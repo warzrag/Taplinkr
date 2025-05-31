@@ -180,3 +180,5 @@ Ce projet est sous license MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 ---
 
 Créé avec ❤️ par [Votre Nom]
+
+Déploiement Vercel – test de relance ✅
