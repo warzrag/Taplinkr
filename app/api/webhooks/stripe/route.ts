@@ -105,8 +105,8 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
               subscription.status === 'past_due' ? 'PAST_DUE' :
               subscription.status === 'canceled' ? 'CANCELLED' : 'INCOMPLETE',
       planType: planType,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end
     }
   })
@@ -123,8 +123,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
               subscription.status === 'trialing' ? 'TRIALING' :
               subscription.status === 'past_due' ? 'PAST_DUE' :
               subscription.status === 'canceled' ? 'CANCELLED' : 'INCOMPLETE',
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end
     }
   })
@@ -157,9 +157,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   console.log('Invoice payment succeeded:', invoice.id)
   
-  if (invoice.subscription) {
+  if ((invoice as any).subscription) {
     // Récupérer la subscription
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string)
+    const subscription = await stripe.subscriptions.retrieve((invoice as any).subscription as string)
     const userId = subscription.metadata?.userId
 
     if (userId) {
@@ -175,10 +175,10 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   console.log('Invoice payment failed:', invoice.id)
   
-  if (invoice.subscription) {
+  if ((invoice as any).subscription) {
     // Marquer la subscription comme en retard de paiement
     await prisma.subscription.updateMany({
-      where: { stripeSubscriptionId: invoice.subscription as string },
+      where: { stripeSubscriptionId: (invoice as any).subscription as string },
       data: { status: 'PAST_DUE' }
     })
   }
