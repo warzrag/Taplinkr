@@ -1,207 +1,27 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Modèles NextAuth
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  // Dashboard personnalisé
-  dashboardLayout Json?   // Layout des widgets personnalisés
-  
-  // Subscription info
-  planType      PlanType  @default(FREE)
-  stripeCustomerId String?
-  
-  // Usage limits
-  monthlyClicks Int       @default(0)
-  monthlyClicksLimit Int  @default(1000)  // FREE: 1000, PRO: 10000, ENTERPRISE: unlimited
-  linksCount    Int       @default(0)
-  linksLimit    Int       @default(5)     // FREE: 5, PRO: 100, ENTERPRISE: unlimited
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
 
-  accounts Account[]
-  sessions Session[]
-  links    Link[]
-  alerts   Alert[]
-  notifications Notification[]
-  subscriptions Subscription[]
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-enum Role {
-  USER
-  ADMIN
-}
-
-enum PlanType {
-  FREE
-  PRO
-  ENTERPRISE
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELLED
-  PAST_DUE
-  INCOMPLETE
-  TRIALING
+  links     Link[]   @relation("UserLinks")
 }
 
 model Link {
-  id          String   @id @default(cuid())
-  title       String
-  url         String
-  shortCode   String   @unique
-  clicks      Int      @default(0)
-  isDirect    Boolean  @default(false) // true = lien direct, false = lien protégé
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Customisation pour pages de liens (Linktree-style)
-  customization Json?  // Photo, background, theme, etc.
-  
-  clicks_details Click[]
-}
-
-model Click {
   id        String   @id @default(cuid())
-  linkId    String
-  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  timestamp DateTime @default(now())
-  
-  // Informations optionnelles sur le clic
-  ipAddress String?
-  userAgent String?
-  referer   String?
-  country   String?
-  city      String?
-  device    String?
-  browser   String?
-}
-
-// Système d'alertes
-model Alert {
-  id        String    @id @default(cuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  linkId    String?   // Si alerte pour un lien spécifique
-  type      AlertType
-  threshold Int?      // Seuil de clics pour déclencher l'alerte
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-enum AlertType {
-  CLICK_THRESHOLD   // Seuil de clics atteint
-  TRAFFIC_SPIKE     // Pic de trafic détecté
-  BROKEN_LINK       // Lien cassé
-  LOW_PERFORMANCE   // Performance faible
-}
-
-// Système de notifications
-model Notification {
-  id        String           @id @default(cuid())
-  userId    String
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String
-  message   String
-  type      NotificationType
-  isRead    Boolean          @default(false)
-  metadata  Json?            // Données additionnelles (linkId, etc.)
-  createdAt DateTime         @default(now())
-}
-
-enum NotificationType {
-  ALERT
-  SYSTEM
-  UPDATE
-}
-
-// Système de facturation
-model Subscription {
-  id                String             @id @default(cuid())
-  userId            String
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  stripeSubscriptionId String?         @unique
-  stripePriceId     String?
-  status            SubscriptionStatus @default(ACTIVE)
-  planType          PlanType
-  
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-  cancelAtPeriodEnd  Boolean           @default(false)
-  
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  
-  @@index([userId])
-}
-
-model Payment {
-  id                String   @id @default(cuid())
-  userId            String
-  stripePaymentIntentId String @unique
-  amount            Int      // en centimes
-  currency          String   @default("eur")
-  status            String
-  planType          PlanType
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  @@index([userId])
+  url       String
+  title     String?
+  createdAt DateTime @default(now())
+  user      User?    @relation("UserLinks", fields: [userId], references: [id])
+  userId    String?
 }
