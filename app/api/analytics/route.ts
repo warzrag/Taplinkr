@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Récupérer les clics
-    const clicks = await prisma.click.findMany({
+    const clicks = await prisma.Click.findMany({
       where: whereClause,
       include: {
         link: {
