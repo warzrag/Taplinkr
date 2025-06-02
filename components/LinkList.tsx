@@ -1,38 +1,30 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { LinkCard } from './LinkCard'
-
-interface Link {
-  id: string
-  title: string
-  url: string
-  shortCode: string
-  clicks: number
-  createdAt: string
-  _count?: {
-    clicks_details: number
-  }
-}
+import { useState } from "react";
+import { LinkCard } from "./LinkCard";
+import type { LinkWithDetails } from "@/types";
 
 interface LinkListProps {
-  links: Link[]
-  onLinkDeleted: (linkId: string) => void
-  onCustomize?: (link: Link) => void
+  links: LinkWithDetails[];
+  onLinkDeleted: (linkId: string) => void;
+  onCustomize?: (link: LinkWithDetails) => void;
 }
 
 export function LinkList({ links, onLinkDeleted, onCustomize }: LinkListProps) {
-  if (links.length === 0) {
+  // Ensure links is an array to prevent map errors
+  const safeLinks = Array.isArray(links) ? links : [];
+
+  if (safeLinks.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Aucun lien créé pour le moment.</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-4">
-      {links.map((link) => (
+      {safeLinks.map((link) => (
         <LinkCard
           key={link.id}
           link={link}
@@ -41,5 +33,5 @@ export function LinkList({ links, onLinkDeleted, onCustomize }: LinkListProps) {
         />
       ))}
     </div>
-  )
+  );
 }

@@ -1,100 +1,97 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-
-interface LinkData {
-  id: string
-  title: string
-  url: string
-  shortCode: string
-  customization?: any
-}
+import { useState } from "react";
+import type { LinkWithDetails } from "@/types";
 
 interface CustomLandingPageProps {
-  link: LinkData
+  link: LinkWithDetails;
 }
 
 export function CustomLandingPage({ link }: CustomLandingPageProps) {
-  const [isRedirecting, setIsRedirecting] = useState(false)
-  const customization = link.customization || {}
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const customization = (link.customization as any) || {};
 
   const handleRedirect = async () => {
-    if (isRedirecting) return
-    
-    setIsRedirecting(true)
-    
+    if (isRedirecting) return;
+
+    setIsRedirecting(true);
+
     // Enregistrer le clic
     try {
       await fetch(`/api/track-click`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           linkId: link.id,
           userAgent: navigator.userAgent,
-          referer: document.referrer
-        })
-      })
+          referer: document.referrer,
+        }),
+      });
     } catch (error) {
-      console.error('Error recording click:', error)
+      console.error("Error recording click:", error);
     }
-    
+
     // Rediriger vers l'URL finale
-    window.location.href = link.url
-  }
+    window.location.href = link.url;
+  };
 
   const getBackgroundStyle = () => {
-    if (customization.backgroundType === 'color') {
-      return { backgroundColor: customization.backgroundColor || '#1e293b' }
-    } else if (customization.backgroundType === 'gradient') {
-      const gradient = customization.backgroundGradient || { 
-        from: '#1e293b', 
-        to: '#334155', 
-        direction: 'to-br' 
-      }
+    if (customization.backgroundType === "color") {
+      return { backgroundColor: customization.backgroundColor || "#1e293b" };
+    } else if (customization.backgroundType === "gradient") {
+      const gradient = customization.backgroundGradient || {
+        from: "#1e293b",
+        to: "#334155",
+        direction: "to-br",
+      };
       return {
-        background: `linear-gradient(${gradient.direction}, ${gradient.from}, ${gradient.to})`
-      }
-    } else if (customization.backgroundType === 'image' && customization.backgroundImage) {
+        background: `linear-gradient(${gradient.direction}, ${gradient.from}, ${gradient.to})`,
+      };
+    } else if (
+      customization.backgroundType === "image" &&
+      customization.backgroundImage
+    ) {
       return {
         backgroundImage: `url(${customization.backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      };
     }
     return {
-      background: 'linear-gradient(to-br, #1e293b, #334155)'
-    }
-  }
+      background: "linear-gradient(to-br, #1e293b, #334155)",
+    };
+  };
 
   const getButtonClassName = () => {
-    const baseClasses = 'w-full py-4 px-6 text-white font-semibold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none'
-    
-    switch (customization.buttonStyle) {
-      case 'square':
-        return `${baseClasses} rounded-none`
-      case 'pill':
-        return `${baseClasses} rounded-full`
-      default:
-        return `${baseClasses} rounded-xl`
-    }
-  }
+    const baseClasses =
+      "w-full py-4 px-6 text-white font-semibold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none";
 
-  const textColor = customization.textColor || '#ffffff'
-  const buttonColor = customization.buttonColor || '#6366f1'
+    switch (customization.buttonStyle) {
+      case "square":
+        return `${baseClasses} rounded-none`;
+      case "pill":
+        return `${baseClasses} rounded-full`;
+      default:
+        return `${baseClasses} rounded-xl`;
+    }
+  };
+
+  const textColor = customization.textColor || "#ffffff";
+  const buttonColor = customization.buttonColor || "#6366f1";
 
   return (
-    <div 
+    <div
       className="min-h-screen flex flex-col items-center justify-center p-4 relative"
       style={getBackgroundStyle()}
     >
       {/* Overlay pour améliorer la lisibilité sur les images */}
-      {customization.backgroundType === 'image' && (
+      {customization.backgroundType === "image" && (
         <div className="absolute inset-0 bg-black/20"></div>
       )}
-      
+
       <div className="w-full max-w-md relative z-10">
         {/* Header avec photo de profil */}
         <div className="text-center mb-8">
@@ -112,16 +109,16 @@ export function CustomLandingPage({ link }: CustomLandingPageProps) {
               <span className="text-4xl">👤</span>
             </div>
           )}
-          
-          <h1 
+
+          <h1
             className="text-3xl font-bold mb-3 text-shadow-lg"
             style={{ color: textColor }}
           >
-            {link.title}
+            {link.title || "Lien personnalisé"}
           </h1>
-          
+
           {customization.description && (
-            <p 
+            <p
               className="text-lg opacity-90 leading-relaxed max-w-sm mx-auto"
               style={{ color: textColor }}
             >
@@ -136,9 +133,9 @@ export function CustomLandingPage({ link }: CustomLandingPageProps) {
             onClick={handleRedirect}
             disabled={isRedirecting}
             className={getButtonClassName()}
-            style={{ 
+            style={{
               backgroundColor: buttonColor,
-              boxShadow: `0 10px 25px ${buttonColor}30`
+              boxShadow: `0 10px 25px ${buttonColor}30`,
             }}
           >
             {isRedirecting ? (
@@ -149,8 +146,16 @@ export function CustomLandingPage({ link }: CustomLandingPageProps) {
             ) : (
               <div className="flex items-center justify-center">
                 <span>Accéder au lien</span>
-                <svg className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                <svg
+                  className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
             )}
@@ -160,7 +165,7 @@ export function CustomLandingPage({ link }: CustomLandingPageProps) {
         {/* Liens des réseaux sociaux */}
         {customization.socialLinks && customization.socialLinks.length > 0 && (
           <div className="mb-8">
-            <h3 
+            <h3
               className="text-center text-sm font-medium mb-4 opacity-80"
               style={{ color: textColor }}
             >
@@ -204,5 +209,5 @@ export function CustomLandingPage({ link }: CustomLandingPageProps) {
         }
       `}</style>
     </div>
-  )
+  );
 }

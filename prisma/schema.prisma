@@ -8,20 +8,133 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  createdAt DateTime @default(now())
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  emailVerified      DateTime?
+  image              String?
+  password           String?
+  role               String    @default("USER")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  dashboardLayout    Json?
+  planType           String    @default("FREE")
+  stripeCustomerId   String?
+  monthlyClicks      Int       @default(0)
+  monthlyClicksLimit Int       @default(1000)
+  linksCount         Int       @default(0)
+  linksLimit         Int       @default(5)
 
-  links     Link[]   @relation("UserLinks")
+  links         Link[]         @relation("UserLinks")
+  subscriptions Subscription[]
+  payments      Payment[]
+  alerts        Alert[]
+  notifications Notification[]
 }
 
 model Link {
+  id            String   @id @default(cuid())
+  title         String?
+  url           String
+  shortCode     String   @unique
+  clicks        Int      @default(0)
+  isDirect      Boolean  @default(false)
+  customization Json?
+  userId        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User?   @relation("UserLinks", fields: [userId], references: [id])
+  clicksDetails Click[] @relation("LinkClicks")
+  alerts        Alert[]
+
+  @@map("Link")
+}
+
+model Click {
   id        String   @id @default(cuid())
-  url       String
-  title     String?
+  linkId    String
+  ipAddress String?
+  userAgent String?
+  referer   String?
+  country   String?
+  city      String?
+  device    String?
+  browser   String?
+  timestamp DateTime @default(now())
+
+  link Link @relation("LinkClicks", fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+  @@index([timestamp])
+  @@map("Click")
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  stripeSubscriptionId String?  @unique
+  stripePriceId        String?
+  status               String   @default("ACTIVE")
+  planType             String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("Subscription")
+}
+
+model Payment {
+  id                    String   @id @default(cuid())
+  userId                String
+  stripePaymentIntentId String   @unique
+  amount                Int
+  currency              String   @default("eur")
+  status                String
+  planType              String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("Payment")
+}
+
+model Alert {
+  id        String   @id @default(cuid())
+  userId    String
+  linkId    String?
+  type      String
+  threshold Int?
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-  user      User?    @relation("UserLinks", fields: [userId], references: [id])
-  userId    String?
+  updatedAt DateTime @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link Link? @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("Alert")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("Notification")
 }

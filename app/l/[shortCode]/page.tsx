@@ -1,60 +1,65 @@
-import { prisma } from '@/lib/prisma'
-import { notFound, redirect } from 'next/navigation'
-import { ProtectedLandingPage } from '@/components/ProtectedLandingPage'
-import { CustomLandingPage } from '@/components/CustomLandingPage'
-import { Metadata } from 'next'
+import { prisma } from "@/lib/prisma";
+import { notFound, redirect } from "next/navigation";
+import { ProtectedLandingPage } from "@/components/ProtectedLandingPage";
+import { CustomLandingPage } from "@/components/CustomLandingPage";
+import { Metadata } from "next";
+import type { LinkCustomization } from "@/types";
 
 interface PageProps {
-  params: Promise<{ shortCode: string }>
+  params: Promise<{ shortCode: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { shortCode } = await params
-  
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { shortCode } = await params;
+
   const link = await prisma.link.findUnique({
     where: { shortCode },
     select: {
       title: true,
       customization: true,
-    }
-  })
-  
+    },
+  });
+
   if (!link) {
     return {
-      title: 'Page non trouvée - LinkTracker'
-    }
+      title: "Page non trouvée - LinkTracker",
+    };
   }
-  
+
   // Si le lien a une customisation, utiliser des métadonnées personnalisées
   if (link.customization) {
+    const customization = link.customization as LinkCustomization;
     return {
-      title: link.title,
-      description: (link.customization as any)?.description || 'Découvrez ce contenu partagé',
-      robots: 'noindex, nofollow',
+      title: link.title || "Lien personnalisé",
+      description: customization?.description || "Découvrez ce contenu partagé",
+      robots: "noindex, nofollow",
       openGraph: {
-        title: link.title,
-        description: (link.customization as any)?.description || 'Votre hub de liens personnel',
-        type: 'website',
+        title: link.title || "Lien personnalisé",
+        description:
+          customization?.description || "Votre hub de liens personnel",
+        type: "website",
       },
-    }
+    };
   }
-  
+
   // Métadonnées neutres pour éviter la détection des liens protégés
   return {
-    title: 'LinkTracker - Share your content',
-    description: 'Discover amazing content and connect with creators',
-    robots: 'noindex, nofollow',
+    title: "LinkTracker - Share your content",
+    description: "Discover amazing content and connect with creators",
+    robots: "noindex, nofollow",
     openGraph: {
-      title: 'LinkTracker',
-      description: 'Your personal link hub',
-      type: 'website',
+      title: "LinkTracker",
+      description: "Your personal link hub",
+      type: "website",
     },
-  }
+  };
 }
 
 export default async function LandingPage({ params }: PageProps) {
-  const { shortCode } = await params
-  
+  const { shortCode } = await params;
+
   const link = await prisma.link.findUnique({
     where: { shortCode },
     select: {
@@ -64,11 +69,15 @@ export default async function LandingPage({ params }: PageProps) {
       shortCode: true,
       isDirect: true,
       customization: true,
-    }
-  })
+      createdAt: true,
+      updatedAt: true,
+      clicks: true,
+      userId: true,
+    },
+  });
 
   if (!link) {
-    notFound()
+    notFound();
   }
 
   // Si c'est un lien direct, rediriger immédiatement
@@ -78,22 +87,24 @@ export default async function LandingPage({ params }: PageProps) {
       data: {
         linkId: link.id,
         timestamp: new Date(),
-      }
-    })
-    redirect(link.url)
+      },
+    });
+    redirect(link.url);
   }
 
   // Si le lien a une customisation, utiliser la page personnalisée
   if (link.customization) {
-    return <CustomLandingPage link={link} />
+    return <CustomLandingPage link={link} />;
   }
 
   // Sinon, utiliser la page protégée classique
-  const encodedData = Buffer.from(JSON.stringify({
-    id: link.id,
-    url: link.url,
-    timestamp: Date.now()
-  })).toString('base64')
+  const encodedData = Buffer.from(
+    JSON.stringify({
+      id: link.id,
+      url: link.url,
+      timestamp: Date.now(),
+    })
+  ).toString("base64");
 
-  return <ProtectedLandingPage link={link} encodedData={encodedData} />
+  return <ProtectedLandingPage link={link} encodedData={encodedData} />;
 }
