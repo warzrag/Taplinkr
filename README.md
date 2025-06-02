@@ -1,4 +1,4 @@
-# LinkTracker 🔗
+ # LinkTracker 🔗
 
 Une application SaaS complète pour créer et suivre des liens courts avec protection anti-ban et pages personnalisables style Linktree.
 
