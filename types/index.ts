@@ -6,7 +6,8 @@ import type {
   Payment,
   Alert,
   Notification,
-} from "@prisma/client";
+} from "@prisma/client"; 
+
 
 // Types de base depuis Prisma
 export type { User, Link, Click, Subscription, Payment, Alert, Notification };
