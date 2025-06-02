@@ -9,3 +9,5 @@
       "react-hooks/exhaustive-deps": "warn"
     }
   }
+
+"Relax ESLint rules for deployment"
