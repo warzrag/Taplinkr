@@ -3,138 +3,103 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  name               String?
-  email              String    @unique
-  emailVerified      DateTime?
-  image              String?
-  password           String?
-  role               String    @default("USER")
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  dashboardLayout    Json?
-  planType           String    @default("FREE")
-  stripeCustomerId   String?
-  monthlyClicks      Int       @default(0)
-  monthlyClicksLimit Int       @default(1000)
-  linksCount         Int       @default(0)
-  linksLimit         Int       @default(5)
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  name      String?
+  image     String?
+  
+  // Personnalisation du profil public
+  bio         String?  // Description/biographie
+  bannerImage String?  // Image de bannière
+  theme       String   @default("gradient") // gradient, solid, image
+  primaryColor String  @default("#3b82f6") // Couleur principale
+  secondaryColor String @default("#8b5cf6") // Couleur secondaire
+  backgroundImage String? // Image de fond personnalisée
+  
+  // Réseaux sociaux
+  twitterUrl   String?
+  instagramUrl String?
+  linkedinUrl  String?
+  youtubeUrl   String?
+  tiktokUrl    String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  links         Link[]         @relation("UserLinks")
-  subscriptions Subscription[]
-  payments      Payment[]
-  alerts        Alert[]
-  notifications Notification[]
+  links Link[]
+  clicks Click[]
+
+  @@map("users")
 }
 
 model Link {
-  id            String   @id @default(cuid())
-  title         String?
-  url           String
-  shortCode     String   @unique
-  clicks        Int      @default(0)
-  isDirect      Boolean  @default(false)
-  customization Json?
-  userId        String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  slug        String   @unique
+  title       String
+  description String?
+  
+  // Visual customization
+  color       String?  // HEX color for button background
+  icon        String?  // Emoji or icon identifier
+  coverImage  String?  // URL to cover image
+  
+  // Metadata
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  clicks      Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  user          User?   @relation("UserLinks", fields: [userId], references: [id])
-  clicksDetails Click[] @relation("LinkClicks")
-  alerts        Alert[]
+  clickEvents Click[]
+  multiLinks  MultiLink[] // Toujours des sous-liens
 
-  @@map("Link")
+  @@map("links")
+}
+
+model MultiLink {
+  id          String   @id @default(cuid())
+  parentLinkId String
+  parentLink  Link     @relation(fields: [parentLinkId], references: [id], onDelete: Cascade)
+  
+  title       String
+  url         String
+  description String?
+  icon        String?
+  order       Int      @default(0)
+  clicks      Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("multi_links")
 }
 
 model Click {
   id        String   @id @default(cuid())
   linkId    String
-  ipAddress String?
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  ip        String?
   userAgent String?
   referer   String?
   country   String?
-  city      String?
   device    String?
-  browser   String?
-  timestamp DateTime @default(now())
-
-  link Link @relation("LinkClicks", fields: [linkId], references: [id], onDelete: Cascade)
-
-  @@index([linkId])
-  @@index([timestamp])
-  @@map("Click")
-}
-
-model Subscription {
-  id                   String   @id @default(cuid())
-  userId               String
-  stripeSubscriptionId String?  @unique
-  stripePriceId        String?
-  status               String   @default("ACTIVE")
-  planType             String
-  currentPeriodStart   DateTime
-  currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean  @default(false)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("Subscription")
-}
-
-model Payment {
-  id                    String   @id @default(cuid())
-  userId                String
-  stripePaymentIntentId String   @unique
-  amount                Int
-  currency              String   @default("eur")
-  status                String
-  planType              String
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("Payment")
-}
-
-model Alert {
-  id        String   @id @default(cuid())
-  userId    String
-  linkId    String?
-  type      String
-  threshold Int?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  link Link? @relation(fields: [linkId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("Alert")
-}
-
-model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  message   String
-  type      String
-  isRead    Boolean  @default(false)
-  metadata  Json?
+  
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("Notification")
+  @@map("clicks")
 }

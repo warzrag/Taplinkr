@@ -1,13 +1,10 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import Providers from '@/components/Providers'
+import { Toaster } from 'react-hot-toast'
 import './globals.css'
-import { Providers } from '@/components/Providers'
 
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'LinkTracker - Gérez et suivez vos liens',
-  description: 'Une application pour créer et suivre les clics sur vos liens',
+export const metadata = {
+  title: 'GetAllMyLinks - Create Your Link Page',
+  description: 'Create and manage your personalized link page with analytics',
 }
 
 export default function RootLayout({
@@ -16,10 +13,17 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr">
-      <body className={inter.className}>
-        <Providers>
+    <html lang="en" className="h-full">
+      <body className="h-full bg-gray-50 antialiased">
+        <Providers session={null}>
           {children}
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              className: 'bg-white border border-gray-200 text-gray-900',
+              duration: 4000,
+            }}
+          />
         </Providers>
       </body>
     </html>

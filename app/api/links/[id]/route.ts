@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { decrementLinkCount } from '@/lib/usage'
 
-export async function DELETE(
+export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -15,38 +14,62 @@ export async function DELETE(
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const { id } = await params
+    const body = await request.json()
+    const { 
+      title, 
+      url, 
+      description, 
+      color, 
+      icon, 
+      coverImage, 
+      type, 
+      shield, 
+      isActive 
+    } = body
 
-    // Vérifier que le lien appartient à l'utilisateur ou que c'est un admin
-    const link = await prisma.link.findUnique({
-      where: { id },
+    // Vérifier que le lien appartient à l'utilisateur
+    const existingLink = await prisma.link.findFirst({
+      where: { id: params.id, userId: session.user.id }
     })
 
-    if (!link) {
-      return NextResponse.json({ error: 'Lien introuvable' }, { status: 404 })
+    if (!existingLink) {
+      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
     }
 
-    if (link.userId !== session.user.id && session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
+    // Valider l'URL si elle est fournie
+    if (url) {
+      try {
+        new URL(url)
+      } catch {
+        return NextResponse.json({ error: 'URL invalide' }, { status: 400 })
+      }
     }
 
-    await prisma.link.delete({
-      where: { id },
+    const link = await prisma.link.update({
+      where: { id: params.id },
+      data: {
+        ...(title !== undefined && { title }),
+        ...(url !== undefined && { url }),
+        ...(description !== undefined && { description: description || null }),
+        ...(color !== undefined && { color: color || null }),
+        ...(icon !== undefined && { icon: icon || null }),
+        ...(coverImage !== undefined && { coverImage: coverImage || null }),
+        ...(type !== undefined && { type }),
+        ...(shield !== undefined && { shield }),
+        ...(isActive !== undefined && { isActive })
+      }
     })
 
-    // Décrémenter le compteur de liens
-    await decrementLinkCount(session.user.id)
-
-    return NextResponse.json({ message: 'Lien supprimé avec succès' })
+    return NextResponse.json(link)
   } catch (error) {
-    console.error('Delete link error:', error)
-    return NextResponse.json({ error: 'Erreur lors de la suppression du lien' }, { status: 500 })
+    console.error('Erreur lors de la mise à jour du lien:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
 
-export async function PUT(
+export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -55,31 +78,22 @@ export async function PUT(
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const { id } = await params
-    const body = await request.json()
-    const { title, url } = body
-
-    // Vérifier que le lien appartient à l'utilisateur ou que c'est un admin
-    const link = await prisma.link.findUnique({
-      where: { id },
+    // Vérifier que le lien appartient à l'utilisateur
+    const existingLink = await prisma.link.findFirst({
+      where: { id: params.id, userId: session.user.id }
     })
 
-    if (!link) {
-      return NextResponse.json({ error: 'Lien introuvable' }, { status: 404 })
+    if (!existingLink) {
+      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
     }
 
-    if (link.userId !== session.user.id && session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
-    }
-
-    const updatedLink = await prisma.link.update({
-      where: { id },
-      data: { title, url },
+    await prisma.link.delete({
+      where: { id: params.id }
     })
 
-    return NextResponse.json(updatedLink)
+    return NextResponse.json({ message: 'Lien supprimé' })
   } catch (error) {
-    console.error('Update link error:', error)
-    return NextResponse.json({ error: 'Erreur lors de la mise à jour du lien' }, { status: 500 })
+    console.error('Erreur lors de la suppression du lien:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

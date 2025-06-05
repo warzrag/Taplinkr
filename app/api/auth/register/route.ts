@@ -1,21 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { nanoid } from 'nanoid'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await request.json()
+    const body = await request.json()
+    const { email, password, name } = body
 
-    if (!name || !email || !password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: 'Tous les champs sont requis' },
-        { status: 400 }
-      )
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'Le mot de passe doit contenir au moins 6 caractères' },
+        { message: 'Email et mot de passe requis' },
         { status: 400 }
       )
     }
@@ -27,9 +22,19 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Un utilisateur avec cet email existe déjà' },
+        { message: 'Un utilisateur avec cet email existe déjà' },
         { status: 400 }
       )
+    }
+
+    // Générer un username unique
+    const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
+    let username = baseUsername
+    let counter = 1
+
+    while (await prisma.user.findUnique({ where: { username } })) {
+      username = `${baseUsername}${counter}`
+      counter++
     }
 
     // Hasher le mot de passe
@@ -38,10 +43,10 @@ export async function POST(request: NextRequest) {
     // Créer l'utilisateur
     const user = await prisma.user.create({
       data: {
-        name,
         email,
         password: hashedPassword,
-        role: 'USER'
+        name: name || email.split('@')[0],
+        username,
       }
     })
 
@@ -49,13 +54,16 @@ export async function POST(request: NextRequest) {
     const { password: _, ...userWithoutPassword } = user
 
     return NextResponse.json(
-      { user: userWithoutPassword, message: 'Utilisateur créé avec succès' },
+      { 
+        message: 'Utilisateur créé avec succès',
+        user: userWithoutPassword 
+      },
       { status: 201 }
     )
   } catch (error) {
-    console.error('Registration error:', error)
+    console.error('Erreur lors de l\'inscription:', error)
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      { message: 'Erreur serveur' },
       { status: 500 }
     )
   }
