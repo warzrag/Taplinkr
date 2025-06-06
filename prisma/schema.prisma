@@ -54,6 +54,7 @@ model User {
   notificationPreferences NotificationPreference?
   pushSubscriptions PushSubscription[]
   templates Template[]
+  folders   Folder[]
 
   @@map("users")
 }
@@ -96,6 +97,10 @@ model Link {
   passwordProtection PasswordProtection?
   linkSchedule LinkSchedule?
   passwordAttempts PasswordAttempt[]
+  
+  // Folder relation
+  folderId    String?
+  folder      Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
 
   @@map("links")
 }
@@ -134,6 +139,30 @@ model Click {
   createdAt DateTime @default(now())
 
   @@map("clicks")
+}
+
+// === FOLDER MANAGEMENT ===
+
+model Folder {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String?  // Couleur du dossier (hex)
+  icon        String?  // Emoji ou icône du dossier
+  
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links       Link[]
+  
+  // Metadata
+  order       Int      @default(0)
+  isExpanded  Boolean  @default(true)  // Pour l'UI (dossier ouvert/fermé)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("folders")
 }
 
 // === FILE MANAGEMENT ===

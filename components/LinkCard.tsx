@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Link as LinkType } from '@/types'
-import { ExternalLink, Eye, EyeOff, Shield, GripVertical, Edit, Trash2, Copy, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { ExternalLink, Eye, EyeOff, Shield, GripVertical, Edit, Trash2, Copy, CheckCircle, XCircle, Loader2, Folder } from 'lucide-react'
 import Image from 'next/image'
 
 interface LinkCardProps {
@@ -10,6 +10,7 @@ interface LinkCardProps {
   onToggle: (id: string, isActive: boolean) => void
   onEdit: (link: LinkType) => void
   onDelete: (id: string) => void
+  onMoveToFolder?: (link: LinkType) => void
   isDragging?: boolean
   listeners?: any
   attributes?: any
@@ -19,7 +20,8 @@ export default function LinkCard({
   link, 
   onToggle, 
   onEdit, 
-  onDelete, 
+  onDelete,
+  onMoveToFolder,
   isDragging,
   listeners,
   attributes 
@@ -134,6 +136,15 @@ export default function LinkCard({
             >
               <Edit size={16} />
             </button>
+            {onMoveToFolder && (
+              <button
+                onClick={() => onMoveToFolder(link)}
+                className="p-1 hover:bg-white/20 rounded transition-colors"
+                title="Déplacer vers un dossier"
+              >
+                <Folder size={16} />
+              </button>
+            )}
             <button
               onClick={handleDelete}
               className="p-1 hover:bg-red-500/50 rounded transition-colors"

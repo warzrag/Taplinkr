@@ -18,11 +18,17 @@ export interface Link {
   color?: string
   icon?: string
   coverImage?: string
+  profileImage?: string
+  fontFamily?: string
+  borderRadius?: string
+  backgroundColor?: string
+  textColor?: string
   isActive: boolean
   order: number
   clicks: number
   createdAt: string
   updatedAt: string
+  folderId?: string
   multiLinks?: MultiLink[]
   user?: {
     id: string

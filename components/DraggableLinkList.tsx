@@ -29,9 +29,10 @@ interface SortableLinkProps {
   onToggle: (id: string, isActive: boolean) => void
   onEdit: (link: LinkType) => void
   onDelete: (id: string) => void
+  onMoveToFolder?: (link: LinkType) => void
 }
 
-function SortableLink({ link, onToggle, onEdit, onDelete }: SortableLinkProps) {
+function SortableLink({ link, onToggle, onEdit, onDelete, onMoveToFolder }: SortableLinkProps) {
   const {
     attributes,
     listeners,
@@ -53,6 +54,7 @@ function SortableLink({ link, onToggle, onEdit, onDelete }: SortableLinkProps) {
         onToggle={onToggle}
         onEdit={onEdit}
         onDelete={onDelete}
+        onMoveToFolder={onMoveToFolder}
         isDragging={isDragging}
         listeners={listeners}
         attributes={attributes}
@@ -67,6 +69,7 @@ interface DraggableLinkListProps {
   onToggle: (id: string, isActive: boolean) => void
   onEdit: (link: LinkType) => void
   onDelete: (id: string) => void
+  onMoveToFolder?: (link: LinkType) => void
 }
 
 export default function DraggableLinkList({
@@ -75,6 +78,7 @@ export default function DraggableLinkList({
   onToggle,
   onEdit,
   onDelete,
+  onMoveToFolder,
 }: DraggableLinkListProps) {
   const [isReordering, setIsReordering] = useState(false)
   
@@ -147,6 +151,7 @@ export default function DraggableLinkList({
               onToggle={onToggle}
               onEdit={onEdit}
               onDelete={onDelete}
+              onMoveToFolder={onMoveToFolder}
             />
           ))}
         </SortableContext>
