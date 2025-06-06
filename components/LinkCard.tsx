@@ -47,7 +47,7 @@ export default function LinkCard({
     e.stopPropagation()
     
     // Construire l'URL du lien
-    const linkUrl = `${window.location.origin}/${link.slug}`
+    const linkUrl = `${window.location.origin}/link/${link.slug}`
     
     try {
       await navigator.clipboard.writeText(linkUrl)

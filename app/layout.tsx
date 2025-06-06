@@ -10,15 +10,16 @@ export const metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'GetAllMyLinks'
-  },
-  themeColor: '#3b82f6',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover'
   }
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#3b82f6'
 }
 
 export default function RootLayout({
