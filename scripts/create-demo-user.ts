@@ -20,49 +20,49 @@ async function createDemoUser() {
         links: {
           create: [
             {
-              slug: 'mon-site-web',
-              url: 'https://example.com',
-              title: 'Mon Site Web Personnel',
-              description: 'Découvrez mon portfolio et mes projets',
-              type: 'Website',
+              slug: 'demo-links',
+              title: 'Mes Liens Demo',
+              description: 'Collection de liens de démonstration',
+              icon: '🔗',
               shield: false,
-              isActive: true
-            },
-            {
-              slug: 'youtube-channel',
-              url: 'https://youtube.com/@demo',
-              title: 'Ma Chaîne YouTube',
-              description: 'Tutoriels et contenus créatifs',
-              type: 'Social Media',
-              shield: false,
-              isActive: true
-            },
-            {
-              slug: 'instagram-profile',
-              url: 'https://instagram.com/demo',
-              title: 'Instagram',
-              description: 'Suivez-moi pour du contenu quotidien',
-              type: 'Social Media',
-              shield: false,
-              isActive: true
-            },
-            {
-              slug: 'github-projects',
-              url: 'https://github.com/demo',
-              title: 'Mes Projets GitHub',
-              description: 'Code open source et projets techniques',
-              type: 'Portfolio',
-              shield: true,
-              isActive: true
-            },
-            {
-              slug: 'blog-articles',
-              url: 'https://medium.com/@demo',
-              title: 'Mon Blog',
-              description: 'Articles et réflexions sur la tech',
-              type: 'Blog',
-              shield: false,
-              isActive: true
+              isActive: true,
+              clicks: 0,
+              multiLinks: {
+                create: [
+                  {
+                    title: 'Mon Site Web Personnel',
+                    url: 'https://example.com',
+                    description: 'Découvrez mon portfolio et mes projets',
+                    icon: '🌐',
+                    order: 1,
+                    clicks: 0
+                  },
+                  {
+                    title: 'Ma Chaîne YouTube',
+                    url: 'https://youtube.com/@demo',
+                    description: 'Tutoriels et contenus créatifs',
+                    icon: '🎬',
+                    order: 2,
+                    clicks: 0
+                  },
+                  {
+                    title: 'Instagram',
+                    url: 'https://instagram.com/demo',
+                    description: 'Suivez-moi pour du contenu quotidien',
+                    icon: '📸',
+                    order: 3,
+                    clicks: 0
+                  },
+                  {
+                    title: 'Mes Projets GitHub',
+                    url: 'https://github.com/demo',
+                    description: 'Code open source et projets techniques',
+                    icon: '💻',
+                    order: 4,
+                    clicks: 0
+                  }
+                ]
+              }
             }
           ]
         }
@@ -72,11 +72,9 @@ async function createDemoUser() {
     console.log('✅ Utilisateur demo créé avec succès !')
     console.log('📧 Email: demo@getallmylinks.com')
     console.log('🔑 Mot de passe: demo123')
-    console.log('🔗 Profil public: http://localhost:3000/demo')
+    console.log('🔗 Profil public: http://localhost:3001/demo')
     console.log('🎯 Liens de test:')
-    console.log('   - http://localhost:3000/mon-site-web')
-    console.log('   - http://localhost:3000/youtube-channel')
-    console.log('   - http://localhost:3000/github-projects (avec shield)')
+    console.log('   - http://localhost:3001/demo-links')
   } catch (error) {
     console.error('❌ Erreur lors de la création de l\'utilisateur demo:', error)
   } finally {

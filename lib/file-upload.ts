@@ -1,7 +1,6 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import { nanoid } from 'nanoid'
-import sharp from 'sharp'
 
 export interface UploadResult {
   id: string
@@ -37,11 +36,8 @@ export class FileUploadService {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
     
-    // Optimize image if it's an image
+    // Use original buffer (no optimization for now)
     let finalBuffer = buffer
-    if (this.isImage(file.type)) {
-      finalBuffer = await this.optimizeImage(buffer)
-    }
     
     // Write file
     await fs.writeFile(filePath, finalBuffer)
@@ -65,20 +61,10 @@ export class FileUploadService {
     }
   }
 
-  private async optimizeImage(buffer: Buffer): Promise<Buffer> {
-    try {
-      return await sharp(buffer)
-        .resize(1200, 1200, {
-          fit: 'inside',
-          withoutEnlargement: true
-        })
-        .jpeg({ quality: 85 })
-        .toBuffer()
-    } catch (error) {
-      console.error('Error optimizing image:', error)
-      return buffer
-    }
-  }
+  // Image optimization removed for now
+  // private async optimizeImage(buffer: Buffer): Promise<Buffer> {
+  //   return buffer
+  // }
 
   private isImage(mimeType: string): boolean {
     return mimeType.startsWith('image/')
@@ -88,15 +74,10 @@ export class FileUploadService {
     return path.extname(filename).toLowerCase()
   }
 
-  async generateThumbnail(imageBuffer: Buffer, size: number = 200): Promise<Buffer> {
-    return await sharp(imageBuffer)
-      .resize(size, size, {
-        fit: 'cover',
-        position: 'center'
-      })
-      .jpeg({ quality: 80 })
-      .toBuffer()
-  }
+  // Thumbnail generation removed for now
+  // async generateThumbnail(imageBuffer: Buffer, size: number = 200): Promise<Buffer> {
+  //   return imageBuffer
+  // }
 
   validateFile(file: File): { valid: boolean; error?: string } {
     const maxSize = 10 * 1024 * 1024 // 10MB

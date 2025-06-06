@@ -38,7 +38,8 @@
       "Bash(npm ls:*)",
       "Bash(gh pr list:*)",
       "Bash(npx ts-node:*)",
-      "WebFetch(domain:linktr.ee)"
+      "WebFetch(domain:linktr.ee)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

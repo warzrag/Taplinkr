@@ -72,8 +72,13 @@ model Link {
   color       String?  // HEX color for button background
   icon        String?  // Emoji or icon identifier
   coverImage  String?  // URL to cover image
+  profileImage String? // URL to profile image
   coverId     String?  // Relation to File model
   cover       File?    @relation("LinkCover", fields: [coverId], references: [id])
+  fontFamily  String?  // Font family for the link
+  borderRadius String? // Border radius style
+  backgroundColor String? // Background color for the link
+  textColor String?    // Text color for the link
   
   // Metadata
   isActive    Boolean  @default(true)

@@ -11,8 +11,13 @@ import {
   Upload,
   Shield,
   Bell,
-  Settings
+  Settings,
+  Menu,
+  X
 } from 'lucide-react'
+import LivePhonePreview from '@/components/LivePhonePreview'
+import { LinkUpdateProvider } from '@/contexts/LinkUpdateContext'
+import { useState, useEffect } from 'react'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -22,6 +27,39 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const pathname = usePathname()
+  const [links, setLinks] = useState([])
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  
+  // Fonction pour mettre à jour un lien spécifique en temps réel
+  const updateLinkInPreview = (updatedLink: any) => {
+    setLinks(prevLinks => 
+      prevLinks.map(link => 
+        link.id === updatedLink.id ? updatedLink : link
+      )
+    )
+  }
+
+  // Récupérer les liens pour la prévisualisation
+  useEffect(() => {
+    const fetchLinks = async () => {
+      try {
+        const response = await fetch('/api/links')
+        if (response.ok) {
+          const data = await response.json()
+          setLinks(data)
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des liens:', error)
+      }
+    }
+
+    if (session) {
+      fetchLinks()
+      // Rafraîchir les liens toutes les 5 secondes pour la prévisualisation live
+      const interval = setInterval(fetchLinks, 5000)
+      return () => clearInterval(interval)
+    }
+  }, [session])
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
@@ -42,8 +80,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <div className={`
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
@@ -99,9 +148,29 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {children}
+      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
+        {/* Mobile header */}
+        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">G</span>
+            </div>
+            <span className="font-bold text-gray-900">GetAllMyLinks</span>
+          </div>
+          <div className="w-10" /> {/* Spacer pour centrer le logo */}
+        </div>
+
+        <LinkUpdateProvider updateLinkInPreview={updateLinkInPreview}>
+          {children}
+        </LinkUpdateProvider>
       </div>
+
     </div>
   )
 }

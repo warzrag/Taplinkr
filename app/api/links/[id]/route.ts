@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function PATCH(
+export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -17,14 +17,18 @@ export async function PATCH(
     const body = await request.json()
     const { 
       title, 
-      url, 
+      slug,
       description, 
       color, 
       icon, 
-      coverImage, 
-      type, 
-      shield, 
-      isActive 
+      coverImage,
+      profileImage, 
+      isActive,
+      fontFamily,
+      borderRadius,
+      backgroundColor,
+      textColor,
+      multiLinks
     } = body
 
     // Vérifier que le lien appartient à l'utilisateur
@@ -36,12 +40,27 @@ export async function PATCH(
       return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
     }
 
-    // Valider l'URL si elle est fournie
-    if (url) {
-      try {
-        new URL(url)
-      } catch {
-        return NextResponse.json({ error: 'URL invalide' }, { status: 400 })
+    // Pas de validation d'URL car c'est un multi-link
+
+    // Mettre à jour les multiLinks d'abord s'ils sont fournis
+    if (multiLinks !== undefined) {
+      // Supprimer les anciens multiLinks
+      await prisma.multiLink.deleteMany({
+        where: { parentLinkId: params.id }
+      })
+
+      // Créer les nouveaux multiLinks
+      if (multiLinks && multiLinks.length > 0) {
+        await prisma.multiLink.createMany({
+          data: multiLinks.map((ml: any, index: number) => ({
+            parentLinkId: params.id,
+            title: ml.title,
+            url: ml.url,
+            description: ml.description || null,
+            icon: ml.icon || null,
+            order: ml.order || index
+          }))
+        })
       }
     }
 
@@ -49,14 +68,22 @@ export async function PATCH(
       where: { id: params.id },
       data: {
         ...(title !== undefined && { title }),
-        ...(url !== undefined && { url }),
+        ...(slug !== undefined && { slug }),
         ...(description !== undefined && { description: description || null }),
         ...(color !== undefined && { color: color || null }),
         ...(icon !== undefined && { icon: icon || null }),
         ...(coverImage !== undefined && { coverImage: coverImage || null }),
-        ...(type !== undefined && { type }),
-        ...(shield !== undefined && { shield }),
+        ...(profileImage !== undefined && { profileImage: profileImage || null }),
+        ...(fontFamily !== undefined && { fontFamily: fontFamily || null }),
+        ...(borderRadius !== undefined && { borderRadius: borderRadius || null }),
+        ...(backgroundColor !== undefined && { backgroundColor: backgroundColor || null }),
+        ...(textColor !== undefined && { textColor: textColor || null }),
         ...(isActive !== undefined && { isActive })
+      },
+      include: {
+        multiLinks: {
+          orderBy: { order: 'asc' }
+        }
       }
     })
 
