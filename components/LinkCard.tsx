@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Link as LinkType } from '@/types'
 import { ExternalLink, Eye, EyeOff, Shield, GripVertical, Edit, Trash2, Copy, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import BeaconStylePreview from '@/components/BeaconStylePreview'
 
 interface LinkCardProps {
   link: LinkType
@@ -65,17 +66,32 @@ export default function LinkCard({
     opacity: isDragging ? 0.5 : link.isActive ? 1 : 0.6
   }
 
+  const linkDataForPreview = {
+    title: link.title,
+    url: link.multiLinks && link.multiLinks.length > 0 ? link.multiLinks[0].url : '',
+    description: link.description,
+    imageUrl: link.coverImage || null,
+    isProtected: link.shield || false
+  }
+
+  const userData = {
+    name: link.title,
+    username: link.slug,
+    image: link.coverImage || null
+  }
+
   return (
-    <div 
-      className={`
-        relative group rounded-lg p-4 mb-4 transition-all duration-200 cursor-pointer
-        ${isDragging ? 'shadow-xl' : 'shadow-md hover:shadow-lg'}
-        ${link.isActive ? '' : 'grayscale'}
-      `}
-      style={cardStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <BeaconStylePreview link={linkDataForPreview} user={userData}>
+      <div 
+        className={`
+          relative group rounded-lg p-4 mb-4 transition-all duration-200 cursor-pointer
+          ${isDragging ? 'shadow-xl' : 'shadow-md hover:shadow-lg'}
+          ${link.isActive ? '' : 'grayscale'}
+        `}
+        style={cardStyle}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
       {/* Drag Handle */}
       <div 
         className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
@@ -173,6 +189,7 @@ export default function LinkCard({
           <div className={`w-2 h-2 rounded-full ${link.isActive ? 'bg-green-400' : 'bg-gray-400'}`} />
         </div>
       </div>
-    </div>
+      </div>
+    </BeaconStylePreview>
   )
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ExternalLink, ArrowLeft, Eye } from 'lucide-react'
 import Image from 'next/image'
+import BeaconStyleCard from '@/components/BeaconStyleCard'
 
 interface MultiLink {
   id: string
@@ -45,9 +46,15 @@ interface Link {
 
 interface MultiLinkPageProps {
   link: Link
+  profile?: {
+    template: any
+    customCSS?: string | null
+    layout?: any
+    seo?: any
+  }
 }
 
-export default function MultiLinkPage({ link }: MultiLinkPageProps) {
+export default function MultiLinkPage({ link, profile }: MultiLinkPageProps) {
   const [clickedLinks, setClickedLinks] = useState<Set<string>>(new Set())
 
   const handleLinkClick = async (multiLinkId: string, url: string) => {
@@ -148,40 +155,18 @@ export default function MultiLinkPage({ link }: MultiLinkPageProps) {
               </div>
             ) : (
               sortedLinks.map((multiLink) => (
-                <button
+                <BeaconStyleCard
                   key={multiLink.id}
+                  link={{
+                    id: multiLink.id,
+                    title: multiLink.title,
+                    url: multiLink.url,
+                    description: multiLink.description,
+                    icon: multiLink.icon
+                  }}
                   onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
-                  className={`w-full bg-white/95 backdrop-blur-sm rounded-2xl p-4 text-left hover:bg-white transition-all duration-200 hover:scale-[1.02] hover:shadow-xl group border border-white/30 ${
-                    clickedLinks.has(multiLink.id) ? 'animate-pulse' : ''
-                  }`}
-                >
-                  <div className="flex items-center">
-                    {/* Icône */}
-                    {multiLink.icon && (
-                      <div className="mr-3 text-2xl flex-shrink-0">
-                        {multiLink.icon}
-                      </div>
-                    )}
-
-                    {/* Contenu */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 text-base mb-1 group-hover:text-purple-600 transition-colors">
-                        {multiLink.title}
-                      </h3>
-                      
-                      {multiLink.description && (
-                        <p className="text-gray-600 text-sm line-clamp-1">
-                          {multiLink.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Flèche */}
-                    <div className="ml-3 flex-shrink-0">
-                      <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors" />
-                    </div>
-                  </div>
-                </button>
+                  isClicked={clickedLinks.has(multiLink.id)}
+                />
               ))
             )}
           </div>

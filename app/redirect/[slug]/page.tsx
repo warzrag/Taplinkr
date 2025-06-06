@@ -1,8 +1,12 @@
 import { notFound, redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import { analyticsService } from '@/lib/analytics-service'
+import { passwordProtectionService } from '@/lib/password-protection'
+import { templateEngine } from '@/lib/template-engine'
 import ShieldPage from '@/components/ShieldPage'
 import MultiLinkPage from '@/components/MultiLinkPage'
+import PasswordProtectionModal from '@/components/protection/PasswordProtectionModal'
 
 interface PageProps {
   params: { slug: string }
@@ -53,23 +57,19 @@ async function recordClick(linkId: string, userId: string) {
     const userAgent = headersList.get('user-agent') || ''
     const referer = headersList.get('referer') || ''
 
-    // Détection simple du device
-    const device = userAgent.toLowerCase().includes('mobile') ? 'mobile' : 
-                  userAgent.toLowerCase().includes('tablet') ? 'tablet' : 'desktop'
-
-    // Créer l'enregistrement du clic
-    await prisma.click.create({
-      data: {
-        linkId,
-        userId,
-        ip: ip.split(',')[0].trim(), // Prendre la première IP si multiple
+    // Use new analytics service
+    await analyticsService.trackEvent({
+      linkId,
+      userId,
+      eventType: 'view',
+      request: {
+        ip: ip.split(',')[0].trim(),
         userAgent,
-        referer,
-        device
+        referer
       }
     })
 
-    // Incrémenter le compteur de clics
+    // Incrémenter le compteur de clics pour la compatibilité
     await prisma.link.update({
       where: { id: linkId },
       data: {
@@ -80,7 +80,6 @@ async function recordClick(linkId: string, userId: string) {
     })
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement du clic:', error)
-    // Ne pas bloquer la redirection si l'enregistrement échoue
   }
 }
 
@@ -96,6 +95,32 @@ export default async function RedirectPage({ params }: PageProps) {
     notFound()
   }
 
+  // Check password protection
+  const protection = await passwordProtectionService.getProtectionInfo(link.id)
+  if (protection) {
+    // Check if user has verified cookie
+    const headersList = headers()
+    const cookieHeader = headersList.get('cookie') || ''
+    const hasVerified = cookieHeader.includes(`verified_${link.id}=true`)
+    
+    if (!hasVerified) {
+      // Show password protection modal
+      return (
+        <PasswordProtectionModal
+          linkTitle={link.title}
+          hint={protection.hint || undefined}
+          isLocked={protection.lockedUntil ? protection.lockedUntil > new Date() : false}
+          lockedUntil={protection.lockedUntil || undefined}
+          onVerify={async (password: string) => {
+            'use server'
+            // This will be handled by the verify API endpoint
+            return { success: false, error: 'Use API endpoint' }
+          }}
+        />
+      )
+    }
+  }
+
   // Enregistrer le clic de manière asynchrone
   try {
     await recordClick(link.id, link.userId)
@@ -103,8 +128,11 @@ export default async function RedirectPage({ params }: PageProps) {
     // Ignorer les erreurs d'enregistrement pour ne pas bloquer la redirection
   }
 
-  // Tous les liens affichent maintenant la page MultiLink
-  return <MultiLinkPage link={link} />
+  // Get user profile with template
+  const profile = await templateEngine.renderProfile(link.userId)
+
+  // Tous les liens affichent maintenant la page MultiLink avec template
+  return <MultiLinkPage link={link} profile={profile} />
 }
 
 // Générer des métadonnées pour l'aperçu social

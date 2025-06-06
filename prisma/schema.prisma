@@ -23,6 +23,12 @@ model User {
   secondaryColor String @default("#8b5cf6") // Couleur secondaire
   backgroundImage String? // Image de fond personnalisée
   
+  // File relations
+  avatarId    String?
+  avatar      File?    @relation("UserAvatar", fields: [avatarId], references: [id])
+  bannerId    String?
+  banner      File?    @relation("UserBanner", fields: [bannerId], references: [id])
+  
   // Réseaux sociaux
   twitterUrl   String?
   instagramUrl String?
@@ -33,8 +39,21 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relations
   links Link[]
   clicks Click[]
+  files File[]
+  analyticsEvents AnalyticsEvent[]
+  analyticsSummary AnalyticsSummary[]
+  userProfile UserProfile?
+  userTheme UserTheme?
+  passwordProtections PasswordProtection[]
+  linkSchedules LinkSchedule[]
+  customDomains CustomDomain[]
+  notifications Notification[]
+  notificationPreferences NotificationPreference?
+  pushSubscriptions PushSubscription[]
+  templates Template[]
 
   @@map("users")
 }
@@ -53,6 +72,8 @@ model Link {
   color       String?  // HEX color for button background
   icon        String?  // Emoji or icon identifier
   coverImage  String?  // URL to cover image
+  coverId     String?  // Relation to File model
+  cover       File?    @relation("LinkCover", fields: [coverId], references: [id])
   
   // Metadata
   isActive    Boolean  @default(true)
@@ -62,8 +83,14 @@ model Link {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Relations
   clickEvents Click[]
-  multiLinks  MultiLink[] // Toujours des sous-liens
+  multiLinks  MultiLink[]
+  analyticsEvents AnalyticsEvent[]
+  analyticsSummary AnalyticsSummary[]
+  passwordProtection PasswordProtection?
+  linkSchedule LinkSchedule?
+  passwordAttempts PasswordAttempt[]
 
   @@map("links")
 }
@@ -102,4 +129,353 @@ model Click {
   createdAt DateTime @default(now())
 
   @@map("clicks")
+}
+
+// === FILE MANAGEMENT ===
+model File {
+  id        String   @id @default(cuid())
+  filename  String
+  originalName String
+  mimeType  String
+  size      Int
+  url       String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  userAvatars    User[] @relation("UserAvatar")
+  userBanners    User[] @relation("UserBanner")
+  linkCovers     Link[] @relation("LinkCover")
+  templateThumbnails Template[] @relation("TemplateThumbnail")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("files")
+}
+
+// === ANALYTICS SYSTEM ===
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  linkId    String
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Event data
+  eventType    String  // 'click', 'view', 'share'
+  ip           String?
+  userAgent    String?
+  referer      String?
+  
+  // Geolocation
+  country      String?
+  region       String?
+  city         String?
+  latitude     Float?
+  longitude    Float?
+  
+  // Device/Browser
+  device       String? // 'mobile', 'tablet', 'desktop'
+  browser      String?
+  os           String?
+  
+  // UTM Tracking
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  utmTerm      String?
+  utmContent   String?
+  
+  createdAt    DateTime @default(now())
+  
+  @@map("analytics_events")
+  @@index([linkId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model AnalyticsSummary {
+  id          String   @id @default(cuid())
+  linkId      String
+  link        Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date        DateTime
+  clicks      Int      @default(0)
+  views       Int      @default(0)
+  
+  // Top data
+  topCountry  String?
+  topDevice   String?
+  topBrowser  String?
+  topReferer  String?
+  
+  @@unique([linkId, date])
+  @@map("analytics_summary")
+}
+
+// === TEMPLATES SYSTEM ===
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String   // 'business', 'personal', 'social', 'creative'
+  
+  // Template configuration
+  layout      String   // 'list', 'grid', 'card', 'minimal'
+  colors      String   // Color palette JSON
+  fonts       String   // Font configuration JSON
+  spacing     String   // Margins and spacing JSON
+  animations  String?  // CSS animations JSON
+  
+  // Template assets
+  thumbnailId String?
+  thumbnail   File?    @relation("TemplateThumbnail", fields: [thumbnailId], references: [id])
+  cssCode     String?  // Custom CSS
+  
+  // Metadata
+  isPremium   Boolean  @default(false)
+  isPublic    Boolean  @default(true)
+  authorId    String?
+  author      User?    @relation(fields: [authorId], references: [id])
+  usageCount  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userProfiles UserProfile[]
+  
+  @@map("templates")
+}
+
+model UserProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Template applied
+  templateId String?
+  template   Template? @relation(fields: [templateId], references: [id])
+  
+  // Customizations
+  customCSS  String?
+  layout     String?  // Custom layout JSON
+  seo        String?  // SEO meta tags JSON
+  
+  // Advanced settings
+  domain     String?  // Custom domain
+  favicon    String?
+  analytics  String?  // Google Analytics JSON, etc.
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@map("user_profiles")
+}
+
+model UserTheme {
+  id       String @id @default(cuid())
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  preference String @default("system") // 'light', 'dark', 'system'
+  customTheme String? // Custom theme JSON
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("user_themes")
+}
+
+// === PASSWORD PROTECTION ===
+model PasswordProtection {
+  id        String   @id @default(cuid())
+  linkId    String   @unique
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  password  String   // Hashed
+  hint      String?  // Password hint
+  
+  // Configuration
+  maxAttempts Int    @default(5)
+  lockoutDuration Int @default(3600) // in seconds
+  
+  // Tracking
+  attempts  Int     @default(0)
+  lockedUntil DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("password_protections")
+}
+
+model PasswordAttempt {
+  id        String   @id @default(cuid())
+  linkId    String
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  
+  ip        String
+  success   Boolean
+  
+  createdAt DateTime @default(now())
+  
+  @@map("password_attempts")
+  @@index([linkId, ip, createdAt])
+}
+
+// === LINK SCHEDULING ===
+model LinkSchedule {
+  id        String   @id @default(cuid())
+  linkId    String   @unique
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Scheduling
+  startDate DateTime?
+  endDate   DateTime?
+  timezone  String   @default("UTC")
+  
+  // Recurrence
+  isRecurring Boolean @default(false)
+  recurrenceRule String? // Cron format
+  
+  // Actions
+  actionOnStart String? // 'activate', 'redirect', 'email'
+  actionOnEnd   String? // 'deactivate', 'archive', 'email'
+  
+  // Notifications
+  notifyStart   Boolean @default(false)
+  notifyEnd     Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  scheduledJobs ScheduledJob[]
+  
+  @@map("link_schedules")
+}
+
+model ScheduledJob {
+  id          String   @id @default(cuid())
+  scheduleId  String
+  schedule    LinkSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  
+  jobType     String   // 'activate', 'deactivate', 'notify'
+  scheduledFor DateTime
+  executed    Boolean  @default(false)
+  executedAt  DateTime?
+  error       String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@map("scheduled_jobs")
+  @@index([scheduledFor, executed])
+}
+
+// === CUSTOM DOMAINS ===
+model CustomDomain {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  domain     String   @unique
+  subdomain  String?  // for user.example.com
+  
+  // DNS configuration
+  verified   Boolean  @default(false)
+  dnsRecords String?  // Required records JSON
+  
+  // SSL
+  sslEnabled Boolean  @default(false)
+  sslExpiry  DateTime?
+  
+  // Redirection
+  redirectTo String?  // Fallback URL
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@map("custom_domains")
+}
+
+// === NOTIFICATIONS SYSTEM ===
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // 'click', 'schedule', 'system', 'marketing'
+  title     String
+  message   String
+  data      String?  // Contextual data JSON
+  
+  // State
+  read      Boolean  @default(false)
+  readAt    DateTime?
+  
+  // Channels
+  inApp     Boolean  @default(true)
+  email     Boolean  @default(false)
+  push      Boolean  @default(false)
+  
+  // Scheduling
+  scheduledFor DateTime?
+  sentAt       DateTime?
+  
+  createdAt DateTime @default(now())
+  
+  @@map("notifications")
+  @@index([userId, read, createdAt])
+}
+
+model NotificationPreference {
+  id       String @id @default(cuid())
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Preferences by type
+  clickNotifications    Boolean @default(true)
+  scheduleNotifications Boolean @default(true)
+  systemNotifications  Boolean @default(true)
+  marketingEmails       Boolean @default(false)
+  
+  // Preferred channels
+  emailEnabled Boolean @default(true)
+  pushEnabled  Boolean @default(true)
+  smsEnabled   Boolean @default(false)
+  
+  // Frequency
+  digestFrequency String @default("daily") // 'realtime', 'daily', 'weekly'
+  quietHours      String?  // Silent hours JSON
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("notification_preferences")
+}
+
+model PushSubscription {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  endpoint String @unique
+  keys     String // p256dh and auth keys JSON
+  
+  userAgent String?
+  deviceId  String?
+  
+  isActive  Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  lastUsed  DateTime @default(now())
+  
+  @@map("push_subscriptions")
 }
