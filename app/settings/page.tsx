@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import { 
   User, 
@@ -14,14 +15,28 @@ import {
   Twitter,
   Instagram,
   Linkedin,
-  Youtube
+  Youtube,
+  Settings,
+  Sparkles,
+  Check,
+  ArrowLeft,
+  Globe,
+  Shield,
+  Bell,
+  Moon,
+  Sun
 } from 'lucide-react'
 import { HexColorPicker } from 'react-colorful'
+import Link from 'next/link'
+import FileUpload from '@/components/upload/FileUpload'
 
 interface ProfileData {
   name: string
   bio: string
+  image: string
   bannerImage: string
+  avatarId: string
+  bannerId: string
   theme: string
   primaryColor: string
   secondaryColor: string
@@ -34,9 +49,29 @@ interface ProfileData {
 }
 
 const THEMES = [
-  { id: 'gradient', name: 'Dégradé', description: 'Arrière-plan dégradé coloré' },
-  { id: 'solid', name: 'Couleur unie', description: 'Arrière-plan couleur unie' },
-  { id: 'image', name: 'Image', description: 'Image de fond personnalisée' },
+  { 
+    id: 'gradient', 
+    name: 'Dégradé', 
+    description: 'Arrière-plan dégradé coloré',
+    preview: 'bg-gradient-to-br from-blue-500 to-purple-600'
+  },
+  { 
+    id: 'solid', 
+    name: 'Couleur unie', 
+    description: 'Arrière-plan couleur unie',
+    preview: 'bg-blue-600'
+  },
+  { 
+    id: 'image', 
+    name: 'Image', 
+    description: 'Image de fond personnalisée',
+    preview: 'bg-gradient-to-br from-gray-600 to-gray-800'
+  },
+]
+
+const PRESET_COLORS = [
+  '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+  '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
 ]
 
 export default function Settings() {
@@ -50,7 +85,10 @@ export default function Settings() {
   const [profile, setProfile] = useState<ProfileData>({
     name: '',
     bio: '',
+    image: '',
     bannerImage: '',
+    avatarId: '',
+    bannerId: '',
     theme: 'gradient',
     primaryColor: '#3b82f6',
     secondaryColor: '#8b5cf6',
@@ -78,7 +116,10 @@ export default function Settings() {
         setProfile({
           name: data.name || '',
           bio: data.bio || '',
+          image: data.image || '',
           bannerImage: data.bannerImage || '',
+          avatarId: data.avatarId || '',
+          bannerId: data.bannerId || '',
           theme: data.theme || 'gradient',
           primaryColor: data.primaryColor || '#3b82f6',
           secondaryColor: data.secondaryColor || '#8b5cf6',
@@ -123,10 +164,39 @@ export default function Settings() {
     setProfile(prev => ({ ...prev, [field]: value }))
   }
 
+  const handleAvatarUpload = (file: any) => {
+    setProfile(prev => ({ 
+      ...prev, 
+      image: file.url,
+      avatarId: file.id
+    }))
+    toast.success('Photo de profil uploadée!')
+  }
+
+  const handleBannerUpload = (file: any) => {
+    setProfile(prev => ({ 
+      ...prev, 
+      bannerImage: file.url,
+      bannerId: file.id
+    }))
+    toast.success('Image de bannière uploadée!')
+  }
+
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Chargement...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center space-y-4"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full"
+          />
+          <p className="text-gray-600 font-medium">Chargement de vos paramètres...</p>
+        </motion.div>
       </div>
     )
   }
@@ -134,37 +204,105 @@ export default function Settings() {
   if (!session) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Paramètres du profil</h1>
-              <p className="text-gray-600">Personnalisez votre page publique</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle at 25% 25%, #3b82f6 2px, transparent 2px), radial-gradient(circle at 75% 75%, #8b5cf6 2px, transparent 2px)',
+          backgroundSize: '50px 50px'
+        }} />
+      </div>
+
+      {/* Animated Background Elements */}
+      <motion.div
+        className="absolute top-20 right-20 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"
+        animate={{
+          x: [0, 100, 0],
+          y: [0, -100, 0],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div
+        className="absolute bottom-20 left-20 w-24 h-24 bg-gradient-to-br from-indigo-400/20 to-blue-600/20 rounded-full blur-3xl"
+        animate={{
+          x: [0, -50, 0],
+          y: [0, 50, 0],
+        }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+      />
+      
+      <div className="relative z-10 py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          {/* Header */}
+          <motion.div 
+            className="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-8 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="flex items-center space-x-4">
+                <motion.div 
+                  className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Settings className="w-8 h-8 text-white" />
+                </motion.div>
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
+                    Paramètres du profil
+                  </h1>
+                  <p className="text-gray-600 text-lg mt-1">Personnalisez votre page publique et votre expérience</p>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
+                <Link href="/dashboard">
+                  <motion.button
+                    className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all font-medium text-gray-700"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Retour au dashboard</span>
+                  </motion.button>
+                </Link>
+                
+                <motion.a
+                  href={`/link/${session.user.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all font-medium text-gray-700 shadow-sm"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>Prévisualiser</span>
+                  <ExternalLink className="w-4 h-4" />
+                </motion.a>
+                
+                <motion.button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: saving ? 1 : 1.02 }}
+                  whileTap={{ scale: saving ? 1 : 0.98 }}
+                >
+                  {saving ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                    />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  <span>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</span>
+                </motion.button>
+              </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <a
-                href={`/${session.user.username}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                <Eye size={16} />
-                <span>Prévisualiser</span>
-                <ExternalLink size={14} />
-              </a>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                <Save size={16} />
-                <span>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
+          </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Informations générales */}
@@ -208,15 +346,56 @@ export default function Settings() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image de bannière (URL)
+                  Photo de profil
                 </label>
-                <input
-                  type="url"
-                  value={profile.bannerImage}
-                  onChange={(e) => handleInputChange('bannerImage', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com/banner.jpg"
+                <FileUpload 
+                  onFileUploaded={handleAvatarUpload}
+                  accept="image/*"
+                  maxSize={5 * 1024 * 1024}
+                  className="mb-2"
                 />
+                {profile.image && (
+                  <div className="mt-2">
+                    <img 
+                      src={profile.image} 
+                      alt="Photo de profil" 
+                      className="w-16 h-16 rounded-full object-cover border"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image de bannière
+                </label>
+                <FileUpload 
+                  onFileUploaded={handleBannerUpload}
+                  accept="image/*"
+                  maxSize={5 * 1024 * 1024}
+                  className="mb-2"
+                />
+                {profile.bannerImage && (
+                  <div className="mt-2">
+                    <img 
+                      src={profile.bannerImage} 
+                      alt="Image de bannière" 
+                      className="w-full h-24 rounded-md object-cover border"
+                    />
+                  </div>
+                )}
+                <div className="mt-2">
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Ou entrez une URL directement
+                  </label>
+                  <input
+                    type="url"
+                    value={profile.bannerImage}
+                    onChange={(e) => handleInputChange('bannerImage', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="https://example.com/banner.jpg"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -342,72 +521,70 @@ export default function Settings() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center space-x-2">
-                    <Twitter size={16} className="text-blue-400" />
-                    <span>Twitter</span>
-                  </div>
-                </label>
-                <input
-                  type="url"
-                  value={profile.twitterUrl}
-                  onChange={(e) => handleInputChange('twitterUrl', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://twitter.com/username"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center space-x-2">
-                    <Instagram size={16} className="text-pink-500" />
-                    <span>Instagram</span>
-                  </div>
-                </label>
-                <input
-                  type="url"
-                  value={profile.instagramUrl}
-                  onChange={(e) => handleInputChange('instagramUrl', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://instagram.com/username"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center space-x-2">
-                    <Linkedin size={16} className="text-blue-600" />
-                    <span>LinkedIn</span>
-                  </div>
-                </label>
-                <input
-                  type="url"
-                  value={profile.linkedinUrl}
-                  onChange={(e) => handleInputChange('linkedinUrl', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://linkedin.com/in/username"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center space-x-2">
-                    <Youtube size={16} className="text-red-500" />
-                    <span>YouTube</span>
-                  </div>
-                </label>
-                <input
-                  type="url"
-                  value={profile.youtubeUrl}
-                  onChange={(e) => handleInputChange('youtubeUrl', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://youtube.com/@username"
-                />
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {[
+                { 
+                  field: 'twitterUrl', 
+                  icon: Twitter, 
+                  name: 'Twitter', 
+                  color: 'text-blue-400', 
+                  bg: 'from-blue-400 to-blue-600',
+                  placeholder: 'https://twitter.com/username'
+                },
+                { 
+                  field: 'instagramUrl', 
+                  icon: Instagram, 
+                  name: 'Instagram', 
+                  color: 'text-pink-500', 
+                  bg: 'from-purple-500 to-pink-500',
+                  placeholder: 'https://instagram.com/username'
+                },
+                { 
+                  field: 'linkedinUrl', 
+                  icon: Linkedin, 
+                  name: 'LinkedIn', 
+                  color: 'text-blue-600', 
+                  bg: 'from-blue-600 to-blue-800',
+                  placeholder: 'https://linkedin.com/in/username'
+                },
+                { 
+                  field: 'youtubeUrl', 
+                  icon: Youtube, 
+                  name: 'YouTube', 
+                  color: 'text-red-500', 
+                  bg: 'from-red-500 to-red-700',
+                  placeholder: 'https://youtube.com/@username'
+                }
+              ].map((social, index) => {
+                const Icon = social.icon
+                return (
+                  <motion.div 
+                    key={social.field}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                  >
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-8 h-8 bg-gradient-to-r ${social.bg} rounded-xl flex items-center justify-center`}>
+                          <Icon className="w-4 h-4 text-white" />
+                        </div>
+                        <span>{social.name}</span>
+                      </div>
+                    </label>
+                    <motion.input
+                      type="url"
+                      value={profile[social.field as keyof ProfileData] as string}
+                      onChange={(e) => handleInputChange(social.field as keyof ProfileData, e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                      placeholder={social.placeholder}
+                      whileFocus={{ scale: 1.01 }}
+                    />
+                  </motion.div>
+                )
+              })}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

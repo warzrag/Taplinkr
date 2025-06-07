@@ -78,11 +78,29 @@ export async function POST(request: NextRequest) {
     const url = `/uploads/${filename}`
     console.log('7. File URL:', url)
 
-    // Skip database save for now to test
-    console.log('8. Skipping database save for testing...')
+    console.log('8. Saving to database...')
+    const savedFile = await prisma.file.create({
+      data: {
+        id: fileId,
+        filename,
+        originalName: file.name,
+        mimeType: file.type,
+        size: file.size,
+        url,
+        userId: session.user.id,
+      }
+    })
+    console.log('File saved to database:', savedFile.id)
     
     console.log('=== UPLOAD SUCCESS ===')
-    return NextResponse.json({ url, id: fileId }, { status: 201 })
+    return NextResponse.json({
+      id: savedFile.id,
+      filename: savedFile.filename,
+      originalName: savedFile.originalName,
+      url: savedFile.url,
+      mimeType: savedFile.mimeType,
+      size: savedFile.size
+    }, { status: 201 })
   } catch (error) {
     console.error('=== UPLOAD ERROR ===')
     console.error('Error type:', error.constructor.name)
