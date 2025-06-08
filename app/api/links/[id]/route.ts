@@ -58,6 +58,7 @@ export async function PUT(
             url: ml.url,
             description: ml.description || null,
             icon: ml.icon || null,
+            animation: ml.animation || null,
             order: ml.order || index
           }))
         })

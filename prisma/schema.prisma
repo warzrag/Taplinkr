@@ -92,6 +92,7 @@ model MultiLink {
   url          String
   description  String?
   icon         String?
+  animation    String?
   order        Int      @default(0)
   clicks       Int      @default(0)
   createdAt    DateTime @default(now())

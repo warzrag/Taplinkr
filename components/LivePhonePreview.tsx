@@ -32,6 +32,7 @@ interface LivePhonePreviewProps {
       url: string
       icon?: string
       description?: string
+      animation?: string
       order?: number
       clicks?: number
       createdAt?: string
@@ -63,6 +64,105 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
   // Pour l'édition, on affiche tous les liens (actifs ou non)
   const displayableLinks = links
 
+  // Fonction pour obtenir les animations Framer Motion
+  const getAnimationVariants = (animationType?: string) => {
+    switch (animationType) {
+      case 'pulse':
+        return {
+          animate: {
+            scale: [1, 1.05, 1.1, 1.05, 1, 0.9, 0.8, 0.7, 0.8, 0.9, 1],
+            transition: {
+              duration: 0.8,
+              repeat: Infinity,
+              ease: [0.23, 1, 0.32, 1],
+              times: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+            }
+          }
+        }
+      case 'bounce':
+        return {
+          animate: {
+            y: [0, -5, 0],
+            transition: {
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'shake':
+        return {
+          animate: {
+            x: [0, -2, 2, -2, 2, 0],
+            transition: {
+              duration: 0.5,
+              repeat: Infinity,
+              repeatDelay: 2
+            }
+          }
+        }
+      case 'wobble':
+        return {
+          animate: {
+            rotate: [0, -2, 2, -2, 2, 0],
+            transition: {
+              duration: 1,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'swing':
+        return {
+          animate: {
+            rotate: [0, 15, -10, 5, -5, 0],
+            transition: {
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'tada':
+        return {
+          animate: {
+            scale: [1, 0.9, 1.1, 1.1, 1],
+            rotate: [0, -3, 3, -3, 3, 0],
+            transition: {
+              duration: 1,
+              repeat: Infinity,
+              repeatDelay: 3
+            }
+          }
+        }
+      case 'flash':
+        return {
+          animate: {
+            scale: [1, 1.1, 1],
+            transition: {
+              duration: 0.5,
+              repeat: Infinity,
+              repeatDelay: 2
+            }
+          }
+        }
+      case 'rubberBand':
+        return {
+          animate: {
+            scaleX: [1, 1.25, 0.75, 1.15, 0.95, 1],
+            scaleY: [1, 0.75, 1.25, 0.85, 1.05, 1],
+            transition: {
+              duration: 1,
+              repeat: Infinity,
+              repeatDelay: 3
+            }
+          }
+        }
+      default:
+        return {}
+    }
+  }
+
   // Créer les liens pour l'affichage
   const displayLinks = displayableLinks.flatMap(link => {
     if (link.multiLinks && link.multiLinks.length > 0) {
@@ -72,6 +172,7 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
         url: multiLink.url,
         icon: multiLink.icon || link.icon,
         description: null,
+        animation: multiLink.animation,
         isActive: link.isActive,
         coverImage: link.coverImage,
         fontFamily: link.fontFamily,
@@ -86,6 +187,7 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
         url: link.url || '#',
         icon: link.icon,
         description: link.description,
+        animation: undefined,
         isActive: link.isActive,
         coverImage: link.coverImage,
         fontFamily: link.fontFamily,
@@ -192,22 +294,31 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
               <div className="flex-1 flex flex-col justify-center space-y-3">
                 <AnimatePresence mode="wait">
                   {displayLinks.length > 0 ? (
-                    displayLinks.map((link, index) => (
-                      <motion.div
-                        key={link.id}
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -20, opacity: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className={`backdrop-blur-md p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
-                          getBorderRadiusClass(link.borderRadius)} ${
-                          link.isActive !== false ? '' : 'opacity-60'
-                        } ${getFontClass(link.fontFamily)}`}
-                        style={{
-                          backgroundColor: link.backgroundColor || (link.isActive !== false ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)'),
-                          color: link.textColor || '#1f2937'
-                        }}
-                      >
+                    displayLinks.map((link, index) => {
+                      const hasAnimation = link.animation && link.animation !== 'none'
+                      const animationProps = hasAnimation ? getAnimationVariants(link.animation) : {}
+                      
+                      if (hasAnimation) {
+                        return (
+                          <motion.div
+                            key={link.id}
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -20, opacity: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                          >
+                            <motion.div
+                              animate={animationProps.animate}
+                              transition={animationProps.animate?.transition}
+                              className={`backdrop-blur-md p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
+                                getBorderRadiusClass(link.borderRadius)} ${
+                                link.isActive !== false ? '' : 'opacity-60'
+                              } ${getFontClass(link.fontFamily)}`}
+                              style={{
+                                backgroundColor: link.backgroundColor || (link.isActive !== false ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)'),
+                                color: link.textColor || '#1f2937'
+                              }}
+                            >
                         <div className="flex items-center">
                           {/* Icon */}
                           <div className="mr-3 text-2xl">
@@ -229,8 +340,51 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
                           {/* Arrow */}
                           <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
                         </div>
-                      </motion.div>
-                    ))
+                            </motion.div>
+                          </motion.div>
+                        )
+                      } else {
+                        return (
+                          <motion.div
+                            key={link.id}
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -20, opacity: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className={`backdrop-blur-md p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
+                              getBorderRadiusClass(link.borderRadius)} ${
+                              link.isActive !== false ? '' : 'opacity-60'
+                            } ${getFontClass(link.fontFamily)}`}
+                            style={{
+                              backgroundColor: link.backgroundColor || (link.isActive !== false ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)'),
+                              color: link.textColor || '#1f2937'
+                            }}
+                          >
+                            <div className="flex items-center">
+                              {/* Icon */}
+                              <div className="mr-3 text-2xl">
+                                {link.icon || '🔗'}
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1">
+                                <h3 className="font-bold text-sm" style={{ color: 'inherit' }}>
+                                  {link.title}
+                                </h3>
+                                {link.description && (
+                                  <p className="text-xs mt-1 opacity-80" style={{ color: 'inherit' }}>
+                                    {link.description}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Arrow */}
+                              <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
+                            </div>
+                          </motion.div>
+                        )
+                      }
+                    })
                   ) : (
                     <motion.div
                       initial={{ opacity: 0 }}

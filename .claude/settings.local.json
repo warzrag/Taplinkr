@@ -44,7 +44,8 @@
       "Bash(tree:*)",
       "Bash(sqlite3:*)",
       "Bash(sed:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebFetch(domain:getallmylinks.com)"
     ],
     "deny": []
   }

@@ -4,6 +4,7 @@ export interface MultiLink {
   url: string
   description?: string
   icon?: string
+  animation?: string
   order: number
   clicks: number
   createdAt: string

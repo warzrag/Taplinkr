@@ -88,6 +88,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
       url: 'https://example.com',
       description: '',
       icon: '🔗',
+      animation: 'none',
       order: linkData.multiLinks?.length || 0,
       clicks: 0,
       createdAt: new Date().toISOString(),
@@ -645,6 +646,34 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
                                             placeholder="https://example.com"
                                           />
+                                          
+                                          <div className="grid grid-cols-2 gap-2 mt-2">
+                                            <div>
+                                              <label className="block text-xs text-gray-600 mb-1">Animation</label>
+                                              <select
+                                                value={multiLink.animation || 'none'}
+                                                onChange={(e) => updateMultiLink(multiLink.id, 'animation', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
+                                              >
+                                                <option value="none">Aucune</option>
+                                                <option value="pulse">Pulse</option>
+                                                <option value="bounce">Bounce</option>
+                                                <option value="shake">Shake</option>
+                                                <option value="wobble">Wobble</option>
+                                                <option value="swing">Swing</option>
+                                                <option value="tada">Tada</option>
+                                                <option value="flash">Flash</option>
+                                                <option value="rubberBand">Rubber Band</option>
+                                              </select>
+                                            </div>
+                                            <input
+                                              type="text"
+                                              value={multiLink.description || ''}
+                                              onChange={(e) => updateMultiLink(multiLink.id, 'description', e.target.value)}
+                                              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
+                                              placeholder="Description"
+                                            />
+                                          </div>
                                         </div>
                                         
                                         <motion.button

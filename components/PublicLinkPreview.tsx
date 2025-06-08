@@ -33,6 +33,7 @@ interface MultiLink {
   url: string
   description?: string | null
   icon?: string | null
+  animation?: string | null
   order: number
   clicks: number
 }
@@ -149,6 +150,110 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
     return { name: 'Website', color: 'from-blue-500 to-indigo-600', icon: 'website' }
   }
 
+  // Fonction pour obtenir les animations Framer Motion
+  const getAnimationVariants = (animationType?: string | null) => {
+    switch (animationType) {
+      case 'pulse':
+        return {
+          animate: {
+            scale: [1, 1.05, 1.1, 1.05, 1, 0.9, 0.8, 0.7, 0.8, 0.9, 1],
+            transition: {
+              duration: 0.8,
+              repeat: Infinity,
+              ease: [0.23, 1, 0.32, 1],
+              times: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+            }
+          }
+        }
+      case 'bounce':
+        return {
+          animate: {
+            y: [0, -5, 0],
+            transition: {
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'shake':
+        return {
+          animate: {
+            x: [0, -2, 2, -2, 2, 0],
+            transition: {
+              duration: 0.5,
+              repeat: Infinity,
+              repeatDelay: 2
+            }
+          }
+        }
+      case 'wobble':
+        return {
+          animate: {
+            rotate: [0, -2, 2, -2, 2, 0],
+            transition: {
+              duration: 1,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'swing':
+        return {
+          animate: {
+            rotate: [0, 15, -10, 5, -5, 0],
+            transition: {
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'tada':
+        return {
+          animate: {
+            scale: [1, 0.9, 1.1, 1.1, 1],
+            rotate: [0, -3, 3, -3, 3, 0],
+            transition: {
+              duration: 1,
+              repeat: Infinity,
+              repeatDelay: 3
+            }
+          }
+        }
+      case 'flash':
+        return {
+          animate: {
+            scale: [1, 1.1, 1],
+            transition: {
+              duration: 0.5,
+              repeat: Infinity,
+              repeatDelay: 2
+            }
+          }
+        }
+      case 'rubberBand':
+        return {
+          animate: {
+            scaleX: [1, 1.25, 0.75, 1.15, 0.95, 1],
+            scaleY: [1, 0.75, 1.25, 0.85, 1.05, 1],
+            transition: {
+              duration: 1,
+              repeat: Infinity,
+              repeatDelay: 3
+            }
+          }
+        }
+      default:
+        return {}
+    }
+  }
+
+  // Fonction pour obtenir la classe CSS du border radius
+  const getBorderRadiusClass = (borderRadius?: string) => {
+    return borderRadius || 'rounded-2xl'
+  }
+
   const backgroundColor = link.user.primaryColor || '#1f2937'
   const accentColor = link.user.secondaryColor || '#3b82f6'
 
@@ -210,21 +315,30 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
         {/* Links Section */}
         <div className="w-full max-w-sm space-y-4">
           {link.multiLinks.length > 0 ? (
-            link.multiLinks.map((multiLink, index) => (
-              <motion.button
-                key={multiLink.id}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.1 }}
-                onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
-                className="w-full backdrop-blur-md p-4 rounded-2xl transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer"
-                style={{
-                  backgroundColor: link.backgroundColor || multiLink.backgroundColor || 'rgba(255, 255, 255, 0.9)',
-                  color: link.textColor || multiLink.textColor || '#1f2937'
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
+            link.multiLinks.map((multiLink, index) => {
+              const hasAnimation = multiLink.animation && multiLink.animation !== 'none'
+              const animationProps = hasAnimation ? getAnimationVariants(multiLink.animation) : {}
+              
+              if (hasAnimation) {
+                return (
+                  <motion.div
+                    key={multiLink.id}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <motion.button
+                      animate={animationProps.animate}
+                      transition={animationProps.animate?.transition}
+                      onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
+                      className={`w-full backdrop-blur-md p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${getBorderRadiusClass(link.borderRadius)}`}
+                      style={{
+                        backgroundColor: link.backgroundColor || multiLink.backgroundColor || 'rgba(255, 255, 255, 0.9)',
+                        color: link.textColor || multiLink.textColor || '#1f2937'
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                >
                 <div className="flex items-center">
                   {/* Icon */}
                   <div className="mr-3 text-2xl">
@@ -246,8 +360,50 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
                   {/* Arrow */}
                   <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
                 </div>
-              </motion.button>
-            ))
+                    </motion.button>
+                  </motion.div>
+                )
+              } else {
+                return (
+                  <motion.button
+                    key={multiLink.id}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
+                    className={`w-full backdrop-blur-md p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${getBorderRadiusClass(link.borderRadius)}`}
+                    style={{
+                      backgroundColor: link.backgroundColor || multiLink.backgroundColor || 'rgba(255, 255, 255, 0.9)',
+                      color: link.textColor || multiLink.textColor || '#1f2937'
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-center">
+                      {/* Icon */}
+                      <div className="mr-3 text-2xl">
+                        {multiLink.icon || '🔗'}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 text-left">
+                        <h3 className="font-bold text-sm" style={{ color: 'inherit' }}>
+                          {multiLink.title}
+                        </h3>
+                        {multiLink.description && (
+                          <p className="text-xs mt-1 opacity-80" style={{ color: 'inherit' }}>
+                            {multiLink.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Arrow */}
+                      <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
+                    </div>
+                  </motion.button>
+                )
+              }
+            })
           ) : (
             <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 text-center">
               <div className="text-4xl mb-2">🔗</div>
