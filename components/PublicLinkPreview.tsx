@@ -153,279 +153,118 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
   const accentColor = link.user.secondaryColor || '#3b82f6'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25% 25%, ${accentColor} 2px, transparent 2px), radial-gradient(circle at 75% 75%, ${accentColor} 2px, transparent 2px)`,
-          backgroundSize: '50px 50px'
-        }} />
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        {link.coverImage ? (
+          <img
+            src={link.coverImage}
+            alt={link.title}
+            className="w-full h-full object-cover"
+          />
+        ) : link.user.backgroundImage ? (
+          <img
+            src={link.user.backgroundImage}
+            alt="Background"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500" />
+        )}
+        {/* Light overlay for text readability */}
+        <div className="absolute inset-0 bg-black/20" />
       </div>
 
-      {/* Animated Background Elements */}
-      <motion.div
-        className="absolute top-20 left-20 w-32 h-32 rounded-full"
-        style={{ background: `linear-gradient(135deg, ${accentColor}20, ${accentColor}10)` }}
-        animate={{
-          x: [0, 100, 0],
-          y: [0, -50, 0],
-          rotate: [0, 180, 360],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.div
-        className="absolute bottom-20 right-20 w-24 h-24 rounded-full"
-        style={{ background: `linear-gradient(135deg, ${backgroundColor}30, ${backgroundColor}15)` }}
-        animate={{
-          x: [0, -80, 0],
-          y: [0, 60, 0],
-          rotate: [360, 180, 0],
-        }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-      />
-
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Header */}
-        <div className="bg-black/20 backdrop-blur-md border-b border-white/10">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <motion.div
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg"
-                whileHover={{ scale: 1.05 }}
-              >
-                <Link2 className="w-5 h-5 text-white" />
-              </motion.div>
-              <div>
-                <h1 className="text-white font-semibold">{link.title}</h1>
-                <p className="text-white/60 text-sm">by @{link.user.username}</p>
-              </div>
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
+        {/* Profile Section */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="text-center mb-8"
+        >
+          {/* Profile Image */}
+          {link.user.image && (
+            <div className="flex justify-center mb-4">
+              <img
+                src={link.user.image}
+                alt={link.user.name || link.user.username}
+                className="w-40 h-40 object-cover rounded-full shadow-lg"
+              />
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <motion.button
-                onClick={handleLike}
-                className={`p-2 rounded-xl transition-all ${isLiked ? 'text-red-500 bg-red-500/10' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-              </motion.button>
-              <motion.button
-                onClick={handleShare}
-                className="p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Share2 className="w-5 h-5" />
-              </motion.button>
-            </div>
+          )}
+          
+          {/* User Bio */}
+          {link.user.bio && (
+            <p className="text-white/90 text-lg mb-4 drop-shadow-md max-w-md mx-auto">
+              {link.user.bio}
+            </p>
+          )}
+          
+          {/* Instagram handle */}
+          <div className="flex items-center justify-center">
+            <Instagram className="w-4 h-4 text-white mr-1" />
+            <span className="text-white/90 text-sm">@{link.user.username}</span>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-md">
-            {/* Profile Section */}
-            <motion.div
-              className="text-center mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              {/* Avatar */}
-              <motion.div
-                className="relative w-24 h-24 mx-auto mb-4"
-                whileHover={{ scale: 1.05 }}
+        {/* Links Section */}
+        <div className="w-full max-w-sm space-y-4">
+          {link.multiLinks.length > 0 ? (
+            link.multiLinks.map((multiLink, index) => (
+              <motion.button
+                key={multiLink.id}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
+                className="w-full backdrop-blur-md p-4 rounded-2xl transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer"
+                style={{
+                  backgroundColor: link.backgroundColor || multiLink.backgroundColor || 'rgba(255, 255, 255, 0.9)',
+                  color: link.textColor || multiLink.textColor || '#1f2937'
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20">
-                  {link.user.image ? (
-                    <img
-                      src={link.user.image}
-                      alt={link.user.name || link.user.username}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-white">
-                        {(link.user.name || link.user.username).charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <motion.div
-                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-gray-900 flex items-center justify-center"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Sparkles className="w-3 h-3 text-white" />
-                </motion.div>
-              </motion.div>
-
-              {/* Name and Bio */}
-              <h2 className="text-2xl font-bold text-white mb-2">
-                {link.user.name || link.user.username}
-              </h2>
-              {(link.user.bio || link.description) && (
-                <p className="text-white/80 text-sm leading-relaxed max-w-xs mx-auto">
-                  {link.user.bio || link.description}
-                </p>
-              )}
-
-              {/* Social Links */}
-              <div className="flex justify-center space-x-2 mt-4">
-                {link.user.instagramUrl && (
-                  <motion.a
-                    href={link.user.instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg transition-all"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Instagram className="w-4 h-4" />
-                  </motion.a>
-                )}
-                {link.user.twitterUrl && (
-                  <motion.a
-                    href={link.user.twitterUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-gradient-to-r from-blue-400 to-blue-600 text-white hover:shadow-lg transition-all"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Twitter className="w-4 h-4" />
-                  </motion.a>
-                )}
-                {link.user.linkedinUrl && (
-                  <motion.a
-                    href={link.user.linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-800 text-white hover:shadow-lg transition-all"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Linkedin className="w-4 h-4" />
-                  </motion.a>
-                )}
-                {link.user.youtubeUrl && (
-                  <motion.a
-                    href={link.user.youtubeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-gradient-to-r from-red-500 to-red-700 text-white hover:shadow-lg transition-all"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Youtube className="w-4 h-4" />
-                  </motion.a>
-                )}
-              </div>
-            </motion.div>
-
-            {/* Links Section */}
-            <div className="space-y-3">
-              {link.multiLinks && link.multiLinks.length > 0 ? (
-                link.multiLinks
-                  .sort((a, b) => a.order - b.order)
-                  .map((multiLink, index) => {
-                    const platformInfo = getPlatformInfo(multiLink.url)
-                    const isClicked = clickedLinks.has(multiLink.id)
-                    
-                    return (
-                      <motion.div
-                        key={multiLink.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1, duration: 0.5 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
-                        className={`relative group cursor-pointer overflow-hidden rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 ${
-                          isClicked ? 'animate-pulse' : ''
-                        }`}
-                      >
-                        <div className="p-4 flex items-center space-x-4">
-                          {/* Icon */}
-                          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${platformInfo.color} flex items-center justify-center text-white shadow-lg flex-shrink-0`}>
-                            {multiLink.icon ? (
-                              <span className="text-xl">{multiLink.icon}</span>
-                            ) : (
-                              getSocialIcon(platformInfo.icon)
-                            )}
-                          </div>
-
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-white text-lg leading-tight">
-                              {multiLink.title}
-                            </h3>
-                            {multiLink.description && (
-                              <p className="text-white/70 text-sm mt-1 line-clamp-2">
-                                {multiLink.description}
-                              </p>
-                            )}
-                            <div className="flex items-center space-x-3 mt-2">
-                              <span className="text-white/50 text-xs flex items-center">
-                                <Eye className="w-3 h-3 mr-1" />
-                                {multiLink.clicks} vues
-                              </span>
-                              <span className="text-white/50 text-xs">
-                                {platformInfo.name}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Arrow */}
-                          <motion.div
-                            className="text-white/60 group-hover:text-white transition-colors"
-                            animate={{ x: isClicked ? 5 : 0 }}
-                          >
-                            <ExternalLink className="w-5 h-5" />
-                          </motion.div>
-                        </div>
-
-                        {/* Hover effect */}
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
-                          initial={{ x: '-100%' }}
-                          whileHover={{ x: '100%' }}
-                          transition={{ duration: 0.6 }}
-                        />
-                      </motion.div>
-                    )
-                  })
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-12"
-                >
-                  <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 inline-block">
-                    <Link2 className="w-8 h-8 text-white/60 mx-auto mb-2" />
-                    <p className="text-white/80 text-sm">Aucun lien disponible</p>
+                <div className="flex items-center">
+                  {/* Icon */}
+                  <div className="mr-3 text-2xl">
+                    {multiLink.icon || '🔗'}
                   </div>
-                </motion.div>
-              )}
+
+                  {/* Content */}
+                  <div className="flex-1 text-left">
+                    <h3 className="font-bold text-sm" style={{ color: 'inherit' }}>
+                      {multiLink.title}
+                    </h3>
+                    {multiLink.description && (
+                      <p className="text-xs mt-1 opacity-80" style={{ color: 'inherit' }}>
+                        {multiLink.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Arrow */}
+                  <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
+                </div>
+              </motion.button>
+            ))
+          ) : (
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 text-center">
+              <div className="text-4xl mb-2">🔗</div>
+              <p className="text-gray-600 text-sm">Aucun lien disponible</p>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer */}
         <motion.div
-          className="text-center py-6 text-white/40 text-xs"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
+          className="mt-8 flex items-center justify-center"
         >
-          <div className="flex items-center justify-center space-x-2">
-            <Calendar className="w-3 h-3" />
-            <span>Créé le {new Date(link.createdAt).toLocaleDateString('fr-FR')}</span>
-          </div>
-          <div className="flex items-center justify-center space-x-2 mt-1">
-            <Eye className="w-3 h-3" />
-            <span>{link.clicks} vues au total</span>
+          <div className="bg-white/20 backdrop-blur-md rounded-full px-4 py-2 flex items-center space-x-2">
+            <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-gray-900 rounded-full" />
+            </div>
+            <span className="text-white text-xs font-medium">LinkTracker</span>
           </div>
         </motion.div>
       </div>

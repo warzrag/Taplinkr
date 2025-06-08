@@ -167,7 +167,7 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
                     <img
                       src={displayableLinks[0]?.profileImage || user?.image}
                       alt="Profile"
-                      className="w-20 h-20 object-cover rounded-full border-4 border-white shadow-lg"
+                      className="w-24 h-24 object-cover rounded-full shadow-lg"
                     />
                   </div>
                 )}
