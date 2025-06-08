@@ -30,10 +30,13 @@ import {
   ChevronRight,
   Edit2,
   Trash2,
-  Link2
+  Link2,
+  FolderPlus
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import LinkCard from './LinkCard'
+import FolderAnalyticsTooltip from './FolderAnalyticsTooltip'
+import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 
 interface Folder {
@@ -45,6 +48,8 @@ interface Folder {
   isExpanded: boolean
   links: LinkType[]
   order: number
+  parentId?: string | null
+  children?: Folder[]
 }
 
 interface DragDropDashboardProps {
@@ -68,14 +73,22 @@ function SortableFolder({
   onEdit, 
   onDelete, 
   onToggle,
-  isOver 
+  onCreateSubfolder,
+  onMouseEnter,
+  onMouseLeave,
+  isOver,
+  depth = 0
 }: {
   folder: Folder
   children: React.ReactNode
   onEdit: () => void
   onDelete: () => void
   onToggle: () => void
+  onCreateSubfolder: () => void
+  onMouseEnter?: (event: React.MouseEvent) => void
+  onMouseLeave?: () => void
   isOver?: boolean
+  depth?: number
 }) {
   const {
     attributes,
@@ -100,46 +113,97 @@ function SortableFolder({
   return (
     <motion.div
       ref={setNodeRef}
-      style={style}
-      className={`border rounded-lg overflow-hidden transition-all ${
-        isDragging ? 'opacity-50' : ''
-      } ${isOver ? 'ring-2 ring-blue-500 bg-blue-50/50' : 'border-gray-200'}`}
+      style={{
+        ...style,
+        marginLeft: `${depth * 20}px`,
+      }}
+      className={`group relative rounded-xl overflow-hidden transition-all duration-300 ${
+        isDragging ? 'opacity-50 scale-105 shadow-2xl' : 'hover:shadow-lg'
+      } ${isOver ? 'ring-2 ring-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 scale-[1.02]' : 'bg-white border border-gray-100 hover:border-gray-200'}`}
       layout
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
     >
       {/* En-tête du dossier */}
       <div 
-        className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 ${
-          isOver ? 'bg-blue-50' : ''
+        className={`flex items-center justify-between p-4 cursor-pointer transition-all duration-200 ${
+          isOver ? 'bg-gradient-to-r from-blue-50 to-indigo-50' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100'
         }`}
-        style={{ backgroundColor: isOver ? undefined : `${folder.color}10` }}
+        style={{ 
+          background: isOver ? undefined : `linear-gradient(135deg, ${folder.color}08, ${folder.color}15)`,
+        }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         {...attributes}
         {...listeners}
       >
-        <div className="flex items-center space-x-3" onClick={onToggle}>
-          {folder.isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <span className="text-lg select-none">{folder.icon}</span>
-          <div className="select-none">
-            <h3 className="font-semibold">{folder.name}</h3>
-            {folder.description && (
-              <p className="text-sm text-gray-600">{folder.description}</p>
-            )}
-            <p className="text-xs text-gray-500">{folder.links.length} lien(s)</p>
+        <div className="flex items-center space-x-4" onClick={onToggle}>
+          <motion.div
+            animate={{ rotate: folder.isExpanded ? 90 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex-shrink-0"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-500" />
+          </motion.div>
+          
+          <div className="flex items-center space-x-3">
+            <motion.div
+              className="text-2xl select-none flex-shrink-0"
+              whileHover={{ scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 400 }}
+            >
+              {folder.icon}
+            </motion.div>
+            
+            <div className="select-none min-w-0 flex-1">
+              <h3 className="font-semibold text-gray-900 truncate">{folder.name}</h3>
+              {folder.description && (
+                <p className="text-sm text-gray-600 truncate">{folder.description}</p>
+              )}
+              <div className="flex items-center space-x-3 mt-1">
+                <span className="text-xs text-gray-500 flex items-center">
+                  <Link2 className="w-3 h-3 mr-1" />
+                  {folder.links.length} lien{folder.links.length > 1 ? 's' : ''}
+                </span>
+                {folder.children && folder.children.length > 0 && (
+                  <span className="text-xs text-gray-500 flex items-center">
+                    <FolderIcon className="w-3 h-3 mr-1" />
+                    {folder.children.length} dossier{folder.children.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-          <button
+        <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
+          <motion.button
+            onClick={onCreateSubfolder}
+            className="p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-700"
+            title="Créer un sous-dossier"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <FolderPlus className="w-4 h-4" />
+          </motion.button>
+          <motion.button
             onClick={onEdit}
-            className="p-1 hover:bg-white/50 rounded transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-700"
+            title="Modifier le dossier"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <Edit2 className="w-4 h-4" />
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             onClick={onDelete}
-            className="p-1 hover:bg-red-100 rounded transition-colors text-red-600"
+            className="p-2 hover:bg-red-100 rounded-lg transition-colors text-red-600 hover:text-red-700"
+            title="Supprimer le dossier"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -150,9 +214,12 @@ function SortableFolder({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-t border-gray-200 p-3 bg-gray-50/50"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="border-t border-gray-100 bg-gradient-to-br from-gray-50/30 to-gray-100/20 backdrop-blur-sm"
           >
-            {children}
+            <div className="p-4">
+              {children}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -220,8 +287,103 @@ export default function DragDropDashboard({
   onDeleteFolder,
   onToggleFolder,
 }: DragDropDashboardProps) {
+  const { refreshAll: refreshLinksContext } = useLinks()
   const [activeId, setActiveId] = useState<string | null>(null)
   const [overId, setOverId] = useState<string | null>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const [createInParent, setCreateInParent] = useState<string | null>(null)
+  const [tooltipState, setTooltipState] = useState<{
+    visible: boolean
+    folderId: string | null
+    folderName: string
+    position: { x: number; y: number }
+  }>({
+    visible: false,
+    folderId: null,
+    folderName: '',
+    position: { x: 0, y: 0 }
+  })
+
+  const handleFolderMouseEnter = (event: React.MouseEvent, folderId: string, folderName: string) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    setTooltipState({
+      visible: true,
+      folderId,
+      folderName,
+      position: {
+        x: rect.right,
+        y: rect.top
+      }
+    })
+  }
+
+  const handleFolderMouseLeave = () => {
+    setTooltipState(prev => ({ ...prev, visible: false }))
+  }
+
+  const handleCreateFolder = async (parentId?: string) => {
+    if (!newFolderName.trim()) {
+      toast.error('Veuillez entrer un nom pour le dossier')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/folders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newFolderName.trim(),
+          color: '#3b82f6',
+          icon: '📁',
+          parentId: parentId || createInParent,
+        })
+      })
+      
+      if (response.ok) {
+        const newFolder = await response.json()
+        
+        // Toujours mettre à jour instantanément
+        const updateFolderStructure = (folders: any[], newFolder: any): any[] => {
+          if (!parentId && !createInParent) {
+            // Dossier racine
+            return [...folders, newFolder]
+          } else {
+            // Sous-dossier - trouver le parent et y ajouter l'enfant
+            const parentFolderId = parentId || createInParent
+            return folders.map(folder => {
+              if (folder.id === parentFolderId) {
+                return {
+                  ...folder,
+                  children: [...(folder.children || []), newFolder]
+                }
+              }
+              // Recherche récursive dans les sous-dossiers
+              if (folder.children && folder.children.length > 0) {
+                return {
+                  ...folder,
+                  children: updateFolderStructure(folder.children, newFolder)
+                }
+              }
+              return folder
+            })
+          }
+        }
+        
+        onFoldersChange(updateFolderStructure(folders, newFolder))
+        refreshLinksContext()
+        
+        setNewFolderName('')
+        setShowCreateForm(false)
+        setCreateInParent(null)
+        toast.success('Dossier créé avec succès')
+      } else {
+        toast.error('Erreur lors de la création du dossier')
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la création du dossier')
+    }
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -263,12 +425,14 @@ export default function DragDropDashboard({
       if (overData?.type === 'folder') {
         const targetFolder = overData.folder as Folder
         await onMoveLink(link.id, targetFolder.id)
+        refreshLinksContext()
         toast.success(`"${link.title}" déplacé dans "${targetFolder.name}"`)
       }
       // Si on le dépose dans la zone "sans dossier"
       else if (over.id === 'unorganized') {
         if (link.folderId) {
           await onMoveLink(link.id, null)
+          refreshLinksContext()
           toast.success(`"${link.title}" retiré du dossier`)
         }
       }
@@ -330,30 +494,72 @@ export default function DragDropDashboard({
         }
       }
     }
-    // Si on déplace un dossier
+    // Si on déplace un dossier sur un autre dossier
     else if (activeData?.type === 'folder' && overData?.type === 'folder') {
       const activeFolder = activeData.folder as Folder
       const overFolder = overData.folder as Folder
       
       if (activeFolder.id !== overFolder.id) {
-        const activeIndex = folders.findIndex(f => f.id === activeFolder.id)
-        const overIndex = folders.findIndex(f => f.id === overFolder.id)
-        
-        if (activeIndex !== -1 && overIndex !== -1) {
-          const newFolders = arrayMove(folders, activeIndex, overIndex)
-          onFoldersChange(newFolders)
-          
-          // Persister l'ordre en base de données
+        // Demander confirmation avant de déplacer un dossier dans un autre
+        if (confirm(`Voulez-vous déplacer le dossier "${activeFolder.name}" dans "${overFolder.name}" ?`)) {
           try {
-            const folderIds = newFolders.map(f => f.id)
-            await fetch('/api/folders/order', {
+            const response = await fetch(`/api/folders/${activeFolder.id}/move`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ folderIds })
+              body: JSON.stringify({ parentId: overFolder.id })
             })
-            toast.success('Ordre des dossiers mis à jour')
+            
+            if (response.ok) {
+              // Mise à jour instantanée de la structure
+              const updateFolderMove = (folders: any[], movedId: string, newParentId: string): any[] => {
+                let movedFolder: any = null
+                
+                // Trouver et retirer le dossier déplacé
+                const removeFolderRecursive = (folderList: any[]): any[] => {
+                  return folderList.reduce((acc, folder) => {
+                    if (folder.id === movedId) {
+                      movedFolder = { ...folder, parentId: newParentId }
+                      return acc
+                    }
+                    
+                    const updatedFolder = { ...folder }
+                    if (folder.children && folder.children.length > 0) {
+                      updatedFolder.children = removeFolderRecursive(folder.children)
+                    }
+                    return [...acc, updatedFolder]
+                  }, [])
+                }
+                
+                const foldersWithoutMoved = removeFolderRecursive(folders)
+                
+                // Ajouter le dossier à son nouveau parent
+                const addToParent = (folderList: any[]): any[] => {
+                  return folderList.map(folder => {
+                    if (folder.id === newParentId) {
+                      return {
+                        ...folder,
+                        children: [...(folder.children || []), movedFolder]
+                      }
+                    }
+                    if (folder.children && folder.children.length > 0) {
+                      return {
+                        ...folder,
+                        children: addToParent(folder.children)
+                      }
+                    }
+                    return folder
+                  })
+                }
+                
+                return addToParent(foldersWithoutMoved)
+              }
+              
+              onFoldersChange(updateFolderMove(folders, activeFolder.id, overFolder.id))
+              refreshLinksContext()
+              toast.success('Dossier déplacé avec succès')
+            }
           } catch (error) {
-            toast.error('Erreur lors de la sauvegarde de l\'ordre')
+            toast.error('Erreur lors du déplacement')
           }
         }
       }
@@ -391,100 +597,33 @@ export default function DragDropDashboard({
     }),
   }
 
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-      onDragCancel={handleDragCancel}
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Colonne des dossiers */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center space-x-2">
-              <FolderIcon className="w-5 h-5" />
-              <span>Dossiers</span>
-            </h2>
-            <button
-              onClick={onCreateFolder}
-              className="text-blue-600 hover:text-blue-700 text-sm flex items-center space-x-1"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Nouveau</span>
-            </button>
-          </div>
-
-          <SortableContext
-            items={folders.map(f => `folder-${f.id}`)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-3">
-              {folders.map((folder) => (
-                <SortableFolder
-                  key={folder.id}
-                  folder={folder}
-                  onEdit={() => onEditFolder(folder)}
-                  onDelete={() => onDeleteFolder(folder.id)}
-                  onToggle={() => onToggleFolder(folder.id)}
-                  isOver={overId === `folder-${folder.id}`}
-                >
-                  {folder.links.length === 0 ? (
-                    <p className="text-sm text-gray-500 italic text-center py-4">
-                      Glissez des liens ici
-                    </p>
-                  ) : (
-                    <SortableContext
-                      items={folder.links.map(l => `link-${l.id}`)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div className="space-y-2">
-                        {folder.links.map((link) => (
-                          <SortableLink
-                            key={link.id}
-                            link={link}
-                            onToggle={onToggleLink}
-                            onEdit={onEditLink}
-                            onDelete={onDeleteLink}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  )}
-                </SortableFolder>
-              ))}
-            </div>
-          </SortableContext>
-        </div>
-
-        {/* Colonne des liens sans dossier */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center space-x-2">
-              <Link2 className="w-5 h-5" />
-              <span>Liens sans dossier</span>
-            </h2>
-          </div>
-
-          <div
-            id="unorganized"
-            className={`min-h-[200px] p-4 border-2 border-dashed rounded-lg transition-colors ${
-              overId === 'unorganized' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-            }`}
-          >
-            {unorganizedLinks.length === 0 ? (
-              <p className="text-center text-gray-500 italic">
-                Tous vos liens sont organisés !
-              </p>
-            ) : (
+  // Fonction récursive pour afficher les dossiers imbriqués
+  const renderFolder = (folder: Folder, depth: number = 0): React.ReactNode => {
+    return (
+      <div key={folder.id} style={{ marginLeft: `${depth * 16}px` }}>
+        <SortableFolder
+          folder={folder}
+          onEdit={() => onEditFolder(folder)}
+          onDelete={() => onDeleteFolder(folder.id)}
+          onToggle={() => onToggleFolder(folder.id)}
+          onCreateSubfolder={() => {
+            setCreateInParent(folder.id)
+            setShowCreateForm(true)
+          }}
+          onMouseEnter={(event) => handleFolderMouseEnter(event, folder.id, folder.name)}
+          onMouseLeave={handleFolderMouseLeave}
+          isOver={overId === `folder-${folder.id}`}
+          depth={depth}
+        >
+          <div className="space-y-2">
+            {/* Liens du dossier */}
+            {folder.links.length > 0 && (
               <SortableContext
-                items={unorganizedLinks.map(l => `link-${l.id}`)}
+                items={folder.links.map(l => `link-${l.id}`)}
                 strategy={verticalListSortingStrategy}
               >
-                <div className="space-y-3">
-                  {unorganizedLinks.map((link) => (
+                <div className="space-y-2">
+                  {folder.links.map((link) => (
                     <SortableLink
                       key={link.id}
                       link={link}
@@ -496,7 +635,223 @@ export default function DragDropDashboard({
                 </div>
               </SortableContext>
             )}
+            
+            {/* Sous-dossiers */}
+            {folder.children && folder.children.length > 0 && (
+              <div className="space-y-2 mt-2">
+                {folder.children.map((childFolder) => renderFolder(childFolder, depth + 1))}
+              </div>
+            )}
+            
+            {/* Message si le dossier est vide */}
+            {folder.links.length === 0 && (!folder.children || folder.children.length === 0) && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-8 text-center"
+              >
+                <div className="p-3 bg-gray-100 rounded-xl mb-3">
+                  <FolderIcon className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-500 font-medium">Dossier vide</p>
+                <p className="text-xs text-gray-400 mt-1">Glissez des liens ou créez des sous-dossiers</p>
+              </motion.div>
+            )}
           </div>
+        </SortableFolder>
+      </div>
+    )
+  }
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+        {/* Colonne des dossiers */}
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                <FolderIcon className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Dossiers</h2>
+                <p className="text-sm text-gray-500">Organisez vos liens</p>
+              </div>
+            </div>
+            <motion.button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-xl flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FolderPlus className="w-4 h-4" />
+              <span className="font-medium">Nouveau</span>
+            </motion.button>
+          </div>
+
+          {/* Formulaire de création de dossier */}
+          <AnimatePresence>
+            {showCreateForm && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl p-6 shadow-lg"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <FolderPlus className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Nouveau dossier</h3>
+                  </div>
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                    <input
+                      type="text"
+                      value={newFolderName}
+                      onChange={(e) => setNewFolderName(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleCreateFolder()}
+                      placeholder="Nom du dossier"
+                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                      autoFocus
+                    />
+                    <div className="flex space-x-2 sm:space-x-3">
+                      <motion.button
+                        onClick={handleCreateFolder}
+                        className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        Créer
+                      </motion.button>
+                      <motion.button
+                        onClick={() => {
+                          setShowCreateForm(false)
+                          setNewFolderName('')
+                          setCreateInParent(null)
+                        }}
+                        className="flex-1 sm:flex-none px-6 py-3 bg-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        Annuler
+                      </motion.button>
+                    </div>
+                  </div>
+                  {createInParent && (
+                    <p className="text-sm text-gray-600 flex items-center">
+                      <FolderIcon className="w-4 h-4 mr-1" />
+                      Sera créé dans: <span className="font-medium ml-1">{folders.find(f => f.id === createInParent)?.name}</span>
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <SortableContext
+            items={folders.map(f => `folder-${f.id}`)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-4">
+              {folders.length === 0 ? (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col items-center justify-center py-12 text-center"
+                >
+                  <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
+                    <FolderIcon className="w-12 h-12 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucun dossier encore</h3>
+                  <p className="text-gray-500 mb-4 max-w-xs">
+                    Créez votre premier dossier pour organiser vos liens
+                  </p>
+                  <motion.button
+                    onClick={() => setShowCreateForm(true)}
+                    className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Créer mon premier dossier
+                  </motion.button>
+                </motion.div>
+              ) : (
+                folders.map((folder) => renderFolder(folder, 0))
+              )}
+            </div>
+          </SortableContext>
+        </div>
+
+        {/* Colonne des liens sans dossier */}
+        <div className="space-y-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg">
+              <Link2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Liens libres</h2>
+              <p className="text-sm text-gray-500">{unorganizedLinks.length} liens non organisés</p>
+            </div>
+          </div>
+
+          <motion.div
+            id="unorganized"
+            className={`min-h-[300px] rounded-2xl transition-all duration-300 ${
+              overId === 'unorganized' 
+                ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg scale-[1.01]' 
+                : 'border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50/50 to-gray-100/30'
+            }`}
+            animate={{
+              borderColor: overId === 'unorganized' ? '#60a5fa' : '#d1d5db'
+            }}
+          >
+            {unorganizedLinks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-8">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring" }}
+                  className="mb-4"
+                >
+                  <div className="p-4 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl">
+                    <Link2 className="w-12 h-12 text-emerald-600" />
+                  </div>
+                </motion.div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Parfaitement organisé !</h3>
+                <p className="text-gray-500">
+                  Tous vos liens sont bien rangés dans des dossiers
+                </p>
+              </div>
+            ) : (
+              <div className="p-6">
+                <SortableContext
+                  items={unorganizedLinks.map(l => `link-${l.id}`)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-4">
+                    {unorganizedLinks.map((link) => (
+                      <SortableLink
+                        key={link.id}
+                        link={link}
+                        onToggle={onToggleLink}
+                        onEdit={onEditLink}
+                        onDelete={onDeleteLink}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </div>
+            )}
+          </motion.div>
         </div>
       </div>
 
@@ -512,6 +867,16 @@ export default function DragDropDashboard({
           />
         ) : null}
       </DragOverlay>
+
+      {/* Tooltip d'analytics */}
+      {tooltipState.folderId && (
+        <FolderAnalyticsTooltip
+          folderId={tooltipState.folderId}
+          folderName={tooltipState.folderName}
+          isVisible={tooltipState.visible}
+          position={tooltipState.position}
+        />
+      )}
     </DndContext>
   )
 }

@@ -166,7 +166,7 @@ export default function BeaconLayoutDashboard({
                     <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
                       <div className="w-2 h-2 bg-gray-900 rounded-full" />
                     </div>
-                    <span className="text-white text-xs font-medium">GetAllMyLinks</span>
+                    <span className="text-white text-xs font-medium">LinkTracker</span>
                   </div>
                 </motion.div>
               </div>

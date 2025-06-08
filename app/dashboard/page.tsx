@@ -2,16 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
-import { Plus, Folder as FolderIcon, Link2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Plus, Folder as FolderIcon, Link2, BarChart3 } from 'lucide-react'
 import CreateLinkModal from '@/components/CreateLinkModal'
+import Link from 'next/link'
 import EditLinkModal from '@/components/EditLinkModal'
 import EditPhonePreview from '@/components/EditPhonePreview'
 import DraggableLinkList from '@/components/DraggableLinkList'
 import FolderManager from '@/components/FolderManager'
 import MoveToFolderMenu from '@/components/MoveToFolderMenu'
 import DragDropDashboard from '@/components/DragDropDashboard'
+import EditFolderModal from '@/components/EditFolderModal'
 import { useLinkUpdate } from '@/contexts/LinkUpdateContext'
+import { useProfile } from '@/contexts/ProfileContext'
 import { Link as LinkType } from '@/types'
 
 interface Folder {
@@ -23,11 +28,14 @@ interface Folder {
   isExpanded: boolean
   links: LinkType[]
   order: number
+  parentId?: string | null
+  children?: Folder[]
 }
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const { updateLinkInPreview } = useLinkUpdate()
+  const { profile: userProfile } = useProfile()
   const [links, setLinks] = useState<LinkType[]>([])
   const [folders, setFolders] = useState<Folder[]>([])
   const [loading, setLoading] = useState(true)
@@ -35,8 +43,9 @@ export default function Dashboard() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
   const [liveEditingLink, setLiveEditingLink] = useState<LinkType | null>(null)
-  const [activeTab, setActiveTab] = useState<'links' | 'folders' | 'organize'>('organize')
   const [movingLink, setMovingLink] = useState<LinkType | null>(null)
+  const [showEditFolderModal, setShowEditFolderModal] = useState(false)
+  const [editingFolder, setEditingFolder] = useState<Folder | null>(null)
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -136,6 +145,43 @@ export default function Dashboard() {
     }
   }
 
+  const handleSaveFolder = async (folderData: Partial<Folder>) => {
+    try {
+      if (editingFolder) {
+        // Mise à jour d'un dossier existant
+        const response = await fetch(`/api/folders/${editingFolder.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(folderData)
+        })
+
+        if (response.ok) {
+          const updatedFolder = await response.json()
+          setFolders(folders.map(f => f.id === editingFolder.id ? { ...f, ...updatedFolder } : f))
+          setEditingFolder(null)
+          setShowEditFolderModal(false)
+          toast.success('Dossier mis à jour')
+        }
+      } else {
+        // Création d'un nouveau dossier
+        const response = await fetch('/api/folders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(folderData)
+        })
+
+        if (response.ok) {
+          const newFolder = await response.json()
+          setFolders([...folders, newFolder])
+          setShowEditFolderModal(false)
+          toast.success('Dossier créé')
+        }
+      }
+    } catch (error) {
+      toast.error(editingFolder ? 'Erreur lors de la mise à jour' : 'Erreur lors de la création')
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -153,126 +199,86 @@ export default function Dashboard() {
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-sm sm:text-base text-gray-600">Gérez vos liens et consultez vos statistiques</p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors w-full sm:w-auto"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Créer un lien</span>
-          </button>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex space-x-1 mt-4 border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab('organize')}
-            className={`px-4 py-2 -mb-px border-b-2 transition-colors flex items-center space-x-2 ${
-              activeTab === 'organize'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <FolderIcon className="w-4 h-4" />
-            <span>Organisation</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('links')}
-            className={`px-4 py-2 -mb-px border-b-2 transition-colors flex items-center space-x-2 ${
-              activeTab === 'links'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Link2 className="w-4 h-4" />
-            <span>Tous les liens ({links.length})</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('folders')}
-            className={`px-4 py-2 -mb-px border-b-2 transition-colors flex items-center space-x-2 ${
-              activeTab === 'folders'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <FolderIcon className="w-4 h-4" />
-            <span>Gérer les dossiers</span>
-          </button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+            <Link href="/dashboard/folders-analytics">
+              <motion.button
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>Analytics des Dossiers</span>
+              </motion.button>
+            </Link>
+            <motion.button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors w-full sm:w-auto"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Créer un lien</span>
+            </motion.button>
+          </div>
         </div>
       </header>
 
       {/* Content */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-        {activeTab === 'organize' ? (
-          <DragDropDashboard
-            folders={folders}
-            unorganizedLinks={links}
-            onFoldersChange={setFolders}
-            onLinksChange={setLinks}
-            onToggleLink={handleToggle}
-            onEditLink={handleEdit}
-            onDeleteLink={handleDelete}
-            onMoveLink={handleMoveLink}
-            onCreateFolder={() => {
-              // TODO: Implémenter la création de dossier
-              toast.info('Créez un dossier depuis l\'onglet "Gérer les dossiers"')
-            }}
-            onEditFolder={(folder) => {
-              // TODO: Implémenter l'édition de dossier
-              toast.info('Éditez les dossiers depuis l\'onglet "Gérer les dossiers"')
-            }}
-            onDeleteFolder={async (folderId) => {
-              if (!confirm('Êtes-vous sûr de vouloir supprimer ce dossier ?')) return
+        <DragDropDashboard
+          folders={folders}
+          unorganizedLinks={links}
+          onFoldersChange={setFolders}
+          onLinksChange={setLinks}
+          onToggleLink={handleToggle}
+          onEditLink={handleEdit}
+          onDeleteLink={handleDelete}
+          onMoveLink={handleMoveLink}
+          onCreateFolder={() => {
+            setShowEditFolderModal(true)
+            setEditingFolder(null)
+          }}
+          onEditFolder={(folder) => {
+            setEditingFolder(folder)
+            setShowEditFolderModal(true)
+          }}
+          onDeleteFolder={async (folderId) => {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce dossier ?')) return
+            
+            try {
+              const response = await fetch(`/api/folders/${folderId}`, {
+                method: 'DELETE'
+              })
               
-              try {
-                const response = await fetch(`/api/folders/${folderId}`, {
-                  method: 'DELETE'
-                })
-                
-                if (response.ok) {
-                  fetchLinks()
-                  fetchFolders()
-                  toast.success('Dossier supprimé')
-                }
-              } catch (error) {
-                toast.error('Erreur lors de la suppression')
+              if (response.ok) {
+                fetchLinks()
+                fetchFolders()
+                toast.success('Dossier supprimé')
               }
-            }}
-            onToggleFolder={async (folderId) => {
-              const folder = folders.find(f => f.id === folderId)
-              if (!folder) return
+            } catch (error) {
+              toast.error('Erreur lors de la suppression')
+            }
+          }}
+          onToggleFolder={async (folderId) => {
+            const folder = folders.find(f => f.id === folderId)
+            if (!folder) return
+            
+            try {
+              const response = await fetch(`/api/folders/${folderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isExpanded: !folder.isExpanded })
+              })
               
-              try {
-                const response = await fetch(`/api/folders/${folderId}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ isExpanded: !folder.isExpanded })
-                })
-                
-                if (response.ok) {
-                  const updatedFolder = await response.json()
-                  setFolders(folders.map(f => f.id === folderId ? updatedFolder : f))
-                }
-              } catch (error) {
-                toast.error('Erreur lors de la mise à jour')
+              if (response.ok) {
+                const updatedFolder = await response.json()
+                setFolders(folders.map(f => f.id === folderId ? updatedFolder : f))
               }
-            }}
-          />
-        ) : activeTab === 'links' ? (
-          <DraggableLinkList
-            links={links}
-            onLinksReorder={handleLinksReorder}
-            onToggle={handleToggle}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onMoveToFolder={(link) => setMovingLink(link)}
-          />
-        ) : (
-          <FolderManager
-            folders={folders}
-            onFoldersChange={setFolders}
-            onMoveLink={handleMoveLink}
-          />
-        )}
+            } catch (error) {
+              toast.error('Erreur lors de la mise à jour')
+            }
+          }}
+        />
       </main>
 
       {/* Modals */}
@@ -312,16 +318,23 @@ export default function Dashboard() {
             }}
           />
           
-          <EditPhonePreview
-            isVisible={showEditModal}
-            user={{
-              name: session?.user?.name || 'Laura',
-              username: session?.user?.email?.split('@')[0] || 'laura',
-              image: session?.user?.image || null,
-              bio: 'gratuit pour les prochaines 24h'
-            }}
-            links={liveEditingLink ? [liveEditingLink] : []}
-          />
+          <div className="hidden xl:block">
+            <EditPhonePreview
+              isVisible={showEditModal}
+              user={userProfile ? {
+                name: userProfile.name,
+                username: userProfile.username,
+                image: userProfile.image,
+                bio: userProfile.bio
+              } : {
+                name: 'Chargement...',
+                username: 'user',
+                image: null,
+                bio: ''
+              }}
+              links={liveEditingLink ? [liveEditingLink] : []}
+            />
+          </div>
         </>
       )}
 
@@ -334,6 +347,17 @@ export default function Dashboard() {
           onMove={handleMoveLink}
         />
       )}
+
+      {/* Edit folder modal */}
+      <EditFolderModal
+        isOpen={showEditFolderModal}
+        folder={editingFolder}
+        onClose={() => {
+          setShowEditFolderModal(false)
+          setEditingFolder(null)
+        }}
+        onSave={handleSaveFolder}
+      />
     </>
   )
 }

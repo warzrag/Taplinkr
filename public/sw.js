@@ -1,6 +1,6 @@
-const CACHE_NAME = 'getallmylinks-v1'
-const STATIC_CACHE_NAME = 'getallmylinks-static-v1'
-const DYNAMIC_CACHE_NAME = 'getallmylinks-dynamic-v1'
+const CACHE_NAME = 'linktracker-v1'
+const STATIC_CACHE_NAME = 'linktracker-static-v1'
+const DYNAMIC_CACHE_NAME = 'linktracker-dynamic-v1'
 
 // Static assets to cache
 const STATIC_ASSETS = [

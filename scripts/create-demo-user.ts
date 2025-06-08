@@ -13,7 +13,7 @@ async function createDemoUser() {
       where: { username: 'demo' },
       update: {},
       create: {
-        email: 'demo@getallmylinks.com',
+        email: 'demo@linktracker.app',
         password: hashedPassword,
         username: 'demo',
         name: 'Utilisateur Démo',
@@ -70,7 +70,7 @@ async function createDemoUser() {
     })
 
     console.log('✅ Utilisateur demo créé avec succès !')
-    console.log('📧 Email: demo@getallmylinks.com')
+    console.log('📧 Email: demo@linktracker.app')
     console.log('🔑 Mot de passe: demo123')
     console.log('🔗 Profil public: http://localhost:3001/demo')
     console.log('🎯 Liens de test:')

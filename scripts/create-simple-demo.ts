@@ -10,10 +10,10 @@ async function createSimpleDemo() {
 
     // Créer l'utilisateur demo
     const user = await prisma.user.upsert({
-      where: { email: 'demo@getallmylinks.com' },
+      where: { email: 'demo@linktracker.app' },
       update: {},
       create: {
-        email: 'demo@getallmylinks.com',
+        email: 'demo@linktracker.app',
         password: hashedPassword,
         username: 'demo',
         name: 'Demo User',
@@ -22,7 +22,7 @@ async function createSimpleDemo() {
     })
 
     console.log('✅ Utilisateur demo créé avec succès !')
-    console.log('📧 Email: demo@getallmylinks.com')
+    console.log('📧 Email: demo@linktracker.app')
     console.log('🔑 Mot de passe: demo123')
     
   } catch (error) {

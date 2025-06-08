@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Eye, EyeOff, Link2, Plus, Trash2, GripVertical, Upload, Image, Palette, Type } from 'lucide-react'
+import { X, Save, Eye, EyeOff, Link2, Plus, Trash2, GripVertical, Upload, Image, Palette, Type, Smartphone } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { useLinks } from '@/contexts/LinksContext'
 import { Link, MultiLink } from '@/types'
+import LivePhonePreview from './LivePhonePreview'
+import { useProfile } from '@/contexts/ProfileContext'
 
 interface LinkData extends Link {
   multiLinks: MultiLink[]
@@ -21,11 +24,14 @@ interface EditLinkModalProps {
 }
 
 export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess, onLiveUpdate }: EditLinkModalProps) {
+  const { refreshAll: refreshLinksContext } = useLinks()
+  const { profile: userProfile } = useProfile()
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [activeTab, setActiveTab] = useState('general')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   // Effet pour déclencher la mise à jour en temps réel
   useEffect(() => {
@@ -59,6 +65,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
       })
 
       if (response.ok) {
+        refreshLinksContext()
         toast.success('Lien mis à jour!')
         onSuccess()
         onClose()
@@ -277,12 +284,12 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - only covers left side, not phone area */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 z-40"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-20"
             onClick={onClose}
           />
 
@@ -296,7 +303,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
               damping: 25,
               stiffness: 200
             }}
-            className="fixed inset-0 lg:inset-auto lg:top-0 lg:left-[calc(50%-300px)] lg:h-full lg:w-[600px] w-full h-full bg-white shadow-2xl z-50 flex flex-col"
+            className="fixed inset-0 md:inset-auto md:top-0 md:left-0 md:h-full md:w-full lg:w-[600px] lg:left-[calc(50%-300px)] bg-white shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
@@ -305,14 +312,25 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                   <h2 className="text-xl font-bold text-gray-900">Éditer le lien</h2>
                   <p className="text-sm text-gray-600">Modifications en temps réel</p>
                 </div>
-                <motion.button
-                  onClick={onClose}
-                  className="p-2 hover:bg-white/50 rounded-full transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <X className="w-5 h-5" />
-                </motion.button>
+                <div className="flex items-center space-x-2">
+                  <motion.button
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="xl:hidden p-2 hover:bg-white/50 rounded-full transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title={showPreview ? "Masquer la prévisualisation" : "Afficher la prévisualisation"}
+                  >
+                    <Smartphone className="w-5 h-5" />
+                  </motion.button>
+                  <motion.button
+                    onClick={onClose}
+                    className="p-2 hover:bg-white/50 rounded-full transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <X className="w-5 h-5" />
+                  </motion.button>
+                </div>
               </div>
 
               {/* Tabs */}
@@ -877,6 +895,44 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
               </div>
             </div>
           </motion.div>
+
+          {/* Prévisualisation mobile - Affichée en overlay */}
+          <AnimatePresence>
+            {showPreview && (
+              <motion.div
+                initial={{ opacity: 0, x: '100%' }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: '100%' }}
+                transition={{ type: 'spring', damping: 25 }}
+                className="xl:hidden fixed inset-y-0 right-0 w-full md:w-96 bg-gray-100 z-60 overflow-y-auto shadow-2xl"
+              >
+                <div className="p-4">
+                  <motion.button
+                    onClick={() => setShowPreview(false)}
+                    className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <X className="w-5 h-5" />
+                  </motion.button>
+                  <LivePhonePreview 
+                    user={userProfile ? {
+                      name: userProfile.name,
+                      username: userProfile.username,
+                      image: userProfile.image,
+                      bio: userProfile.bio
+                    } : {
+                      name: 'Chargement...',
+                      username: 'user',
+                      image: null,
+                      bio: ''
+                    }}
+                    links={linkData ? [linkData] : []}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>
       )}
     </AnimatePresence>

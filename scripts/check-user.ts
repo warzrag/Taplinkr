@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 async function checkUser() {
   try {
     const user = await prisma.user.findUnique({
-      where: { email: 'demo@getallmylinks.com' },
+      where: { email: 'demo@linktracker.app' },
       include: {
         links: true
       }

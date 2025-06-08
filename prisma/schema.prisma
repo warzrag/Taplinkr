@@ -8,117 +8,95 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  username  String   @unique
-  name      String?
-  image     String?
-  
-  // Personnalisation du profil public
-  bio         String?  // Description/biographie
-  bannerImage String?  // Image de bannière
-  theme       String   @default("gradient") // gradient, solid, image
-  primaryColor String  @default("#3b82f6") // Couleur principale
-  secondaryColor String @default("#8b5cf6") // Couleur secondaire
-  backgroundImage String? // Image de fond personnalisée
-  
-  // File relations
-  avatarId    String?
-  avatar      File?    @relation("UserAvatar", fields: [avatarId], references: [id])
-  bannerId    String?
-  banner      File?    @relation("UserBanner", fields: [bannerId], references: [id])
-  
-  // Réseaux sociaux
-  twitterUrl   String?
-  instagramUrl String?
-  linkedinUrl  String?
-  youtubeUrl   String?
-  tiktokUrl    String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  links Link[]
-  clicks Click[]
-  files File[]
-  analyticsEvents AnalyticsEvent[]
-  analyticsSummary AnalyticsSummary[]
-  userProfile UserProfile?
-  userTheme UserTheme?
-  passwordProtections PasswordProtection[]
-  linkSchedules LinkSchedule[]
-  customDomains CustomDomain[]
-  notifications Notification[]
+  id                      String                  @id @default(cuid())
+  email                   String                  @unique
+  password                String
+  username                String                  @unique
+  name                    String?
+  image                   String?
+  bio                     String?
+  bannerImage             String?
+  theme                   String                  @default("gradient")
+  primaryColor            String                  @default("#3b82f6")
+  secondaryColor          String                  @default("#8b5cf6")
+  backgroundImage         String?
+  avatarId                String?
+  bannerId                String?
+  twitterUrl              String?
+  instagramUrl            String?
+  linkedinUrl             String?
+  youtubeUrl              String?
+  tiktokUrl               String?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  analyticsEvents         AnalyticsEvent[]
+  analyticsSummary        AnalyticsSummary[]
+  clicks                  Click[]
+  customDomains           CustomDomain[]
+  files                   File[]
+  folders                 Folder[]
+  linkSchedules           LinkSchedule[]
+  links                   Link[]
   notificationPreferences NotificationPreference?
-  pushSubscriptions PushSubscription[]
-  templates Template[]
-  folders   Folder[]
+  notifications           Notification[]
+  passwordProtections     PasswordProtection[]
+  pushSubscriptions       PushSubscription[]
+  templates               Template[]
+  userProfile             UserProfile?
+  userTheme               UserTheme?
+  banner                  File?                   @relation("UserBanner", fields: [bannerId], references: [id])
+  avatar                  File?                   @relation("UserAvatar", fields: [avatarId], references: [id])
 
   @@map("users")
 }
 
 model Link {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Basic info
-  slug        String   @unique
-  title       String
-  description String?
-  
-  // Visual customization
-  color       String?  // HEX color for button background
-  icon        String?  // Emoji or icon identifier
-  coverImage  String?  // URL to cover image
-  profileImage String? // URL to profile image
-  coverId     String?  // Relation to File model
-  cover       File?    @relation("LinkCover", fields: [coverId], references: [id])
-  fontFamily  String?  // Font family for the link
-  borderRadius String? // Border radius style
-  backgroundColor String? // Background color for the link
-  textColor String?    // Text color for the link
-  
-  // Metadata
-  isActive    Boolean  @default(true)
-  order       Int      @default(0)
-  clicks      Int      @default(0)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  clickEvents Click[]
-  multiLinks  MultiLink[]
-  analyticsEvents AnalyticsEvent[]
-  analyticsSummary AnalyticsSummary[]
+  id                 String              @id @default(cuid())
+  userId             String
+  slug               String              @unique
+  title              String
+  description        String?
+  color              String?
+  icon               String?
+  coverImage         String?
+  profileImage       String?
+  coverId            String?
+  fontFamily         String?
+  borderRadius       String?
+  backgroundColor    String?
+  textColor          String?
+  isActive           Boolean             @default(true)
+  order              Int                 @default(0)
+  clicks             Int                 @default(0)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  folderId           String?
+  analyticsEvents    AnalyticsEvent[]
+  analyticsSummary   AnalyticsSummary[]
+  clickEvents        Click[]
+  linkSchedule       LinkSchedule?
+  folder             Folder?             @relation(fields: [folderId], references: [id])
+  cover              File?               @relation("LinkCover", fields: [coverId], references: [id])
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  multiLinks         MultiLink[]
+  passwordAttempts   PasswordAttempt[]
   passwordProtection PasswordProtection?
-  linkSchedule LinkSchedule?
-  passwordAttempts PasswordAttempt[]
-  
-  // Folder relation
-  folderId    String?
-  folder      Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
 
   @@map("links")
 }
 
 model MultiLink {
-  id          String   @id @default(cuid())
+  id           String   @id @default(cuid())
   parentLinkId String
-  parentLink  Link     @relation(fields: [parentLinkId], references: [id], onDelete: Cascade)
-  
-  title       String
-  url         String
-  description String?
-  icon        String?
-  order       Int      @default(0)
-  clicks      Int      @default(0)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  title        String
+  url          String
+  description  String?
+  icon         String?
+  order        Int      @default(0)
+  clicks       Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  parentLink   Link     @relation(fields: [parentLinkId], references: [id], onDelete: Cascade)
 
   @@map("multi_links")
 }
@@ -126,390 +104,296 @@ model MultiLink {
 model Click {
   id        String   @id @default(cuid())
   linkId    String
-  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   ip        String?
   userAgent String?
   referer   String?
   country   String?
   device    String?
-  
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
 
   @@map("clicks")
 }
-
-// === FOLDER MANAGEMENT ===
 
 model Folder {
   id          String   @id @default(cuid())
   name        String
   description String?
-  color       String?  // Couleur du dossier (hex)
-  icon        String?  // Emoji ou icône du dossier
-  
-  // Relations
+  color       String?
+  icon        String?
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  links       Link[]
-  
-  // Metadata
+  parentId    String?
   order       Int      @default(0)
-  isExpanded  Boolean  @default(true)  // Pour l'UI (dossier ouvert/fermé)
-  
+  isExpanded  Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  parent      Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Folder[] @relation("FolderHierarchy")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links       Link[]
 
   @@map("folders")
 }
 
-// === FILE MANAGEMENT ===
 model File {
-  id        String   @id @default(cuid())
-  filename  String
-  originalName String
-  mimeType  String
-  size      Int
-  url       String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Relations
-  userAvatars    User[] @relation("UserAvatar")
-  userBanners    User[] @relation("UserBanner")
-  linkCovers     Link[] @relation("LinkCover")
+  id                 String     @id @default(cuid())
+  filename           String
+  originalName       String
+  mimeType           String
+  size               Int
+  url                String
+  userId             String
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkCovers         Link[]     @relation("LinkCover")
   templateThumbnails Template[] @relation("TemplateThumbnail")
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  userBanners        User[]     @relation("UserBanner")
+  userAvatars        User[]     @relation("UserAvatar")
+
   @@map("files")
 }
 
-// === ANALYTICS SYSTEM ===
 model AnalyticsEvent {
-  id        String   @id @default(cuid())
-  linkId    String
-  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Event data
-  eventType    String  // 'click', 'view', 'share'
-  ip           String?
-  userAgent    String?
-  referer      String?
-  
-  // Geolocation
-  country      String?
-  region       String?
-  city         String?
-  latitude     Float?
-  longitude    Float?
-  
-  // Device/Browser
-  device       String? // 'mobile', 'tablet', 'desktop'
-  browser      String?
-  os           String?
-  
-  // UTM Tracking
-  utmSource    String?
-  utmMedium    String?
-  utmCampaign  String?
-  utmTerm      String?
-  utmContent   String?
-  
-  createdAt    DateTime @default(now())
-  
-  @@map("analytics_events")
+  id          String   @id @default(cuid())
+  linkId      String
+  userId      String
+  eventType   String
+  ip          String?
+  userAgent   String?
+  referer     String?
+  country     String?
+  region      String?
+  city        String?
+  latitude    Float?
+  longitude   Float?
+  device      String?
+  browser     String?
+  os          String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link        Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
   @@index([linkId, createdAt])
   @@index([userId, createdAt])
+  @@map("analytics_events")
 }
 
 model AnalyticsSummary {
-  id          String   @id @default(cuid())
-  linkId      String
-  link        Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  date        DateTime
-  clicks      Int      @default(0)
-  views       Int      @default(0)
-  
-  // Top data
-  topCountry  String?
-  topDevice   String?
-  topBrowser  String?
-  topReferer  String?
-  
+  id         String   @id @default(cuid())
+  linkId     String
+  userId     String
+  date       DateTime
+  clicks     Int      @default(0)
+  views      Int      @default(0)
+  topCountry String?
+  topDevice  String?
+  topBrowser String?
+  topReferer String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link       Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
   @@unique([linkId, date])
   @@map("analytics_summary")
 }
 
-// === TEMPLATES SYSTEM ===
 model Template {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  category    String   // 'business', 'personal', 'social', 'creative'
-  
-  // Template configuration
-  layout      String   // 'list', 'grid', 'card', 'minimal'
-  colors      String   // Color palette JSON
-  fonts       String   // Font configuration JSON
-  spacing     String   // Margins and spacing JSON
-  animations  String?  // CSS animations JSON
-  
-  // Template assets
-  thumbnailId String?
-  thumbnail   File?    @relation("TemplateThumbnail", fields: [thumbnailId], references: [id])
-  cssCode     String?  // Custom CSS
-  
-  // Metadata
-  isPremium   Boolean  @default(false)
-  isPublic    Boolean  @default(true)
-  authorId    String?
-  author      User?    @relation(fields: [authorId], references: [id])
-  usageCount  Int      @default(0)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  category     String
+  layout       String
+  colors       String
+  fonts        String
+  spacing      String
+  animations   String?
+  thumbnailId  String?
+  cssCode      String?
+  isPremium    Boolean       @default(false)
+  isPublic     Boolean       @default(true)
+  authorId     String?
+  usageCount   Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  author       User?         @relation(fields: [authorId], references: [id])
+  thumbnail    File?         @relation("TemplateThumbnail", fields: [thumbnailId], references: [id])
   userProfiles UserProfile[]
-  
+
   @@map("templates")
 }
 
 model UserProfile {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Template applied
+  id         String    @id @default(cuid())
+  userId     String    @unique
   templateId String?
-  template   Template? @relation(fields: [templateId], references: [id])
-  
-  // Customizations
   customCSS  String?
-  layout     String?  // Custom layout JSON
-  seo        String?  // SEO meta tags JSON
-  
-  // Advanced settings
-  domain     String?  // Custom domain
+  layout     String?
+  seo        String?
+  domain     String?
   favicon    String?
-  analytics  String?  // Google Analytics JSON, etc.
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
+  analytics  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  template   Template? @relation(fields: [templateId], references: [id])
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_profiles")
 }
 
 model UserTheme {
-  id       String @id @default(cuid())
-  userId   String @unique
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  preference String @default("system") // 'light', 'dark', 'system'
-  customTheme String? // Custom theme JSON
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  preference  String   @default("system")
+  customTheme String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_themes")
 }
 
-// === PASSWORD PROTECTION ===
 model PasswordProtection {
-  id        String   @id @default(cuid())
-  linkId    String   @unique
-  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  password  String   // Hashed
-  hint      String?  // Password hint
-  
-  // Configuration
-  maxAttempts Int    @default(5)
-  lockoutDuration Int @default(3600) // in seconds
-  
-  // Tracking
-  attempts  Int     @default(0)
-  lockedUntil DateTime?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  id              String    @id @default(cuid())
+  linkId          String    @unique
+  userId          String
+  password        String
+  hint            String?
+  maxAttempts     Int       @default(5)
+  lockoutDuration Int       @default(3600)
+  attempts        Int       @default(0)
+  lockedUntil     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link            Link      @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
   @@map("password_protections")
 }
 
 model PasswordAttempt {
   id        String   @id @default(cuid())
   linkId    String
-  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  
   ip        String
   success   Boolean
-  
   createdAt DateTime @default(now())
-  
-  @@map("password_attempts")
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
   @@index([linkId, ip, createdAt])
+  @@map("password_attempts")
 }
 
-// === LINK SCHEDULING ===
 model LinkSchedule {
-  id        String   @id @default(cuid())
-  linkId    String   @unique
-  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Scheduling
-  startDate DateTime?
-  endDate   DateTime?
-  timezone  String   @default("UTC")
-  
-  // Recurrence
-  isRecurring Boolean @default(false)
-  recurrenceRule String? // Cron format
-  
-  // Actions
-  actionOnStart String? // 'activate', 'redirect', 'email'
-  actionOnEnd   String? // 'deactivate', 'archive', 'email'
-  
-  // Notifications
-  notifyStart   Boolean @default(false)
-  notifyEnd     Boolean @default(false)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  scheduledJobs ScheduledJob[]
-  
+  id             String         @id @default(cuid())
+  linkId         String         @unique
+  userId         String
+  startDate      DateTime?
+  endDate        DateTime?
+  timezone       String         @default("UTC")
+  isRecurring    Boolean        @default(false)
+  recurrenceRule String?
+  actionOnStart  String?
+  actionOnEnd    String?
+  notifyStart    Boolean        @default(false)
+  notifyEnd      Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link           Link           @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  scheduledJobs  ScheduledJob[]
+
   @@map("link_schedules")
 }
 
 model ScheduledJob {
-  id          String   @id @default(cuid())
-  scheduleId  String
-  schedule    LinkSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  
-  jobType     String   // 'activate', 'deactivate', 'notify'
+  id           String       @id @default(cuid())
+  scheduleId   String
+  jobType      String
   scheduledFor DateTime
-  executed    Boolean  @default(false)
-  executedAt  DateTime?
-  error       String?
-  
-  createdAt   DateTime @default(now())
-  
-  @@map("scheduled_jobs")
+  executed     Boolean      @default(false)
+  executedAt   DateTime?
+  error        String?
+  createdAt    DateTime     @default(now())
+  schedule     LinkSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
   @@index([scheduledFor, executed])
+  @@map("scheduled_jobs")
 }
 
-// === CUSTOM DOMAINS ===
 model CustomDomain {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  domain     String   @unique
-  subdomain  String?  // for user.example.com
-  
-  // DNS configuration
-  verified   Boolean  @default(false)
-  dnsRecords String?  // Required records JSON
-  
-  // SSL
-  sslEnabled Boolean  @default(false)
+  domain     String    @unique
+  subdomain  String?
+  verified   Boolean   @default(false)
+  dnsRecords String?
+  sslEnabled Boolean   @default(false)
   sslExpiry  DateTime?
-  
-  // Redirection
-  redirectTo String?  // Fallback URL
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
+  redirectTo String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("custom_domains")
 }
 
-// === NOTIFICATIONS SYSTEM ===
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type      String   // 'click', 'schedule', 'system', 'marketing'
-  title     String
-  message   String
-  data      String?  // Contextual data JSON
-  
-  // State
-  read      Boolean  @default(false)
-  readAt    DateTime?
-  
-  // Channels
-  inApp     Boolean  @default(true)
-  email     Boolean  @default(false)
-  push      Boolean  @default(false)
-  
-  // Scheduling
+  id           String    @id @default(cuid())
+  userId       String
+  type         String
+  title        String
+  message      String
+  data         String?
+  read         Boolean   @default(false)
+  readAt       DateTime?
+  inApp        Boolean   @default(true)
+  email        Boolean   @default(false)
+  push         Boolean   @default(false)
   scheduledFor DateTime?
   sentAt       DateTime?
-  
-  createdAt DateTime @default(now())
-  
-  @@map("notifications")
+  createdAt    DateTime  @default(now())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId, read, createdAt])
+  @@map("notifications")
 }
 
 model NotificationPreference {
-  id       String @id @default(cuid())
-  userId   String @unique
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Preferences by type
-  clickNotifications    Boolean @default(true)
-  scheduleNotifications Boolean @default(true)
-  systemNotifications  Boolean @default(true)
-  marketingEmails       Boolean @default(false)
-  
-  // Preferred channels
-  emailEnabled Boolean @default(true)
-  pushEnabled  Boolean @default(true)
-  smsEnabled   Boolean @default(false)
-  
-  // Frequency
-  digestFrequency String @default("daily") // 'realtime', 'daily', 'weekly'
-  quietHours      String?  // Silent hours JSON
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  clickNotifications    Boolean  @default(true)
+  scheduleNotifications Boolean  @default(true)
+  systemNotifications   Boolean  @default(true)
+  marketingEmails       Boolean  @default(false)
+  emailEnabled          Boolean  @default(true)
+  pushEnabled           Boolean  @default(true)
+  smsEnabled            Boolean  @default(false)
+  digestFrequency       String   @default("daily")
+  quietHours            String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("notification_preferences")
 }
 
 model PushSubscription {
-  id       String @id @default(cuid())
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  endpoint String @unique
-  keys     String // p256dh and auth keys JSON
-  
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  keys      String
   userAgent String?
   deviceId  String?
-  
-  isActive  Boolean @default(true)
-  
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   lastUsed  DateTime @default(now())
-  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("push_subscriptions")
 }

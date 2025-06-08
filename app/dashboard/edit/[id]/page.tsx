@@ -7,6 +7,7 @@ import { ArrowLeft, Save, Eye, EyeOff, Palette, Upload, Link2, Plus, Trash2, Gri
 import { toast } from 'react-hot-toast'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import LivePhonePreview from '@/components/LivePhonePreview'
+import { useProfile } from '@/contexts/ProfileContext'
 
 interface MultiLink {
   id: string
@@ -33,6 +34,7 @@ export default function EditLinkPage() {
   const router = useRouter()
   const params = useParams()
   const linkId = params.id as string
+  const { profile: userProfile } = useProfile()
 
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -179,7 +181,7 @@ export default function EditLinkPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar de navigation */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-full md:w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <button
@@ -250,9 +252,9 @@ export default function EditLinkPage() {
       </div>
 
       {/* Contenu principal */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex flex-col lg:flex-row">
         {/* Formulaire d'édition */}
-        <div className="flex-1 p-8 overflow-y-auto">
+        <div className="flex-1 p-4 md:p-8 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -457,16 +459,23 @@ export default function EditLinkPage() {
           </AnimatePresence>
         </div>
 
-        {/* Prévisualisation live à droite */}
-        <LivePhonePreview 
-          user={{
-            name: 'Laura',
-            username: 'laura',
-            image: null,
-            bio: 'gratuit pour les prochaines 24h'
-          }}
-          links={[linkData]}
-        />
+        {/* Prévisualisation live à droite - cachée sur mobile/tablette */}
+        <div className="hidden xl:block">
+          <LivePhonePreview 
+            user={userProfile ? {
+              name: userProfile.name,
+              username: userProfile.username,
+              image: userProfile.image,
+              bio: userProfile.bio
+            } : {
+              name: 'Chargement...',
+              username: 'user',
+              image: null,
+              bio: ''
+            }}
+            links={[linkData]}
+          />
+        </div>
       </div>
     </div>
   )

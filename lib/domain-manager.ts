@@ -103,13 +103,13 @@ export class DomainManager {
       {
         type: 'CNAME',
         name: subdomain,
-        value: 'cname.getallmylinks.com',
+        value: 'cname.linktracker.app',
         ttl: 300
       },
       {
         type: 'TXT',
-        name: `_getallmylinks.${domain}`,
-        value: `getallmylinks-verification=${this.generateVerificationToken()}`,
+        name: `_linktracker.${domain}`,
+        value: `linktracker-verification=${this.generateVerificationToken()}`,
         ttl: 300
       }
     ]

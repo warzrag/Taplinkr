@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
-import { X, Link, Shield, Globe, Palette } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, Link, Shield, Globe, Palette, Plus, Trash2, Sparkles } from 'lucide-react'
 import { HexColorPicker } from 'react-colorful'
 import { Link as LinkType } from '@/types'
 
@@ -197,58 +198,122 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Link className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                {editingLink ? 'Modifier le lien' : 'Créer un nouveau lien'}
-              </h2>
-              <p className="text-sm text-gray-500">
-                {editingLink ? 'Modifiez votre lien personnalisé' : 'Ajoutez un nouveau lien à votre page'}
-              </p>
-            </div>
-          </div>
-          <button
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-screen p-4">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          />
+
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
           >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex items-center space-x-4">
+                <motion.div 
+                  className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Link className="w-6 h-6 text-white" />
+                </motion.div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {editingLink ? 'Modifier le lien' : 'Créer un nouveau lien'}
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    {editingLink ? 'Modifiez votre lien personnalisé' : 'Ajoutez un nouveau lien à votre page'}
+                  </p>
+                </div>
+              </div>
+              <motion.button
+                onClick={handleClose}
+                className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </motion.button>
+            </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
-            <input
-              type="text"
-              {...register('title', { required: 'Le titre est requis' })}
-              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.title ? 'border-red-500' : ''}`}
-              placeholder="Mon lien génial"
-            />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
-            )}
-          </div>
+            {/* Form Content */}
+            <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+              <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-8">
+                {/* Preview Section */}
+                <motion.div 
+                  className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <div className="flex items-center space-x-3 mb-2">
+                    <Sparkles className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm font-medium text-gray-700">Aperçu du lien</span>
+                  </div>
+                  <motion.div 
+                    className="p-4 rounded-xl text-white font-medium text-center shadow-lg"
+                    style={{ backgroundColor: selectedColor }}
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      {selectedIcon && <span className="text-xl">{selectedIcon}</span>}
+                      <span>{watch('title') || 'Titre de votre lien'}</span>
+                    </div>
+                    {watch('description') && (
+                      <p className="text-sm text-white/80 mt-1">{watch('description')}</p>
+                    )}
+                  </motion.div>
+                </motion.div>
 
+                {/* Title */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Titre du lien *</label>
+                  <input
+                    type="text"
+                    {...register('title', { required: 'Le titre est requis' })}
+                    className={`w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.title ? 'border-red-500 ring-2 ring-red-200' : ''}`}
+                    placeholder="Mon lien génial"
+                  />
+                  {errors.title && (
+                    <motion.p 
+                      className="text-red-500 text-sm mt-2 flex items-center"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      {errors.title.message}
+                    </motion.p>
+                  )}
+                </motion.div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea
-              {...register('description')}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Description optionnelle..."
-            />
-          </div>
+                {/* Description */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Description (optionnelle)</label>
+                  <textarea
+                    {...register('description')}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                    placeholder="Description de votre lien..."
+                  />
+                </motion.div>
 
           {/* Color Selection */}
           <div>
@@ -403,26 +468,38 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex space-x-3">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              disabled={loading}
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              disabled={loading}
-            >
-              {loading ? 'Enregistrement...' : (editingLink ? 'Modifier' : 'Créer')}
-            </button>
-          </div>
-        </form>
+                {/* Submit Button */}
+                <motion.div 
+                  className="flex space-x-3 pt-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <motion.button
+                    type="button"
+                    onClick={handleClose}
+                    className="flex-1 px-6 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-medium text-gray-700"
+                    disabled={loading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Annuler
+                  </motion.button>
+                  <motion.button
+                    type="submit"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg"
+                    disabled={loading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {loading ? 'Enregistrement...' : (editingLink ? 'Modifier' : 'Créer')}
+                  </motion.button>
+                </motion.div>
+              </form>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </AnimatePresence>
   )
 }

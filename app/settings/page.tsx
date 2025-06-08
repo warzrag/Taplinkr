@@ -24,11 +24,13 @@ import {
   Shield,
   Bell,
   Moon,
-  Sun
+  Sun,
+  X
 } from 'lucide-react'
 import { HexColorPicker } from 'react-colorful'
 import Link from 'next/link'
 import FileUpload from '@/components/upload/FileUpload'
+import { useProfile } from '@/contexts/ProfileContext'
 
 interface ProfileData {
   name: string
@@ -77,10 +79,15 @@ const PRESET_COLORS = [
 export default function Settings() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { profile: contextProfile, updateProfile, forceRefresh } = useProfile()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showPrimaryPicker, setShowPrimaryPicker] = useState(false)
   const [showSecondaryPicker, setShowSecondaryPicker] = useState(false)
+  const [tempAvatar, setTempAvatar] = useState<string | null>(null)
+  const [tempBanner, setTempBanner] = useState<string | null>(null)
+  const [avatarKey, setAvatarKey] = useState(0)
+  const [bannerKey, setBannerKey] = useState(0)
   
   const [profile, setProfile] = useState<ProfileData>({
     name: '',
@@ -103,10 +110,40 @@ export default function Settings() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
-    } else if (status === 'authenticated') {
-      fetchProfile()
+    } else if (status === 'authenticated' && contextProfile) {
+      // Charger les données depuis le Context
+      setProfile({
+        name: contextProfile.name || '',
+        bio: contextProfile.bio || '',
+        image: contextProfile.image || '',
+        bannerImage: contextProfile.bannerImage || '',
+        avatarId: contextProfile.avatarId || '',
+        bannerId: contextProfile.bannerId || '',
+        theme: contextProfile.theme || 'gradient',
+        primaryColor: contextProfile.primaryColor || '#3b82f6',
+        secondaryColor: contextProfile.secondaryColor || '#8b5cf6',
+        backgroundImage: contextProfile.backgroundImage || '',
+        twitterUrl: contextProfile.twitterUrl || '',
+        instagramUrl: contextProfile.instagramUrl || '',
+        linkedinUrl: contextProfile.linkedinUrl || '',
+        youtubeUrl: contextProfile.youtubeUrl || '',
+        tiktokUrl: contextProfile.tiktokUrl || '',
+      })
+      setTempAvatar(contextProfile.image || null)
+      setTempBanner(contextProfile.bannerImage || null)
+      setLoading(false)
     }
-  }, [status, router])
+  }, [status, router, contextProfile])
+
+  // Debug: surveiller les changements du profile
+  useEffect(() => {
+    console.log('👀 Profile a changé:', {
+      image: profile.image,
+      bannerImage: profile.bannerImage,
+      avatarId: profile.avatarId,
+      bannerId: profile.bannerId
+    })
+  }, [profile.image, profile.bannerImage, profile.avatarId, profile.bannerId])
 
   const fetchProfile = async () => {
     try {
@@ -130,6 +167,9 @@ export default function Settings() {
           youtubeUrl: data.youtubeUrl || '',
           tiktokUrl: data.tiktokUrl || '',
         })
+        // Synchroniser les états temporaires
+        setTempAvatar(data.image || null)
+        setTempBanner(data.bannerImage || null)
       }
     } catch (error) {
       toast.error('Erreur lors du chargement du profil')
@@ -140,6 +180,8 @@ export default function Settings() {
 
   const handleSave = async () => {
     setSaving(true)
+    console.log('💾 Sauvegarde du profil avec les données:', profile)
+    
     try {
       const response = await fetch('/api/profile', {
         method: 'PATCH',
@@ -148,12 +190,18 @@ export default function Settings() {
       })
 
       if (response.ok) {
-        toast.success('Profil mis à jour avec succès!')
+        const data = await response.json()
+        console.log('✅ Profil sauvegardé, réponse:', data)
+        toast.success('Profil mis à jour avec succès! Actualiser la page pour voir les changements.')
+        
+        // Recharger les données
+        await fetchProfile()
       } else {
         const error = await response.json()
         toast.error(error.error || 'Erreur lors de la sauvegarde')
       }
     } catch (error) {
+      console.error('❌ Erreur sauvegarde:', error)
       toast.error('Erreur lors de la sauvegarde')
     } finally {
       setSaving(false)
@@ -164,22 +212,62 @@ export default function Settings() {
     setProfile(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleAvatarUpload = (file: any) => {
+  const handleAvatarUpload = async (file: any) => {
+    console.log('🎯 handleAvatarUpload appelé avec:', file)
+    
+    // Affichage immédiat avec l'état temporaire
+    setTempAvatar(file.url)
+    
+    // Mise à jour de l'état du profil local
     setProfile(prev => ({ 
       ...prev, 
       image: file.url,
       avatarId: file.id
     }))
-    toast.success('Photo de profil uploadée!')
+    
+    // Sauvegarde immédiate via le Context
+    const success = await updateProfile({
+      image: file.url,
+      avatarId: file.id
+    })
+    
+    if (success) {
+      toast.success('Photo de profil uploadée et sauvegardée!')
+      forceRefresh() // Force la mise à jour partout
+    } else {
+      toast.error('Erreur lors de la sauvegarde')
+    }
+    
+    setAvatarKey(prev => prev + 1)
   }
 
-  const handleBannerUpload = (file: any) => {
+  const handleBannerUpload = async (file: any) => {
+    console.log('🎯 handleBannerUpload appelé avec:', file)
+    
+    // Affichage immédiat avec l'état temporaire
+    setTempBanner(file.url)
+    
+    // Mise à jour de l'état du profil local
     setProfile(prev => ({ 
       ...prev, 
       bannerImage: file.url,
       bannerId: file.id
     }))
-    toast.success('Image de bannière uploadée!')
+    
+    // Sauvegarde immédiate via le Context
+    const success = await updateProfile({
+      bannerImage: file.url,
+      bannerId: file.id
+    })
+    
+    if (success) {
+      toast.success('Image de bannière uploadée et sauvegardée!')
+      forceRefresh() // Force la mise à jour partout
+    } else {
+      toast.error('Erreur lors de la sauvegarde')
+    }
+    
+    setBannerKey(prev => prev + 1)
   }
 
   if (status === 'loading' || loading) {
@@ -283,6 +371,15 @@ export default function Settings() {
                 </motion.a>
                 
                 <motion.button
+                  onClick={fetchProfile}
+                  className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all font-medium"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span>🔄 Recharger</span>
+                </motion.button>
+                
+                <motion.button
                   onClick={handleSave}
                   disabled={saving}
                   className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
@@ -349,20 +446,60 @@ export default function Settings() {
                   Photo de profil
                 </label>
                 <FileUpload 
+                  key={`avatar-upload-${avatarKey}`}
                   onFileUploaded={handleAvatarUpload}
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
                   className="mb-2"
                 />
-                {profile.image && (
-                  <div className="mt-2">
-                    <img 
-                      src={profile.image} 
-                      alt="Photo de profil" 
-                      className="w-16 h-16 rounded-full object-cover border"
-                    />
+                {(tempAvatar || profile.image) && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-sm font-medium text-gray-700">Photo actuelle :</p>
+                    <div className="relative inline-block">
+                      <img 
+                        key={tempAvatar || profile.image}
+                        src={tempAvatar || profile.image} 
+                        alt="Photo de profil" 
+                        className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setProfile(prev => ({ ...prev, image: '', avatarId: '' }))
+                          setTempAvatar(null)
+                          
+                          // Supprimer via le Context
+                          const success = await updateProfile({
+                            image: '',
+                            avatarId: ''
+                          })
+                          
+                          if (success) {
+                            toast.success('Photo supprimée définitivement!')
+                            forceRefresh() // Force la mise à jour partout
+                          } else {
+                            toast.error('Erreur lors de la suppression')
+                          }
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 )}
+                <div className="mt-2">
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Ou entrez une URL directement
+                  </label>
+                  <input
+                    type="url"
+                    value={profile.image}
+                    onChange={(e) => handleInputChange('image', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="https://example.com/avatar.jpg"
+                  />
+                </div>
               </div>
 
               <div>
@@ -370,18 +507,46 @@ export default function Settings() {
                   Image de bannière
                 </label>
                 <FileUpload 
+                  key={`banner-upload-${bannerKey}`}
                   onFileUploaded={handleBannerUpload}
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
                   className="mb-2"
                 />
-                {profile.bannerImage && (
-                  <div className="mt-2">
-                    <img 
-                      src={profile.bannerImage} 
-                      alt="Image de bannière" 
-                      className="w-full h-24 rounded-md object-cover border"
-                    />
+                {(tempBanner || profile.bannerImage) && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-sm font-medium text-gray-700">Bannière actuelle :</p>
+                    <div className="relative">
+                      <img 
+                        key={tempBanner || profile.bannerImage}
+                        src={tempBanner || profile.bannerImage} 
+                        alt="Image de bannière" 
+                        className="w-full h-32 rounded-lg object-cover border-2 border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setProfile(prev => ({ ...prev, bannerImage: '', bannerId: '' }))
+                          setTempBanner(null)
+                          
+                          // Supprimer via le Context
+                          const success = await updateProfile({
+                            bannerImage: '',
+                            bannerId: ''
+                          })
+                          
+                          if (success) {
+                            toast.success('Bannière supprimée définitivement!')
+                            forceRefresh() // Force la mise à jour partout
+                          } else {
+                            toast.error('Erreur lors de la suppression')
+                          }
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 )}
                 <div className="mt-2">

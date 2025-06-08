@@ -22,7 +22,8 @@ export default function EditPhonePreview({ isVisible, user, links }: EditPhonePr
             damping: 25,
             stiffness: 200
           }}
-          className="hidden lg:block fixed right-80 top-0 h-full z-50"
+          className="hidden xl:block fixed right-24 top-0 h-full bg-transparent"
+          style={{ zIndex: 9999 }}
         >
           <LivePhonePreview user={user} links={links} />
         </motion.div>

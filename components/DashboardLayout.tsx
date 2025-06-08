@@ -17,6 +17,8 @@ import {
 } from 'lucide-react'
 import LivePhonePreview from '@/components/LivePhonePreview'
 import { LinkUpdateProvider } from '@/contexts/LinkUpdateContext'
+import { ProfileProvider } from '@/contexts/ProfileContext'
+import { LinksProvider } from '@/contexts/LinksContext'
 import { useState, useEffect } from 'react'
 
 interface DashboardLayoutProps {
@@ -99,7 +101,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">G</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">GetAllMyLinks</span>
+            <span className="text-xl font-bold text-gray-900">LinkTracker</span>
           </div>
         </div>
 
@@ -161,14 +163,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">G</span>
             </div>
-            <span className="font-bold text-gray-900">GetAllMyLinks</span>
+            <span className="font-bold text-gray-900">LinkTracker</span>
           </div>
           <div className="w-10" /> {/* Spacer pour centrer le logo */}
         </div>
 
-        <LinkUpdateProvider updateLinkInPreview={updateLinkInPreview}>
-          {children}
-        </LinkUpdateProvider>
+        <ProfileProvider>
+          <LinksProvider>
+            <LinkUpdateProvider updateLinkInPreview={updateLinkInPreview}>
+              {children}
+            </LinkUpdateProvider>
+          </LinksProvider>
+        </ProfileProvider>
       </div>
 
     </div>

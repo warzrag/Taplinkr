@@ -3,13 +3,13 @@ import { Toaster } from 'react-hot-toast'
 import './globals.css'
 
 export const metadata = {
-  title: 'GetAllMyLinks - Create Your Link Page',
-  description: 'Create and manage your personalized link page with analytics',
+  title: 'LinkTracker - Smart Link Management & Analytics',
+  description: 'Create, organize and track your links with powerful analytics and insights',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'GetAllMyLinks'
+    title: 'LinkTracker'
   }
 }
 
@@ -33,7 +33,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="GetAllMyLinks" />
+        <meta name="apple-mobile-web-app-title" content="LinkTracker" />
       </head>
       <body className="h-full bg-gray-50 antialiased">
         <Providers session={null}>

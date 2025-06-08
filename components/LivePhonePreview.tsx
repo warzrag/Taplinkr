@@ -97,37 +97,37 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
   }).slice(0, 4) // Limiter à 4 liens max pour l'affichage
 
   return (
-    <div className="w-80 p-8 flex items-center justify-center h-full"
+    <div className="w-full xl:w-80 p-8 flex items-center justify-center h-full relative z-10"
     >
       <div className="relative">
         {/* iPhone Frame */}
-        <div className="w-[300px] h-[620px] bg-gradient-to-b from-gray-800 to-gray-900 rounded-[40px] p-2 shadow-2xl border border-gray-700">
+        <div className="w-[300px] h-[620px] bg-gradient-to-b from-gray-700 to-gray-800 rounded-[40px] p-2 shadow-2xl border border-gray-600">
           {/* Camera Notch */}
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-black rounded-full z-30 flex items-center justify-center">
-            <div className="w-12 h-3 bg-gray-800 rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-gray-600 rounded-full mr-2"></div>
-              <div className="w-6 h-1 bg-gray-700 rounded-full"></div>
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-gray-900 rounded-full z-30 flex items-center justify-center">
+            <div className="w-12 h-3 bg-gray-700 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-gray-500 rounded-full mr-2"></div>
+              <div className="w-6 h-1 bg-gray-600 rounded-full"></div>
             </div>
           </div>
           
           {/* Screen */}
-          <div className="w-full h-full bg-black rounded-[32px] overflow-hidden relative border border-gray-600">
+          <div className="w-full h-full bg-white rounded-[32px] overflow-hidden relative border border-gray-200">
             {/* Status Bar */}
             <div className="absolute top-8 left-0 right-0 h-8 flex items-center justify-between px-6 text-white text-xs z-20">
               <div className="flex items-center space-x-1">
                 <span className="font-semibold">9:41</span>
                 <div className="flex items-center ml-2">
-                  <div className="w-1 h-1 bg-white rounded-full"></div>
-                  <div className="w-2 h-1 bg-white rounded-full ml-1"></div>
-                  <div className="w-3 h-1 bg-white rounded-full ml-1"></div>
-                  <div className="w-3 h-1 bg-white rounded-full ml-1"></div>
+                  <div className="w-1 h-1 bg-black rounded-full"></div>
+                  <div className="w-2 h-1 bg-black rounded-full ml-1"></div>
+                  <div className="w-3 h-1 bg-black rounded-full ml-1"></div>
+                  <div className="w-3 h-1 bg-black rounded-full ml-1"></div>
                 </div>
               </div>
               <div className="flex items-center space-x-1">
-                <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 fill-black" viewBox="0 0 24 24">
                   <path d="M2 17h20v2H2zm1.15-4.05L4 11.47l.85 1.48L3.3 14.43l1.55.27.85-1.48zm3.7-6.42L8 5.05l1.15 1.48L10.7 5.8l-.85 1.48L11.4 8.76 10.25 10.24 8 8zm8 0L16 5.05l1.15 1.48L18.7 5.8l-.85 1.48L19.4 8.76 18.25 10.24 16 8zm3.7 6.42L20 11.47l.85 1.48 1.55-.27-.85 1.48 1.55.27L21.7 15.9 20 14.43z"/>
                 </svg>
-                <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 fill-black" viewBox="0 0 24 24">
                   <path d="M15.67 4H14V2c0-1.1-.9-2-2-2s-2 .9-2 2v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/>
                 </svg>
               </div>
@@ -151,8 +151,7 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500" />
               )}
-              {/* Dark overlay */}
-              <div className="absolute inset-0 bg-black/40" />
+              {/* No overlay - full image brightness */}
             </div>
 
             {/* Content */}
@@ -173,19 +172,19 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
                   </div>
                 )}
                 
-                <h1 className="text-white text-2xl font-bold mb-1 drop-shadow-lg">
+                <h1 className="text-white text-2xl font-bold mb-1" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                   {displayableLinks[0]?.title || user?.name || user?.username || 'Laura'}
                 </h1>
                 {(displayableLinks[0]?.description || user?.bio || 'gratuit pour les prochaines 24h') && (
-                  <p className="text-white/90 text-sm drop-shadow-md">
+                  <p className="text-white/95 text-sm" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
                     {displayableLinks[0]?.description || user?.bio || 'gratuit pour les prochaines 24h'}
                   </p>
                 )}
                 
                 {/* Instagram handle */}
                 <div className="flex items-center justify-center mt-2">
-                  <Instagram className="w-4 h-4 text-white mr-1" />
-                  <span className="text-white/90 text-sm">@{user?.username || 'laura'}</span>
+                  <Instagram className="w-4 h-4 text-white mr-1" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))' }} />
+                  <span className="text-white/95 text-sm" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>@{user?.username || 'laura'}</span>
                 </div>
               </motion.div>
 
@@ -258,39 +257,28 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
                   <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
                     <div className="w-2 h-2 bg-gray-900 rounded-full" />
                   </div>
-                  <span className="text-white text-xs font-medium">GetAllMyLinks</span>
+                  <span className="text-white text-xs font-medium" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>LinkTracker</span>
                 </div>
               </motion.div>
             </div>
 
             {/* Home indicator */}
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/60 rounded-full" />
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-400 rounded-full" />
             
             {/* Side Buttons */}
-            <div className="absolute left-0 top-20 w-1 h-8 bg-gray-700 rounded-r-full"></div>
-            <div className="absolute left-0 top-32 w-1 h-12 bg-gray-700 rounded-r-full"></div>
-            <div className="absolute left-0 top-48 w-1 h-12 bg-gray-700 rounded-r-full"></div>
+            <div className="absolute left-0 top-20 w-1 h-8 bg-gray-600 rounded-r-full"></div>
+            <div className="absolute left-0 top-32 w-1 h-12 bg-gray-600 rounded-r-full"></div>
+            <div className="absolute left-0 top-48 w-1 h-12 bg-gray-600 rounded-r-full"></div>
             
             {/* Right side button */}
-            <div className="absolute right-0 top-28 w-1 h-16 bg-gray-700 rounded-l-full"></div>
+            <div className="absolute right-0 top-28 w-1 h-16 bg-gray-600 rounded-l-full"></div>
           </div>
         </div>
 
-        {/* Shine effect */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-[40px] pointer-events-none"
-          animate={{ x: [-320, 320] }}
-          transition={{ 
-            duration: 4,
-            repeat: Infinity,
-            repeatDelay: 8,
-            ease: 'easeInOut'
-          }}
-        />
 
         {/* Live indicator */}
         <motion.div
-          className="absolute -top-2 -right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center space-x-1"
+          className="absolute -top-2 -right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center space-x-1 z-10"
           animate={{ 
             scale: [1, 1.1, 1],
           }}

@@ -148,7 +148,7 @@ export default function ShieldPage({ link }: ShieldPageProps) {
             <div className="border-t border-gray-200 pt-6 mt-6">
               <div className="flex items-center space-x-3 text-sm text-gray-500">
                 <Shield className="w-4 h-4" />
-                <span>Protégé par GetAllMyLinks Shield</span>
+                <span>Protégé par LinkTracker Shield</span>
               </div>
             </div>
           </div>

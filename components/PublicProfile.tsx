@@ -264,7 +264,7 @@ export default function PublicProfile({ user }: PublicProfileProps) {
             <div className="w-6 h-6 bg-white/20 rounded flex items-center justify-center">
               <span className="text-xs font-bold">G</span>
             </div>
-            <span>Créé avec GetAllMyLinks</span>
+            <span>Créé avec LinkTracker</span>
           </div>
         </div>
       </div>

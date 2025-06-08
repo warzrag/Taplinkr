@@ -39,7 +39,12 @@
       "Bash(gh pr list:*)",
       "Bash(npx ts-node:*)",
       "WebFetch(domain:linktr.ee)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(curl:*)",
+      "Bash(tree:*)",
+      "Bash(sqlite3:*)",
+      "Bash(sed:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

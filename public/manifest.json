@@ -1,7 +1,7 @@
 {
-  "name": "GetAllMyLinks",
-  "short_name": "GAML",
-  "description": "Create and manage your personalized link page",
+  "name": "LinkTracker",
+  "short_name": "LinkTracker",
+  "description": "Smart link management and analytics platform",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -61,8 +61,14 @@ export default function FileUpload({
       }
 
       const uploadedFile = await response.json()
+      console.log('📤 FileUpload - Fichier uploadé:', uploadedFile)
       setUploadedFile(uploadedFile)
-      onFileUploaded?.(uploadedFile)
+      
+      if (onFileUploaded) {
+        console.log('📞 FileUpload - Appel du callback onFileUploaded')
+        onFileUploaded(uploadedFile)
+      }
+      
       toast.success('File uploaded successfully!')
       
     } catch (error) {
