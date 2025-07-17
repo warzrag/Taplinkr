@@ -61,17 +61,30 @@ export default function EditFolderModal({ isOpen, folder, onClose, onSave }: Edi
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const handleSave = () => {
+    console.log('📁 [EDIT_FOLDER_MODAL] Bouton Créer/Enregistrer cliqué')
+    console.log('📁 [EDIT_FOLDER_MODAL] Données du formulaire:', {
+      name: name,
+      description: description,
+      icon: selectedIcon,
+      color: selectedColor,
+      isNewFolder: !folder
+    })
+    
     if (!name.trim()) {
+      console.log('❌ [EDIT_FOLDER_MODAL] Erreur: nom vide')
       toast.error('Le nom du dossier est requis')
       return
     }
 
-    onSave({
+    const folderData = {
       name: name.trim(),
       description: description.trim() || null,
       icon: selectedIcon,
       color: selectedColor
-    })
+    }
+    
+    console.log('📁 [EDIT_FOLDER_MODAL] Appel de onSave avec:', folderData)
+    onSave(folderData)
 
     onClose()
   }

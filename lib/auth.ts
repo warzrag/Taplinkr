@@ -1,14 +1,32 @@
 import { NextAuthOptions } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
+import { nanoid } from 'nanoid'
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 jours
+    updateAge: 24 * 60 * 60, // 24 heures
   },
-  debug: true,
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 jours
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
+  },
+  debug: process.env.NODE_ENV === 'development',
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -49,25 +67,104 @@ export const authOptions: NextAuthOptions = {
             return null
           }
           
+          // Vérifier si l'email est vérifié
+          if (!user.emailVerified) {
+            console.log('❌ Email not verified')
+            throw new Error('EMAIL_NOT_VERIFIED')
+          }
+          
           console.log('✅ Auth successful for:', user.email)
           return {
             id: user.id,
             email: user.email,
             name: user.name,
-            username: user.username
+            username: user.username,
+            role: user.role,
+            plan: user.plan,
+            planExpiresAt: user.planExpiresAt
           }
         } catch (error) {
           console.error('❌ Auth error:', error)
           return null
         }
       }
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     })
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Si c'est une connexion Google
+      if (account?.provider === 'google') {
+        const email = user.email!
+        
+        try {
+          // Chercher si l'utilisateur existe déjà
+          let dbUser = await prisma.user.findUnique({
+            where: { email }
+          })
+
+          if (!dbUser) {
+            // Créer un nouvel utilisateur
+            const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
+            let username = baseUsername
+            let counter = 1
+
+            while (await prisma.user.findUnique({ where: { username } })) {
+              username = `${baseUsername}${counter}`
+              counter++
+            }
+
+            dbUser = await prisma.user.create({
+              data: {
+                email,
+                name: user.name || email.split('@')[0],
+                username,
+                image: user.image,
+                emailVerified: true, // Google vérifie déjà l'email
+                password: '', // Pas de mot de passe pour OAuth
+                role: 'user',
+                plan: 'free'
+              }
+            })
+          } else {
+            // Mettre à jour l'image si elle a changé
+            if (user.image && user.image !== dbUser.image) {
+              await prisma.user.update({
+                where: { id: dbUser.id },
+                data: { 
+                  image: user.image,
+                  emailVerified: true // S'assurer que l'email est vérifié
+                }
+              })
+            }
+          }
+
+          // Ajouter les infos dans user pour le callback JWT
+          user.id = dbUser.id
+          ;(user as any).username = dbUser.username
+          ;(user as any).role = dbUser.role
+          ;(user as any).plan = dbUser.plan
+          ;(user as any).planExpiresAt = dbUser.planExpiresAt
+          
+          return true
+        } catch (error) {
+          console.error('Erreur lors de la connexion Google:', error)
+          return false
+        }
+      }
+      
+      return true
+    },
     jwt: async ({ token, user }) => {
       if (user) {
         token.id = user.id
         token.username = (user as any).username
+        token.role = (user as any).role
+        token.plan = (user as any).plan
+        token.planExpiresAt = (user as any).planExpiresAt
       }
       return token
     },
@@ -75,6 +172,9 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string
         session.user.username = token.username as string
+        session.user.role = token.role as string
+        session.user.plan = token.plan as string
+        session.user.planExpiresAt = token.planExpiresAt as Date | null
       }
       return session
     }

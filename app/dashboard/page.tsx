@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { motion } from 'framer-motion'
-import { Plus, Folder as FolderIcon, Link2, BarChart3 } from 'lucide-react'
+import { Plus, Folder as FolderIcon, Link2, BarChart3, Crown, Shield } from 'lucide-react'
 import CreateLinkModal from '@/components/CreateLinkModal'
 import Link from 'next/link'
 import EditLinkModal from '@/components/EditLinkModal'
@@ -17,6 +17,7 @@ import DragDropDashboard from '@/components/DragDropDashboard'
 import EditFolderModal from '@/components/EditFolderModal'
 import { useLinkUpdate } from '@/contexts/LinkUpdateContext'
 import { useProfile } from '@/contexts/ProfileContext'
+import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 
 interface Folder {
@@ -36,9 +37,8 @@ export default function Dashboard() {
   const { data: session, status } = useSession()
   const { updateLinkInPreview } = useLinkUpdate()
   const { profile: userProfile } = useProfile()
-  const [links, setLinks] = useState<LinkType[]>([])
+  const { links: contextLinks, folders: contextFolders, loading: contextLoading, refreshLinks, refreshFolders } = useLinks()
   const [folders, setFolders] = useState<Folder[]>([])
-  const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
@@ -49,26 +49,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      fetchLinks()
+      refreshLinks()
       fetchFolders()
     }
-  }, [status])
+  }, [status]) // refreshLinks retiré des dépendances pour éviter la boucle infinie
 
-  const fetchLinks = async () => {
-    try {
-      const response = await fetch('/api/links')
-      if (response.ok) {
-        const data = await response.json()
-        // Filtrer seulement les liens sans dossier
-        const linksWithoutFolder = data.filter((link: LinkType) => !link.folderId)
-        setLinks(linksWithoutFolder)
-      }
-    } catch (error) {
-      toast.error('Erreur lors du chargement des liens')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Filtrer les liens sans dossier depuis le contexte
+  const links = contextLinks.filter(link => !link.folderId)
 
   const fetchFolders = async () => {
     try {
@@ -82,8 +69,9 @@ export default function Dashboard() {
     }
   }
 
-  const handleLinksReorder = (newLinks: LinkType[]) => {
-    setLinks(newLinks)
+  const handleLinksReorder = async (newLinks: LinkType[]) => {
+    // Mettre à jour l'ordre dans la base de données
+    // Pour l'instant, on ne fait rien car le contexte gère déjà les liens
   }
 
   const handleToggle = async (linkId: string, isActive: boolean) => {
@@ -95,9 +83,7 @@ export default function Dashboard() {
       })
       
       if (response.ok) {
-        setLinks(prev => prev.map(link => 
-          link.id === linkId ? { ...link, isActive } : link
-        ))
+        await refreshLinks()
         toast.success(isActive ? 'Lien activé' : 'Lien désactivé')
       }
     } catch (error) {
@@ -118,7 +104,7 @@ export default function Dashboard() {
       })
       
       if (response.ok) {
-        setLinks(prev => prev.filter(link => link.id !== linkId))
+        await refreshLinks()
         toast.success('Lien supprimé')
       }
     } catch (error) {
@@ -136,7 +122,7 @@ export default function Dashboard() {
       
       if (response.ok) {
         // Recharger les liens et dossiers
-        fetchLinks()
+        await refreshLinks()
         fetchFolders()
         toast.success(folderId ? 'Lien déplacé dans le dossier' : 'Lien sorti du dossier')
       }
@@ -146,6 +132,9 @@ export default function Dashboard() {
   }
 
   const handleSaveFolder = async (folderData: Partial<Folder>) => {
+    console.log('📁 [DASHBOARD] handleSaveFolder appelé avec:', folderData)
+    console.log('📁 [DASHBOARD] Mode:', editingFolder ? 'MODIFICATION' : 'CRÉATION')
+    
     try {
       if (editingFolder) {
         // Mise à jour d'un dossier existant
@@ -161,13 +150,26 @@ export default function Dashboard() {
           setEditingFolder(null)
           setShowEditFolderModal(false)
           toast.success('Dossier mis à jour')
+        } else {
+          const errorData = await response.json()
+          console.error('Erreur API mise à jour dossier:', errorData)
+          toast.error(errorData.error || 'Erreur lors de la mise à jour du dossier')
         }
       } else {
         // Création d'un nouveau dossier
+        console.log('📁 [DASHBOARD] Envoi POST vers /api/folders')
+        console.log('📁 [DASHBOARD] Body de la requête:', JSON.stringify(folderData))
+        
         const response = await fetch('/api/folders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(folderData)
+        })
+        
+        console.log('📁 [DASHBOARD] Réponse reçue:', {
+          status: response.status,
+          ok: response.ok,
+          statusText: response.statusText
         })
 
         if (response.ok) {
@@ -175,14 +177,19 @@ export default function Dashboard() {
           setFolders([...folders, newFolder])
           setShowEditFolderModal(false)
           toast.success('Dossier créé')
+        } else {
+          const errorData = await response.json()
+          console.error('Erreur API création dossier:', errorData)
+          toast.error(errorData.error || 'Erreur lors de la création du dossier')
         }
       }
     } catch (error) {
-      toast.error(editingFolder ? 'Erreur lors de la mise à jour' : 'Erreur lors de la création')
+      console.error('Erreur réseau:', error)
+      toast.error(editingFolder ? 'Erreur réseau lors de la mise à jour' : 'Erreur réseau lors de la création')
     }
   }
 
-  if (loading) {
+  if (contextLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-600">Chargement...</div>
@@ -200,6 +207,33 @@ export default function Dashboard() {
             <p className="text-sm sm:text-base text-gray-600">Gérez vos liens et consultez vos statistiques</p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+            {/* Bouton Admin - Visible uniquement pour les admins */}
+            {(session?.user as any)?.role === 'admin' && (
+              <Link href="/admin/users">
+                <motion.button
+                  className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Shield className="w-4 h-4" />
+                  <span>Admin</span>
+                </motion.button>
+              </Link>
+            )}
+            
+            {/* Bouton Passer Pro - Masqué pour les admins et les utilisateurs Pro/Business */}
+            {(session?.user as any)?.plan === 'free' && (
+              <Link href="/pricing">
+                <motion.button
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Crown className="w-4 h-4" />
+                  <span>Passer Pro</span>
+                </motion.button>
+              </Link>
+            )}
             <Link href="/dashboard/folders-analytics">
               <motion.button
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
@@ -229,14 +263,19 @@ export default function Dashboard() {
           folders={folders}
           unorganizedLinks={links}
           onFoldersChange={setFolders}
-          onLinksChange={setLinks}
+          onLinksChange={async () => {
+            // Ne rien faire car les liens sont gérés par le contexte
+            await refreshLinks()
+          }}
           onToggleLink={handleToggle}
           onEditLink={handleEdit}
           onDeleteLink={handleDelete}
           onMoveLink={handleMoveLink}
           onCreateFolder={() => {
+            console.log('📁 [DASHBOARD] Bouton créer dossier cliqué')
             setShowEditFolderModal(true)
             setEditingFolder(null)
+            console.log('📁 [DASHBOARD] Modal EditFolderModal ouvert avec editingFolder=null')
           }}
           onEditFolder={(folder) => {
             setEditingFolder(folder)
@@ -251,7 +290,7 @@ export default function Dashboard() {
               })
               
               if (response.ok) {
-                fetchLinks()
+                await refreshLinks()
                 fetchFolders()
                 toast.success('Dossier supprimé')
               }
@@ -289,9 +328,9 @@ export default function Dashboard() {
           onClose={() => {
             setShowCreateModal(false)
           }}
-          onSuccess={() => {
+          onSuccess={async () => {
             setShowCreateModal(false)
-            fetchLinks()
+            await refreshLinks()
           }}
         />
       )}
@@ -306,11 +345,11 @@ export default function Dashboard() {
               setEditingLink(null)
               setLiveEditingLink(null)
             }}
-            onSuccess={() => {
+            onSuccess={async () => {
               setShowEditModal(false)
               setEditingLink(null)
               setLiveEditingLink(null)
-              fetchLinks()
+              await refreshLinks()
             }}
             onLiveUpdate={(linkData) => {
               setLiveEditingLink(linkData as LinkType)

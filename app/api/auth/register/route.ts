@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { nanoid } from 'nanoid'
+// Utiliser Resend si la clé API est configurée, sinon utiliser nodemailer
+const emailModule = process.env.RESEND_API_KEY 
+  ? require('@/lib/email-resend')
+  : require('@/lib/email')
+const { sendEmail, getVerificationEmailTemplate } = emailModule
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,6 +45,11 @@ export async function POST(request: NextRequest) {
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 12)
 
+    // Générer un token de vérification unique
+    const emailVerificationToken = nanoid(32)
+    const emailVerificationExpiry = new Date()
+    emailVerificationExpiry.setHours(emailVerificationExpiry.getHours() + 24) // Expire dans 24h
+
     // Créer l'utilisateur
     const user = await prisma.user.create({
       data: {
@@ -47,16 +57,29 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         name: name || email.split('@')[0],
         username,
+        emailVerified: false,
+        emailVerificationToken,
+        emailVerificationExpiry
       }
     })
 
+    // Envoyer l'email de vérification
+    const verificationUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/verify-email?token=${emailVerificationToken}`
+    
+    await sendEmail({
+      to: email,
+      subject: 'Vérifiez votre compte LinkTracker',
+      html: getVerificationEmailTemplate(user.name || username, verificationUrl)
+    })
+
     // Retourner l'utilisateur sans le mot de passe
-    const { password: _, ...userWithoutPassword } = user
+    const { password: _, emailVerificationToken: __, ...userWithoutSensitiveData } = user
 
     return NextResponse.json(
       { 
-        message: 'Utilisateur créé avec succès',
-        user: userWithoutPassword 
+        message: 'Compte créé ! Vérifiez votre email pour activer votre compte.',
+        user: userWithoutSensitiveData,
+        requiresVerification: true
       },
       { status: 201 }
     )

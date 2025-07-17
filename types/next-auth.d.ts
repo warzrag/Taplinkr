@@ -7,6 +7,9 @@ declare module 'next-auth' {
       email: string
       name?: string | null
       username: string
+      role: string
+      plan: string
+      planExpiresAt?: Date | null
     }
   }
 
@@ -15,5 +18,8 @@ declare module 'next-auth' {
     email: string
     name?: string | null
     username: string
+    role: string
+    plan: string
+    planExpiresAt?: Date | null
   }
 }

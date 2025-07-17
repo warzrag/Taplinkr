@@ -10,8 +10,12 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/admin') ||
     pathname.startsWith('/link/') ||
+    pathname.startsWith('/redirect/') ||
     pathname.startsWith('/settings') ||
+    pathname.startsWith('/pricing') ||
+    pathname.startsWith('/checkout') ||
     pathname.includes('.') ||
     pathname === '/' ||
     pathname === '/favicon.ico'

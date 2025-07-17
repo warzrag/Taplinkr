@@ -16,6 +16,15 @@ model User {
   image                   String?
   bio                     String?
   bannerImage             String?
+  role                    String                  @default("user") // user, admin
+  plan                    String                  @default("free") // free, pro, business
+  planExpiresAt           DateTime?
+  emailVerified           Boolean                 @default(false)
+  emailVerificationToken  String?                 @unique
+  emailVerificationExpiry DateTime?
+  banned                  Boolean                 @default(false)
+  bannedAt                DateTime?
+  bannedReason            String?
   theme                   String                  @default("gradient")
   primaryColor            String                  @default("#3b82f6")
   secondaryColor          String                  @default("#8b5cf6")
@@ -66,6 +75,8 @@ model Link {
   backgroundColor    String?
   textColor          String?
   isActive           Boolean             @default(true)
+  isDirect           Boolean             @default(false)
+  directUrl          String?
   order              Int                 @default(0)
   clicks             Int                 @default(0)
   createdAt          DateTime            @default(now())

@@ -28,6 +28,8 @@ import {
   X
 } from 'lucide-react'
 import { HexColorPicker } from 'react-colorful'
+import ThemePicker from '@/components/ThemePicker'
+import { themes as predefinedThemes, Theme } from '@/lib/themes'
 import Link from 'next/link'
 import FileUpload from '@/components/upload/FileUpload'
 import { useProfile } from '@/contexts/ProfileContext'
@@ -43,6 +45,9 @@ interface ProfileData {
   primaryColor: string
   secondaryColor: string
   backgroundImage: string
+  backgroundGradient?: string
+  backgroundColor?: string
+  selectedThemeId?: string
   twitterUrl: string
   instagramUrl: string
   linkedinUrl: string
@@ -100,6 +105,9 @@ export default function Settings() {
     primaryColor: '#3b82f6',
     secondaryColor: '#8b5cf6',
     backgroundImage: '',
+    backgroundGradient: '',
+    backgroundColor: '',
+    selectedThemeId: '',
     twitterUrl: '',
     instagramUrl: '',
     linkedinUrl: '',
@@ -672,6 +680,26 @@ export default function Settings() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Thèmes prédéfinis */}
+          <div className="bg-white rounded-lg shadow-sm border p-6 lg:col-span-2">
+            <ThemePicker 
+              currentTheme={profile.selectedThemeId}
+              onThemeSelect={(theme: Theme) => {
+                // Appliquer les styles du thème
+                handleInputChange('theme', theme.styles.backgroundType)
+                if (theme.styles.backgroundType === 'gradient') {
+                  handleInputChange('backgroundGradient', theme.styles.backgroundGradient)
+                } else if (theme.styles.backgroundType === 'solid') {
+                  handleInputChange('backgroundColor', theme.styles.backgroundColor)
+                }
+                handleInputChange('primaryColor', theme.styles.primaryColor)
+                handleInputChange('secondaryColor', theme.styles.secondaryColor)
+                handleInputChange('selectedThemeId', theme.id)
+                toast.success(`Thème "${theme.name}" appliqué!`)
+              }}
+            />
           </div>
 
           {/* Réseaux sociaux */}

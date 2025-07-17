@@ -328,6 +328,13 @@ export default function DragDropDashboard({
       return
     }
 
+    console.log('🚀 [DragDropDashboard] Création dossier avec:', {
+      name: newFolderName.trim(),
+      parentId: parentId || createInParent || 'null',
+      createInParent,
+      parentId
+    })
+
     try {
       const response = await fetch('/api/folders', {
         method: 'POST',
@@ -338,6 +345,13 @@ export default function DragDropDashboard({
           icon: '📁',
           parentId: parentId || createInParent,
         })
+      })
+      
+      console.log('📡 [DragDropDashboard] Réponse API:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers)
       })
       
       if (response.ok) {
@@ -378,9 +392,12 @@ export default function DragDropDashboard({
         setCreateInParent(null)
         toast.success('Dossier créé avec succès')
       } else {
-        toast.error('Erreur lors de la création du dossier')
+        const errorData = await response.json()
+        console.error('❌ [DragDropDashboard] Erreur API:', errorData)
+        toast.error(errorData.error || 'Erreur lors de la création du dossier')
       }
     } catch (error) {
+      console.error('❌ [DragDropDashboard] Erreur catch:', error)
       toast.error('Erreur lors de la création du dossier')
     }
   }
@@ -725,7 +742,7 @@ export default function DragDropDashboard({
                     />
                     <div className="flex space-x-2 sm:space-x-3">
                       <motion.button
-                        onClick={handleCreateFolder}
+                        onClick={() => handleCreateFolder()}
                         className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}

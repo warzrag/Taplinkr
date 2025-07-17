@@ -1,5 +1,6 @@
 import Providers from '@/components/Providers'
 import { Toaster } from 'react-hot-toast'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 import './globals.css'
 
 export const metadata = {
@@ -35,17 +36,19 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="LinkTracker" />
       </head>
-      <body className="h-full bg-gray-50 antialiased">
-        <Providers session={null}>
-          {children}
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              className: 'bg-white border border-gray-200 text-gray-900',
-              duration: 4000,
-            }}
-          />
-        </Providers>
+      <body className="h-full bg-gray-50 dark:bg-gray-900 antialiased transition-colors duration-300">
+        <ThemeProvider>
+          <Providers>
+            {children}
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                className: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100',
+                duration: 4000,
+              }}
+            />
+          </Providers>
+        </ThemeProvider>
         
         {/* Service Worker Registration */}
         <script

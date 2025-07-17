@@ -45,7 +45,8 @@
       "Bash(sqlite3:*)",
       "Bash(sed:*)",
       "Bash(git add:*)",
-      "WebFetch(domain:getallmylinks.com)"
+      "WebFetch(domain:getallmylinks.com)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }

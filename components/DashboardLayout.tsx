@@ -7,10 +7,8 @@ import {
   User, 
   LogOut,
   BarChart3,
-  Palette,
   Upload,
   Shield,
-  Bell,
   Settings,
   Menu,
   X
@@ -19,6 +17,7 @@ import LivePhonePreview from '@/components/LivePhonePreview'
 import { LinkUpdateProvider } from '@/contexts/LinkUpdateContext'
 import { ProfileProvider } from '@/contexts/ProfileContext'
 import { LinksProvider } from '@/contexts/LinksContext'
+import ThemeToggle from '@/components/ThemeToggle'
 import { useState, useEffect } from 'react'
 
 interface DashboardLayoutProps {
@@ -66,10 +65,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' },
-    { icon: Palette, label: 'Templates', href: '/dashboard/templates' },
     { icon: Upload, label: 'Fichiers', href: '/dashboard/files' },
     { icon: Shield, label: 'Protection', href: '/dashboard/protection' },
-    { icon: Bell, label: 'Notifications', href: '/dashboard/notifications' },
     { icon: Settings, label: 'Paramètres', href: '/settings' },
   ]
 
@@ -81,27 +78,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex transition-colors duration-300">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 dark:bg-black/70 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <div className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-300 ease-in-out
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">G</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">LinkTracker</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">LinkTracker</span>
           </div>
         </div>
 
@@ -116,8 +113,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => router.push(item.href)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
                   active 
-                    ? 'bg-blue-50 text-blue-600 border border-blue-200' 
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800' 
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -151,21 +148,34 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
-        {/* Mobile header */}
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">G</span>
+        {/* Header with Theme Toggle */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="lg:hidden flex items-center space-x-2 ml-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">G</span>
+              </div>
+              <span className="font-bold text-gray-900 dark:text-gray-100">LinkTracker</span>
             </div>
-            <span className="font-bold text-gray-900">LinkTracker</span>
           </div>
-          <div className="w-10" /> {/* Spacer pour centrer le logo */}
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <div className="hidden lg:flex items-center space-x-3">
+              <span className="text-sm text-gray-600 dark:text-gray-300">{session?.user?.email}</span>
+              <button
+                onClick={() => signOut()}
+                className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
         </div>
 
         <ProfileProvider>

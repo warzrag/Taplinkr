@@ -26,6 +26,9 @@ import {
   Sparkles
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import SocialHeader from './SocialHeader'
+import EmbedLink from './EmbedLink'
+import QRCodeGenerator from './QRCodeGenerator'
 
 interface MultiLink {
   id: string
@@ -306,11 +309,24 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
           )}
           
           {/* Instagram handle */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center mb-4">
             <Instagram className="w-4 h-4 text-white mr-1" />
             <span className="text-white/90 text-sm">@{link.user.username}</span>
           </div>
         </motion.div>
+
+        {/* Social Icons Header */}
+        <SocialHeader 
+          socials={{
+            twitterUrl: link.user.twitterUrl,
+            instagramUrl: link.user.instagramUrl,
+            linkedinUrl: link.user.linkedinUrl,
+            youtubeUrl: link.user.youtubeUrl,
+            tiktokUrl: link.user.tiktokUrl
+          }}
+          style="glass"
+          size="md"
+        />
 
         {/* Links Section */}
         <div className="w-full max-w-sm space-y-4">
@@ -327,80 +343,40 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <motion.button
+                    <motion.div
                       animate={animationProps.animate}
                       transition={animationProps.animate?.transition}
-                      onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
-                      className={`w-full backdrop-blur-md p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${getBorderRadiusClass(link.borderRadius)}`}
-                      style={{
-                        backgroundColor: link.backgroundColor || multiLink.backgroundColor || 'rgba(255, 255, 255, 0.9)',
-                        color: link.textColor || multiLink.textColor || '#1f2937'
-                      }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                >
-                <div className="flex items-center">
-                  {/* Icon */}
-                  <div className="mr-3 text-2xl">
-                    {multiLink.icon || '🔗'}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 text-left">
-                    <h3 className="font-bold text-sm" style={{ color: 'inherit' }}>
-                      {multiLink.title}
-                    </h3>
-                    {multiLink.description && (
-                      <p className="text-xs mt-1 opacity-80" style={{ color: 'inherit' }}>
-                        {multiLink.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Arrow */}
-                  <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
-                </div>
-                    </motion.button>
+                    >
+                      <EmbedLink
+                        url={multiLink.url}
+                        title={multiLink.title}
+                        description={multiLink.description}
+                        icon={multiLink.icon}
+                        onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
+                        className={`w-full backdrop-blur-md p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${getBorderRadiusClass(link.borderRadius)}`}
+                        style={{
+                          backgroundColor: link.backgroundColor || multiLink.backgroundColor || 'rgba(255, 255, 255, 0.9)',
+                          color: link.textColor || multiLink.textColor || '#1f2937'
+                        }}
+                      />
+                    </motion.div>
                   </motion.div>
                 )
               } else {
                 return (
-                  <motion.button
+                  <EmbedLink
                     key={multiLink.id}
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
+                    url={multiLink.url}
+                    title={multiLink.title}
+                    description={multiLink.description}
+                    icon={multiLink.icon}
                     onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
                     className={`w-full backdrop-blur-md p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${getBorderRadiusClass(link.borderRadius)}`}
                     style={{
                       backgroundColor: link.backgroundColor || multiLink.backgroundColor || 'rgba(255, 255, 255, 0.9)',
                       color: link.textColor || multiLink.textColor || '#1f2937'
                     }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="flex items-center">
-                      {/* Icon */}
-                      <div className="mr-3 text-2xl">
-                        {multiLink.icon || '🔗'}
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 text-left">
-                        <h3 className="font-bold text-sm" style={{ color: 'inherit' }}>
-                          {multiLink.title}
-                        </h3>
-                        {multiLink.description && (
-                          <p className="text-xs mt-1 opacity-80" style={{ color: 'inherit' }}>
-                            {multiLink.description}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Arrow */}
-                      <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
-                    </div>
-                  </motion.button>
+                  />
                 )
               }
             })
@@ -412,15 +388,40 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer with Actions */}
         <motion.div
-          className="mt-8 flex items-center justify-center"
+          className="mt-8 space-y-4"
         >
-          <div className="bg-white/20 backdrop-blur-md rounded-full px-4 py-2 flex items-center space-x-2">
-            <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-gray-900 rounded-full" />
+          {/* Action Buttons */}
+          <div className="flex items-center justify-center gap-3">
+            {/* Share Button */}
+            <motion.button
+              onClick={handleShare}
+              className="p-3 bg-white/20 backdrop-blur-md rounded-2xl hover:bg-white/30 transition-all duration-300 group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Share2 className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
+            </motion.button>
+            
+            {/* QR Code Generator */}
+            <QRCodeGenerator 
+              url={typeof window !== 'undefined' ? window.location.href : ''}
+              title={`${link.user.name || link.user.username} - ${link.title}`}
+              logo={link.user.image}
+              primaryColor={link.user.primaryColor}
+              secondaryColor={link.user.secondaryColor}
+            />
+          </div>
+          
+          {/* LinkTracker Badge */}
+          <div className="flex items-center justify-center">
+            <div className="bg-white/20 backdrop-blur-md rounded-full px-4 py-2 flex items-center space-x-2">
+              <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                <div className="w-2 h-2 bg-gray-900 rounded-full" />
+              </div>
+              <span className="text-white text-xs font-medium">LinkTracker</span>
             </div>
-            <span className="text-white text-xs font-medium">LinkTracker</span>
           </div>
         </motion.div>
       </div>

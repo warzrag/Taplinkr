@@ -16,6 +16,7 @@ import {
   Calendar
 } from 'lucide-react'
 import Link from 'next/link'
+import { useLinks } from '@/contexts/LinksContext'
 
 interface FolderAnalytics {
   id: string
@@ -43,6 +44,7 @@ interface FolderAnalytics {
 export default function FoldersAnalyticsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { links: contextLinks, folders: contextFolders } = useLinks()
   const [loading, setLoading] = useState(true)
   const [folders, setFolders] = useState<FolderAnalytics[]>([])
   const [unorganized, setUnorganized] = useState<FolderAnalytics | null>(null)
@@ -55,6 +57,62 @@ export default function FoldersAnalyticsPage() {
       fetchFoldersAnalytics()
     }
   }, [status, router])
+
+  // Mettre à jour les stats quand les liens du contexte changent
+  useEffect(() => {
+    if (contextLinks.length > 0 && folders.length > 0) {
+      // Recalculer les clics totaux avec les données en temps réel
+      const newTotalClicks = contextLinks.reduce((sum, link) => sum + (link.clicks || 0), 0)
+      setTotalClicks(newTotalClicks)
+      
+      // Mettre à jour les stats des dossiers
+      const updatedFolders = folders.map(folder => {
+        const folderLinks = contextLinks.filter(link => link.folderId === folder.id)
+        const folderClicks = folderLinks.reduce((sum, link) => sum + (link.clicks || 0), 0)
+        
+        return {
+          ...folder,
+          totalClicks: folderClicks,
+          directClicks: folderClicks,
+          topLinks: folderLinks
+            .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+            .slice(0, 3)
+            .map(link => ({
+              id: link.id,
+              title: link.title,
+              slug: link.slug,
+              clicks: link.clicks || 0,
+              icon: link.icon
+            }))
+        }
+      })
+      
+      setFolders(updatedFolders)
+      
+      // Mettre à jour les liens non organisés
+      if (unorganized) {
+        const unorganizedLinks = contextLinks.filter(link => !link.folderId)
+        const unorganizedClicks = unorganizedLinks.reduce((sum, link) => sum + (link.clicks || 0), 0)
+        
+        setUnorganized({
+          ...unorganized,
+          totalClicks: unorganizedClicks,
+          directClicks: unorganizedClicks,
+          linksCount: unorganizedLinks.length,
+          topLinks: unorganizedLinks
+            .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+            .slice(0, 3)
+            .map(link => ({
+              id: link.id,
+              title: link.title,
+              slug: link.slug,
+              clicks: link.clicks || 0,
+              icon: link.icon
+            }))
+        })
+      }
+    }
+  }, [contextLinks]) // folders.length retiré pour éviter les re-rendus inutiles
 
   const fetchFoldersAnalytics = async () => {
     try {

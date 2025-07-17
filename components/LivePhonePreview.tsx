@@ -237,17 +237,11 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
 
             {/* Background Image */}
             <div className="absolute inset-0">
-              {/* Priorité : image de couverture du lien, puis image utilisateur, puis dégradé */}
+              {/* Afficher uniquement l'image de couverture du lien si elle existe */}
               {displayableLinks[0]?.coverImage ? (
                 <img
                   src={displayableLinks[0].coverImage}
                   alt="Cover Image"
-                  className="w-full h-full object-cover"
-                />
-              ) : user?.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name || user.username || 'Profile'}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -264,10 +258,10 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
                 className="text-center mb-6"
               >
                 {/* Photo de profil */}
-                {(displayableLinks[0]?.profileImage || user?.image) && (
+                {displayableLinks[0]?.profileImage && (
                   <div className="flex justify-center mb-4">
                     <img
-                      src={displayableLinks[0]?.profileImage || user?.image}
+                      src={displayableLinks[0].profileImage}
                       alt="Profile"
                       className="w-24 h-24 object-cover rounded-full shadow-lg"
                     />

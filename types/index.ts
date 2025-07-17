@@ -25,6 +25,8 @@ export interface Link {
   backgroundColor?: string
   textColor?: string
   isActive: boolean
+  isDirect: boolean
+  directUrl?: string
   order: number
   clicks: number
   createdAt: string

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import AnalyticsCharts from '@/components/analytics/AnalyticsCharts'
 import AdvancedAnalytics from '@/components/analytics/AdvancedAnalytics'
+import { useLinks } from '@/contexts/LinksContext'
 
 interface FolderAnalytics {
   id: string
@@ -46,6 +47,7 @@ interface FolderAnalytics {
 export default function AnalyticsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { links: contextLinks, folders: contextFolders } = useLinks()
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [selectedLink, setSelectedLink] = useState<string | null>(null)
   const [linkAnalytics, setLinkAnalytics] = useState<any>(null)
@@ -65,6 +67,27 @@ export default function AnalyticsPage() {
       }
     }
   }, [status, router, view])
+
+  // Mettre à jour les stats quand les liens du contexte changent
+  useEffect(() => {
+    if (contextLinks.length > 0 && dashboardStats) {
+      // Calculer les stats mises à jour avec les données du contexte
+      const totalClicks = contextLinks.reduce((sum, link) => sum + (link.clicks || 0), 0)
+      const topLinks = [...contextLinks]
+        .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+        .slice(0, 10)
+        .map(link => ({
+          ...link,
+          _count: { analyticsEvents: link.clicks || 0 }
+        }))
+      
+      setDashboardStats(prev => ({
+        ...prev,
+        totalClicks,
+        topLinks
+      }))
+    }
+  }, [contextLinks])
 
   const fetchDashboardStats = async () => {
     try {
@@ -419,7 +442,7 @@ export default function AnalyticsPage() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Liens</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {dashboardStats.totalLinks}
+                      {contextLinks.length}
                     </p>
                   </div>
                 </div>
@@ -434,9 +457,9 @@ export default function AnalyticsPage() {
                     <TrendingUp className="w-6 h-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Clics (30j)</p>
+                    <p className="text-sm font-medium text-gray-600">Clics Totaux</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {dashboardStats.totalClicks}
+                      {contextLinks.reduce((sum, link) => sum + (link.clicks || 0), 0)}
                     </p>
                   </div>
                 </div>
@@ -517,7 +540,7 @@ export default function AnalyticsPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-gray-900 text-xl">
-                            {link._count?.analyticsEvents || 0}
+                            {link.clicks || link._count?.analyticsEvents || 0}
                           </p>
                           <p className="text-sm text-gray-500">clics</p>
                         </div>

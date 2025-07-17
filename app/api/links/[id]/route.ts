@@ -28,7 +28,9 @@ export async function PUT(
       borderRadius,
       backgroundColor,
       textColor,
-      multiLinks
+      multiLinks,
+      isDirect,
+      directUrl
     } = body
 
     // Vérifier que le lien appartient à l'utilisateur
@@ -79,7 +81,9 @@ export async function PUT(
         ...(borderRadius !== undefined && { borderRadius: borderRadius || null }),
         ...(backgroundColor !== undefined && { backgroundColor: backgroundColor || null }),
         ...(textColor !== undefined && { textColor: textColor || null }),
-        ...(isActive !== undefined && { isActive })
+        ...(isActive !== undefined && { isActive }),
+        ...(isDirect !== undefined && { isDirect }),
+        ...(directUrl !== undefined && { directUrl: directUrl || null })
       },
       include: {
         multiLinks: {

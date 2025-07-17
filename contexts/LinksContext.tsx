@@ -24,6 +24,7 @@ interface LinksContextType {
   refreshFolders: () => Promise<void>
   refreshAll: () => Promise<void>
   forceRefresh: () => void
+  incrementLinkClicks: (linkId: string) => void
 }
 
 const LinksContext = createContext<LinksContextType | undefined>(undefined)
@@ -82,6 +83,17 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     refreshAll()
   }
 
+  const incrementLinkClicks = (linkId: string) => {
+    console.log('📈 LinksContext - Incrémentation des clics pour:', linkId)
+    setLinks(prevLinks => 
+      prevLinks.map(link => 
+        link.id === linkId 
+          ? { ...link, clicks: (link.clicks || 0) + 1 }
+          : link
+      )
+    )
+  }
+
   useEffect(() => {
     refreshAll()
   }, [])
@@ -103,7 +115,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
       refreshLinks,
       refreshFolders,
       refreshAll,
-      forceRefresh
+      forceRefresh,
+      incrementLinkClicks
     }}>
       {children}
     </LinksContext.Provider>
