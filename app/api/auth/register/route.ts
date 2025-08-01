@@ -50,20 +50,21 @@ export async function POST(request: NextRequest) {
     const emailVerificationExpiry = new Date()
     emailVerificationExpiry.setHours(emailVerificationExpiry.getHours() + 24) // Expire dans 24h
 
-    // Créer l'utilisateur
+    // Créer l'utilisateur (temporairement avec email vérifié automatiquement)
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name: name || email.split('@')[0],
         username,
-        emailVerified: false,
+        emailVerified: true, // Temporairement activé automatiquement
         emailVerificationToken,
         emailVerificationExpiry
       }
     })
 
-    // Envoyer l'email de vérification
+    // Email désactivé temporairement pour le déploiement initial
+    /*
     const verificationUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/verify-email?token=${emailVerificationToken}`
     
     await sendEmail({
@@ -71,15 +72,16 @@ export async function POST(request: NextRequest) {
       subject: 'Vérifiez votre compte LinkTracker',
       html: getVerificationEmailTemplate(user.name || username, verificationUrl)
     })
+    */
 
     // Retourner l'utilisateur sans le mot de passe
     const { password: _, emailVerificationToken: __, ...userWithoutSensitiveData } = user
 
     return NextResponse.json(
       { 
-        message: 'Compte créé ! Vérifiez votre email pour activer votre compte.',
+        message: 'Compte créé avec succès !',
         user: userWithoutSensitiveData,
-        requiresVerification: true
+        requiresVerification: false // Email auto-vérifié temporairement
       },
       { status: 201 }
     )

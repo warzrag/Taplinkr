@@ -67,11 +67,13 @@ export const authOptions: NextAuthOptions = {
             return null
           }
           
-          // Vérifier si l'email est vérifié
+          // Vérification d'email temporairement désactivée
+          /*
           if (!user.emailVerified) {
             console.log('❌ Email not verified')
             throw new Error('EMAIL_NOT_VERIFIED')
           }
+          */
           
           console.log('✅ Auth successful for:', user.email)
           return {

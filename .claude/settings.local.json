@@ -59,6 +59,7 @@
       "Bash(git commit:*)",
       "Bash(cd:*)",
       "Bash(git fetch:*)",
+      "Bash(cd:*)",
       "Bash(cd:*)"
     ],
     "deny": []
