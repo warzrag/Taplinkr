@@ -56,7 +56,9 @@
       "WebFetch(domain:brandsnag.com)",
       "Bash(cd:*)",
       "Bash(cp:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(cd:*)",
+      "Bash(git fetch:*)"
     ],
     "deny": []
   }

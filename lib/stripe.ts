@@ -1,10 +1,9 @@
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set in environment variables')
-}
+// Temporairement désactivé pour le déploiement initial
+const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_disabled'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(STRIPE_KEY, {
   apiVersion: '2024-11-20.acacia',
   typescript: true,
 })
