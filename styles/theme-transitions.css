@@ -1,0 +1,73 @@
+/* Transitions professionnelles pour le changement de thème */
+
+/* Variables CSS pour la transition */
+:root {
+  --theme-transition-duration: 300ms;
+  --theme-transition-easing: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Transition ultra-fluide sur tous les éléments */
+.theme-transitioning * {
+  transition: 
+    background-color var(--theme-transition-duration) var(--theme-transition-easing),
+    border-color var(--theme-transition-duration) var(--theme-transition-easing),
+    color var(--theme-transition-duration) var(--theme-transition-easing),
+    box-shadow var(--theme-transition-duration) var(--theme-transition-easing),
+    fill var(--theme-transition-duration) var(--theme-transition-easing),
+    stroke var(--theme-transition-duration) var(--theme-transition-easing) !important;
+}
+
+/* Transitions pour les gradients et backgrounds complexes */
+.theme-transitioning *[class*="gradient"],
+.theme-transitioning *[class*="from-"],
+.theme-transitioning *[class*="to-"],
+.theme-transitioning *[class*="via-"] {
+  transition: 
+    background var(--theme-transition-duration) var(--theme-transition-easing),
+    background-image var(--theme-transition-duration) var(--theme-transition-easing) !important;
+}
+
+/* Transitions pour les éléments interactifs */
+.theme-transitioning button,
+.theme-transitioning input,
+.theme-transitioning textarea,
+.theme-transitioning select,
+.theme-transitioning nav,
+.theme-transitioning header,
+.theme-transitioning aside {
+  transition: 
+    background-color var(--theme-transition-duration) var(--theme-transition-easing),
+    border-color var(--theme-transition-duration) var(--theme-transition-easing),
+    color var(--theme-transition-duration) var(--theme-transition-easing) !important;
+}
+
+/* Prévenir les transitions sur les animations et transformations */
+.theme-transitioning *[class*="animate-"],
+.theme-transitioning *[style*="transform"],
+.theme-transitioning .motion-safe\:animate-spin {
+  transition: 
+    background-color var(--theme-transition-duration) var(--theme-transition-easing),
+    border-color var(--theme-transition-duration) var(--theme-transition-easing),
+    color var(--theme-transition-duration) var(--theme-transition-easing) !important;
+}
+
+/* GPU acceleration pour une fluidité maximale */
+.theme-transitioning * {
+  transform: translateZ(0);
+  will-change: background-color, color, border-color;
+}
+
+/* Préparation GPU pour les éléments principaux */
+.theme-transitioning body,
+.theme-transitioning html {
+  transform: translateZ(0);
+  transition: background-color var(--theme-transition-duration) var(--theme-transition-easing) !important;
+}
+
+/* Optimisation pour les SVG et icônes */
+.theme-transitioning svg,
+.theme-transitioning path {
+  transition: 
+    fill var(--theme-transition-duration) var(--theme-transition-easing),
+    stroke var(--theme-transition-duration) var(--theme-transition-easing) !important;
+}

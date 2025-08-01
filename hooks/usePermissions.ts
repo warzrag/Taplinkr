@@ -85,12 +85,12 @@ export function usePermissions() {
     return userPermissions.role === 'admin'
   }
 
-  const isPro = (): boolean => {
-    return userPermissions.plan === 'pro' || userPermissions.plan === 'business' || isAdmin()
+  const isStandard = (): boolean => {
+    return userPermissions.plan === 'standard' || userPermissions.plan === 'premium' || isAdmin()
   }
 
-  const isBusiness = (): boolean => {
-    return userPermissions.plan === 'business' || isAdmin()
+  const isPremium = (): boolean => {
+    return userPermissions.plan === 'premium' || isAdmin()
   }
 
   const getPlan = (): string => {
@@ -104,9 +104,12 @@ export function usePermissions() {
     requirePermission,
     requireLimit,
     isAdmin,
-    isPro,
-    isBusiness,
+    isStandard,
+    isPremium,
     getPlan,
-    userPermissions,
+    permissions: {
+      ...userPermissions,
+      userId: session?.user?.id
+    },
   }
 }

@@ -1,5 +1,5 @@
- {
-    "installCommand": "npm install && npm run postinstall",
-    "buildCommand": "npm run build",
-    "framework": "nextjs"
-  }
+{
+  "installCommand": "npm install && npm run postinstall",
+  "buildCommand": "npm run build",
+  "framework": "nextjs"
+}

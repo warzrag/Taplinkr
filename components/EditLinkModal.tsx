@@ -2,17 +2,25 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Eye, EyeOff, Link2, Plus, Trash2, GripVertical, Upload, Image, Palette, Type, Smartphone } from 'lucide-react'
+import { X, Save, Eye, EyeOff, Link2, Plus, Trash2, GripVertical, Upload, Image, Palette, Type, Smartphone, ExternalLink, Share2, Instagram, Twitter, Youtube } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link, MultiLink } from '@/types'
 import LivePhonePreview from './LivePhonePreview'
 import { useProfile } from '@/contexts/ProfileContext'
+import ImageUpload from './upload/ImageUpload'
+import CoverImageUpload from './upload/CoverImageUpload'
+import IconImageUpload from './upload/IconImageUpload'
+import { usePermissions } from '@/hooks/usePermissions'
 
 interface LinkData extends Link {
   multiLinks: MultiLink[]
   profileImage?: string
+  instagramUrl?: string
+  tiktokUrl?: string
+  twitterUrl?: string
+  youtubeUrl?: string
 }
 
 interface EditLinkModalProps {
@@ -26,11 +34,10 @@ interface EditLinkModalProps {
 export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess, onLiveUpdate }: EditLinkModalProps) {
   const { refreshAll: refreshLinksContext } = useLinks()
   const { profile: userProfile } = useProfile()
+  const { hasPermission, requirePermission, requireLimit } = usePermissions()
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [activeTab, setActiveTab] = useState('general')
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
 
   // Effet pour déclencher la mise à jour en temps réel
@@ -64,15 +71,19 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
         body: JSON.stringify(linkData)
       })
 
-      if (response.ok) {
-        refreshLinksContext()
-        toast.success('Lien mis à jour!')
-        onSuccess()
-        onClose()
-      } else {
-        toast.error('Erreur lors de la sauvegarde')
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Erreur de sauvegarde:', errorData)
+        toast.error(errorData.error || 'Erreur lors de la sauvegarde')
+        return
       }
+      
+      refreshLinksContext()
+      toast.success('Lien mis à jour!')
+      onSuccess()
+      onClose()
     } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error)
       toast.error('Erreur lors de la sauvegarde')
     } finally {
       setSaving(false)
@@ -137,98 +148,16 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
     })
   }
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
-  }
+  // Les fonctions d'upload ont été remplacées par le composant ImageUpload
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0])
-    }
-  }
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    handleFileUpload(file)
-  }
-
-  const handleFileUpload = async (file: File, type: 'cover' | 'profile' = 'cover') => {
-    if (!linkData) {
-      toast.error('Erreur: données du lien manquantes')
-      return
-    }
-
-    // Vérifier le type de fichier
-    if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image')
-      return
-    }
-
-    // Vérifier la taille (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('L\'image doit faire moins de 5MB')
-      return
-    }
-
-    setUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
-
-    try {
-      console.log('Uploading file:', file.name, file.type, file.size)
-      const response = await fetch('/api/files/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      console.log('Upload response status:', response.status)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log('Upload response data:', data)
-        
-        if (type === 'profile') {
-          setLinkData({ ...linkData, profileImage: data.url })
-        } else {
-          setLinkData({ ...linkData, coverImage: data.url })
-        }
-        
-        toast.success('Image téléchargée!')
-      } else {
-        const errorData = await response.text()
-        console.error('Upload error:', response.status, errorData)
-        toast.error('Erreur lors du téléchargement')
-      }
-    } catch (error) {
-      console.error('Upload catch error:', error)
-      toast.error('Erreur lors du téléchargement')
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    handleFileUpload(file, 'profile')
-  }
-
-  const tabs = [
-    { id: 'general', label: 'Général', icon: Link2 },
-    { id: 'links', label: 'Liens', icon: Plus },
-    { id: 'style', label: 'Style', icon: Palette },
-  ]
+  const tabs = linkData?.isDirect 
+    ? [{ id: 'general', label: 'Général', icon: Link2 }]
+    : [
+        { id: 'general', label: 'Général', icon: Link2 },
+        { id: 'links', label: 'Liens', icon: Plus },
+        { id: 'style', label: 'Style', icon: Palette },
+        ...(hasPermission('hasSocialMedia') ? [{ id: 'social', label: 'Réseaux', icon: Share2 }] : []),
+      ]
 
   // Options de polices
   const fontOptions = [
@@ -304,25 +233,29 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
               damping: 25,
               stiffness: 200
             }}
-            className="fixed inset-0 md:inset-auto md:top-0 md:left-0 md:h-full md:w-full lg:w-[600px] lg:left-[calc(50%-300px)] bg-white shadow-2xl z-50 flex flex-col"
+            className="fixed inset-0 md:inset-auto md:top-0 md:left-0 md:bottom-0 md:h-full md:w-full md:max-w-xl lg:max-w-2xl bg-white dark:bg-gray-800 shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+            <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Éditer le lien</h2>
-                  <p className="text-sm text-gray-600">Modifications en temps réel</p>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">Éditer le lien</h2>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    {linkData?.isDirect ? 'Configuration du lien direct' : 'Modifications en temps réel'}
+                  </p>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <motion.button
-                    onClick={() => setShowPreview(!showPreview)}
-                    className="xl:hidden p-2 hover:bg-white/50 rounded-full transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    title={showPreview ? "Masquer la prévisualisation" : "Afficher la prévisualisation"}
-                  >
-                    <Smartphone className="w-5 h-5" />
-                  </motion.button>
+                  {!linkData?.isDirect && (
+                    <motion.button
+                      onClick={() => setShowPreview(!showPreview)}
+                      className="xl:hidden p-2 hover:bg-white/50 rounded-full transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title={showPreview ? "Masquer la prévisualisation" : "Afficher la prévisualisation"}
+                    >
+                      <Smartphone className="w-5 h-5" />
+                    </motion.button>
+                  )}
                   <motion.button
                     onClick={onClose}
                     className="p-2 hover:bg-white/50 rounded-full transition-colors"
@@ -335,28 +268,28 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
               </div>
 
               {/* Tabs */}
-              <div className="flex space-x-1 mt-4 bg-white/50 rounded-lg p-1 overflow-x-auto">
+              <div className="flex space-x-1 mt-3 bg-white/50 dark:bg-gray-800/50 rounded-lg p-1 overflow-x-auto scrollbar-hide">
                 {tabs.map((tab) => (
                   <motion.button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 min-w-fit flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    className={`flex-1 min-w-fit flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                       activeTab === tab.id
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <tab.icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
+                    <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">{tab.label}</span>
                   </motion.button>
                 ))}
               </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -368,159 +301,57 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                 >
                   {activeTab === 'general' && (
                     <>
-                      {/* Photo de profil */}
-                      <div>
+                      {/* Message pour les liens directs */}
+                      {linkData.isDirect && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <ExternalLink className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div className="text-sm">
+                              <p className="font-medium text-blue-900 mb-1">
+                                Lien Direct {linkData.isUltraLink ? 'ULTRA' : linkData.shieldEnabled ? 'avec Shield' : ''}
+                              </p>
+                              <p className="text-blue-700">
+                                Les visiteurs seront redirigés directement vers votre URL cible. 
+                                Les photos de profil et de couverture ne sont pas nécessaires pour ce type de lien.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Photos uniquement pour les multi-liens */}
+                      {!linkData.isDirect && (
+                        <>
+                          {/* Photo de profil */}
+                          <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Photo de profil
                         </label>
-                        <div className="flex items-center space-x-4">
-                          <div className="relative">
-                            {linkData.profileImage ? (
-                              <div className="relative group">
-                                <img
-                                  src={linkData.profileImage}
-                                  alt="Profile"
-                                  className="w-20 h-20 object-cover rounded-full border-4 border-white shadow-lg"
-                                />
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center">
-                                  <label className="cursor-pointer">
-                                    <input
-                                      type="file"
-                                      className="hidden"
-                                      accept="image/*"
-                                      onChange={handleProfileImageUpload}
-                                      disabled={uploading}
-                                    />
-                                    <motion.div
-                                      className="bg-white text-gray-900 p-2 rounded-full"
-                                      whileHover={{ scale: 1.05 }}
-                                      whileTap={{ scale: 0.95 }}
-                                    >
-                                      <Upload className="w-4 h-4" />
-                                    </motion.div>
-                                  </label>
-                                </div>
-                              </div>
-                            ) : (
-                              <label className="cursor-pointer">
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  accept="image/*"
-                                  onChange={handleProfileImageUpload}
-                                  disabled={uploading}
-                                />
-                                <motion.div
-                                  className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center hover:border-blue-500 transition-colors"
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                >
-                                  {uploading ? (
-                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
-                                  ) : (
-                                    <Upload className="w-6 h-6 text-gray-400" />
-                                  )}
-                                </motion.div>
-                              </label>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-600">
-                              Ajoutez une photo de profil pour personnaliser votre page
-                            </p>
-                            {linkData.profileImage && (
-                              <motion.button
-                                onClick={() => setLinkData({ ...linkData, profileImage: '' })}
-                                className="mt-2 text-red-500 text-sm hover:text-red-700"
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                              >
-                                Supprimer la photo
-                              </motion.button>
-                            )}
-                          </div>
+                        <div className="space-y-2">
+                          <ImageUpload
+                            value={linkData.profileImage}
+                            onChange={(url) => setLinkData({ ...linkData, profileImage: url })}
+                            type="profile"
+                            aspectRatio="square"
+                          />
+                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                            Photo de profil pour personnaliser votre page. Format carré recommandé.
+                          </p>
                         </div>
                       </div>
 
-                      {/* Photo de couverture */}
-                      <div>
+                          {/* Photo de couverture */}
+                          <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Photo de couverture
                         </label>
-                        <div className="relative">
-                          {linkData.coverImage ? (
-                            <div className="relative group">
-                              <img
-                                src={linkData.coverImage}
-                                alt="Cover"
-                                className="w-full h-40 object-cover rounded-lg"
-                              />
-                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                                <label className="cursor-pointer">
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    disabled={uploading}
-                                  />
-                                  <motion.div
-                                    className="bg-white text-gray-900 px-4 py-2 rounded-lg flex items-center space-x-2"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                  >
-                                    <Upload className="w-4 h-4" />
-                                    <span>Changer</span>
-                                  </motion.div>
-                                </label>
-                                <motion.button
-                                  onClick={() => setLinkData({ ...linkData, coverImage: '' })}
-                                  className="ml-2 bg-red-500 text-white p-2 rounded-lg"
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                >
-                                  <X className="w-4 h-4" />
-                                </motion.button>
-                              </div>
-                            </div>
-                          ) : (
-                            <label className="cursor-pointer">
-                              <input
-                                type="file"
-                                className="hidden"
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                                disabled={uploading}
-                              />
-                              <motion.div
-                                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                                  dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-500'
-                                }`}
-                                whileHover={{ scale: 1.01 }}
-                                whileTap={{ scale: 0.99 }}
-                                onDragEnter={handleDrag}
-                                onDragLeave={handleDrag}
-                                onDragOver={handleDrag}
-                                onDrop={handleDrop}
-                              >
-                                {uploading ? (
-                                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-                                ) : (
-                                  <>
-                                    <Image className={`w-12 h-12 mx-auto mb-2 ${dragActive ? 'text-blue-500' : 'text-gray-400'}`} />
-                                    <p className={`text-sm ${dragActive ? 'text-blue-600' : 'text-gray-600'}`}>
-                                      {dragActive ? 'Déposez votre image ici' : 'Cliquez ou glissez une image ici'}
-                                    </p>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                      JPG, PNG, GIF (max 5MB)
-                                    </p>
-                                  </>
-                                )}
-                              </motion.div>
-                            </label>
-                          )}
-                        </div>
-                      </div>
+                        <CoverImageUpload
+                          value={linkData.coverImage}
+                          onChange={(url) => setLinkData({ ...linkData, coverImage: url })}
+                        />
+                          </div>
+                        </>
+                      )}
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -530,39 +361,159 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                           type="text"
                           value={linkData.title}
                           onChange={(e) => setLinkData({ ...linkData, title: e.target.value })}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                           placeholder="Mon super lien"
                           whileFocus={{ scale: 1.02 }}
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Description
-                        </label>
-                        <motion.textarea
-                          value={linkData.description || ''}
-                          onChange={(e) => setLinkData({ ...linkData, description: e.target.value })}
-                          rows={3}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="Description de votre lien..."
-                          whileFocus={{ scale: 1.02 }}
-                        />
-                      </div>
+                      {/* Status en ligne et localisation - seulement pour multi-link */}
+                      {!linkData.isDirect && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="space-y-4 p-4 sm:p-5 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-indigo-100 dark:border-gray-700"
+                        >
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            <span className="text-lg">✨</span> Présence & Localisation
+                          </h3>
+                          
+                          {/* Status en ligne avec design moderne */}
+                          {hasPermission('hasOnlineStatus') ? (
+                            <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${
+                                  linkData.isOnline ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-800'
+                                }`}>
+                                  <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all ${
+                                    linkData.isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                                  }`} />
+                                </div>
+                                <div>
+                                  <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
+                                    Statut en ligne
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {linkData.isOnline ? 'Actuellement disponible' : 'Hors ligne'}
+                                  </p>
+                                </div>
+                              </div>
+                              <motion.button
+                                type="button"
+                                onClick={() => setLinkData({ ...linkData, isOnline: !linkData.isOnline })}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all ${
+                                  linkData.isOnline 
+                                    ? 'bg-gradient-to-r from-green-400 to-emerald-500 shadow-lg shadow-green-500/25' 
+                                    : 'bg-gray-200 dark:bg-gray-700'
+                                }`}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                <motion.span
+                                  layout
+                                  className="inline-block h-6 w-6 transform rounded-full bg-white shadow-lg"
+                                  animate={{ x: linkData.isOnline ? 32 : 4 }}
+                                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                />
+                              </motion.button>
+                            </div>
+                          ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                              <p className="text-sm text-gray-600 mb-2">
+                                🔒 Statut en ligne disponible avec le plan Standard
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => requirePermission('hasOnlineStatus')}
+                                className="text-sm text-blue-600 hover:text-blue-700 underline"
+                              >
+                                Débloquer cette fonctionnalité
+                              </button>
+                            </div>
+                          )}
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Icône
-                        </label>
-                        <motion.input
-                          type="text"
-                          value={linkData.icon || ''}
-                          onChange={(e) => setLinkData({ ...linkData, icon: e.target.value })}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="🔗"
-                          whileFocus={{ scale: 1.02 }}
-                        />
-                      </div>
+                          {/* Localisation avec icône moderne */}
+                          {hasPermission('hasLocationDisplay') ? (
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                </svg>
+                                Localisation
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={linkData.city || ''}
+                                  onChange={(e) => setLinkData({ ...linkData, city: e.target.value })}
+                                  className="w-full px-4 py-3 pl-10 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-800 transition-all"
+                                  placeholder="Paris, France"
+                                />
+                                <div className="absolute left-3 top-3.5 text-gray-400">
+                                  📍
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                💡 Les fans locaux sont 3x plus susceptibles de s'abonner
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                              <p className="text-sm text-gray-600 mb-2">
+                                🔒 Localisation disponible avec le plan Standard
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => requirePermission('hasLocationDisplay')}
+                                className="text-sm text-blue-600 hover:text-blue-700 underline"
+                              >
+                                Débloquer cette fonctionnalité
+                              </button>
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+
+                      {/* URL de destination pour les liens directs */}
+                      {linkData.isDirect && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            URL de destination
+                          </label>
+                          <motion.input
+                            type="url"
+                            value={linkData.directUrl || ''}
+                            onChange={(e) => setLinkData({ ...linkData, directUrl: e.target.value })}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder="https://example.com"
+                            required
+                            whileFocus={{ scale: 1.02 }}
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            L'URL vers laquelle les visiteurs seront redirigés
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Description et icône uniquement pour les multi-liens */}
+                      {!linkData.isDirect && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Description
+                            </label>
+                            <motion.textarea
+                              value={linkData.description || ''}
+                              onChange={(e) => setLinkData({ ...linkData, description: e.target.value })}
+                              rows={3}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                              placeholder="Description de votre lien..."
+                              whileFocus={{ scale: 1.02 }}
+                            />
+                          </div>
+
+                        </>
+                      )}
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -570,7 +521,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                         </label>
                         <div className="flex">
                           <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                            localhost:3000/link/
+                            localhost:3000{linkData.isDirect ? '/' : '/link/'}
                           </span>
                           <motion.input
                             type="text"
@@ -622,21 +573,37 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                                         </div>
                                         
                                         <div className="flex-1 space-y-2">
-                                          <div className="grid grid-cols-2 gap-2">
+                                          <div className="space-y-3">
                                             <input
                                               type="text"
                                               value={multiLink.title}
                                               onChange={(e) => updateMultiLink(multiLink.id, 'title', e.target.value)}
-                                              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
-                                              placeholder="Titre"
+                                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
+                                              placeholder="Titre du lien"
                                             />
-                                            <input
-                                              type="text"
-                                              value={multiLink.icon || ''}
-                                              onChange={(e) => updateMultiLink(multiLink.id, 'icon', e.target.value)}
-                                              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
-                                              placeholder="🔗"
-                                            />
+                                            
+                                            {/* Upload d'icône personnalisée */}
+                                            {hasPermission('hasCustomIcons') ? (
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                  Logo
+                                                </label>
+                                                <IconImageUpload
+                                                  value={multiLink.iconImage}
+                                                  onChange={(url) => updateMultiLink(multiLink.id, 'iconImage', url)}
+                                                />
+                                              </div>
+                                            ) : (
+                                              <div className="text-center py-2">
+                                                <button
+                                                  type="button"
+                                                  onClick={() => requirePermission('hasCustomIcons')}
+                                                  className="text-xs text-blue-600 hover:text-blue-700 underline"
+                                                >
+                                                  🔒 Plan Standard pour icônes
+                                                </button>
+                                              </div>
+                                            )}
                                           </div>
                                           
                                           <input
@@ -705,31 +672,47 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                           <Type className="w-4 h-4 inline mr-2" />
                           Police des liens
                         </label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {fontOptions.map((font) => (
-                            <motion.button
-                              key={font.id}
-                              onClick={() => setLinkData({ 
-                                ...linkData, 
-                                fontFamily: font.id 
-                              })}
-                              className={`p-3 border-2 rounded-lg text-center transition-all ${
-                                (linkData.fontFamily || 'system') === font.id 
-                                  ? 'border-blue-500 bg-blue-50' 
-                                  : 'border-gray-200 hover:border-gray-300'
-                              }`}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
+                        {hasPermission('hasCustomFonts') ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {fontOptions.map((font) => (
+                              <motion.button
+                                key={font.id}
+                                onClick={() => setLinkData({ 
+                                  ...linkData, 
+                                  fontFamily: font.id 
+                                })}
+                                className={`p-3 border-2 rounded-lg text-center transition-all ${
+                                  (linkData.fontFamily || 'system') === font.id 
+                                    ? 'border-blue-500 bg-blue-50' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                              >
+                                <div className={`text-2xl ${font.class} mb-1`}>
+                                  {font.preview}
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  {font.name}
+                                </div>
+                              </motion.button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                            <Type className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                            <p className="text-sm text-gray-600 mb-3">
+                              🔒 Polices personnalisées disponibles avec le plan Standard
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => requirePermission('hasCustomFonts')}
+                              className="text-sm text-blue-600 hover:text-blue-700 underline"
                             >
-                              <div className={`text-2xl ${font.class} mb-1`}>
-                                {font.preview}
-                              </div>
-                              <div className="text-xs text-gray-600">
-                                {font.name}
-                              </div>
-                            </motion.button>
-                          ))}
-                        </div>
+                              Débloquer les polices premium
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Couleur de fond du lien */}
@@ -865,8 +848,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                           >
-                            <div className="flex items-center justify-center space-x-2">
-                              <span>{linkData.icon || '🔗'}</span>
+                            <div className="flex items-center justify-center">
                               <span>{linkData.title || 'Mon super lien'}</span>
                             </div>
                             {linkData.description && (
@@ -877,6 +859,144 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                           </motion.div>
                         </div>
                       </div>
+                    </>
+                  )}
+
+                  {activeTab === 'social' && (
+                    <>
+                      {!hasPermission('hasSocialMedia') ? (
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                          <Share2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            Réseaux sociaux verrouillés
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-4">
+                            🔒 Connectez vos réseaux sociaux pour augmenter votre engagement avec le plan Standard
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => requirePermission('hasSocialMedia')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                          >
+                            Débloquer cette fonctionnalité
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
+                            <p className="text-sm text-purple-800 flex items-center gap-2">
+                              <Share2 className="w-4 h-4" />
+                              <span className="font-medium">Connectez vos réseaux sociaux pour augmenter votre engagement!</span>
+                            </p>
+                          </div>
+
+                        {/* Instagram */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 rounded-xl flex items-center justify-center">
+                              <Instagram className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-gray-900">Instagram</h3>
+                              <p className="text-xs text-gray-500">Partagez vos moments</p>
+                            </div>
+                          </div>
+                          <input
+                            type="text"
+                            value={linkData.instagramUrl || ''}
+                            onChange={(e) => {
+                              let value = e.target.value
+                              if (value && !value.startsWith('@') && !value.startsWith('http')) {
+                                value = '@' + value
+                              }
+                              setLinkData({ ...linkData, instagramUrl: value })
+                            }}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="@votre_username"
+                          />
+                        </div>
+
+                        {/* TikTok */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-gray-900">TikTok</h3>
+                              <p className="text-xs text-gray-500">Créez du contenu viral</p>
+                            </div>
+                          </div>
+                          <input
+                            type="text"
+                            value={linkData.tiktokUrl || ''}
+                            onChange={(e) => {
+                              let value = e.target.value
+                              if (value && !value.startsWith('@') && !value.startsWith('http')) {
+                                value = '@' + value
+                              }
+                              setLinkData({ ...linkData, tiktokUrl: value })
+                            }}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="@votre_username"
+                          />
+                        </div>
+
+                        {/* Twitter */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                              <Twitter className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-gray-900">Twitter / X</h3>
+                              <p className="text-xs text-gray-500">Partagez vos pensées</p>
+                            </div>
+                          </div>
+                          <input
+                            type="text"
+                            value={linkData.twitterUrl || ''}
+                            onChange={(e) => {
+                              let value = e.target.value
+                              if (value && !value.startsWith('@') && !value.startsWith('http')) {
+                                value = '@' + value
+                              }
+                              setLinkData({ ...linkData, twitterUrl: value })
+                            }}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="@votre_username"
+                          />
+                        </div>
+
+                        {/* YouTube */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-red-600 to-red-800 rounded-xl flex items-center justify-center">
+                              <Youtube className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-gray-900">YouTube</h3>
+                              <p className="text-xs text-gray-500">Partagez vos vidéos</p>
+                            </div>
+                          </div>
+                          <input
+                            type="text"
+                            value={linkData.youtubeUrl || ''}
+                            onChange={(e) => {
+                              let value = e.target.value
+                              if (value && !value.startsWith('@') && !value.startsWith('http')) {
+                                value = '@' + value
+                              }
+                              setLinkData({ ...linkData, youtubeUrl: value })
+                            }}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="@votre_chaine"
+                          />
+                        </div>
+                        </div>
+                      )}
                     </>
                   )}
 
@@ -927,7 +1047,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
 
           {/* Prévisualisation mobile - Affichée en overlay */}
           <AnimatePresence>
-            {showPreview && (
+            {showPreview && !linkData?.isDirect && (
               <motion.div
                 initial={{ opacity: 0, x: '100%' }}
                 animate={{ opacity: 1, x: 0 }}

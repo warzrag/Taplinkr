@@ -71,22 +71,24 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
 
   // Statistiques avancées
   const advancedStats = useMemo(() => {
-    if (!enrichedData.length) return null
+    if (!enrichedData.length && !data?.totals) return null
 
-    const totalClicks = enrichedData.reduce((sum, item) => sum + item.clicks, 0)
-    const totalViews = enrichedData.reduce((sum, item) => sum + item.views, 0)
-    const avgClicks = totalClicks / enrichedData.length
-    const avgViews = totalViews / enrichedData.length
+    // Utiliser les totaux fournis en priorité, sinon calculer depuis le summary
+    const totalClicks = data?.totals?.clicks ?? data?.totalClicks ?? enrichedData.reduce((sum, item) => sum + item.clicks, 0)
+    const totalViews = data?.totals?.views ?? data?.totalViews ?? enrichedData.reduce((sum, item) => sum + item.views, 0)
+    
+    const avgClicks = enrichedData.length > 0 ? totalClicks / enrichedData.length : 0
+    const avgViews = enrichedData.length > 0 ? totalViews / enrichedData.length : 0
     
     const clicksArray = enrichedData.map(item => item.clicks)
-    const maxClicks = Math.max(...clicksArray)
-    const minClicks = Math.min(...clicksArray)
+    const maxClicks = clicksArray.length > 0 ? Math.max(...clicksArray) : totalClicks
+    const minClicks = clicksArray.length > 0 ? Math.min(...clicksArray) : 0
     
     const recentTrend = enrichedData.slice(-7).reduce((sum, item) => sum + item.clickGrowth, 0) / 7
     
-    const peakDay = enrichedData.reduce((max, item) => 
+    const peakDay = enrichedData.length > 0 ? enrichedData.reduce((max, item) => 
       item.clicks > max.clicks ? item : max
-    )
+    ) : { date: 'Aujourd\'hui', clicks: totalClicks }
 
     return {
       totalClicks,
@@ -98,9 +100,9 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
       engagementRate: totalViews > 0 ? (totalClicks / totalViews * 100).toFixed(1) : 0,
       recentTrend: recentTrend.toFixed(1),
       peakDay,
-      growthRate: enrichedData[enrichedData.length - 1]?.clickGrowth || 0
+      growthRate: (data?.totals?.growthRate ?? data?.growthRate ?? enrichedData[enrichedData.length - 1]?.clickGrowth) || 0
     }
-  }, [enrichedData])
+  }, [enrichedData, data])
 
   // Données pour les graphiques spécialisés
   const heatmapData = useMemo(() => {

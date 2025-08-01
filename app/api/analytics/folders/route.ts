@@ -58,10 +58,23 @@ export async function GET(request: NextRequest) {
         sum + (link._count?.analyticsEvents || 0), 0
       )
       
+      // Vues directes du dossier (uniquement pour les liens multi-liens)
+      const directViews = folder.links
+        .filter(link => !link.isDirect)
+        .reduce((sum, link) => sum + (link.views || 0), 0)
+      
       // Clics des sous-dossiers
       const childrenClicks = folder.children.reduce((sum, child) => 
         sum + child.links.reduce((linkSum, link) => 
           linkSum + (link._count?.analyticsEvents || 0), 0
+        ), 0
+      )
+      
+      // Vues des sous-dossiers (uniquement pour les liens multi-liens)
+      const childrenViews = folder.children.reduce((sum, child) => 
+        sum + child.links
+          .filter(link => !link.isDirect)
+          .reduce((linkSum, link) => linkSum + (link.views || 0), 0
         ), 0
       )
 
@@ -110,8 +123,11 @@ export async function GET(request: NextRequest) {
         color: folder.color,
         description: folder.description,
         totalClicks: directClicks + childrenClicks,
+        totalViews: directViews + childrenViews,
         directClicks,
+        directViews,
         childrenClicks,
+        childrenViews,
         linksCount: folder.links.length,
         childrenCount: folder.children.length,
         clicksByDay: Object.entries(clicksByDay)
@@ -149,6 +165,10 @@ export async function GET(request: NextRequest) {
     const unorganizedClicks = unorganizedLinks.reduce((sum, link) => 
       sum + (link._count?.analyticsEvents || 0), 0
     )
+    
+    const unorganizedViews = unorganizedLinks
+      .filter(link => !link.isDirect)
+      .reduce((sum, link) => sum + (link.views || 0), 0)
 
     // Analytics pour les liens non organisés
     const unorganizedClicksByDay: { [key: string]: number } = {}
@@ -174,6 +194,7 @@ export async function GET(request: NextRequest) {
       icon: '🔗',
       color: '#10b981',
       totalClicks: unorganizedClicks,
+      totalViews: unorganizedViews,
       linksCount: unorganizedLinks.length,
       clicksByDay: Object.entries(unorganizedClicksByDay)
         .map(([date, clicks]) => ({ date, clicks }))
@@ -194,7 +215,8 @@ export async function GET(request: NextRequest) {
     const result = {
       folders: folderAnalytics,
       unorganized: unorganizedAnalytics,
-      totalClicks: folderAnalytics.reduce((sum, f) => sum + f.totalClicks, 0) + unorganizedClicks
+      totalClicks: folderAnalytics.reduce((sum, f) => sum + f.totalClicks, 0) + unorganizedClicks,
+      totalViews: folderAnalytics.reduce((sum, f) => sum + f.totalViews, 0) + unorganizedViews
     }
 
     console.log('Résultat final:', result)

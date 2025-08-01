@@ -16,9 +16,13 @@ model User {
   image                   String?
   bio                     String?
   bannerImage             String?
-  role                    String                  @default("user") // user, admin
-  plan                    String                  @default("free") // free, pro, business
+  role                    String                  @default("user")
+  plan                    String                  @default("free")
   planExpiresAt           DateTime?
+  stripeCustomerId        String?                 @unique
+  stripeSubscriptionId    String?                 @unique
+  teamId                  String?
+  teamRole                String?                 @default("member")
   emailVerified           Boolean                 @default(false)
   emailVerificationToken  String?                 @unique
   emailVerificationExpiry DateTime?
@@ -53,8 +57,12 @@ model User {
   templates               Template[]
   userProfile             UserProfile?
   userTheme               UserTheme?
-  banner                  File?                   @relation("UserBanner", fields: [bannerId], references: [id])
   avatar                  File?                   @relation("UserAvatar", fields: [avatarId], references: [id])
+  banner                  File?                   @relation("UserBanner", fields: [bannerId], references: [id])
+  team                    Team?                   @relation(fields: [teamId], references: [id])
+  ownedTeam               Team?                   @relation("TeamOwner")
+  teamInvitations         TeamInvitation[]
+  sentInvitations         TeamInvitation[]        @relation("InvitedBy")
 
   @@map("users")
 }
@@ -68,6 +76,7 @@ model Link {
   color              String?
   icon               String?
   coverImage         String?
+  coverImagePosition String?
   profileImage       String?
   coverId            String?
   fontFamily         String?
@@ -77,8 +86,19 @@ model Link {
   isActive           Boolean             @default(true)
   isDirect           Boolean             @default(false)
   directUrl          String?
+  shieldEnabled      Boolean             @default(false)
+  isUltraLink        Boolean             @default(false)
+  shieldConfig       String?
+  isOnline           Boolean             @default(false)
+  city               String?
+  country            String?
+  instagramUrl       String?
+  tiktokUrl          String?
+  twitterUrl         String?
+  youtubeUrl         String?
   order              Int                 @default(0)
   clicks             Int                 @default(0)
+  views              Int                 @default(0)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   folderId           String?
@@ -86,9 +106,9 @@ model Link {
   analyticsSummary   AnalyticsSummary[]
   clickEvents        Click[]
   linkSchedule       LinkSchedule?
-  folder             Folder?             @relation(fields: [folderId], references: [id])
-  cover              File?               @relation("LinkCover", fields: [coverId], references: [id])
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cover              File?               @relation("LinkCover", fields: [coverId], references: [id])
+  folder             Folder?             @relation(fields: [folderId], references: [id])
   multiLinks         MultiLink[]
   passwordAttempts   PasswordAttempt[]
   passwordProtection PasswordProtection?
@@ -103,6 +123,7 @@ model MultiLink {
   url          String
   description  String?
   icon         String?
+  iconImage    String?
   animation    String?
   order        Int      @default(0)
   clicks       Int      @default(0)
@@ -123,8 +144,8 @@ model Click {
   country   String?
   device    String?
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("clicks")
 }
@@ -141,9 +162,9 @@ model Folder {
   isExpanded  Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent      Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   children    Folder[] @relation("FolderHierarchy")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   links       Link[]
 
   @@map("folders")
@@ -162,8 +183,8 @@ model File {
   user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   linkCovers         Link[]     @relation("LinkCover")
   templateThumbnails Template[] @relation("TemplateThumbnail")
-  userBanners        User[]     @relation("UserBanner")
   userAvatars        User[]     @relation("UserAvatar")
+  userBanners        User[]     @relation("UserBanner")
 
   @@map("files")
 }
@@ -190,8 +211,8 @@ model AnalyticsEvent {
   utmTerm     String?
   utmContent  String?
   createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   link        Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([linkId, createdAt])
   @@index([userId, createdAt])
@@ -209,8 +230,8 @@ model AnalyticsSummary {
   topDevice  String?
   topBrowser String?
   topReferer String?
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   link       Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([linkId, date])
   @@map("analytics_summary")
@@ -234,8 +255,8 @@ model Template {
   usageCount   Int           @default(0)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  author       User?         @relation(fields: [authorId], references: [id])
   thumbnail    File?         @relation("TemplateThumbnail", fields: [thumbnailId], references: [id])
+  author       User?         @relation(fields: [authorId], references: [id])
   userProfiles UserProfile[]
 
   @@map("templates")
@@ -253,8 +274,8 @@ model UserProfile {
   analytics  String?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  template   Template? @relation(fields: [templateId], references: [id])
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template   Template? @relation(fields: [templateId], references: [id])
 
   @@map("user_profiles")
 }
@@ -283,8 +304,8 @@ model PasswordProtection {
   lockedUntil     DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   link            Link      @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_protections")
 }
@@ -316,8 +337,8 @@ model LinkSchedule {
   notifyEnd      Boolean        @default(false)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   link           Link           @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   scheduledJobs  ScheduledJob[]
 
   @@map("link_schedules")
@@ -408,4 +429,78 @@ model PushSubscription {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("push_subscriptions")
+}
+
+// Team system for Premium users
+model Team {
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  slug            String           @unique
+  ownerId         String           @unique
+  maxMembers      Int              @default(5)
+  brandTheme      String?          // JSON theme settings
+  brandAssets     String?          // JSON assets (logos, colors)
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  owner           User             @relation("TeamOwner", fields: [ownerId], references: [id])
+  members         User[]
+  invitations     TeamInvitation[]
+  sharedTemplates TeamTemplate[]
+  analytics       TeamAnalytics[]
+  
+  @@map("teams")
+}
+
+model TeamInvitation {
+  id          String            @id @default(cuid())
+  teamId      String
+  email       String
+  role        String            @default("member") // owner, admin, member, viewer
+  token       String            @unique
+  status      String            @default("pending") // pending, accepted, declined, expired
+  invitedById String
+  expiresAt   DateTime
+  createdAt   DateTime          @default(now())
+  acceptedAt  DateTime?
+  
+  team        Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  invitedBy   User              @relation("InvitedBy", fields: [invitedById], references: [id])
+  user        User?             @relation(fields: [email], references: [email])
+  
+  @@unique([teamId, email])
+  @@map("team_invitations")
+}
+
+model TeamTemplate {
+  id          String   @id @default(cuid())
+  teamId      String
+  name        String
+  description String?
+  template    String   // JSON template data
+  isApproved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  @@map("team_templates")
+}
+
+model TeamAnalytics {
+  id          String   @id @default(cuid())
+  teamId      String
+  date        DateTime
+  totalClicks Int      @default(0)
+  totalViews  Int      @default(0)
+  members     Int      @default(0)
+  data        String?  // JSON analytics data
+  createdAt   DateTime @default(now())
+  
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  @@unique([teamId, date])
+  @@map("team_analytics")
 }

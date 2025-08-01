@@ -7,12 +7,14 @@ import {
   User, 
   LogOut,
   BarChart3,
-  Upload,
   Shield,
   Settings,
   Menu,
-  X
+  X,
+  CreditCard,
+  Users
 } from 'lucide-react'
+import LinkLogo from '@/components/LinkLogo'
 import LivePhonePreview from '@/components/LivePhonePreview'
 import { LinkUpdateProvider } from '@/contexts/LinkUpdateContext'
 import { ProfileProvider } from '@/contexts/ProfileContext'
@@ -65,7 +67,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' },
-    { icon: Upload, label: 'Fichiers', href: '/dashboard/files' },
+    { icon: Users, label: 'Équipe', href: '/dashboard/team' },
+    { icon: CreditCard, label: 'Tarifs', href: '/dashboard/pricing' },
     { icon: Shield, label: 'Protection', href: '/dashboard/protection' },
     { icon: Settings, label: 'Paramètres', href: '/settings' },
   ]
@@ -78,7 +81,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row transition-colors duration-300">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
@@ -89,16 +92,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Sidebar */}
       <div className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out
+        fixed lg:static inset-y-0 left-0 z-50 w-[280px] lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">G</span>
+        <div className="p-6 lg:p-8 border-b border-gray-200 dark:border-gray-700">
+          <div className="relative">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden absolute right-0 top-0 z-10 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex justify-center">
+              <LinkLogo size="lg" showText={true} />
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">LinkTracker</span>
           </div>
         </div>
 
@@ -114,7 +122,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
                   active 
                     ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800' 
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -125,20 +133,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-gray-500" />
+            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-gray-600 dark:text-gray-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                 {session?.user?.email}
               </p>
             </div>
           </div>
           <button
             onClick={() => signOut()}
-            className="w-full flex items-center space-x-3 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+            className="w-full flex items-center space-x-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <LogOut className="w-4 h-4" />
             <span className="text-sm">Déconnexion</span>
@@ -147,9 +155,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header with Theme Toggle */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between">
           <div className="flex items-center">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -157,24 +165,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <Menu className="w-6 h-6" />
             </button>
-            <div className="lg:hidden flex items-center space-x-2 ml-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">G</span>
-              </div>
-              <span className="font-bold text-gray-900 dark:text-gray-100">LinkTracker</span>
+            <div className="lg:hidden flex-1 flex justify-center px-4">
+              <LinkLogo size="md" showText={true} />
             </div>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <div className="hidden lg:flex items-center space-x-3">
-              <span className="text-sm text-gray-600 dark:text-gray-300">{session?.user?.email}</span>
-              <button
-                onClick={() => signOut()}
-                className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
-            </div>
           </div>
         </div>
 

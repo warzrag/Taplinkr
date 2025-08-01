@@ -1,8 +1,8 @@
- # LinkTracker 🔗
+ # TapLinkr 🔗
 
-Une application SaaS complète pour créer et suivre des liens courts avec protection anti-ban et pages personnalisables style Linktree.
+La plateforme mobile-first pour créer des pages bio interactives. Un simple tap suffit pour accéder à tout votre univers digital.
 
-![LinkTracker](https://img.shields.io/badge/Version-1.0.0-blue)
+![TapLinkr](https://img.shields.io/badge/Version-1.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Next.js](https://img.shields.io/badge/Next.js-15.3-black)
 
@@ -49,8 +49,8 @@ Une application SaaS complète pour créer et suivre des liens courts avec prote
 
 1. **Cloner le repository**
 ```bash
-git clone https://github.com/votre-username/linktracker-app.git
-cd linktracker-app
+git clone https://github.com/votre-username/TapLinkr-app.git
+cd TapLinkr-app
 ```
 
 2. **Installer les dépendances**
@@ -97,8 +97,8 @@ Ouvrez [http://localhost:3000](http://localhost:3000)
 
 ### 3. Créer les produits
 - Dashboard → Products → Add product
-- Créez "LinkTracker Pro" (9.99€/mois)
-- Créez "LinkTracker Enterprise" (29.99€/mois)
+- Créez "TapLinkr Standard" (9.99€/mois)
+- Créez "TapLinkr Premium" (24.99€/mois)
 - Copiez les IDs des prix
 
 ### 4. Configurer le webhook (production)
@@ -130,7 +130,7 @@ Ouvrez [http://localhost:3000](http://localhost:3000)
 ## 🏗️ Architecture
 
 ```
-linktracker-app/
+TapLinkr/
 ├── app/                    # Pages Next.js (App Router)
 │   ├── api/               # Routes API
 │   ├── auth/              # Pages d'authentification

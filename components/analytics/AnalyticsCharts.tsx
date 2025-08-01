@@ -21,15 +21,46 @@ interface AnalyticsChartsProps {
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
 
 export default function AnalyticsCharts({ data }: AnalyticsChartsProps) {
-  // Prepare daily data
-  const dailyData = data.summary.map(item => ({
-    date: new Date(item.date).toLocaleDateString('fr-FR', { 
-      month: 'short', 
-      day: 'numeric' 
-    }),
-    clicks: item.clicks,
-    views: item.views
-  }))
+  console.log('AnalyticsCharts received data:', data)
+  
+  // Vérifier si les données existent
+  if (!data || !data.summary || data.summary.length === 0) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-lg font-semibold mb-4">Évolution quotidienne</h3>
+        <p className="text-gray-500">Aucune donnée disponible</p>
+      </div>
+    )
+  }
+  
+  // Prepare daily data - Filtrer seulement les jours avec des données
+  const dailyData = data.summary
+    .filter(item => item.clicks > 0 || item.views > 0) // Garder seulement les jours avec activité
+    .slice(-7) // Prendre les 7 derniers jours
+    .map(item => ({
+      date: new Date(item.date).toLocaleDateString('fr-FR', { 
+        month: 'short', 
+        day: 'numeric' 
+      }),
+      clicks: item.clicks || 0,
+      views: item.views || 0
+    }))
+  
+  console.log('Daily data for chart:', dailyData)
+  
+  // Si pas de données, utiliser les totaux sur les derniers jours
+  if (dailyData.length === 0 && data.totalClicks > 0) {
+    const today = new Date()
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+      dailyData.push({
+        date: date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' }),
+        clicks: i === 0 ? data.totalClicks : 0,
+        views: i === 0 ? data.totalViews : 0
+      })
+    }
+  }
 
   // Prepare hourly data
   const hourlyData = Array.from({ length: 24 }, (_, hour) => ({

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { analyticsService } from '@/lib/analytics-service'
+import { getGeoData, parseUserAgent } from '@/lib/geo-service'
 
 export async function GET(
   request: NextRequest,
@@ -23,14 +25,44 @@ export async function GET(
       return NextResponse.redirect(new URL('/404', request.url))
     }
     
-    // Enregistrer le clic
+    // Enregistrer le clic avec des données complètes
     try {
+      // Obtenir l'IP et les données géographiques
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+                request.headers.get('x-real-ip') || 
+                'unknown'
+      const userAgent = request.headers.get('user-agent') || 'Unknown'
+      const referer = request.headers.get('referer') || 'direct'
+      
+      // Parser les informations de l'appareil
+      const deviceInfo = parseUserAgent(userAgent)
+      
+      // Obtenir les données géographiques
+      const geoData = await getGeoData(ip)
+      
+      // Enregistrer le clic dans la table Click
       await prisma.click.create({
         data: {
           linkId: link.id,
-          country: request.headers.get('x-vercel-ip-country') || 'Unknown',
-          device: request.headers.get('user-agent')?.includes('Mobile') ? 'mobile' : 'desktop',
-          referrer: request.headers.get('referer') || 'direct'
+          userId: link.userId,
+          country: geoData.country || 'Unknown',
+          device: deviceInfo.deviceType,
+          referer: referer,
+          userAgent: userAgent,
+          ip: ip
+        }
+      })
+      
+      // Utiliser le service analytics pour un tracking plus détaillé
+      await analyticsService.trackEvent({
+        linkId: link.id,
+        userId: link.userId,
+        eventType: 'click',
+        request: {
+          ip,
+          userAgent,
+          referer,
+          url: request.url
         }
       })
       
@@ -46,28 +78,16 @@ export async function GET(
     
     // Si c'est un lien direct
     if (link.isDirect && link.directUrl) {
-      // Rediriger directement vers l'URL cible
+      // Si Shield ou ULTRA LINK est activé, rediriger vers la page intermédiaire
+      if (link.shieldEnabled || link.isUltraLink) {
+        return NextResponse.redirect(new URL(`/shield/${slug}`, request.url))
+      }
+      
+      // Sinon, rediriger directement vers l'URL cible
       return NextResponse.redirect(link.directUrl)
     }
     
-    // Si c'est un lien avec un seul MultiLink, rediriger directement
-    if (link.multiLinks.length === 1) {
-      const singleLink = link.multiLinks[0]
-      
-      // Tracker le clic sur le MultiLink
-      try {
-        await prisma.multiLink.update({
-          where: { id: singleLink.id },
-          data: { clicks: { increment: 1 } }
-        })
-      } catch (error) {
-        console.error('Error tracking multilink click:', error)
-      }
-      
-      return NextResponse.redirect(singleLink.url)
-    }
-    
-    // Sinon, rediriger vers la page de preview avec tous les liens
+    // Pour tous les multi-links, rediriger vers la page de preview
     return NextResponse.redirect(new URL(`/link/${slug}`, request.url))
     
   } catch (error) {

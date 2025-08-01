@@ -10,8 +10,6 @@ import CreateLinkModal from '@/components/CreateLinkModal'
 import Link from 'next/link'
 import EditLinkModal from '@/components/EditLinkModal'
 import EditPhonePreview from '@/components/EditPhonePreview'
-import DraggableLinkList from '@/components/DraggableLinkList'
-import FolderManager from '@/components/FolderManager'
 import MoveToFolderMenu from '@/components/MoveToFolderMenu'
 import DragDropDashboard from '@/components/DragDropDashboard'
 import EditFolderModal from '@/components/EditFolderModal'
@@ -132,9 +130,6 @@ export default function Dashboard() {
   }
 
   const handleSaveFolder = async (folderData: Partial<Folder>) => {
-    console.log('📁 [DASHBOARD] handleSaveFolder appelé avec:', folderData)
-    console.log('📁 [DASHBOARD] Mode:', editingFolder ? 'MODIFICATION' : 'CRÉATION')
-    
     try {
       if (editingFolder) {
         // Mise à jour d'un dossier existant
@@ -157,19 +152,10 @@ export default function Dashboard() {
         }
       } else {
         // Création d'un nouveau dossier
-        console.log('📁 [DASHBOARD] Envoi POST vers /api/folders')
-        console.log('📁 [DASHBOARD] Body de la requête:', JSON.stringify(folderData))
-        
         const response = await fetch('/api/folders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(folderData)
-        })
-        
-        console.log('📁 [DASHBOARD] Réponse reçue:', {
-          status: response.status,
-          ok: response.ok,
-          statusText: response.statusText
         })
 
         if (response.ok) {
@@ -200,18 +186,18 @@ export default function Dashboard() {
   return (
     <>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-4 lg:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-sm sm:text-base text-gray-600">Gérez vos liens et consultez vos statistiques</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Gérez vos liens et consultez vos statistiques</p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap lg:gap-3">
             {/* Bouton Admin - Visible uniquement pour les admins */}
             {(session?.user as any)?.role === 'admin' && (
               <Link href="/admin/users">
                 <motion.button
-                  className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
+                  className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white px-3 py-2 text-sm lg:px-4 lg:text-base rounded-lg flex items-center justify-center gap-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -225,7 +211,7 @@ export default function Dashboard() {
             {(session?.user as any)?.plan === 'free' && (
               <Link href="/pricing">
                 <motion.button
-                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-3 py-2 text-sm lg:px-4 lg:text-base rounded-lg flex items-center justify-center gap-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl animate-pulse"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -236,17 +222,18 @@ export default function Dashboard() {
             )}
             <Link href="/dashboard/folders-analytics">
               <motion.button
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-3 py-2 text-sm lg:px-4 lg:text-base rounded-lg flex items-center justify-center gap-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <BarChart3 className="w-4 h-4" />
-                <span>Analytics des Dossiers</span>
+                <span className="hidden sm:inline">Analytics des Dossiers</span>
+                <span className="sm:hidden">Analytics</span>
               </motion.button>
             </Link>
             <motion.button
               onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors w-full sm:w-auto"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm lg:px-4 lg:text-base rounded-lg flex items-center justify-center gap-2 transition-colors w-full sm:w-auto"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -258,7 +245,7 @@ export default function Dashboard() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+      <main className="flex-1 overflow-y-auto p-4 lg:p-6">
         <DragDropDashboard
           folders={folders}
           unorganizedLinks={links}
@@ -272,10 +259,8 @@ export default function Dashboard() {
           onDeleteLink={handleDelete}
           onMoveLink={handleMoveLink}
           onCreateFolder={() => {
-            console.log('📁 [DASHBOARD] Bouton créer dossier cliqué')
             setShowEditFolderModal(true)
             setEditingFolder(null)
-            console.log('📁 [DASHBOARD] Modal EditFolderModal ouvert avec editingFolder=null')
           }}
           onEditFolder={(folder) => {
             setEditingFolder(folder)
@@ -352,28 +337,31 @@ export default function Dashboard() {
               await refreshLinks()
             }}
             onLiveUpdate={(linkData) => {
-              setLiveEditingLink(linkData as LinkType)
+              // Forcer une nouvelle référence pour déclencher le re-render
+              setLiveEditingLink({ ...linkData } as LinkType)
               if (updateLinkInPreview) updateLinkInPreview(linkData)
             }}
           />
           
-          <div className="hidden xl:block">
-            <EditPhonePreview
-              isVisible={showEditModal}
-              user={userProfile ? {
-                name: userProfile.name,
-                username: userProfile.username,
-                image: userProfile.image,
-                bio: userProfile.bio
-              } : {
-                name: 'Chargement...',
-                username: 'user',
-                image: null,
-                bio: ''
-              }}
-              links={liveEditingLink ? [liveEditingLink] : []}
-            />
-          </div>
+          {!editingLink?.isDirect && (
+            <div className="hidden xl:block">
+              <EditPhonePreview
+                isVisible={showEditModal}
+                user={userProfile ? {
+                  name: userProfile.name,
+                  username: userProfile.username,
+                  image: userProfile.image,
+                  bio: userProfile.bio
+                } : {
+                  name: 'Chargement...',
+                  username: 'user',
+                  image: null,
+                  bio: ''
+                }}
+                links={liveEditingLink ? [liveEditingLink] : []}
+              />
+            </div>
+          )}
         </>
       )}
 

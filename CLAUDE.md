@@ -1,11 +1,11 @@
-# Memory Bank - Projet Link Shortener
+# Memory Bank - Projet TapLinkr
 
 ## Informations utilisateur
 - **Nom** : Flore
 - **Environnement** : Windows avec WSL Ubuntu
 
 ## Contexte du projet
-- **Type** : Application de raccourcissement de liens (Link Shortener)
+- **Type** : Plateforme mobile-first de pages bio interactives
 - **Stack technique** : 
   - Next.js 14.2.0
   - TypeScript
@@ -15,8 +15,9 @@
   - React 18.3.0
   
 ## État actuel
-- Application en développement actif avec de nombreux fichiers modifiés
-- Nouvelles fonctionnalités ajoutées récemment : OAuth Google, vérification email, admin panel
+- Application rebrandée vers TapLinkr.com
+- Focus mobile-first : « One tap, tout accessible »
+- Fonctionnalités : Pages bio interactives, analytics temps réel, monétisation
 - Dossier de travail : /mnt/d/OFM/link/get/Nouveau dossier/V3
 
 ## Commandes utiles

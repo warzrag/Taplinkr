@@ -2,15 +2,21 @@ import Providers from '@/components/Providers'
 import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import './globals.css'
+import '../styles/theme-transitions.css'
 
 export const metadata = {
-  title: 'LinkTracker - Smart Link Management & Analytics',
-  description: 'Create, organize and track your links with powerful analytics and insights',
+  title: 'TapLinkr - Tap Into Your Digital World',
+  description: 'Create a beautiful mobile-first bio page to share all your social links with just one tap',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'LinkTracker'
+    title: 'TapLinkr'
+  },
+  icons: {
+    icon: '/final.png',
+    shortcut: '/final.png',
+    apple: '/final.png'
   }
 }
 
@@ -31,10 +37,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/final.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="LinkTracker" />
+        <meta name="apple-mobile-web-app-title" content="TapLinkr" />
       </head>
       <body className="h-full bg-gray-50 dark:bg-gray-900 antialiased transition-colors duration-300">
         <ThemeProvider>

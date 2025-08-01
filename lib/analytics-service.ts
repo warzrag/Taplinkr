@@ -1,5 +1,6 @@
 import { prisma } from './prisma'
 import { headers } from 'next/headers'
+import { getGeoData, parseUserAgent, parseReferer, parseUTMParams } from './geo-service'
 
 interface AnalyticsData {
   linkId: string
@@ -30,10 +31,19 @@ interface LocationInfo {
 export class AnalyticsService {
   async trackEvent(data: AnalyticsData): Promise<void> {
     try {
-      const deviceInfo = this.parseUserAgent(data.request.userAgent || '')
-      const utmParams = this.parseUTMParams(data.request.url || '')
+      // Parser les informations de l'appareil
+      const deviceInfo = parseUserAgent(data.request.userAgent || '')
       
-      // Create analytics event
+      // Parser les paramètres UTM
+      const utmParams = parseUTMParams(data.request.url || '')
+      
+      // Parser le referer
+      const refererInfo = parseReferer(data.request.referer || null)
+      
+      // Obtenir les données géographiques
+      const geoData = await getGeoData(data.request.ip || 'unknown')
+      
+      // Create analytics event avec toutes les données réelles
       await prisma.analyticsEvent.create({
         data: {
           linkId: data.linkId,
@@ -41,15 +51,20 @@ export class AnalyticsService {
           eventType: data.eventType,
           ip: data.request.ip,
           userAgent: data.request.userAgent,
-          referer: data.request.referer,
+          referer: refererInfo.domain,
+          country: geoData.country,
+          region: geoData.region,
+          city: geoData.city,
+          latitude: geoData.latitude,
+          longitude: geoData.longitude,
           device: deviceInfo.device,
           browser: deviceInfo.browser,
           os: deviceInfo.os,
-          utmSource: utmParams.source,
-          utmMedium: utmParams.medium,
-          utmCampaign: utmParams.campaign,
-          utmTerm: utmParams.term,
-          utmContent: utmParams.content,
+          utmSource: utmParams.utmSource || refererInfo.source,
+          utmMedium: utmParams.utmMedium || refererInfo.medium,
+          utmCampaign: utmParams.utmCampaign,
+          utmTerm: utmParams.utmTerm,
+          utmContent: utmParams.utmContent,
         }
       })
 
@@ -255,10 +270,29 @@ export class AnalyticsService {
       }
     })
 
+    const totalViews = await prisma.analyticsEvent.count({
+      where: {
+        userId,
+        eventType: 'view',
+        createdAt: { gte: thirtyDaysAgo }
+      }
+    })
+
     const previousPeriodClicks = await prisma.analyticsEvent.count({
       where: {
         userId,
         eventType: 'click',
+        createdAt: { 
+          gte: sixtyDaysAgo,
+          lt: thirtyDaysAgo
+        }
+      }
+    })
+
+    const previousPeriodViews = await prisma.analyticsEvent.count({
+      where: {
+        userId,
+        eventType: 'view',
         createdAt: { 
           gte: sixtyDaysAgo,
           lt: thirtyDaysAgo
@@ -313,11 +347,18 @@ export class AnalyticsService {
       ? ((totalClicks - previousPeriodClicks) / previousPeriodClicks * 100).toFixed(1)
       : 0
 
+    const viewsGrowthRate = previousPeriodViews > 0 
+      ? ((totalViews - previousPeriodViews) / previousPeriodViews * 100).toFixed(1)
+      : 0
+
     return {
       totalLinks,
       totalClicks,
+      totalViews,
       previousPeriodClicks,
+      previousPeriodViews,
       growthRate: parseFloat(growthRate.toString()),
+      viewsGrowthRate: parseFloat(viewsGrowthRate.toString()),
       dailyStats,
       topLinks,
       advancedStats: stats,

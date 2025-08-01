@@ -9,7 +9,6 @@ import {
 
 interface FolderAnalyticsData {
   totalClicks: number
-  totalViews: number
   growthRate: number
   topLink?: {
     title: string
@@ -17,7 +16,7 @@ interface FolderAnalyticsData {
   }
   peakHour?: number
   lastActivity?: string
-  engagementRate?: number
+  linksCount?: number
 }
 
 interface FolderAnalyticsTooltipProps {
@@ -55,20 +54,6 @@ export default function FolderAnalyticsTooltip({
       }
     } catch (error) {
       console.error('Erreur lors du chargement des analytics:', error)
-      // Données simulées en cas d'erreur
-      const simulatedData = {
-        totalClicks: Math.floor(Math.random() * 500) + 50,
-        totalViews: Math.floor(Math.random() * 800) + 100,
-        growthRate: Math.floor(Math.random() * 40) - 20,
-        topLink: {
-          title: "Lien principal",
-          clicks: Math.floor(Math.random() * 100) + 10
-        },
-        peakHour: Math.floor(Math.random() * 24),
-        lastActivity: "Il y a 2h",
-        engagementRate: Math.floor(Math.random() * 30) + 60
-      }
-      setData(simulatedData)
     } finally {
       setLoading(false)
     }
@@ -126,45 +111,27 @@ export default function FolderAnalyticsTooltip({
             </div>
           ) : data ? (
             <div className="space-y-3">
-              {/* Stats principales */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <MousePointer className="w-4 h-4 text-blue-600" />
-                    <span className="text-xs font-medium text-blue-700">Clics</span>
+              {/* Stat principale */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <MousePointer className="w-4 h-4 text-blue-600" />
+                      <span className="text-xs font-medium text-blue-700">Total des clics</span>
+                    </div>
+                    <p className="text-2xl font-bold text-blue-900">{data.totalClicks.toLocaleString()}</p>
                   </div>
-                  <p className="text-lg font-bold text-blue-900">{data.totalClicks.toLocaleString()}</p>
-                </div>
-                
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <Eye className="w-4 h-4 text-purple-600" />
-                    <span className="text-xs font-medium text-purple-700">Vues</span>
-                  </div>
-                  <p className="text-lg font-bold text-purple-900">{data.totalViews.toLocaleString()}</p>
+                  {data.linksCount && (
+                    <div className="text-right">
+                      <p className="text-xs text-blue-600">{data.linksCount} liens</p>
+                      <p className="text-xs text-blue-700 font-medium">
+                        ~{Math.round(data.totalClicks / data.linksCount)} clics/lien
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Engagement Rate */}
-              {data.engagementRate && (
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Users className="w-4 h-4 text-emerald-600" />
-                      <span className="text-xs font-medium text-emerald-700">Taux d'engagement</span>
-                    </div>
-                    <span className="text-lg font-bold text-emerald-900">{data.engagementRate}%</span>
-                  </div>
-                  <div className="mt-2 bg-emerald-200 rounded-full h-2">
-                    <motion.div
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-2 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${data.engagementRate}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* Top Link */}
               {data.topLink && (

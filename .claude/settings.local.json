@@ -46,7 +46,17 @@
       "Bash(sed:*)",
       "Bash(git add:*)",
       "WebFetch(domain:getallmylinks.com)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "WebFetch(domain:instantdomainsearch.com)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_install",
+      "WebFetch(domain:www.namecheap.com)",
+      "WebFetch(domain:www.godaddy.com)",
+      "WebFetch(domain:who.is)",
+      "WebFetch(domain:brandsnag.com)",
+      "Bash(cd:*)",
+      "Bash(cp:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

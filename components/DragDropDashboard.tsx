@@ -231,12 +231,14 @@ function SortableLink({
   link, 
   onToggle, 
   onEdit, 
-  onDelete 
+  onDelete,
+  onRemoveFromFolder 
 }: {
   link: LinkType
   onToggle: (id: string, isActive: boolean) => void
   onEdit: (link: LinkType) => void
   onDelete: (id: string) => void
+  onRemoveFromFolder?: (linkId: string) => void
 }) {
   const {
     attributes,
@@ -265,6 +267,7 @@ function SortableLink({
         onToggle={onToggle}
         onEdit={onEdit}
         onDelete={onDelete}
+        onRemoveFromFolder={onRemoveFromFolder}
         isDragging={isDragging}
         listeners={listeners}
         attributes={attributes}
@@ -647,6 +650,11 @@ export default function DragDropDashboard({
                       onToggle={onToggleLink}
                       onEdit={onEditLink}
                       onDelete={onDeleteLink}
+                      onRemoveFromFolder={async (linkId) => {
+                        await onMoveLink(linkId, null)
+                        refreshLinksContext()
+                        toast.success('Lien retiré du dossier')
+                      }}
                     />
                   ))}
                 </div>
@@ -822,6 +830,7 @@ export default function DragDropDashboard({
 
           <motion.div
             id="unorganized"
+            data-type="droppable"
             className={`min-h-[300px] rounded-2xl transition-all duration-300 ${
               overId === 'unorganized' 
                 ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg scale-[1.01]' 

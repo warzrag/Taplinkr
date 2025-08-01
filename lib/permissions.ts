@@ -1,5 +1,5 @@
 export type UserRole = 'user' | 'admin'
-export type UserPlan = 'free' | 'pro' | 'business'
+export type UserPlan = 'free' | 'standard' | 'premium'
 
 export interface UserPermissions {
   role: UserRole
@@ -25,36 +25,62 @@ export interface PlanLimits {
   hasQRCode: boolean
   hasCustomQRCode: boolean
   hasPrioritySupport: boolean
+  hasProfileImage: boolean
+  hasCoverImage: boolean
+  hasCustomFonts: boolean
+  hasSocialMedia: boolean
+  hasLocationDisplay: boolean
+  hasOnlineStatus: boolean
+  hasCustomIcons: boolean
+  hasEmailCapture: boolean
+  hasPasswordProtection: boolean
+  hasExpirationDate: boolean
+  hasUltraLink: boolean
+  hasShieldLink: boolean
+  hasAdvancedCustomization: boolean
 }
 
 export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
   free: {
     maxPages: 1,
-    maxLinksPerPage: 10,
-    maxFolders: 3,
+    maxLinksPerPage: 5,
+    maxFolders: 0,
     hasAnalytics: true, // Basic analytics only
     hasAdvancedAnalytics: false,
     hasCustomThemes: false,
     hasPremiumThemes: false,
-    hasAnimations: false,
+    hasAnimations: true, // Toutes les animations disponibles
     hasIntegrations: false,
     hasCustomDomain: false,
     hasApiAccess: false,
     hasWhiteLabel: false,
     hasTeamMembers: false,
     maxTeamMembers: 0,
-    hasQRCode: true, // Basic QR code
+    hasQRCode: false,
     hasCustomQRCode: false,
     hasPrioritySupport: false,
+    hasProfileImage: true, // Photo de profil disponible
+    hasCoverImage: true, // Photo de couverture disponible
+    hasCustomFonts: false,
+    hasSocialMedia: false,
+    hasLocationDisplay: false,
+    hasOnlineStatus: false,
+    hasCustomIcons: false,
+    hasEmailCapture: false,
+    hasPasswordProtection: false,
+    hasExpirationDate: false,
+    hasUltraLink: false,
+    hasShieldLink: false,
+    hasAdvancedCustomization: false,
   },
-  pro: {
+  standard: {
     maxPages: -1, // Unlimited
     maxLinksPerPage: -1, // Unlimited
     maxFolders: -1, // Unlimited
     hasAnalytics: true,
     hasAdvancedAnalytics: true,
     hasCustomThemes: true,
-    hasPremiumThemes: true,
+    hasPremiumThemes: false,
     hasAnimations: true,
     hasIntegrations: true,
     hasCustomDomain: false,
@@ -64,9 +90,22 @@ export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
     maxTeamMembers: 0,
     hasQRCode: true,
     hasCustomQRCode: true,
-    hasPrioritySupport: true,
+    hasPrioritySupport: false,
+    hasProfileImage: true,
+    hasCoverImage: true,
+    hasCustomFonts: true,
+    hasSocialMedia: true,
+    hasLocationDisplay: true,
+    hasOnlineStatus: true,
+    hasCustomIcons: true,
+    hasEmailCapture: true,
+    hasPasswordProtection: false,
+    hasExpirationDate: false,
+    hasUltraLink: false,
+    hasShieldLink: false,
+    hasAdvancedCustomization: false,
   },
-  business: {
+  premium: {
     maxPages: -1, // Unlimited
     maxLinksPerPage: -1, // Unlimited
     maxFolders: -1, // Unlimited
@@ -80,10 +119,23 @@ export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
     hasApiAccess: true,
     hasWhiteLabel: true,
     hasTeamMembers: true,
-    maxTeamMembers: 5,
+    maxTeamMembers: 10,
     hasQRCode: true,
     hasCustomQRCode: true,
     hasPrioritySupport: true,
+    hasProfileImage: true,
+    hasCoverImage: true,
+    hasCustomFonts: true,
+    hasSocialMedia: true,
+    hasLocationDisplay: true,
+    hasOnlineStatus: true,
+    hasCustomIcons: true,
+    hasEmailCapture: true,
+    hasPasswordProtection: true,
+    hasExpirationDate: true,
+    hasUltraLink: true,
+    hasShieldLink: true,
+    hasAdvancedCustomization: true,
   },
 }
 
@@ -159,24 +211,50 @@ export function getRemainingLimit(
 
 export function getUpgradeMessage(feature: keyof PlanLimits): string {
   const messages: Record<keyof PlanLimits, string> = {
-    maxPages: 'Passez au plan Pro pour créer des pages illimitées',
-    maxLinksPerPage: 'Passez au plan Pro pour ajouter plus de liens',
-    maxFolders: 'Passez au plan Pro pour créer plus de dossiers',
+    maxPages: 'Passez au plan Standard pour créer des pages illimitées',
+    maxLinksPerPage: 'Passez au plan Standard pour ajouter plus de liens',
+    maxFolders: 'Passez au plan Standard pour créer des dossiers',
     hasAnalytics: 'Cette fonctionnalité nécessite un plan payant',
-    hasAdvancedAnalytics: 'Les analytics avancés nécessitent le plan Pro',
-    hasCustomThemes: 'Les thèmes personnalisés nécessitent le plan Pro',
-    hasPremiumThemes: 'Les thèmes premium nécessitent le plan Pro',
-    hasAnimations: 'Les animations nécessitent le plan Pro',
-    hasIntegrations: 'Les intégrations (YouTube, Spotify) nécessitent le plan Pro',
-    hasCustomDomain: 'Le domaine personnalisé nécessite le plan Business',
-    hasApiAccess: 'L\'accès API nécessite le plan Business',
-    hasWhiteLabel: 'La suppression de la bannière nécessite le plan Pro',
-    hasTeamMembers: 'Les membres d\'équipe nécessitent le plan Business',
-    maxTeamMembers: 'Passez au plan Business pour ajouter plus de membres',
-    hasQRCode: 'Cette fonctionnalité nécessite un plan payant',
-    hasCustomQRCode: 'Les QR codes personnalisés nécessitent le plan Pro',
-    hasPrioritySupport: 'Le support prioritaire nécessite le plan Pro',
+    hasAdvancedAnalytics: 'Les analytics avancés nécessitent le plan Standard',
+    hasCustomThemes: 'Les thèmes personnalisés nécessitent le plan Standard',
+    hasPremiumThemes: 'Les thèmes premium nécessitent le plan Premium',
+    hasAnimations: 'Les animations sont disponibles dans tous les plans',
+    hasIntegrations: 'Les intégrations (YouTube, Spotify) nécessitent le plan Standard',
+    hasCustomDomain: 'Le domaine personnalisé nécessite le plan Premium',
+    hasApiAccess: 'L\'accès API nécessite le plan Premium',
+    hasWhiteLabel: 'La suppression de la bannière nécessite le plan Standard',
+    hasTeamMembers: 'Les membres d\'équipe nécessitent le plan Premium',
+    maxTeamMembers: 'Passez au plan Premium pour ajouter plus de membres',
+    hasQRCode: 'Le code QR nécessite le plan Standard',
+    hasCustomQRCode: 'Les QR codes personnalisés nécessitent le plan Standard',
+    hasPrioritySupport: 'Le support prioritaire nécessite le plan Premium',
+    hasProfileImage: 'La photo de profil est disponible dans tous les plans',
+    hasCoverImage: 'La photo de couverture est disponible dans tous les plans',
+    hasCustomFonts: 'Les polices personnalisées nécessitent le plan Standard',
+    hasSocialMedia: 'Les réseaux sociaux nécessitent le plan Standard',
+    hasLocationDisplay: 'L\'affichage de la localisation nécessite le plan Standard',
+    hasOnlineStatus: 'Le statut en ligne nécessite le plan Standard',
+    hasCustomIcons: 'Les icônes personnalisées nécessitent le plan Standard',
+    hasEmailCapture: 'La capture d\'email nécessite le plan Standard',
+    hasPasswordProtection: 'La protection par mot de passe nécessite le plan Premium',
+    hasExpirationDate: 'La date d\'expiration nécessite le plan Premium',
+    hasUltraLink: 'Ultra Link nécessite le plan Premium',
+    hasShieldLink: 'Shield Link nécessite le plan Premium',
+    hasAdvancedCustomization: 'La personnalisation avancée nécessite le plan Premium',
   }
 
   return messages[feature] || 'Cette fonctionnalité nécessite un plan supérieur'
+}
+
+// Utilitaire pour obtenir les permissions d'un utilisateur
+export function getUserPermissions(user: {
+  role: string;
+  plan: string;
+  planExpiresAt?: Date | null;
+}): UserPermissions {
+  return {
+    role: user.role as UserRole,
+    plan: user.plan as UserPlan,
+    planExpiresAt: user.planExpiresAt
+  }
 }

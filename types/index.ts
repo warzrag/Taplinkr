@@ -4,6 +4,7 @@ export interface MultiLink {
   url: string
   description?: string
   icon?: string
+  iconImage?: string
   animation?: string
   order: number
   clicks: number
@@ -19,6 +20,7 @@ export interface Link {
   color?: string
   icon?: string
   coverImage?: string
+  coverImagePosition?: string
   profileImage?: string
   fontFamily?: string
   borderRadius?: string
@@ -27,6 +29,16 @@ export interface Link {
   isActive: boolean
   isDirect: boolean
   directUrl?: string
+  shieldEnabled?: boolean
+  isUltraLink?: boolean
+  shieldConfig?: string
+  isOnline?: boolean
+  city?: string
+  country?: string
+  instagramUrl?: string
+  tiktokUrl?: string
+  twitterUrl?: string
+  youtubeUrl?: string
   order: number
   clicks: number
   createdAt: string

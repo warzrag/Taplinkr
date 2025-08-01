@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, BarChart3, Shield, Sparkles, Folder, Link2 } from 'lucide-react'
 import ThemeToggle from '@/components/ThemeToggle'
+import LinkLogo from '@/components/LinkLogo'
+import LinkLogoHero from '@/components/LinkLogoHero'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -69,42 +71,28 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            {/* Logo */}
+            {/* Logo Hero */}
             <motion.div 
-              className="flex justify-center mb-8"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="mb-16"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1 }}
             >
-              <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl">
-                  <span className="text-4xl font-bold text-white">G</span>
-                </div>
-                <motion.div
-                  className="absolute -top-2 -right-2"
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                >
-                  <Sparkles className="w-6 h-6 text-yellow-500" />
-                </motion.div>
-              </div>
+              <LinkLogoHero />
             </motion.div>
 
             {/* Title */}
-            <motion.h1 
-              className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
+
+            <motion.h2 
+              className="text-3xl md:text-4xl font-bold mb-6 leading-tight"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
             >
-              <span className="bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
-                LinkTracker
-              </span>
-              <br />
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Smart Link Management
+                Bienvenue sur TapLinkr 🚀
               </span>
-            </motion.h1>
+            </motion.h2>
 
             {/* Subtitle */}
             <motion.p 
@@ -113,8 +101,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
             >
-              Organisez, suivez et analysez vos liens avec des analytics puissants. 
-              Créez des dossiers intelligents et suivez vos performances en temps réel.
+              Créez une magnifique page bio mobile-first pour partager tous vos liens sociaux. Un simple tap suffit à vos visiteurs pour accéder à votre univers digital.
             </motion.p>
 
             {/* Feature Pills */}
@@ -177,7 +164,7 @@ export default function Home() {
             >
               Voir un exemple :{' '}
               <Link href="/demo" className="text-blue-600 hover:text-blue-700 font-medium underline underline-offset-4">
-                linktracker.app/demo
+                TapLinkr.com/demo
               </Link>
             </motion.p>
           </motion.div>
@@ -202,10 +189,10 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent mb-4">
-              Pourquoi choisir LinkTracker ?
+              Pourquoi choisir TapLinkr ?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Une solution complète pour centraliser et organiser tous vos liens importants
+              La solution mobile-first pour créer votre hub digital personnel
             </p>
           </motion.div>
 
@@ -213,26 +200,26 @@ export default function Home() {
             {[
               {
                 icon: Folder,
-                title: 'Organisation intelligente',
-                description: 'Créez des dossiers et sous-dossiers pour organiser vos liens comme des fichiers',
+                title: 'Mobile-first design',
+                description: 'Interface optimisée pour mobile où chaque tap compte. Parfait sur tous les écrans.',
                 gradient: 'from-blue-500 to-indigo-600'
               },
               {
                 icon: Link2,
-                title: 'Drag & Drop intuitif',
-                description: 'Déplacez vos liens entre dossiers en glisser-déposer, comme Google Drive',
+                title: 'One tap, tout accessible',
+                description: 'Vos visiteurs accèdent à tous vos contenus en un seul tap. UX pensée mobile.',
                 gradient: 'from-emerald-500 to-teal-600'
               },
               {
                 icon: BarChart3,
-                title: 'Analytics détaillés',
-                description: 'Suivez les clics et analysez les performances de vos liens en temps réel',
+                title: 'Analytics en temps réel',
+                description: 'Suivez chaque tap, analysez le comportement mobile de vos visiteurs',
                 gradient: 'from-purple-500 to-pink-600'
               },
               {
                 icon: Shield,
-                title: 'Protection avancée',
-                description: 'Shield protection contre les bots et système de sécurité robuste',
+                title: 'Pages personnalisables',
+                description: 'Thèmes, couleurs, animations - créez une expérience unique à votre image',
                 gradient: 'from-orange-500 to-red-600'
               }
             ].map((feature, index) => (
@@ -317,7 +304,7 @@ export default function Home() {
             Prêt à créer votre page de liens ?
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Rejoignez des milliers d'utilisateurs qui font confiance à LinkTracker
+            Rejoignez des milliers d'utilisateurs qui font confiance à TapLinkr
           </p>
           <Link 
             href="/auth/signup"
@@ -334,12 +321,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex justify-center mb-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                <span className="text-xl font-bold text-white">G</span>
-              </div>
+              <LinkLogo size="lg" showText={false} animated={false} />
             </div>
             <p className="text-gray-400 mb-6">
-              © 2024 LinkTracker. Tous droits réservés.
+              © 2024 TapLinkr. Tous droits réservés.
             </p>
             <div className="flex justify-center space-x-6">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">

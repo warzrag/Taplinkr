@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type Theme = 'light' | 'dark'
 
@@ -14,6 +15,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
   const [mounted, setMounted] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme
@@ -30,7 +32,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme, mounted])
 
   const toggleTheme = () => {
+    setIsTransitioning(true)
+    
+    // Transition CSS ultra-fluide
+    document.documentElement.style.setProperty('--theme-transition-duration', '300ms')
+    document.documentElement.classList.add('theme-transitioning')
+    
+    // Changement immédiat du thème
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
+    
+    // Nettoyer après la transition
+    setTimeout(() => {
+      setIsTransitioning(false)
+      document.documentElement.classList.remove('theme-transitioning')
+    }, 300)
   }
 
   if (!mounted) {
@@ -41,7 +56,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
+      <div className="theme-wrapper">
+        {/* Transition fluide sans overlay */}
+        
+        {children}
+      </div>
     </ThemeContext.Provider>
   )
 }

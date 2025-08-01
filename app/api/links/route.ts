@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('Received body:', body)
+    
     const { 
       title, 
       description, 
@@ -48,7 +50,16 @@ export async function POST(request: NextRequest) {
       multiLinks,
       isDirect,
       directUrl,
-      slug: customSlug
+      shieldEnabled,
+      isUltraLink,
+      slug: customSlug,
+      isOnline,
+      city,
+      country,
+      instagramUrl,
+      tiktokUrl,
+      twitterUrl,
+      youtubeUrl
     } = body
 
     if (!title) {
@@ -77,6 +88,15 @@ export async function POST(request: NextRequest) {
 
     // Validation selon le type de lien
     if (isDirect) {
+      // Vérifier si l'utilisateur peut créer des liens directs (plan Standard requis)
+      const canCreateDirectLinks = userPermissions.plan === 'standard' || userPermissions.plan === 'premium'
+      if (!canCreateDirectLinks) {
+        return NextResponse.json({ 
+          error: 'Les liens directs nécessitent un plan Standard ou Premium',
+          message: 'Passez à un plan supérieur pour créer des liens directs'
+        }, { status: 403 })
+      }
+      
       // Pour un lien direct, on vérifie l'URL de redirection
       if (!directUrl) {
         return NextResponse.json({ error: 'URL de redirection requise pour un lien direct' }, { status: 400 })
@@ -140,6 +160,15 @@ export async function POST(request: NextRequest) {
       select: { order: true }
     })
 
+    console.log('Creating link with data:', {
+      slug,
+      title,
+      isDirect,
+      directUrl,
+      shieldEnabled,
+      isUltraLink
+    })
+    
     const link = await prisma.link.create({
       data: {
         slug,
@@ -151,7 +180,21 @@ export async function POST(request: NextRequest) {
         order: (maxOrder?.order || 0) + 1,
         userId: session.user.id,
         isDirect: isDirect || false,
-        directUrl: isDirect ? directUrl : null
+        directUrl: isDirect ? directUrl : null,
+        shieldEnabled: isDirect ? (shieldEnabled || false) : false,
+        isUltraLink: isDirect ? (isUltraLink || false) : false,
+        shieldConfig: (isDirect && (shieldEnabled || isUltraLink)) ? JSON.stringify({
+          level: isUltraLink ? 3 : 2,
+          timer: isUltraLink ? 5000 : 3000,
+          features: isUltraLink ? ['adaptive-content', 'domain-rotation', 'js-obfuscation', 'ai-detection'] : ['timer', 'basic-detection']
+        }) : null,
+        isOnline: isOnline || false,
+        city: city || null,
+        country: country || null,
+        instagramUrl: instagramUrl || null,
+        tiktokUrl: tiktokUrl || null,
+        twitterUrl: twitterUrl || null,
+        youtubeUrl: youtubeUrl || null
       }
     })
 

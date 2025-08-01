@@ -15,6 +15,13 @@ export async function PUT(
     }
 
     const body = await request.json()
+    
+    // Log pour debug
+    console.log('Données reçues pour mise à jour:', {
+      id: params.id,
+      body: JSON.stringify(body, null, 2)
+    })
+    
     const { 
       title, 
       slug,
@@ -22,6 +29,7 @@ export async function PUT(
       color, 
       icon, 
       coverImage,
+      coverImagePosition,
       profileImage, 
       isActive,
       fontFamily,
@@ -30,7 +38,16 @@ export async function PUT(
       textColor,
       multiLinks,
       isDirect,
-      directUrl
+      directUrl,
+      shieldEnabled,
+      isUltraLink,
+      isOnline,
+      city,
+      country,
+      instagramUrl,
+      tiktokUrl,
+      twitterUrl,
+      youtubeUrl
     } = body
 
     // Vérifier que le lien appartient à l'utilisateur
@@ -60,6 +77,7 @@ export async function PUT(
             url: ml.url,
             description: ml.description || null,
             icon: ml.icon || null,
+            iconImage: ml.iconImage || null,
             animation: ml.animation || null,
             order: ml.order || index
           }))
@@ -76,6 +94,7 @@ export async function PUT(
         ...(color !== undefined && { color: color || null }),
         ...(icon !== undefined && { icon: icon || null }),
         ...(coverImage !== undefined && { coverImage: coverImage || null }),
+        ...(coverImagePosition !== undefined && { coverImagePosition: coverImagePosition || null }),
         ...(profileImage !== undefined && { profileImage: profileImage || null }),
         ...(fontFamily !== undefined && { fontFamily: fontFamily || null }),
         ...(borderRadius !== undefined && { borderRadius: borderRadius || null }),
@@ -83,7 +102,23 @@ export async function PUT(
         ...(textColor !== undefined && { textColor: textColor || null }),
         ...(isActive !== undefined && { isActive }),
         ...(isDirect !== undefined && { isDirect }),
-        ...(directUrl !== undefined && { directUrl: directUrl || null })
+        ...(directUrl !== undefined && { directUrl: directUrl || null }),
+        ...(shieldEnabled !== undefined && { shieldEnabled: isDirect ? shieldEnabled : false }),
+        ...(isUltraLink !== undefined && { isUltraLink: isDirect ? isUltraLink : false }),
+        ...(isOnline !== undefined && { isOnline }),
+        ...(city !== undefined && { city: city || null }),
+        ...(country !== undefined && { country: country || null }),
+        ...(instagramUrl !== undefined && { instagramUrl: instagramUrl || null }),
+        ...(tiktokUrl !== undefined && { tiktokUrl: tiktokUrl || null }),
+        ...(twitterUrl !== undefined && { twitterUrl: twitterUrl || null }),
+        ...(youtubeUrl !== undefined && { youtubeUrl: youtubeUrl || null }),
+        ...((shieldEnabled !== undefined || isUltraLink !== undefined) && {
+          shieldConfig: (isDirect && (shieldEnabled || isUltraLink)) ? JSON.stringify({
+            level: isUltraLink ? 3 : 2,
+            timer: isUltraLink ? 5000 : 3000,
+            features: isUltraLink ? ['adaptive-content', 'domain-rotation', 'js-obfuscation', 'ai-detection'] : ['timer', 'basic-detection']
+          }) : null
+        })
       },
       include: {
         multiLinks: {
@@ -95,7 +130,15 @@ export async function PUT(
     return NextResponse.json(link)
   } catch (error) {
     console.error('Erreur lors de la mise à jour du lien:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    // Afficher plus de détails sur l'erreur
+    if (error instanceof Error) {
+      console.error('Message d\'erreur:', error.message)
+      console.error('Stack trace:', error.stack)
+    }
+    return NextResponse.json({ 
+      error: 'Erreur serveur',
+      details: error instanceof Error ? error.message : 'Erreur inconnue'
+    }, { status: 500 })
   }
 }
 

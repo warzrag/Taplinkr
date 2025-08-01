@@ -96,6 +96,24 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshAll()
+    
+    // Rafraîchir les liens toutes les 5 secondes pour capturer les nouveaux clics
+    const interval = setInterval(() => {
+      fetchLinks() // Pas de log pour éviter de polluer la console
+    }, 5000) // 5 secondes
+    
+    // Rafraîchir quand on revient sur l'onglet
+    const handleFocus = () => {
+      console.log('🔄 Onglet actif - Rafraîchissement des liens')
+      fetchLinks()
+    }
+    
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [])
 
   // Effect pour surveiller les changements

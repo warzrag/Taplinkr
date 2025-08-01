@@ -13,6 +13,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/admin') ||
     pathname.startsWith('/link/') ||
     pathname.startsWith('/redirect/') ||
+    pathname.startsWith('/shield/') ||
     pathname.startsWith('/settings') ||
     pathname.startsWith('/pricing') ||
     pathname.startsWith('/checkout') ||
