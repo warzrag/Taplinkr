@@ -106,24 +106,44 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7) // Expire dans 7 jours
 
-    const invitation = await prisma.teamInvitation.create({
-      data: {
-        teamId: team.id,
-        email,
-        role,
-        token,
-        invitedById: session.user.id,
-        expiresAt
-      },
-      include: {
-        team: {
-          select: { name: true }
-        },
-        invitedBy: {
-          select: { name: true, email: true }
+    // Créer l'invitation sans la relation user
+    let invitation
+    try {
+      // D'abord créer l'invitation basique
+      invitation = await prisma.teamInvitation.create({
+        data: {
+          teamId: team.id,
+          email,
+          role,
+          token,
+          invitedById: session.user.id,
+          expiresAt
         }
+      })
+      
+      // Puis récupérer avec les relations nécessaires
+      invitation = await prisma.teamInvitation.findUnique({
+        where: { id: invitation.id },
+        include: {
+          team: {
+            select: { name: true }
+          },
+          invitedBy: {
+            select: { name: true, email: true }
+          }
+        }
+      })
+    } catch (createError: any) {
+      console.error('Erreur création invitation:', createError)
+      // Si c'est une erreur de contrainte, essayer sans relations
+      if (createError.code === 'P2003') {
+        return NextResponse.json({ 
+          error: 'L\'utilisateur invité doit d\'abord créer un compte sur TapLinkr',
+          details: 'Demandez à la personne de s\'inscrire avec l\'email ' + email
+        }, { status: 400 })
       }
-    })
+      throw createError
+    }
 
     // Envoyer l'email d'invitation
     try {
