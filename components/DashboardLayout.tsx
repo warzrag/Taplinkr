@@ -12,7 +12,12 @@ import {
   Menu,
   X,
   CreditCard,
-  Users
+  Users,
+  ExternalLink,
+  Gift,
+  HelpCircle,
+  Map,
+  MessageCircle
 } from 'lucide-react'
 import LinkLogo from '@/components/LinkLogo'
 import LivePhonePreview from '@/components/LivePhonePreview'
@@ -64,19 +69,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [session])
 
-  const sidebarItems = [
+  // Control Panel Section
+  const controlPanelItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-    { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' },
-    { icon: Users, label: 'Équipe', href: '/dashboard/team' },
-    { icon: CreditCard, label: 'Tarifs', href: '/dashboard/pricing' },
-    { icon: Shield, label: 'Protection', href: '/dashboard/protection' },
-    { icon: Settings, label: 'Paramètres', href: '/settings' },
+    { icon: ExternalLink, label: 'Links', href: '/dashboard/links' },
+    { icon: BarChart3, label: 'Social Analytics', href: '/dashboard/analytics' },
+    { icon: Users, label: 'Teams', href: '/dashboard/teams' },
+  ]
+
+  // Account Section
+  const accountItems = [
+    { icon: User, label: 'Profile', href: '/settings' },
+    { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
+    { icon: Gift, label: 'Affiliates Program', href: '/dashboard/affiliates' },
+    { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
+  ]
+
+  // Help Section
+  const helpItems = [
+    { icon: HelpCircle, label: 'FAQ', href: '/dashboard/faq' },
+    { icon: Map, label: 'Roadmap', href: '/dashboard/roadmap' },
+    { icon: MessageCircle, label: 'Support', href: '/dashboard/support' },
   ]
   
-  // Ajouter le menu Admin si l'utilisateur est admin
-  if (session?.user?.role === 'admin') {
-    sidebarItems.push({ icon: Shield, label: 'Admin', href: '/admin' })
-  }
+  // Admin section (if applicable)
+  const adminItems = session?.user?.role === 'admin' 
+    ? [{ icon: Shield, label: 'Admin', href: '/admin' }]
+    : []
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -116,25 +135,112 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
-          {sidebarItems.map((item) => {
-            const active = isActive(item.href)
-            
-            return (
-              <button
-                key={item.label}
-                onClick={() => router.push(item.href)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                  active 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800' 
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </button>
-            )
-          })}
+        <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+          {/* Control Panel Section */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
+              Control Panel
+            </h3>
+            <div className="space-y-1">
+              {controlPanelItems.map((item) => {
+                const active = isActive(item.href)
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => router.push(item.href)}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                      active 
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Account Section */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
+              Account
+            </h3>
+            <div className="space-y-1">
+              {accountItems.map((item) => {
+                const active = isActive(item.href)
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => router.push(item.href)}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                      active 
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Help Section */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
+              Help
+            </h3>
+            <div className="space-y-1">
+              {helpItems.map((item) => {
+                const active = isActive(item.href)
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => router.push(item.href)}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                      active 
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Admin Section (if applicable) */}
+          {adminItems.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
+                Administration
+              </h3>
+              <div className="space-y-1">
+                {adminItems.map((item) => {
+                  const active = isActive(item.href)
+                  return (
+                    <button
+                      key={item.label}
+                      onClick={() => router.push(item.href)}
+                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                        active 
+                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </nav>
 
         {/* User section */}
