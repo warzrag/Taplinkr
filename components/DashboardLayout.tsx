@@ -79,7 +79,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Account Section
   const accountItems = [
-    { icon: User, label: 'Profile', href: '/settings/profile' },
+    { icon: User, label: 'Profile', href: '/profile' },
     { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
     { icon: Gift, label: 'Affiliates Program', href: '/dashboard/affiliates' },
     { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
