@@ -72,6 +72,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: Shield, label: 'Protection', href: '/dashboard/protection' },
     { icon: Settings, label: 'Paramètres', href: '/settings' },
   ]
+  
+  // Ajouter le menu Admin si l'utilisateur est admin
+  if (session?.user?.role === 'admin') {
+    sidebarItems.push({ icon: Shield, label: 'Admin', href: '/admin' })
+  }
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
