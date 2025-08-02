@@ -129,6 +129,13 @@ export default function TeamPage() {
     e.preventDefault()
     setInviteLoading(true)
     
+    console.log('Tentative d\'invitation:', {
+      teamId: team?.id,
+      email: inviteEmail,
+      role: inviteRole,
+      team: team
+    })
+    
     try {
       const response = await fetch('/api/teams/invite', {
         method: 'POST',
@@ -141,7 +148,10 @@ export default function TeamPage() {
       })
       
       const data = await response.json()
+      console.log('Réponse de l\'API:', { ok: response.ok, status: response.status, data })
+      
       if (!response.ok) {
+        console.error('Erreur invitation:', data)
         throw new Error(data.error || 'Erreur lors de l\'invitation')
       }
       
