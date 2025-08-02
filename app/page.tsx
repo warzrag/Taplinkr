@@ -9,7 +9,6 @@ import {
   ArrowRight, 
   Check, 
   X, 
-  Sparkles, 
   Shield, 
   Zap, 
   BarChart3,
@@ -28,6 +27,7 @@ import {
   Heart
 } from 'lucide-react'
 import { debounce } from 'lodash'
+import Logo from '@/components/Logo'
 
 const features = [
   {
@@ -172,14 +172,7 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                TapLinkr
-              </span>
-            </div>
+            <Logo size="sm" animated={false} />
             
             <nav className="hidden md:flex items-center gap-6">
               <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
@@ -461,12 +454,7 @@ export default function Home() {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold">TapLinkr</span>
-            </div>
+            <Logo size="sm" showText={true} animated={false} />
             
             <p className="text-gray-400 text-sm">
               © 2024 TapLinkr. Tous droits réservés.

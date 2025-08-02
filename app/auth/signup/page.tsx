@@ -14,7 +14,6 @@ import {
   User, 
   Mail, 
   Lock, 
-  Sparkles, 
   CheckCircle,
   Shield,
   Zap,
@@ -24,6 +23,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import Logo from '@/components/Logo'
 
 interface FormData {
   name: string
@@ -139,8 +139,8 @@ export default function SignUp() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center mb-10"
             >
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl shadow-xl mb-4">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="mb-4 flex justify-center">
+                <Logo size="lg" showText={false} />
               </div>
               <h1 className="text-3xl font-bold text-gray-900">Créer votre compte</h1>
               <p className="text-gray-600 mt-2">
