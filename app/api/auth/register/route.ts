@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { nanoid } from 'nanoid'
-// Utiliser Resend si la clé API est configurée, sinon utiliser nodemailer
-const emailModule = process.env.RESEND_API_KEY 
-  ? require('@/lib/email-resend')
-  : require('@/lib/email')
-const { sendEmail, getVerificationEmailTemplate } = emailModule
+// Email temporairement désactivé
+// const emailModule = process.env.RESEND_API_KEY 
+//   ? require('@/lib/email-resend')
+//   : require('@/lib/email')
+// const { sendEmail, getVerificationEmailTemplate } = emailModule
 
 export async function POST(request: NextRequest) {
   try {
