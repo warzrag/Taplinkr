@@ -1,64 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
-// GET /api/teams/join/[token] - Récupérer les détails de l'invitation
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { token: string } }
-) {
-  try {
-    const { token } = params
-
-    const invitation = await prisma.teamInvitation.findUnique({
-      where: { token },
-      include: {
-        team: {
-          select: { id: true, name: true, description: true }
-        },
-        invitedBy: {
-          select: { name: true, email: true }
-        }
-      }
-    })
-
-    if (!invitation) {
-      return NextResponse.json({ error: 'Invitation non trouvée' }, { status: 404 })
-    }
-
-    if (invitation.status !== 'pending') {
-      return NextResponse.json({ error: 'Invitation déjà utilisée' }, { status: 400 })
-    }
-
-    if (new Date() > invitation.expiresAt) {
-      return NextResponse.json({ error: 'Invitation expirée' }, { status: 400 })
-    }
-
-    return NextResponse.json({ invitation })
-  } catch (error) {
-    console.error('Erreur lors de la récupération de l\'invitation:', error)
-    return NextResponse.json(
-      { error: 'Erreur lors de la récupération de l\'invitation' },
-      { status: 500 }
-    )
-  }
-}
-
-// POST /api/teams/join/[token] - Accepter l'invitation
+// POST /api/teams/join/[token] - Accepter une invitation et créer un compte
 export async function POST(
   request: NextRequest,
   { params }: { params: { token: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    const { token } = params
+    const body = await request.json()
+    const { name, password } = body
+
+    if (!token) {
+      return NextResponse.json({ error: 'Token manquant' }, { status: 400 })
     }
 
-    const { token } = params
+    if (!name || !password) {
+      return NextResponse.json({ error: 'Nom et mot de passe requis' }, { status: 400 })
+    }
 
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'Le mot de passe doit contenir au moins 8 caractères' }, { status: 400 })
+    }
+
+    // Rechercher l'invitation
     const invitation = await prisma.teamInvitation.findUnique({
       where: { token },
       include: {
@@ -67,49 +33,61 @@ export async function POST(
     })
 
     if (!invitation) {
-      return NextResponse.json({ error: 'Invitation non trouvée' }, { status: 404 })
+      return NextResponse.json({ error: 'Invitation invalide' }, { status: 404 })
     }
 
+    // Vérifier le statut et l'expiration
     if (invitation.status !== 'pending') {
-      return NextResponse.json({ error: 'Invitation déjà utilisée' }, { status: 400 })
+      return NextResponse.json({ error: 'Cette invitation a déjà été utilisée' }, { status: 400 })
     }
 
     if (new Date() > invitation.expiresAt) {
-      return NextResponse.json({ error: 'Invitation expirée' }, { status: 400 })
+      return NextResponse.json({ error: 'Cette invitation a expiré' }, { status: 400 })
     }
 
-    // Vérifier que l'email correspond à l'utilisateur connecté
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+    // Vérifier si l'utilisateur existe déjà
+    const existingUser = await prisma.user.findUnique({
+      where: { email: invitation.email }
     })
 
-    if (!user || user.email !== invitation.email) {
+    if (existingUser) {
       return NextResponse.json({ 
-        error: 'Email incorrect',
-        message: 'Cette invitation est destinée à un autre email' 
+        error: 'Un compte existe déjà avec cet email. Veuillez vous connecter.' 
       }, { status: 400 })
     }
 
-    // Vérifier que l'utilisateur n'est pas déjà dans une équipe
-    if (user.teamId) {
-      return NextResponse.json({ 
-        error: 'Déjà dans une équipe',
-        message: 'Vous devez quitter votre équipe actuelle avant de rejoindre une nouvelle équipe'
-      }, { status: 400 })
+    // Hasher le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10)
+    
+    // Générer un username unique basé sur l'email
+    const baseUsername = invitation.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
+    let username = baseUsername
+    let counter = 1
+    
+    while (await prisma.user.findUnique({ where: { username } })) {
+      username = `${baseUsername}${counter}`
+      counter++
     }
 
-    // Transaction pour rejoindre l'équipe
-    await prisma.$transaction(async (tx) => {
-      // Mettre à jour l'utilisateur
-      await tx.user.update({
-        where: { id: session.user.id },
+    // Créer le compte et l'ajouter à l'équipe dans une transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Créer l'utilisateur
+      const user = await tx.user.create({
         data: {
+          email: invitation.email,
+          name,
+          username,
+          password: hashedPassword,
+          emailVerified: new Date(), // Email vérifié automatiquement via invitation
           teamId: invitation.teamId,
-          teamRole: invitation.role
+          teamRole: invitation.role,
+          // Abonnement gratuit par défaut
+          subscription: 'free',
+          subscriptionStatus: 'active'
         }
       })
 
-      // Marquer l'invitation comme acceptée
+      // Mettre à jour l'invitation
       await tx.teamInvitation.update({
         where: { id: invitation.id },
         data: {
@@ -117,20 +95,36 @@ export async function POST(
           acceptedAt: new Date()
         }
       })
+
+      // Créer le profil utilisateur
+      await tx.userProfile.create({
+        data: {
+          userId: user.id,
+          bio: `Membre de l'équipe ${invitation.team.name}`,
+          theme: 'gradient',
+          primaryColor: '#3b82f6',
+          secondaryColor: '#8b5cf6'
+        }
+      })
+
+      return user
     })
 
     return NextResponse.json({ 
       success: true,
-      team: {
-        id: invitation.team.id,
-        name: invitation.team.name,
-        role: invitation.role
+      message: 'Compte créé et équipe rejointe avec succès',
+      user: {
+        id: result.id,
+        email: result.email,
+        name: result.name,
+        username: result.username,
+        teamRole: result.teamRole
       }
     })
   } catch (error) {
-    console.error('Erreur lors de l\'acceptation de l\'invitation:', error)
+    console.error('Erreur acceptation invitation:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de l\'acceptation de l\'invitation' },
+      { error: 'Erreur lors de la création du compte' },
       { status: 500 }
     )
   }

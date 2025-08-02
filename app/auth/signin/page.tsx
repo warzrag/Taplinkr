@@ -20,7 +20,7 @@ export default function SignIn() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<FormData>()
 
   useEffect(() => {
     // Afficher un message si l'email vient d'être vérifié
@@ -30,7 +30,21 @@ export default function SignIn() {
         icon: <CheckCircle className="w-5 h-5" />
       })
     }
-  }, [searchParams])
+    
+    // Afficher un message si le compte vient d'être créé
+    if (searchParams.get('message') === 'account_created') {
+      toast.success('Compte créé avec succès ! Connectez-vous pour accéder à votre équipe.', {
+        duration: 5000,
+        icon: <CheckCircle className="w-5 h-5" />
+      })
+    }
+    
+    // Pré-remplir l'email si fourni
+    const email = searchParams.get('email')
+    if (email) {
+      setValue('email', decodeURIComponent(email))
+    }
+  }, [searchParams, setValue])
 
   const onSubmit = async (data: FormData) => {
     setLoading(true)
