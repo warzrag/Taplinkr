@@ -20,7 +20,8 @@ export async function GET() {
         name: true,
         role: true,
         plan: true,
-        planExpiresAt: true,
+        emailVerified: true,
+        isActive: true,
         createdAt: true,
         _count: {
           select: {
