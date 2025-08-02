@@ -90,6 +90,26 @@ const countryNames: Record<string, string> = {
   'CH': 'Suisse',
   'SE': 'Suède',
   'NO': 'Norvège',
+  'PT': 'Portugal',
+  'AT': 'Autriche',
+  'DK': 'Danemark',
+  'FI': 'Finlande',
+  'GR': 'Grèce',
+  'PL': 'Pologne',
+  'RO': 'Roumanie',
+  'CZ': 'République tchèque',
+  'HU': 'Hongrie',
+  'SK': 'Slovaquie',
+  'BG': 'Bulgarie',
+  'HR': 'Croatie',
+  'SI': 'Slovénie',
+  'LT': 'Lituanie',
+  'LV': 'Lettonie',
+  'EE': 'Estonie',
+  'IE': 'Irlande',
+  'LU': 'Luxembourg',
+  'MT': 'Malte',
+  'CY': 'Chypre',
   'Unknown': 'Inconnu'
 }
 
@@ -122,7 +142,7 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
   // Calculer l'échelle de couleurs avec les nouvelles plages
   const colorScale = scaleLinear<string>()
     .domain([0, 1, 10, 50, 100, 500])
-    .range(['#f3f4f6', '#e0e7ff', '#c7d2fe', '#a5b4fc', '#6366f1', '#4338ca'])
+    .range(['#f3f4f6', '#ddd6fe', '#c4b5fd', '#a78bfa', '#8b5cf6', '#6d28d9'])
 
   const handleMoveEnd = (position: any) => {
     setPosition(position)
@@ -141,16 +161,15 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
     const iso2Code = Object.entries(countryCodeMapping).find(([_, v]) => v === countryCode)?.[0]
     const clicks = clicksByCountry[countryCode] || 0
     
-    if (clicks > 0 && iso2Code) {
-      const percentage = totalClicks > 0 ? (clicks / totalClicks) * 100 : 0
-      setTooltip({
-        x: event.clientX,
-        y: event.clientY,
-        country: countryNames[iso2Code] || geo.properties.NAME || 'Inconnu',
-        clicks: clicks,
-        percentage: percentage
-      })
-    }
+    // Afficher le tooltip même pour les pays sans clics
+    const percentage = totalClicks > 0 ? (clicks / totalClicks) * 100 : 0
+    setTooltip({
+      x: event.clientX,
+      y: event.clientY,
+      country: iso2Code ? (countryNames[iso2Code] || geo.properties.NAME || 'Inconnu') : (geo.properties.NAME || 'Inconnu'),
+      clicks: clicks,
+      percentage: percentage
+    })
   }
 
   const handleMouseLeave = () => {
@@ -197,8 +216,8 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
                     key={geo.rsmKey}
                     geography={geo}
                     fill={getCountryColor(geo)}
-                    stroke="#e5e7eb"
-                    strokeWidth={0.5}
+                    stroke="#9ca3af"
+                    strokeWidth={1}
                     onMouseEnter={(event) => handleMouseEnter(geo, event)}
                     onMouseLeave={handleMouseLeave}
                     style={{
@@ -207,9 +226,11 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
                         transition: 'fill 0.3s ease'
                       },
                       hover: {
-                        fill: hasClicks ? '#4338ca' : '#f3f4f6',
+                        fill: hasClicks ? '#4338ca' : '#e0e7ff',
+                        stroke: '#4b5563',
+                        strokeWidth: 2,
                         outline: 'none',
-                        cursor: hasClicks ? 'pointer' : 'default'
+                        cursor: 'pointer'
                       },
                       pressed: {
                         fill: hasClicks ? '#3730a3' : '#f3f4f6',
@@ -235,23 +256,23 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
             <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Aucun clic</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-indigo-200 rounded" />
+            <div className="w-5 h-5 bg-violet-200 rounded border border-violet-300" />
             <span className="text-sm text-gray-700 dark:text-gray-300">1-10 clics</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-indigo-300 rounded" />
+            <div className="w-5 h-5 bg-violet-300 rounded border border-violet-400" />
             <span className="text-sm text-gray-700 dark:text-gray-300">11-50 clics</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-indigo-400 rounded" />
+            <div className="w-5 h-5 bg-violet-400 rounded border border-violet-500" />
             <span className="text-sm text-gray-700 dark:text-gray-300">51-100 clics</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-indigo-500 rounded" />
+            <div className="w-5 h-5 bg-violet-500 rounded border border-violet-600" />
             <span className="text-sm text-gray-700 dark:text-gray-300">101-500 clics</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-indigo-700 rounded" />
+            <div className="w-5 h-5 bg-violet-700 rounded border border-violet-800" />
             <span className="text-sm text-gray-700 dark:text-gray-300">500+ clics</span>
           </div>
         </div>
@@ -307,24 +328,34 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="fixed z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-3 pointer-events-none"
+          className="fixed z-50 bg-gray-900 dark:bg-gray-800 text-white rounded-lg shadow-2xl border border-gray-700 p-4 pointer-events-none"
           style={{
             left: tooltip.x + 10,
             top: tooltip.y - 10,
             transform: 'translateY(-100%)'
           }}
         >
-          <p className="font-semibold text-gray-900 dark:text-gray-100">
+          <p className="font-bold text-lg mb-2">
             {tooltip.country}
           </p>
-          <div className="flex items-center gap-4 mt-1">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {tooltip.clicks} clics
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">
-              {tooltip.percentage.toFixed(1)}%
-            </p>
-          </div>
+          {tooltip.clicks > 0 ? (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                <p className="text-sm">
+                  <span className="font-semibold text-blue-300">{tooltip.clicks}</span> clic{tooltip.clicks > 1 ? 's' : ''}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <p className="text-sm">
+                  <span className="font-semibold text-green-300">{tooltip.percentage.toFixed(1)}%</span> du total
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400">Aucun clic enregistré</p>
+          )}
         </motion.div>
       )}
     </div>
