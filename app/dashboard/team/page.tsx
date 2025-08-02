@@ -20,7 +20,7 @@ import {
   Send,
   Building
 } from 'lucide-react'
-import { usePermissions } from '@/hooks/usePermissions'
+import { useTeamPermissions } from '@/hooks/useTeamPermissions'
 import { toast } from 'react-hot-toast'
 
 interface TeamMember {
@@ -67,7 +67,7 @@ export default function TeamPage() {
   const [teamDescription, setTeamDescription] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
   
-  const { hasPermission, permissions, isAdmin } = usePermissions()
+  const { hasPermission, permissions, isAdmin } = useTeamPermissions()
   const isOwner = isAdmin() || team?.owner?.id === permissions.userId
   
   useEffect(() => {
