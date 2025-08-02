@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: ExternalLink, label: 'Links', href: '/dashboard/links' },
     { icon: BarChart3, label: 'Social Analytics', href: '/dashboard/analytics' },
-    { icon: Users, label: 'Teams', href: '/dashboard/teams' },
+    { icon: Users, label: 'Teams', href: '/dashboard/team' },
   ]
 
   // Account Section
