@@ -10,6 +10,7 @@ import {
   Filter,
   ChevronLeft,
   Folder,
+  FolderPlus,
   Eye,
   MousePointer,
   Calendar,
@@ -20,7 +21,8 @@ import {
   ExternalLink,
   Shield,
   Zap,
-  Layers
+  Layers,
+  X
 } from 'lucide-react'
 import Link from 'next/link'
 import CreateLinkModal from '@/components/CreateLinkModal'
