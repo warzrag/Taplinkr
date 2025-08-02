@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
@@ -53,9 +53,19 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
+  const [suggestedUsername, setSuggestedUsername] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
   
   const { register, handleSubmit, formState: { errors }, trigger, getValues } = useForm<FormData>()
+
+  useEffect(() => {
+    // Récupérer le username suggéré depuis l'URL
+    const username = searchParams.get('username')
+    if (username) {
+      setSuggestedUsername(username)
+    }
+  }, [searchParams])
 
   const onSubmit = async (data: FormData) => {
     setLoading(true)
@@ -133,8 +143,34 @@ export default function SignUp() {
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-3xl font-bold text-gray-900">Créer votre compte</h1>
-              <p className="text-gray-600 mt-2">Rejoignez des milliers de créateurs</p>
+              <p className="text-gray-600 mt-2">
+                {suggestedUsername 
+                  ? `Votre nom d'utilisateur sera : taplinkr.com/${suggestedUsername}`
+                  : 'Rejoignez des milliers de créateurs'
+                }
+              </p>
             </motion.div>
+
+            {/* Username Alert */}
+            {suggestedUsername && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl"
+              >
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-green-800">
+                      Super ! Le nom d'utilisateur "{suggestedUsername}" est réservé pour vous
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">
+                      Complétez votre inscription pour le sécuriser
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Progress Steps */}
             <div className="flex items-center justify-center mb-8">

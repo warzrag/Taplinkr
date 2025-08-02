@@ -2,17 +2,104 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { ArrowRight, BarChart3, Shield, Sparkles, Folder, Link2 } from 'lucide-react'
-import ThemeToggle from '@/components/ThemeToggle'
-import LinkLogo from '@/components/LinkLogo'
-import LinkLogoHero from '@/components/LinkLogoHero'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  ArrowRight, 
+  Check, 
+  X, 
+  Sparkles, 
+  Shield, 
+  Zap, 
+  BarChart3,
+  Users,
+  Globe,
+  Palette,
+  Link2,
+  Instagram,
+  Youtube,
+  Twitter,
+  Github,
+  Linkedin,
+  Star,
+  TrendingUp,
+  Clock,
+  Heart
+} from 'lucide-react'
+import { debounce } from 'lodash'
+
+const features = [
+  {
+    icon: Link2,
+    title: "Tous vos liens en un seul endroit",
+    description: "Partagez facilement tous vos réseaux sociaux, sites web et contenus"
+  },
+  {
+    icon: Palette,
+    title: "Personnalisation complète",
+    description: "Thèmes, couleurs, animations - créez une page qui vous ressemble"
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics en temps réel",
+    description: "Suivez vos visiteurs, clics et performances détaillées"
+  },
+  {
+    icon: Shield,
+    title: "Protection et sécurité",
+    description: "Liens protégés par mot de passe et dates d'expiration"
+  },
+  {
+    icon: Users,
+    title: "Gestion d'équipe",
+    description: "Collaborez avec votre équipe sur des pages partagées"
+  },
+  {
+    icon: Zap,
+    title: "Ultra rapide",
+    description: "Pages optimisées pour une performance maximale"
+  }
+]
+
+const testimonials = [
+  {
+    name: "Sophie Martin",
+    role: "Influenceuse",
+    avatar: "SM",
+    content: "TapLinkr a révolutionné ma présence en ligne. Je peux enfin partager tous mes projets en un seul lien !",
+    rating: 5
+  },
+  {
+    name: "Thomas Dubois",
+    role: "Entrepreneur",
+    avatar: "TD",
+    content: "Les analytics détaillés m'aident à comprendre mon audience et optimiser ma stratégie.",
+    rating: 5
+  },
+  {
+    name: "Emma Laurent",
+    role: "Artiste",
+    avatar: "EL",
+    content: "La personnalisation est incroyable ! Ma page reflète parfaitement mon univers créatif.",
+    rating: 5
+  }
+]
+
+const popularUsers = [
+  { name: "influenceur", icon: Instagram, color: "from-pink-500 to-purple-500" },
+  { name: "createur", icon: Youtube, color: "from-red-500 to-pink-500" },
+  { name: "artiste", icon: Heart, color: "from-purple-500 to-indigo-500" },
+  { name: "entrepreneur", icon: TrendingUp, color: "from-blue-500 to-cyan-500" }
+]
 
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [username, setUsername] = useState('')
+  const [checking, setChecking] = useState(false)
+  const [available, setAvailable] = useState<boolean | null>(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -20,10 +107,57 @@ export default function Home() {
     }
   }, [status, router])
 
+  const checkUsername = useCallback(
+    debounce(async (value: string) => {
+      if (!value || value.length < 3) {
+        setAvailable(null)
+        setError('')
+        return
+      }
+
+      setChecking(true)
+      setError('')
+
+      try {
+        const response = await fetch(`/api/check-username?username=${encodeURIComponent(value)}`)
+        const data = await response.json()
+        
+        setAvailable(data.available)
+        if (!data.available && data.error) {
+          setError(data.error)
+        }
+      } catch (err) {
+        console.error('Erreur vérification:', err)
+        setError('Erreur de vérification')
+      } finally {
+        setChecking(false)
+      }
+    }, 500),
+    []
+  )
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '')
+    setUsername(value)
+    setAvailable(null)
+    
+    if (value) {
+      checkUsername(value)
+    }
+  }
+
+  const handleGetStarted = () => {
+    if (available && username) {
+      router.push(`/auth/signup?username=${encodeURIComponent(username)}`)
+    }
+  }
+
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Chargement...</div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-pulse">
+          <Sparkles className="w-8 h-8 text-purple-600" />
+        </div>
       </div>
     )
   }
@@ -33,310 +167,310 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Theme Toggle */}
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                TapLinkr
+              </span>
+            </div>
+            
+            <nav className="hidden md:flex items-center gap-6">
+              <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Fonctionnalités
+              </Link>
+              <Link href="#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Témoignages
+              </Link>
+              <Link href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Tarifs
+              </Link>
+            </nav>
+
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/auth/signin" 
+                className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+              >
+                Se connecter
+              </Link>
+              <Link 
+                href="/auth/signup" 
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+              >
+                S'inscrire
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-indigo-600/5 to-purple-600/5" />
-          <motion.div 
-            className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full blur-3xl opacity-20"
-            animate={{
-              x: [0, 100, 0],
-              y: [0, -100, 0],
-              rotate: [0, 180, 360],
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div 
-            className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-indigo-400 to-blue-600 rounded-full blur-3xl opacity-20"
-            animate={{
-              x: [0, -50, 0],
-              y: [0, 50, 0],
-              rotate: [360, 180, 0],
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
-          <motion.div 
-            className="text-center"
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            className="text-center"
           >
-            {/* Logo Hero */}
-            <motion.div 
-              className="mb-16"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1 }}
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-8"
             >
-              <LinkLogoHero />
+              <TrendingUp className="w-4 h-4" />
+              Plus de 50,000 créateurs nous font confiance
             </motion.div>
 
-            {/* Title */}
-
-            <motion.h2 
-              className="text-3xl md:text-4xl font-bold mb-6 leading-tight"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-            >
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Bienvenue sur TapLinkr 🚀
+            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Un seul lien
               </span>
-            </motion.h2>
+              <br />
+              pour tout partager
+            </h1>
 
-            {/* Subtitle */}
-            <motion.p 
-              className="text-xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              Créez une magnifique page bio mobile-first pour partager tous vos liens sociaux. Un simple tap suffit à vos visiteurs pour accéder à votre univers digital.
-            </motion.p>
+            <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+              Créez votre page personnalisée et partagez tous vos liens importants en un seul endroit. 
+              Simple, élégant et puissant.
+            </p>
 
-            {/* Feature Pills */}
-            <motion.div 
-              className="flex flex-wrap justify-center gap-3 mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
-            >
-              {[
-                { icon: Folder, text: "Dossiers imbriqués" },
-                { icon: Link2, text: "Drag & Drop" },
-                { icon: BarChart3, text: "Analytics" },
-                { icon: Shield, text: "Protection" }
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-gray-100"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 400 }}
+            {/* Username Checker */}
+            <div className="max-w-xl mx-auto mb-12">
+              <div className="relative">
+                <div className="flex items-center bg-gray-50 rounded-2xl p-2 border-2 border-gray-200 focus-within:border-purple-500 transition-all">
+                  <span className="text-gray-500 pl-4 pr-1 text-lg">taplinkr.com/</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={handleUsernameChange}
+                    placeholder="votreusername"
+                    className="flex-1 bg-transparent outline-none text-lg px-2 py-3"
+                    maxLength={30}
+                  />
+                  
+                  <AnimatePresence mode="wait">
+                    {checking && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="mr-2"
+                      >
+                        <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                      </motion.div>
+                    )}
+                    
+                    {!checking && available === true && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="mr-2"
+                      >
+                        <Check className="w-5 h-5 text-green-500" />
+                      </motion.div>
+                    )}
+                    
+                    {!checking && available === false && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="mr-2"
+                      >
+                        <X className="w-5 h-5 text-red-500" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <button
+                    onClick={handleGetStarted}
+                    disabled={!available || checking}
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+                      available
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    C'est parti !
+                  </button>
+                </div>
+              </div>
+              
+              {/* Status Message */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-2 text-sm text-red-600"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+                
+                {available === true && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-2 text-sm text-green-600"
+                  >
+                    Parfait ! Ce nom d'utilisateur est disponible
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Popular Examples */}
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <span className="text-sm text-gray-500">Exemples populaires :</span>
+              {popularUsers.map((user, index) => (
+                <motion.button
+                  key={user.name}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1 }}
+                  onClick={() => {
+                    setUsername(user.name)
+                    checkUsername(user.name)
+                  }}
+                  className="group flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all"
                 >
-                  <item.icon className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-700">{item.text}</span>
-                </motion.div>
+                  <div className={`w-6 h-6 bg-gradient-to-r ${user.color} rounded flex items-center justify-center`}>
+                    <user.icon className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">
+                    taplinkr.com/{user.name}
+                  </span>
+                </motion.button>
               ))}
-            </motion.div>
-
-            {/* CTA Buttons */}
-            <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.8 }}
-            >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link 
-                  href="/auth/signup"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-2xl hover:shadow-blue-500/25"
-                >
-                  <span>Commencer gratuitement</span>
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link 
-                  href="/auth/signin"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-2xl hover:bg-white border border-gray-200 transition-all duration-200 shadow-lg"
-                >
-                  Se connecter
-                </Link>
-              </motion.div>
-            </motion.div>
-
-            {/* Demo Link */}
-            <motion.p 
-              className="text-gray-500"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2, duration: 0.8 }}
-            >
-              Voir un exemple :{' '}
-              <Link href="/demo" className="text-blue-600 hover:text-blue-700 font-medium underline underline-offset-4">
-                TapLinkr.com/demo
-              </Link>
-            </motion.p>
+            </div>
           </motion.div>
         </div>
-
-        {/* Bottom Wave */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 120L1440 120L1440 0C1440 0 1140 80 720 80C300 80 0 0 0 0L0 120Z" fill="white"/>
-          </svg>
-        </div>
-      </div>
+      </section>
 
       {/* Features Section */}
-      <div className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent mb-4">
-              Pourquoi choisir TapLinkr ?
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">
+              Tout ce dont vous avez besoin
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              La solution mobile-first pour créer votre hub digital personnel
+            <p className="text-xl text-gray-600">
+              Des fonctionnalités puissantes pour créer la page parfaite
             </p>
-          </motion.div>
+          </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                icon: Folder,
-                title: 'Mobile-first design',
-                description: 'Interface optimisée pour mobile où chaque tap compte. Parfait sur tous les écrans.',
-                gradient: 'from-blue-500 to-indigo-600'
-              },
-              {
-                icon: Link2,
-                title: 'One tap, tout accessible',
-                description: 'Vos visiteurs accèdent à tous vos contenus en un seul tap. UX pensée mobile.',
-                gradient: 'from-emerald-500 to-teal-600'
-              },
-              {
-                icon: BarChart3,
-                title: 'Analytics en temps réel',
-                description: 'Suivez chaque tap, analysez le comportement mobile de vos visiteurs',
-                gradient: 'from-purple-500 to-pink-600'
-              },
-              {
-                icon: Shield,
-                title: 'Pages personnalisables',
-                description: 'Thèmes, couleurs, animations - créez une expérience unique à votre image',
-                gradient: 'from-orange-500 to-red-600'
-              }
-            ].map((feature, index) => (
-              <motion.div 
-                key={index} 
-                className="text-center group"
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.8 }}
+                transition={{ delay: index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -5 }}
+                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all"
               >
-                <motion.div 
-                  className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <feature.icon className="w-8 h-8 text-white" />
-                </motion.div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center mb-6">
+                  <feature.icon className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
               </motion.div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* How it works */}
-      <div className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Comment ça marche ?
+            <h2 className="text-4xl font-bold mb-4">
+              Ils adorent TapLinkr
             </h2>
             <p className="text-xl text-gray-600">
-              En 3 étapes simples, créez votre page de liens
+              Découvrez ce que nos utilisateurs en pensent
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-12">
-            {[
-              {
-                step: '01',
-                title: 'Créez votre compte',
-                description: 'Inscrivez-vous gratuitement en quelques secondes'
-              },
-              {
-                step: '02',
-                title: 'Ajoutez vos liens',
-                description: 'Créez des liens personnalisés vers vos réseaux sociaux, sites web, portfolios...'
-              },
-              {
-                step: '03',
-                title: 'Partagez votre page',
-                description: 'Obtenez votre URL personnalisée et partagez-la partout'
-              }
-            ].map((step, index) => (
-              <div key={index} className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl font-bold text-white">{step.step}</span>
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white p-8 rounded-2xl shadow-lg"
+              >
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600">
-                  {step.description}
-                </p>
-              </div>
+                
+                <p className="text-gray-700 mb-6">"{testimonial.content}"</p>
+                
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold">
+                    {testimonial.avatar}
+                  </div>
+                  <div>
+                    <p className="font-semibold">{testimonial.name}</p>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
       {/* CTA Section */}
-      <div className="py-24 bg-gradient-to-r from-blue-600 to-indigo-700">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Prêt à créer votre page de liens ?
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-600 to-pink-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Prêt à commencer ?
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Rejoignez des milliers d'utilisateurs qui font confiance à TapLinkr
+            Rejoignez des milliers de créateurs et commencez à partager vos liens dès aujourd'hui
           </p>
-          <Link 
+          <Link
             href="/auth/signup"
-            className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-purple-600 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105"
           >
-            <span>Commencer maintenant</span>
-            <ArrowRight className="ml-2 w-5 h-5" />
+            Créer mon TapLinkr gratuitement
+            <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <LinkLogo size="lg" showText={false} animated={false} />
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold">TapLinkr</span>
             </div>
-            <p className="text-gray-400 mb-6">
+            
+            <p className="text-gray-400 text-sm">
               © 2024 TapLinkr. Tous droits réservés.
             </p>
-            <div className="flex justify-center space-x-6">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Conditions d'utilisation
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Politique de confidentialité
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Support
-              </a>
-            </div>
           </div>
         </div>
       </footer>
