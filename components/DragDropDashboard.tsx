@@ -117,7 +117,7 @@ function SortableFolder({
         ...style,
         marginLeft: `${depth * 20}px`,
       }}
-      className={`group relative rounded-xl overflow-hidden transition-all duration-300 ${
+      className={`group relative rounded-xl overflow-hidden transition-all duration-150 ${
         isDragging ? 'opacity-50 scale-105 shadow-2xl' : 'hover:shadow-lg'
       } ${isOver ? 'ring-2 ring-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 scale-[1.02]' : 'bg-white border border-gray-100 hover:border-gray-200'}`}
       layout
@@ -126,7 +126,7 @@ function SortableFolder({
     >
       {/* En-tête du dossier */}
       <div 
-        className={`flex items-center justify-between p-4 cursor-pointer transition-all duration-200 ${
+        className={`flex items-center justify-between p-4 cursor-pointer transition-all duration-100 ${
           isOver ? 'bg-gradient-to-r from-blue-50 to-indigo-50' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100'
         }`}
         style={{ 
@@ -408,7 +408,7 @@ export default function DragDropDashboard({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 3, // Réduire la distance pour un drag plus réactif
       },
     }),
     useSensor(KeyboardSensor, {
@@ -444,16 +444,103 @@ export default function DragDropDashboard({
       // Si on le dépose sur un dossier
       if (overData?.type === 'folder') {
         const targetFolder = overData.folder as Folder
-        await onMoveLink(link.id, targetFolder.id)
-        refreshLinksContext()
+        
+        // Mise à jour instantanée de l'UI
+        if (link.folderId) {
+          // Fonction récursive pour mettre à jour les dossiers imbriqués
+          const updateFoldersRecursive = (folderList: Folder[]): Folder[] => {
+            return folderList.map(f => {
+              if (f.id === link.folderId) {
+                // Ancien dossier - retirer le lien
+                return {
+                  ...f,
+                  links: f.links.filter(l => l.id !== link.id),
+                  children: f.children ? updateFoldersRecursive(f.children) : []
+                }
+              } else if (f.id === targetFolder.id) {
+                // Nouveau dossier - ajouter le lien
+                return {
+                  ...f,
+                  links: [...f.links, { ...link, folderId: targetFolder.id }],
+                  children: f.children ? updateFoldersRecursive(f.children) : []
+                }
+              } else if (f.children && f.children.length > 0) {
+                // Parcourir les enfants
+                return {
+                  ...f,
+                  children: updateFoldersRecursive(f.children)
+                }
+              }
+              return f
+            })
+          }
+          
+          onFoldersChange(updateFoldersRecursive(folders))
+        } else {
+          // Le lien vient de la zone non organisée
+          const newUnorganizedLinks = unorganizedLinks.filter(l => l.id !== link.id)
+          onLinksChange(newUnorganizedLinks)
+          
+          // Fonction récursive pour ajouter au dossier cible
+          const addToTargetFolder = (folderList: Folder[]): Folder[] => {
+            return folderList.map(f => {
+              if (f.id === targetFolder.id) {
+                return {
+                  ...f,
+                  links: [...f.links, { ...link, folderId: targetFolder.id }]
+                }
+              } else if (f.children && f.children.length > 0) {
+                return {
+                  ...f,
+                  children: addToTargetFolder(f.children)
+                }
+              }
+              return f
+            })
+          }
+          
+          onFoldersChange(addToTargetFolder(folders))
+        }
+        
         toast.success(`"${link.title}" déplacé dans "${targetFolder.name}"`)
+        
+        // Appel API en arrière-plan
+        onMoveLink(link.id, targetFolder.id).catch(error => {
+          toast.error('Erreur lors de la sauvegarde')
+          refreshLinksContext() // Recharger en cas d'erreur
+        })
       }
       // Si on le dépose dans la zone "sans dossier"
       else if (over.id === 'unorganized') {
         if (link.folderId) {
-          await onMoveLink(link.id, null)
-          refreshLinksContext()
+          // Mise à jour instantanée avec recherche récursive
+          const removeLinkFromFolder = (folderList: Folder[]): Folder[] => {
+            return folderList.map(f => {
+              if (f.id === link.folderId) {
+                return {
+                  ...f,
+                  links: f.links.filter(l => l.id !== link.id)
+                }
+              } else if (f.children && f.children.length > 0) {
+                return {
+                  ...f,
+                  children: removeLinkFromFolder(f.children)
+                }
+              }
+              return f
+            })
+          }
+          
+          onFoldersChange(removeLinkFromFolder(folders))
+          onLinksChange([...unorganizedLinks, { ...link, folderId: null }])
+          
           toast.success(`"${link.title}" retiré du dossier`)
+          
+          // Appel API en arrière-plan
+          onMoveLink(link.id, null).catch(error => {
+            toast.error('Erreur lors de la sauvegarde')
+            refreshLinksContext()
+          })
         }
       }
       // Si on le dépose sur un autre lien dans le même conteneur
@@ -468,47 +555,70 @@ export default function DragDropDashboard({
             const overIndex = unorganizedLinks.findIndex(l => l.id === overLink.id)
             
             if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+              // Mise à jour instantanée
               const newLinks = arrayMove(unorganizedLinks, activeIndex, overIndex)
               onLinksChange(newLinks)
               
-              // Persister l'ordre en base de données
-              try {
-                const linkIds = newLinks.map(l => l.id)
-                await fetch('/api/links/order', {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ linkIds })
-                })
-              } catch (error) {
+              // Persister l'ordre en arrière-plan
+              const linkIds = newLinks.map(l => l.id)
+              fetch('/api/links/order', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ linkIds })
+              }).catch(error => {
                 toast.error('Erreur lors de la sauvegarde de l\'ordre')
-              }
+              })
             }
           }
           // Si c'est dans un dossier
           else {
-            const folder = folders.find(f => f.id === link.folderId)
-            if (folder) {
-              const activeIndex = folder.links.findIndex(l => l.id === link.id)
-              const overIndex = folder.links.findIndex(l => l.id === overLink.id)
-              
-              if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
-                const newFolderLinks = arrayMove(folder.links, activeIndex, overIndex)
-                const updatedFolder = { ...folder, links: newFolderLinks }
-                const newFolders = folders.map(f => f.id === folder.id ? updatedFolder : f)
-                onFoldersChange(newFolders)
-                
-                // Persister l'ordre en base de données
-                try {
-                  const linkIds = newFolderLinks.map(l => l.id)
-                  await fetch('/api/links/order', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ linkIds })
-                  })
-                } catch (error) {
-                  toast.error('Erreur lors de la sauvegarde de l\'ordre')
+            // Fonction récursive pour trouver et mettre à jour le dossier
+            const updateFolderLinks = (folderList: Folder[]): Folder[] => {
+              return folderList.map(f => {
+                if (f.id === link.folderId) {
+                  const activeIndex = f.links.findIndex(l => l.id === link.id)
+                  const overIndex = f.links.findIndex(l => l.id === overLink.id)
+                  
+                  if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+                    const newFolderLinks = arrayMove(f.links, activeIndex, overIndex)
+                    return { ...f, links: newFolderLinks }
+                  }
+                } else if (f.children && f.children.length > 0) {
+                  return {
+                    ...f,
+                    children: updateFolderLinks(f.children)
+                  }
+                }
+                return f
+              })
+            }
+            
+            // Fonction récursive pour obtenir les IDs des liens dans l'ordre
+            const getLinkIds = (folderList: Folder[], targetFolderId: string): string[] => {
+              for (const f of folderList) {
+                if (f.id === targetFolderId) {
+                  return f.links.map(l => l.id)
+                } else if (f.children && f.children.length > 0) {
+                  const result = getLinkIds(f.children, targetFolderId)
+                  if (result.length > 0) return result
                 }
               }
+              return []
+            }
+            
+            const updatedFolders = updateFolderLinks(folders)
+            onFoldersChange(updatedFolders)
+            
+            // Persister l'ordre en arrière-plan
+            const linkIds = getLinkIds(updatedFolders, link.folderId!)
+            if (linkIds.length > 0) {
+              fetch('/api/links/order', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ linkIds })
+              }).catch(error => {
+                toast.error('Erreur lors de la sauvegarde de l\'ordre')
+              })
             }
           }
         }
@@ -831,7 +941,7 @@ export default function DragDropDashboard({
           <motion.div
             id="unorganized"
             data-type="droppable"
-            className={`min-h-[300px] rounded-2xl transition-all duration-300 ${
+            className={`min-h-[300px] rounded-2xl transition-all duration-150 ${
               overId === 'unorganized' 
                 ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg scale-[1.01]' 
                 : 'border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50/50 to-gray-100/30'
