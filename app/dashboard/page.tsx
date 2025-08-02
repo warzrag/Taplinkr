@@ -37,6 +37,7 @@ import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 import DashboardChart from '@/components/analytics/DashboardChart'
 import InteractiveWorldMap from '@/components/analytics/InteractiveWorldMap'
+import CountryBarsChart from '@/components/analytics/CountryBarsChart'
 import { fetchAnalyticsData } from '@/lib/analytics/api-wrapper'
 
 interface QuickAction {
@@ -326,14 +327,42 @@ export default function Dashboard() {
             </motion.div>
           </div>
 
-          {/* Graphiques principaux */}
+          {/* Carte du monde interactive - Pleine largeur */}
+          {!analyticsLoading && dashboardStats && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 mb-8"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    Répartition géographique des clics
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Carte mondiale interactive - Zoomez et déplacez pour explorer
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <Globe className="w-4 h-4" />
+                  <span>{dashboardStats?.topCountries?.length || 0} pays</span>
+                </div>
+              </div>
+              <div className="h-96">
+                <InteractiveWorldMap data={dashboardStats} />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Graphiques secondaires */}
           {!analyticsLoading && dashboardStats && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {/* Graphique d'évolution */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.6 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
               >
                 <div className="flex items-center justify-between mb-6">
@@ -356,23 +385,23 @@ export default function Dashboard() {
                 </div>
               </motion.div>
 
-              {/* Carte du monde interactive */}
+              {/* Top pays - Barres */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.7 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
               >
                 <div className="mb-6">
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    Répartition géographique
+                    Top 10 pays
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Carte interactive des clics par pays
+                    Détail des clics par pays
                   </p>
                 </div>
-                <div className="h-64">
-                  <InteractiveWorldMap data={dashboardStats} />
+                <div className="h-64 overflow-y-auto">
+                  <CountryBarsChart data={dashboardStats} />
                 </div>
               </motion.div>
             </div>

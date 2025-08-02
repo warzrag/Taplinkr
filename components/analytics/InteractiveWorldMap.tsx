@@ -119,11 +119,10 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
     }
   })
   
-  // Calculer l'échelle de couleurs
-  const maxClicks = Math.max(...Object.values(clicksByCountry), 1)
+  // Calculer l'échelle de couleurs avec les nouvelles plages
   const colorScale = scaleLinear<string>()
-    .domain([0, maxClicks * 0.2, maxClicks * 0.4, maxClicks * 0.6, maxClicks * 0.8, maxClicks])
-    .range(['#e0e7ff', '#c7d2fe', '#a5b4fc', '#818cf8', '#6366f1', '#4f46e5'])
+    .domain([0, 1, 10, 50, 100, 500])
+    .range(['#f3f4f6', '#e0e7ff', '#c7d2fe', '#a5b4fc', '#6366f1', '#4338ca'])
 
   const handleMoveEnd = (position: any) => {
     setPosition(position)
@@ -172,20 +171,20 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full overflow-hidden rounded-lg">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          scale: 140,
-          center: [0, 20]
+          scale: 150,
+          center: [10, 30]
         }}
       >
         <ZoomableGroup
           zoom={position.zoom}
           center={position.coordinates}
           onMoveEnd={handleMoveEnd}
-          minZoom={0.5}
-          maxZoom={8}
+          minZoom={0.75}
+          maxZoom={10}
         >
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
@@ -225,47 +224,81 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
         </ZoomableGroup>
       </ComposableMap>
 
-      {/* Légende */}
-      <div className="absolute bottom-4 left-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-700">
-        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-3">
+      {/* Légende améliorée */}
+      <div className="absolute bottom-4 left-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-xl p-5 shadow-xl border border-gray-200 dark:border-gray-700">
+        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
           Distribution des clics
         </p>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-100 rounded border border-gray-300" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">0</span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-gray-100 rounded border border-gray-300" />
+            <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Aucun clic</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-indigo-200 rounded" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">1-2</span>
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-indigo-200 rounded" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">1-10 clics</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-indigo-300 rounded" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">3-3</span>
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-indigo-300 rounded" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">11-50 clics</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-indigo-400 rounded" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">4-5</span>
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-indigo-400 rounded" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">51-100 clics</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-indigo-500 rounded" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">6-6</span>
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-indigo-500 rounded" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">101-500 clics</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-indigo-600 rounded" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">7-8</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-indigo-700 rounded" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">9+</span>
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-indigo-700 rounded" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">500+ clics</span>
           </div>
         </div>
       </div>
 
+      {/* Contrôles de zoom */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <button
+          onClick={() => setPosition({ ...position, zoom: Math.min(position.zoom * 1.5, 10) })}
+          className="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          title="Zoomer"
+        >
+          <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setPosition({ ...position, zoom: Math.max(position.zoom / 1.5, 0.75) })}
+          className="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          title="Dézoomer"
+        >
+          <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setPosition({ coordinates: [10, 30], zoom: 1 })}
+          className="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          title="Réinitialiser la vue"
+        >
+          <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          </svg>
+        </button>
+      </div>
+
       {/* Instructions */}
-      <div className="absolute top-4 right-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-gray-600 dark:text-gray-400 shadow-lg">
-        <p>🖱️ Molette pour zoomer</p>
-        <p>🤚 Glisser pour déplacer</p>
+      <div className="absolute top-4 left-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-lg px-4 py-3 text-sm text-gray-700 dark:text-gray-300 shadow-lg">
+        <p className="font-medium mb-1">Navigation</p>
+        <p className="flex items-center gap-2">
+          <span className="text-gray-500">🖱️</span>
+          Molette pour zoomer
+        </p>
+        <p className="flex items-center gap-2">
+          <span className="text-gray-500">✋</span>
+          Glisser pour déplacer
+        </p>
       </div>
 
       {/* Tooltip */}
