@@ -3,11 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
+  @@map("User")
   id                      String                  @id @default(cuid())
   email                   String                  @unique
   password                String
@@ -68,6 +69,7 @@ model User {
 }
 
 model Link {
+  @@map("Link")
   id                 String              @id @default(cuid())
   userId             String
   slug               String              @unique
@@ -135,6 +137,7 @@ model MultiLink {
 }
 
 model Click {
+  @@map("Click")
   id        String   @id @default(cuid())
   linkId    String
   userId    String
@@ -151,6 +154,7 @@ model Click {
 }
 
 model Folder {
+  @@map("Folder")
   id          String   @id @default(cuid())
   name        String
   description String?
@@ -190,6 +194,7 @@ model File {
 }
 
 model AnalyticsEvent {
+  @@map("AnalyticsEvent")
   id          String   @id @default(cuid())
   linkId      String
   userId      String
@@ -433,6 +438,7 @@ model PushSubscription {
 
 // Team system for Premium users
 model Team {
+  @@map("Team")
   id              String           @id @default(cuid())
   name            String
   description     String?
@@ -455,6 +461,7 @@ model Team {
 }
 
 model TeamInvitation {
+  @@map("TeamInvitation")
   id          String            @id @default(cuid())
   teamId      String
   email       String
