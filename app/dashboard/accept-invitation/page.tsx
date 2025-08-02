@@ -38,9 +38,9 @@ export default function AcceptInvitationPage() {
       setStatus('success')
       setMessage(data.message || 'Équipe rejointe avec succès!')
       
-      // Rediriger après 2 secondes
+      // Rediriger après 2 secondes vers la page de bienvenue
       setTimeout(() => {
-        router.push('/dashboard/team')
+        router.push('/dashboard/team/welcome')
       }, 2000)
     } catch (error: any) {
       console.error('Erreur:', error)

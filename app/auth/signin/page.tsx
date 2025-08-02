@@ -75,10 +75,14 @@ export default function SignIn() {
       } else if (result?.ok) {
         toast.success('Connexion réussie!')
         
-        // Vérifier si on doit accepter une invitation
+        // Vérifier si on doit accepter une invitation ou aller à la page de bienvenue
         const inviteToken = searchParams.get('invite')
+        const welcomeTeam = searchParams.get('welcome') === 'team'
+        
         if (inviteToken) {
           router.push(`/dashboard/accept-invitation?token=${inviteToken}`)
+        } else if (welcomeTeam) {
+          router.push('/dashboard/team/welcome')
         } else {
           router.push('/dashboard')
         }

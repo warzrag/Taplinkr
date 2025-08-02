@@ -103,8 +103,8 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
 
       toast.success('Compte créé et équipe rejointe avec succès!')
       
-      // Rediriger vers la page de connexion avec les informations pré-remplies
-      router.push(`/auth/signin?email=${encodeURIComponent(invitation!.email)}&message=account_created`)
+      // Rediriger vers la page de connexion avec les informations pré-remplies et un flag pour la bienvenue
+      router.push(`/auth/signin?email=${encodeURIComponent(invitation!.email)}&message=account_created&welcome=team`)
     } catch (error: any) {
       console.error('Erreur:', error)
       toast.error(error.message || 'Erreur lors de la création du compte')
