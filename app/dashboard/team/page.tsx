@@ -199,6 +199,32 @@ export default function TeamPage() {
     toast.success('Lien d\'invitation copié !')
   }
   
+  const deleteTeam = async () => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer l\'équipe ? Cette action est irréversible et tous les membres seront retirés.')) {
+      return
+    }
+    
+    if (!confirm('Vraiment sûr ? Tapez "SUPPRIMER" pour confirmer.')) {
+      return
+    }
+    
+    try {
+      const response = await fetch('/api/teams/delete', {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression')
+      }
+      
+      toast.success('Équipe supprimée avec succès')
+      // Recharger la page pour afficher l'écran de création
+      window.location.reload()
+    } catch (error) {
+      toast.error('Erreur lors de la suppression de l\'équipe')
+    }
+  }
+  
   const getRoleIcon = (role: string) => {
     const icons = {
       owner: <Crown className="w-4 h-4" />,
@@ -623,6 +649,27 @@ export default function TeamPage() {
                   </button>
                 </div>
               </div>
+              
+              {/* Zone danger - Suppression de l'équipe */}
+              {isOwner && (
+                <div className="mt-8 pt-8 border-t border-red-200 dark:border-red-800">
+                  <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">
+                    Zone Danger
+                  </h3>
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
+                    <p className="text-sm text-red-700 dark:text-red-300 mb-4">
+                      La suppression de l'équipe est irréversible. Tous les membres seront retirés et toutes les données seront perdues.
+                    </p>
+                    <button
+                      onClick={deleteTeam}
+                      className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all flex items-center gap-2"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                      Supprimer l'équipe
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
