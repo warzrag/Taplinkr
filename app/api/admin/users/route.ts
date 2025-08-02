@@ -20,6 +20,7 @@ export async function GET() {
         name: true,
         role: true,
         plan: true,
+        planExpiresAt: true,
         emailVerified: true,
         createdAt: true,
         _count: {
