@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { motion } from 'framer-motion'
-import { Plus, Folder as FolderIcon, Link2, BarChart3, Crown, Shield } from 'lucide-react'
+import { Plus, Folder as FolderIcon, Link2, BarChart3, Crown, Shield, TrendingUp, Eye, MousePointer, Users } from 'lucide-react'
 import CreateLinkModal from '@/components/CreateLinkModal'
 import Link from 'next/link'
 import EditLinkModal from '@/components/EditLinkModal'
@@ -17,6 +17,8 @@ import { useLinkUpdate } from '@/contexts/LinkUpdateContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
+import AnalyticsCharts from '@/components/analytics/AnalyticsCharts'
+import { fetchAnalyticsData } from '@/lib/analytics/api-wrapper'
 
 interface Folder {
   id: string
@@ -44,16 +46,31 @@ export default function Dashboard() {
   const [movingLink, setMovingLink] = useState<LinkType | null>(null)
   const [showEditFolderModal, setShowEditFolderModal] = useState(false)
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null)
+  const [dashboardStats, setDashboardStats] = useState<any>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'authenticated') {
       refreshLinks()
       fetchFolders()
+      fetchDashboardStats()
     }
   }, [status]) // refreshLinks retiré des dépendances pour éviter la boucle infinie
 
   // Filtrer les liens sans dossier depuis le contexte
   const links = contextLinks.filter(link => !link.folderId)
+
+  const fetchDashboardStats = async () => {
+    try {
+      setAnalyticsLoading(true)
+      const data = await fetchAnalyticsData()
+      setDashboardStats(data)
+    } catch (error) {
+      console.error('Erreur lors du chargement des statistiques:', error)
+    } finally {
+      setAnalyticsLoading(false)
+    }
+  }
 
   const fetchFolders = async () => {
     try {
@@ -246,6 +263,141 @@ export default function Dashboard() {
 
       {/* Content */}
       <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        {/* Statistiques principales */}
+        {dashboardStats && (
+          <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Clics</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {dashboardStats.totalClicks || 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                    <MousePointer className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Vues</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {dashboardStats.totalViews || 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+                    <Eye className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Visiteurs Uniques</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {dashboardStats.uniqueVisitors || 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                    <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Croissance 7j</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {dashboardStats.growthRate > 0 ? '+' : ''}{dashboardStats.growthRate || 0}%
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Graphiques */}
+            {dashboardStats.summary && dashboardStats.summary.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                  Évolution sur 7 jours
+                </h3>
+                <AnalyticsCharts data={dashboardStats} />
+              </motion.div>
+            )}
+
+            {/* Top liens performants */}
+            {dashboardStats.topLinks && dashboardStats.topLinks.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                  Top 5 liens performants
+                </h3>
+                <div className="space-y-3">
+                  {dashboardStats.topLinks.slice(0, 5).map((link: any, index: number) => (
+                    <div key={link.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                            {index + 1}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">{link.title}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">/{link.slug}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">
+                          {link._count?.analyticsEvents || 0}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">clics</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        )}
+
         <DragDropDashboard
           folders={folders}
           unorganizedLinks={links}
