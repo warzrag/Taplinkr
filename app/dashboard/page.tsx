@@ -77,8 +77,15 @@ export default function Dashboard() {
   const fetchDashboardStats = async () => {
     try {
       setAnalyticsLoading(true)
-      const data = await fetchAnalyticsData()
-      setDashboardStats(data)
+      
+      // Récupérer les vraies données analytics
+      const response = await fetch('/api/analytics/dashboard')
+      if (response.ok) {
+        const data = await response.json()
+        setDashboardStats(data)
+      } else {
+        console.error('Erreur API:', response.status)
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error)
     } finally {
@@ -250,7 +257,7 @@ export default function Dashboard() {
         {/* Statistiques principales */}
         <div className="mb-8">
           {/* Cartes de statistiques */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -277,22 +284,6 @@ export default function Dashboard() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total clics</p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-xl">
-                  <Eye className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                </div>
-              </div>
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                {dashboardStats?.totalViews || 0}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total vues</p>
-            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -371,15 +362,9 @@ export default function Dashboard() {
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     Évolution sur 7 jours
                   </h2>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Clics</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Vues</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Clics par jour</span>
                   </div>
                 </div>
                 <div className="h-64">
@@ -676,25 +661,14 @@ export default function Dashboard() {
                       </div>
 
                       {/* Statistiques */}
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <MousePointer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                            <span className="text-xs text-gray-600 dark:text-gray-400">Clics</span>
-                          </div>
-                          <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                            {link.clicks || 0}
-                          </p>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 mb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <MousePointer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          <span className="text-xs text-gray-600 dark:text-gray-400">Clics totaux</span>
                         </div>
-                        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Eye className="w-4 h-4 text-green-600 dark:text-green-400" />
-                            <span className="text-xs text-gray-600 dark:text-gray-400">Vues</span>
-                          </div>
-                          <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                            {link.views || 0}
-                          </p>
-                        </div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          {link.clicks || 0}
+                        </p>
                       </div>
 
                       {/* Type de lien et actions */}

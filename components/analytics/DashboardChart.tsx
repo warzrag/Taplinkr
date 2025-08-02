@@ -8,10 +8,8 @@ interface DashboardChartProps {
     summary: Array<{
       date: string
       clicks: number
-      views: number
     }>
     totalClicks?: number
-    totalViews?: number
   }
 }
 
@@ -27,8 +25,7 @@ export default function DashboardChart({ data }: DashboardChartProps) {
         emptyData.push({
           date: date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
           fullDate: date.toLocaleDateString('fr-FR'),
-          clicks: 0,
-          views: 0
+          clicks: 0
         })
       }
       return emptyData
@@ -38,8 +35,7 @@ export default function DashboardChart({ data }: DashboardChartProps) {
     return data.summary.slice(-7).map(item => ({
       date: new Date(item.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
       fullDate: new Date(item.date).toLocaleDateString('fr-FR'),
-      clicks: item.clicks || 0,
-      views: item.views || 0
+      clicks: item.clicks || 0
     }))
   }
 
@@ -88,10 +84,6 @@ export default function DashboardChart({ data }: DashboardChartProps) {
               <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
               <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
             </linearGradient>
-            <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-            </linearGradient>
           </defs>
           <CartesianGrid 
             strokeDasharray="3 3" 
@@ -111,15 +103,6 @@ export default function DashboardChart({ data }: DashboardChartProps) {
             width={40}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Area
-            type="monotone"
-            dataKey="views"
-            stroke="#10b981"
-            strokeWidth={2}
-            fillOpacity={1}
-            fill="url(#colorViews)"
-            name="Vues"
-          />
           <Area
             type="monotone"
             dataKey="clicks"
