@@ -36,6 +36,7 @@ import { useProfile } from '@/contexts/ProfileContext'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 import DashboardChart from '@/components/analytics/DashboardChart'
+import CountryBarsChart from '@/components/analytics/CountryBarsChart'
 import { fetchAnalyticsData } from '@/lib/analytics/api-wrapper'
 
 interface QuickAction {
@@ -325,33 +326,56 @@ export default function Dashboard() {
             </motion.div>
           </div>
 
-          {/* Graphique principal */}
+          {/* Graphiques principaux */}
           {!analyticsLoading && dashboardStats && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 border border-gray-100 dark:border-gray-700"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  Évolution sur 7 jours
-                </h2>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Clics</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Vues</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Graphique d'évolution */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    Évolution sur 7 jours
+                  </h2>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Clics</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Vues</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="h-80">
-                <DashboardChart data={dashboardStats} />
-              </div>
-            </motion.div>
+                <div className="h-64">
+                  <DashboardChart data={dashboardStats} />
+                </div>
+              </motion.div>
+
+              {/* Carte du monde */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
+              >
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    Répartition géographique
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Clics par pays
+                  </p>
+                </div>
+                <div className="h-64 overflow-y-auto">
+                  <CountryBarsChart data={dashboardStats} />
+                </div>
+              </motion.div>
+            </div>
           )}
         </div>
 
