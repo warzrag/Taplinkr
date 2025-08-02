@@ -77,13 +77,33 @@ export async function POST(request: NextRequest) {
     const existingInvitation = await prisma.teamInvitation.findFirst({
       where: {
         teamId: team.id,
-        email,
-        status: 'pending'
+        email
       }
     })
 
     if (existingInvitation) {
-      return NextResponse.json({ error: 'Une invitation est déjà en attente pour cet email' }, { status: 400 })
+      // Si l'invitation est déjà acceptée
+      if (existingInvitation.status === 'accepted') {
+        return NextResponse.json({ error: 'Cet utilisateur a déjà rejoint l\'équipe' }, { status: 400 })
+      }
+      
+      // Si l'invitation est toujours en attente et non expirée
+      if (existingInvitation.status === 'pending' && new Date(existingInvitation.expiresAt) > new Date()) {
+        return NextResponse.json({ error: 'Une invitation est déjà en attente pour cet email' }, { status: 400 })
+      }
+      
+      // Si l'invitation est expirée ou déclinée, la supprimer pour pouvoir en créer une nouvelle
+      try {
+        await prisma.teamInvitation.delete({
+          where: { id: existingInvitation.id }
+        })
+      } catch (deleteError) {
+        console.error('Erreur lors de la suppression de l\'ancienne invitation:', deleteError)
+        return NextResponse.json({ 
+          error: 'Impossible de créer une nouvelle invitation', 
+          details: 'Une invitation existe déjà pour cet email' 
+        }, { status: 400 })
+      }
     }
 
     // Vérifier si un utilisateur avec cet email existe ET est déjà membre
