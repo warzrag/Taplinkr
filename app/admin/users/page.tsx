@@ -49,6 +49,7 @@ export default function AdminUsersPage() {
   const [filter, setFilter] = useState('all')
   const [showActions, setShowActions] = useState<string | null>(null)
   const [processingUser, setProcessingUser] = useState<string | null>(null)
+  const [showRoleModal, setShowRoleModal] = useState<string | null>(null)
 
   useEffect(() => {
     if (session?.user?.role !== 'admin') {
@@ -119,6 +120,29 @@ export default function AdminUsersPage() {
     } finally {
       setProcessingUser(null)
       setShowActions(null)
+    }
+  }
+
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    setProcessingUser(userId)
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole })
+      })
+
+      if (response.ok) {
+        toast.success('Rôle modifié avec succès')
+        fetchUsers()
+      } else {
+        toast.error('Erreur lors de la modification du rôle')
+      }
+    } catch (error) {
+      toast.error('Erreur de connexion')
+    } finally {
+      setProcessingUser(null)
+      setShowRoleModal(null)
     }
   }
 
@@ -414,6 +438,17 @@ export default function AdminUsersPage() {
                                 )}
                               </button>
                               
+                              <button
+                                onClick={() => {
+                                  setShowRoleModal(user.id)
+                                  setShowActions(null)
+                                }}
+                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                              >
+                                <Shield className="w-4 h-4 text-purple-600" />
+                                <span>Changer le rôle</span>
+                              </button>
+                              
                               {user.role !== 'admin' && (
                                 <button
                                   onClick={() => handleDeleteUser(user.id)}
@@ -441,6 +476,91 @@ export default function AdminUsersPage() {
             </div>
           )}
         </motion.div>
+
+        {/* Modal de changement de rôle */}
+        <AnimatePresence>
+          {showRoleModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={() => setShowRoleModal(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  Changer le rôle de l'utilisateur
+                </h3>
+                
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Utilisateur : <span className="font-medium text-gray-900">
+                      {users.find(u => u.id === showRoleModal)?.email}
+                    </span>
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Rôle actuel : <span className="font-medium text-gray-900">
+                      {users.find(u => u.id === showRoleModal)?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handleRoleChange(showRoleModal, 'user')}
+                    disabled={users.find(u => u.id === showRoleModal)?.role === 'user'}
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                      users.find(u => u.id === showRoleModal)?.role === 'user'
+                        ? 'border-blue-500 bg-blue-50 cursor-not-allowed opacity-50'
+                        : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Users className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">Utilisateur</p>
+                        <p className="text-sm text-gray-500">Accès standard à l'application</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleRoleChange(showRoleModal, 'admin')}
+                    disabled={users.find(u => u.id === showRoleModal)?.role === 'admin'}
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                      users.find(u => u.id === showRoleModal)?.role === 'admin'
+                        ? 'border-red-500 bg-red-50 cursor-not-allowed opacity-50'
+                        : 'border-gray-200 hover:border-red-500 hover:bg-red-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Shield className="w-5 h-5 text-red-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">Administrateur</p>
+                        <p className="text-sm text-gray-500">Accès complet avec gestion des utilisateurs</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => setShowRoleModal(null)}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
