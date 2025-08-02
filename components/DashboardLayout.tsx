@@ -86,11 +86,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: Settings, label: 'Settings', href: '/settings' },
   ]
 
-  // Help Section - Temporairement vide car pages non créées
+  // Help Section
   const helpItems = [
-    // { icon: HelpCircle, label: 'FAQ', href: '/dashboard/faq' },
-    // { icon: Map, label: 'Roadmap', href: '/dashboard/roadmap' },
-    // { icon: MessageCircle, label: 'Support', href: '/dashboard/support' },
+    { icon: HelpCircle, label: 'FAQ', href: '/dashboard/faq' },
+    { icon: Map, label: 'Roadmap', href: '/dashboard/roadmap' },
+    { icon: MessageCircle, label: 'Support', href: '/dashboard/support' },
   ]
   
   // Admin section (if applicable)
@@ -189,8 +189,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
 
-          {/* Help Section - Hidden for now */}
-          {helpItems.length > 0 && (
+          {/* Help Section */}
+          {(
             <div>
               <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
                 Help
