@@ -27,7 +27,9 @@ import {
   Sparkles,
   Gift,
   EyeOff,
-  Layers
+  Layers,
+  Folder,
+  FolderOpen
 } from 'lucide-react'
 import CreateLinkModal from '@/components/CreateLinkModal'
 import Link from 'next/link'
@@ -64,11 +66,13 @@ export default function Dashboard() {
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('7')
+  const [folderStats, setFolderStats] = useState<any>(null)
 
   useEffect(() => {
     if (status === 'authenticated') {
       refreshLinks()
       fetchDashboardStats()
+      fetchFolderStats()
     }
   }, [status])
 
@@ -90,6 +94,24 @@ export default function Dashboard() {
       console.error('Erreur lors du chargement des statistiques:', error)
     } finally {
       setAnalyticsLoading(false)
+    }
+  }
+
+  const fetchFolderStats = async () => {
+    try {
+      const response = await fetch('/api/analytics/folders')
+      if (response.ok) {
+        const data = await response.json()
+        // Formater les données pour l'affichage
+        const formattedStats = {
+          totalFolders: data.folders.length,
+          organizedLinks: data.folders.reduce((sum: number, f: any) => sum + f.linksCount, 0),
+          topFolders: data.folders.filter((f: any) => f.totalClicks > 0)
+        }
+        setFolderStats(formattedStats)
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des stats dossiers:', error)
     }
   }
 
@@ -403,7 +425,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -464,12 +486,110 @@ export default function Dashboard() {
             )}
           </motion.div>
 
+          {/* Analyse des dossiers */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                Analyse dossiers
+              </h2>
+              <Link href="/dashboard/folders">
+                <span className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                  Gérer
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              </Link>
+            </div>
+
+            {folderStats ? (
+              <div className="space-y-4">
+                {/* Stats globales des dossiers */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Folder className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Total dossiers</span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {folderStats.totalFolders || 0}
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Link2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Liens organisés</span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {folderStats.organizedLinks || 0}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Top dossiers par clics */}
+                {folderStats.topFolders && folderStats.topFolders.length > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                      Performance par dossier
+                    </p>
+                    {folderStats.topFolders.slice(0, 3).map((folder: any, index: number) => (
+                      <motion.div
+                        key={folder.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.65 + index * 0.05 }}
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="text-lg">{folder.icon || '📁'}</div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                              {folder.name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {folder._count?.links || 0} liens
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="font-semibold text-gray-900 dark:text-gray-100">
+                            {folder.totalClicks || 0}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">clics</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <FolderOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">Aucun dossier créé</p>
+                    <Link href="/dashboard/folders">
+                      <button className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                        Créer un dossier
+                      </button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="animate-pulse space-y-3">
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+              </div>
+            )}
+          </motion.div>
+
           {/* Insights et recommandations combinés */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 gap-6"
           >
             {/* Insights */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
