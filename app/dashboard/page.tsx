@@ -35,7 +35,7 @@ import { useLinkUpdate } from '@/contexts/LinkUpdateContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
-import AnalyticsCharts from '@/components/analytics/AnalyticsCharts'
+import DashboardChart from '@/components/analytics/DashboardChart'
 import { fetchAnalyticsData } from '@/lib/analytics/api-wrapper'
 
 interface QuickAction {
@@ -244,247 +244,281 @@ export default function Dashboard() {
         </div>
 
         {/* Statistiques principales */}
-        {!analyticsLoading && dashboardStats && (
+        <div className="mb-8">
+          {/* Cartes de statistiques */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
+                  <MousePointer className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                {dashboardStats?.growthRate !== undefined && (
+                  <span className={`text-sm font-medium ${
+                    dashboardStats.growthRate > 0 
+                      ? 'text-green-600 dark:text-green-400' 
+                      : 'text-red-600 dark:text-red-400'
+                  }`}>
+                    {dashboardStats.growthRate > 0 ? '+' : ''}{dashboardStats.growthRate}%
+                  </span>
+                )}
+              </div>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {dashboardStats?.totalClicks || 0}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total clics</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-xl">
+                  <Eye className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {dashboardStats?.totalViews || 0}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total vues</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-xl">
+                  <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {dashboardStats?.uniqueVisitors || 0}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Visiteurs uniques</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-orange-100 dark:bg-orange-900/20 rounded-xl">
+                  <Activity className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {links.filter(l => l.isActive).length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens actifs</p>
+            </motion.div>
+          </div>
+
+          {/* Graphique principal */}
+          {!analyticsLoading && dashboardStats && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 border border-gray-100 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Évolution sur 7 jours
+                </h2>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Clics</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Vues</span>
+                  </div>
+                </div>
+              </div>
+              <div className="h-80">
+                <DashboardChart data={dashboardStats} />
+              </div>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Grille principale */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+          {/* Top liens performants */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"
+            transition={{ delay: 0.6 }}
+            className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
           >
-            {/* Carte des statistiques */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  Vue d'ensemble
-                </h2>
-                <select
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value)}
-                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="7">7 derniers jours</option>
-                  <option value="30">30 derniers jours</option>
-                  <option value="90">90 derniers jours</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <MousePointer className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                      {dashboardStats.growthRate > 0 ? '+' : ''}{dashboardStats.growthRate || 0}%
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                    {dashboardStats.totalClicks || 0}
-                  </p>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">Total clics</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-4 rounded-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <Eye className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    <ArrowUpRight className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                    {dashboardStats.totalViews || 0}
-                  </p>
-                  <p className="text-sm text-purple-700 dark:text-purple-300">Total vues</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                    {dashboardStats.uniqueVisitors || 0}
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-300">Visiteurs uniques</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-4 rounded-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <Activity className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                    <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                    {links.filter(l => l.isActive).length}
-                  </p>
-                  <p className="text-sm text-orange-700 dark:text-orange-300">Liens actifs</p>
-                </div>
-              </div>
-
-              {/* Graphique */}
-              {dashboardStats.summary && dashboardStats.summary.length > 0 && (
-                <div className="h-64">
-                  <AnalyticsCharts data={dashboardStats} />
-                </div>
-              )}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                Top liens
+              </h2>
+              <Link href="/dashboard/analytics">
+                <span className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                  Voir tout
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              </Link>
             </div>
 
-            {/* Top liens performants */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  Top liens 🏆
-                </h2>
-                <Link href="/dashboard/analytics">
-                  <span className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                    Voir tout
-                    <ChevronRight className="w-4 h-4" />
-                  </span>
-                </Link>
-              </div>
-
-              {dashboardStats.topLinks && dashboardStats.topLinks.length > 0 ? (
-                <div className="space-y-3">
-                  {dashboardStats.topLinks.slice(0, 5).map((link: any, index: number) => (
-                    <motion.div
-                      key={link.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                      onClick={() => handleEdit(link)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                          index === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
-                          index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-500' :
-                          index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
-                          'bg-gradient-to-br from-blue-400 to-blue-500'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {link.title}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            /{link.slug}
-                          </p>
-                        </div>
+            {dashboardStats?.topLinks && dashboardStats.topLinks.length > 0 ? (
+              <div className="space-y-3">
+                {dashboardStats.topLinks.slice(0, 5).map((link: any, index: number) => (
+                  <motion.div
+                    key={link.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 + index * 0.05 }}
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all cursor-pointer group"
+                    onClick={() => handleEdit(link)}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white font-semibold text-sm ${
+                        index === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
+                        index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-500' :
+                        index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
+                        'bg-gradient-to-br from-blue-400 to-indigo-500'
+                      }`}>
+                        {index + 1}
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-900 dark:text-gray-100">
-                          {link._count?.analyticsEvents || 0}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          {link.title}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">clics</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          /{link.slug}
+                        </p>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Target className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Aucune donnée disponible</p>
-                </div>
-              )}
-            </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                        {link._count?.analyticsEvents || 0}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">clics</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <Target className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Aucune donnée disponible</p>
+                <p className="text-xs mt-1">Créez des liens pour voir les statistiques</p>
+              </div>
+            )}
           </motion.div>
-        )}
 
-        {/* Insights et recommandations */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"
-        >
-          {/* Statistiques détaillées */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Insights 📊
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <Globe className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+          {/* Insights et recommandations combinés */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            {/* Insights */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                Insights
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                  <Globe className="w-10 h-10 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100">
                       Portée globale
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Visiteurs de {dashboardStats?.topCountries?.length || 0} pays
+                      {dashboardStats?.topCountries?.length || 0} pays atteints
                     </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <Smartphone className="w-10 h-10 text-purple-600 dark:text-purple-400" />
+                <div className="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                  <Smartphone className="w-10 h-10 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100">
                       Mobile first
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {dashboardStats?.deviceStats?.mobile || 0}% sur mobile
+                      {dashboardStats?.deviceStats?.mobile || 65}% mobile
                     </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <Clock className="w-10 h-10 text-green-600 dark:text-green-400" />
+                <div className="flex items-center gap-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                  <Clock className="w-10 h-10 text-green-600 dark:text-green-400 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100">
-                      Meilleure heure
+                      Pic d'activité
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {dashboardStats?.peakHour || '18h-20h'}
+                      18h - 20h
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Recommandations */}
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-6 text-white">
-            <h2 className="text-xl font-bold mb-4">
-              Recommandations ✨
-            </h2>
-            <div className="space-y-3">
-              {userProfile?.plan === 'free' && (
-                <div className="flex items-start gap-3 p-3 bg-white/10 rounded-xl">
-                  <Crown className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            {/* Recommandations */}
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+              <h2 className="text-xl font-bold mb-4">
+                Recommandations
+              </h2>
+              <div className="space-y-3">
+                {userProfile?.plan === 'free' && (
+                  <div className="flex items-start gap-3 p-3 bg-white/10 backdrop-blur rounded-xl">
+                    <Crown className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Passez Premium</p>
+                      <p className="text-sm opacity-90">
+                        Analytics avancées + liens illimités
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {links.length < 5 && (
+                  <div className="flex items-start gap-3 p-3 bg-white/10 backdrop-blur rounded-xl">
+                    <Link2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Ajoutez des liens</p>
+                      <p className="text-sm opacity-90">
+                        Créez {5 - links.length} liens de plus
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-start gap-3 p-3 bg-white/10 backdrop-blur rounded-xl">
+                  <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium">Passez à Premium</p>
+                    <p className="font-medium">Optimisez vos liens</p>
                     <p className="text-sm opacity-90">
-                      Débloquez les analytics avancées et créez des liens illimités
+                      Utilisez des titres accrocheurs
                     </p>
                   </div>
-                </div>
-              )}
-              
-              {links.length < 3 && (
-                <div className="flex items-start gap-3 p-3 bg-white/10 rounded-xl">
-                  <Link2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium">Ajoutez plus de liens</p>
-                    <p className="text-sm opacity-90">
-                      Créez au moins 5 liens pour maximiser votre présence
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-start gap-3 p-3 bg-white/10 rounded-xl">
-                <Gift className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Code promo disponible</p>
-                  <p className="text-sm opacity-90">
-                    Utilisez WELCOME50 pour 50% de réduction
-                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
+
 
         {/* Liens récents */}
         <motion.div
