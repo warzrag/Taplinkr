@@ -15,6 +15,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/redirect/') ||
     pathname.startsWith('/shield/') ||
     pathname.startsWith('/settings') ||
+    pathname.startsWith('/profile') ||
     pathname.startsWith('/pricing') ||
     pathname.startsWith('/checkout') ||
     pathname.includes('.') ||
