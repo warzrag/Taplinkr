@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
-import { Eye, EyeOff, LogIn, ArrowLeft, Mail, Lock, Sparkles, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, LogIn, ArrowLeft, Mail, Lock, Sparkles, CheckCircle, Users } from 'lucide-react'
 import Link from 'next/link'
 
 interface FormData {
@@ -39,6 +39,15 @@ export default function SignIn() {
       })
     }
     
+    // Afficher un message si l'utilisateur doit se connecter pour rejoindre une équipe
+    if (searchParams.get('message') === 'login_to_join') {
+      const teamName = searchParams.get('team')
+      toast.success(`Connectez-vous pour rejoindre l'équipe ${teamName || ''}`, {
+        duration: 5000,
+        icon: <Users className="w-5 h-5" />
+      })
+    }
+    
     // Pré-remplir l'email si fourni
     const email = searchParams.get('email')
     if (email) {
@@ -65,7 +74,14 @@ export default function SignIn() {
         }
       } else if (result?.ok) {
         toast.success('Connexion réussie!')
-        router.push('/dashboard')
+        
+        // Vérifier si on doit accepter une invitation
+        const inviteToken = searchParams.get('invite')
+        if (inviteToken) {
+          router.push(`/dashboard/accept-invitation?token=${inviteToken}`)
+        } else {
+          router.push('/dashboard')
+        }
       }
     } catch (error) {
       toast.error('Erreur lors de la connexion')

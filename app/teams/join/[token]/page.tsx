@@ -18,6 +18,8 @@ interface InvitationData {
     name?: string
     email: string
   }
+  userExists?: boolean
+  isAlreadyMember?: boolean
 }
 
 export default function JoinTeamPage({ params }: { params: { token: string } }) {
@@ -47,6 +49,18 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
       }
 
       setInvitation(data.invitation)
+      
+      // Si l'utilisateur existe déjà
+      if (data.invitation.userExists) {
+        if (data.invitation.isAlreadyMember) {
+          setError('Vous êtes déjà membre de cette équipe')
+          return
+        }
+        // Rediriger vers la page de connexion avec le token d'invitation
+        router.push(`/auth/signin?email=${encodeURIComponent(data.invitation.email)}&message=login_to_join&team=${encodeURIComponent(data.invitation.team.name)}&invite=${params.token}`)
+        return
+      }
+      
       setName(data.invitation.email.split('@')[0]) // Suggérer un nom basé sur l'email
     } catch (error) {
       console.error('Erreur:', error)

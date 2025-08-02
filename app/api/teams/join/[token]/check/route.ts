@@ -55,19 +55,15 @@ export async function GET(
       where: { email: invitation.email }
     })
 
-    if (existingUser) {
-      return NextResponse.json({ 
-        error: 'Un compte existe déjà avec cet email. Veuillez vous connecter.' 
-      }, { status: 400 })
-    }
-
     return NextResponse.json({
       invitation: {
         id: invitation.id,
         email: invitation.email,
         role: invitation.role,
         team: invitation.team,
-        invitedBy: invitation.invitedBy
+        invitedBy: invitation.invitedBy,
+        userExists: !!existingUser,
+        isAlreadyMember: existingUser ? existingUser.teamId === invitation.teamId : false
       }
     })
   } catch (error) {
