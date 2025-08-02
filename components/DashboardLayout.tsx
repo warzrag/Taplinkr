@@ -18,7 +18,8 @@ import {
   HelpCircle,
   Map,
   MessageCircle,
-  Activity
+  Activity,
+  Folder
 } from 'lucide-react'
 import LinkLogo from '@/components/LinkLogo'
 import LivePhonePreview from '@/components/LivePhonePreview'
@@ -74,6 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const controlPanelItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: ExternalLink, label: 'Links', href: '/dashboard/links' },
+    { icon: Folder, label: 'Dossiers', href: '/dashboard/folders' },
     { icon: BarChart3, label: 'Social Analytics', href: '/dashboard/analytics' },
     { icon: Activity, label: 'Visiteurs', href: '/dashboard/visitors' },
     { icon: Users, label: 'Teams', href: '/dashboard/team' },
