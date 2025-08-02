@@ -16,10 +16,10 @@ export async function getGeoData(ip: string): Promise<Partial<GeoData>> {
   // Ne pas géolocaliser les IPs locales
   if (ip === 'unknown' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
     return {
-      country: 'Local',
-      countryCode: 'XX',
-      region: 'Local',
-      city: 'Local'
+      country: 'France', // Default to France for local IPs
+      countryCode: 'FR',
+      region: 'France',
+      city: 'France'
     }
   }
 
