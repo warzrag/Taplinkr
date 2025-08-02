@@ -36,7 +36,7 @@ import { useProfile } from '@/contexts/ProfileContext'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 import DashboardChart from '@/components/analytics/DashboardChart'
-import CountryBarsChart from '@/components/analytics/CountryBarsChart'
+import InteractiveWorldMap from '@/components/analytics/InteractiveWorldMap'
 import { fetchAnalyticsData } from '@/lib/analytics/api-wrapper'
 
 interface QuickAction {
@@ -356,7 +356,7 @@ export default function Dashboard() {
                 </div>
               </motion.div>
 
-              {/* Carte du monde */}
+              {/* Carte du monde interactive */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -368,11 +368,11 @@ export default function Dashboard() {
                     Répartition géographique
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Clics par pays
+                    Carte interactive des clics par pays
                   </p>
                 </div>
-                <div className="h-64 overflow-y-auto">
-                  <CountryBarsChart data={dashboardStats} />
+                <div className="h-64">
+                  <InteractiveWorldMap data={dashboardStats} />
                 </div>
               </motion.div>
             </div>
