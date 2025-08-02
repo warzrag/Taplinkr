@@ -519,3 +519,37 @@ model VerificationToken {
   @@index([userId])
   @@map("verification_tokens")
 }
+
+model PromoCode {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  description     String?
+  discountType    String   // 'percentage' or 'fixed_days'
+  discountValue   Int      // percentage (0-100) or days
+  validFrom       DateTime @default(now())
+  validUntil      DateTime?
+  maxUses         Int?     // null = unlimited
+  currentUses     Int      @default(0)
+  requiredPlan    String?  // null = any plan
+  isActive        Boolean  @default(true)
+  createdBy       String   // admin who created it
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  promoRedemptions PromoRedemption[]
+  
+  @@index([code])
+  @@map("promo_codes")
+}
+
+model PromoRedemption {
+  id          String   @id @default(cuid())
+  promoCodeId String
+  userId      String
+  redeemedAt  DateTime @default(now())
+  
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id])
+  
+  @@unique([promoCodeId, userId]) // Un utilisateur ne peut utiliser un code qu'une fois
+  @@map("promo_redemptions")
+}

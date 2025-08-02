@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { CreditCard, Calendar, CheckCircle, XCircle, Loader2, ArrowLeft, ExternalLink, AlertCircle } from 'lucide-react'
+import { CreditCard, Calendar, CheckCircle, XCircle, Loader2, ArrowLeft, ExternalLink, AlertCircle, Tag, Crown, Zap } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { usePermissions } from '@/hooks/usePermissions'
+import PromoCodeInput from '@/components/PromoCodeInput'
 
 export default function BillingPage() {
   const { data: session, update } = useSession()
@@ -15,6 +16,7 @@ export default function BillingPage() {
   const { userPlan } = usePermissions()
   const [loading, setLoading] = useState(false)
   const [subscription, setSubscription] = useState<any>(null)
+  const [selectedPromo, setSelectedPromo] = useState<any>(null)
 
   useEffect(() => {
     // Vérifier si on revient de Stripe avec succès
@@ -138,11 +140,64 @@ export default function BillingPage() {
           </p>
         </motion.div>
 
+        {/* Code promo */}
+        {userPlan === 'free' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6"
+          >
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+              <Tag className="w-6 h-6 text-purple-600" />
+              Vous avez un code promo ?
+            </h3>
+            <PromoCodeInput onApply={(code, discount) => setSelectedPromo(discount)} />
+            
+            {selectedPromo && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={async () => {
+                  setLoading(true)
+                  try {
+                    const response = await fetch('/api/promo-codes/redeem', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ code: selectedPromo.code })
+                    })
+
+                    const data = await response.json()
+
+                    if (response.ok) {
+                      toast.success(data.message)
+                      router.refresh()
+                      setTimeout(() => {
+                        router.push('/dashboard')
+                      }, 2000)
+                    } else {
+                      toast.error(data.error || 'Erreur lors de l\'utilisation du code')
+                    }
+                  } catch (error) {
+                    toast.error('Erreur de connexion')
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                disabled={loading}
+                className="mt-4 w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all disabled:opacity-50 font-semibold"
+              >
+                {loading ? 'Application...' : 'Utiliser ce code promo'}
+              </motion.button>
+            )}
+          </motion.div>
+        )}
+
         {/* Abonnement actuel */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.2 }}
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6"
         >
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
@@ -252,11 +307,37 @@ export default function BillingPage() {
           </div>
         </motion.div>
 
+        {/* Plan actuel Premium */}
+        {userPlan === 'premium' && (session?.user as any)?.planExpiresAt && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-6 p-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <Crown className="w-8 h-8" />
+                  <h2 className="text-2xl font-bold">Vous êtes Premium !</h2>
+                </div>
+                <p className="opacity-90">
+                  Profitez de toutes les fonctionnalités avancées de TapLinkr
+                </p>
+                <p className="text-sm opacity-75 mt-2">
+                  Expire le {new Date((session.user as any).planExpiresAt).toLocaleDateString()}
+                </p>
+              </div>
+              <Zap className="w-16 h-16 opacity-20" />
+            </div>
+          </motion.div>
+        )}
+
         {/* Informations importantes */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.4 }}
           className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6"
         >
           <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">

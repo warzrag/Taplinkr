@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
+import PromoCodesManager from '@/components/admin/PromoCodesManager'
 import { 
   Users,
   Search,
@@ -25,7 +26,9 @@ import {
   Filter,
   Gift,
   Clock,
-  Zap
+  Zap,
+  Tag,
+  Percent
 } from 'lucide-react'
 
 interface User {
@@ -55,6 +58,8 @@ export default function AdminUsersPage() {
   const [processingUser, setProcessingUser] = useState<string | null>(null)
   const [showRoleModal, setShowRoleModal] = useState<string | null>(null)
   const [showPlanModal, setShowPlanModal] = useState<string | null>(null)
+  const [showPromoModal, setShowPromoModal] = useState(false)
+  const [promoCodes, setPromoCodes] = useState<any[]>([])
 
   useEffect(() => {
     if (session?.user?.role !== 'admin' && session?.user?.role !== 'manager') {
@@ -62,6 +67,9 @@ export default function AdminUsersPage() {
       return
     }
     fetchUsers()
+    if (session?.user?.role === 'admin') {
+      fetchPromoCodes()
+    }
   }, [session, router])
 
   const fetchUsers = async () => {
@@ -77,6 +85,18 @@ export default function AdminUsersPage() {
       toast.error('Erreur de connexion')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchPromoCodes = async () => {
+    try {
+      const response = await fetch('/api/admin/promo-codes')
+      if (response.ok) {
+        const data = await response.json()
+        setPromoCodes(data)
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des codes promo:', error)
     }
   }
 
@@ -228,14 +248,28 @@ export default function AdminUsersPage() {
               <p className="text-gray-600 mt-1">Gérez les comptes et permissions des utilisateurs</p>
             </div>
             
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={fetchUsers}
-              className="p-3 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-            >
-              <RefreshCw className="w-5 h-5 text-gray-600" />
-            </motion.button>
+            <div className="flex gap-2">
+              {session?.user?.role === 'admin' && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowPromoModal(true)}
+                  className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center gap-2"
+                >
+                  <Tag className="w-5 h-5" />
+                  <span>Codes Promo</span>
+                </motion.button>
+              )}
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={fetchUsers}
+                className="p-3 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+              >
+                <RefreshCw className="w-5 h-5 text-gray-600" />
+              </motion.button>
+            </div>
           </div>
 
           {/* Stats */}
@@ -755,6 +789,33 @@ export default function AdminUsersPage() {
                     Annuler
                   </button>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Modal de gestion des codes promo */}
+        <AnimatePresence>
+          {showPromoModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={() => setShowPromoModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white rounded-2xl shadow-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <PromoCodesManager
+                  promoCodes={promoCodes}
+                  onRefresh={fetchPromoCodes}
+                  onClose={() => setShowPromoModal(false)}
+                />
               </motion.div>
             </motion.div>
           )}
