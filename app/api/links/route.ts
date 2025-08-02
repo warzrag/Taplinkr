@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { nanoid } from 'nanoid'
-import { checkLimit, getUpgradeMessage } from '@/lib/permissions'
+import { getUpgradeMessage } from '@/lib/permissions'
+import { getTeamAwareUserPermissions, checkTeamLimit } from '@/lib/team-permissions'
 
 export async function GET() {
   try {
@@ -66,12 +67,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Titre requis' }, { status: 400 })
     }
 
-    // Vérifier les limites du plan
-    const userPermissions = {
-      role: (session.user as any).role || 'user',
-      plan: (session.user as any).plan || 'free',
-      planExpiresAt: (session.user as any).planExpiresAt
-    }
+    // Vérifier les limites du plan en tenant compte de l'équipe
+    const userPermissions = await getTeamAwareUserPermissions(session.user.id)
 
     // Compter les liens existants
     const linkCount = await prisma.link.count({
@@ -79,7 +76,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Vérifier la limite de liens par page pour le plan gratuit
-    if (!checkLimit(userPermissions, 'maxLinksPerPage', linkCount)) {
+    if (!(await checkTeamLimit(session.user.id, 'maxLinksPerPage', linkCount))) {
       return NextResponse.json({ 
         error: 'Limite de liens atteinte',
         message: getUpgradeMessage('maxLinksPerPage')

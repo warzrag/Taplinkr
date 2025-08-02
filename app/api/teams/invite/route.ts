@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getUserPermissions, checkLimit } from '@/lib/permissions'
+import { getTeamAwareUserPermissions, checkTeamLimit } from '@/lib/team-permissions'
 import { nanoid } from 'nanoid'
 import { sendEmail } from '@/lib/resend-email'
 
@@ -60,22 +60,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Aucune équipe trouvée ou permissions insuffisantes' }, { status: 404 })
     }
 
-    // Vérifier les limites d'équipe
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    })
-
-    if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
-    }
-
-    const permissions = getUserPermissions(user)
+    // Vérifier les limites d'équipe en tenant compte du plan du propriétaire
+    const permissions = await getTeamAwareUserPermissions(session.user.id)
     const currentMemberCount = team.members.length + team.invitations.length
 
-    if (!checkLimit(permissions, 'maxTeamMembers', currentMemberCount)) {
+    if (!(await checkTeamLimit(session.user.id, 'maxTeamMembers', currentMemberCount))) {
+      const { PLAN_LIMITS } = await import('@/lib/permissions')
+      const maxMembers = PLAN_LIMITS[permissions.plan].maxTeamMembers
       return NextResponse.json({ 
         error: 'Limite d\'équipe atteinte',
-        message: `Votre plan permet maximum ${permissions.limits.maxTeamMembers} membres`
+        message: `Le plan de l'équipe permet maximum ${maxMembers} membres`
       }, { status: 403 })
     }
 

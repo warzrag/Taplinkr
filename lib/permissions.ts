@@ -251,7 +251,20 @@ export function getUserPermissions(user: {
   role: string;
   plan: string;
   planExpiresAt?: Date | null;
+  teamOwner?: {
+    plan: string;
+    planExpiresAt?: Date | null;
+  };
 }): UserPermissions {
+  // Si l'utilisateur fait partie d'une équipe, utiliser le plan du propriétaire
+  if (user.teamOwner) {
+    return {
+      role: user.role as UserRole,
+      plan: user.teamOwner.plan as UserPlan,
+      planExpiresAt: user.teamOwner.planExpiresAt
+    }
+  }
+  
   return {
     role: user.role as UserRole,
     plan: user.plan as UserPlan,
