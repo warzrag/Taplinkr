@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getUserPermissions, checkLimit } from '@/lib/permissions'
 import { nanoid } from 'nanoid'
-import { sendEmail } from '@/lib/email'
+import { sendEmail } from '@/lib/resend-email'
 
 // POST /api/teams/invite - Inviter un membre dans l'équipe
 export async function POST(request: NextRequest) {
@@ -147,23 +147,81 @@ export async function POST(request: NextRequest) {
 
     // Envoyer l'email d'invitation
     try {
-      const inviteUrl = `${process.env.NEXTAUTH_URL}/teams/join/${token}`
+      const inviteUrl = `${process.env.NEXTAUTH_URL || 'https://www.taplinkr.com'}/teams/join/${token}`
       
       await sendEmail({
         to: email,
         subject: `Invitation à rejoindre l'équipe ${team.name} sur TapLinkr`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Invitation à rejoindre une équipe</h2>
-            <p>Bonjour,</p>
-            <p>${invitation.invitedBy.name || invitation.invitedBy.email} vous invite à rejoindre l'équipe <strong>${team.name}</strong> sur TapLinkr en tant que <strong>${getRoleLabel(role)}</strong>.</p>
-            <p>Cliquez sur le lien ci-dessous pour accepter l'invitation :</p>
-            <a href="${inviteUrl}" style="display: inline-block; padding: 12px 24px; background-color: #8b5cf6; color: white; text-decoration: none; border-radius: 6px; margin: 16px 0;">
-              Rejoindre l'équipe
-            </a>
-            <p style="color: #666; font-size: 14px;">Cette invitation expire dans 7 jours.</p>
-            <p style="color: #666; font-size: 14px;">Si vous ne pouvez pas cliquer sur le bouton, copiez ce lien : ${inviteUrl}</p>
-          </div>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px;">
+              <!-- Header -->
+              <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #8b5cf6;">
+                <h1 style="color: #8b5cf6; margin: 0;">TapLinkr</h1>
+                <p style="color: #666; margin: 5px 0;">One tap, tout accessible</p>
+              </div>
+              
+              <!-- Content -->
+              <div style="padding: 30px 0;">
+                <h2 style="color: #333; margin-bottom: 20px;">Invitation à rejoindre une équipe</h2>
+                
+                <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
+                  Bonjour,
+                </p>
+                
+                <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
+                  <strong>${invitation.invitedBy.name || invitation.invitedBy.email}</strong> vous invite à rejoindre l'équipe 
+                  <strong style="color: #8b5cf6;">${team.name}</strong> sur TapLinkr en tant que 
+                  <strong>${getRoleLabel(role)}</strong>.
+                </p>
+                
+                <div style="background-color: #f8f9fa; border-left: 4px solid #8b5cf6; padding: 15px; margin: 20px 0;">
+                  <p style="margin: 0; color: #555;">
+                    <strong>⚠️ Important :</strong> Si vous n'avez pas encore de compte TapLinkr, vous devrez d'abord en créer un avec l'adresse email <strong>${email}</strong>
+                  </p>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${inviteUrl}" 
+                     style="display: inline-block; 
+                            padding: 14px 30px; 
+                            background-color: #8b5cf6; 
+                            color: white; 
+                            text-decoration: none; 
+                            border-radius: 8px; 
+                            font-weight: bold;
+                            font-size: 16px;">
+                    Accepter l'invitation
+                  </a>
+                </div>
+                
+                <p style="color: #999; font-size: 14px; text-align: center; margin-top: 20px;">
+                  Cette invitation expire dans 7 jours
+                </p>
+                
+                <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px;">
+                  <p style="color: #999; font-size: 12px; text-align: center;">
+                    Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>
+                    <a href="${inviteUrl}" style="color: #8b5cf6; word-break: break-all;">${inviteUrl}</a>
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Footer -->
+              <div style="text-align: center; padding: 20px 0; border-top: 1px solid #eee; margin-top: 30px;">
+                <p style="color: #999; font-size: 12px; margin: 0;">
+                  © 2024 TapLinkr. Tous droits réservés.
+                </p>
+              </div>
+            </div>
+          </body>
+          </html>
         `
       })
     } catch (emailError) {
