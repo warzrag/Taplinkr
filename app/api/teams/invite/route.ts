@@ -92,14 +92,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Une invitation est déjà en attente pour cet email' }, { status: 400 })
     }
 
-    const existingMember = await prisma.user.findFirst({
-      where: {
-        email,
-        teamId: team.id
-      }
+    // Vérifier si un utilisateur avec cet email existe ET est déjà membre
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
     })
 
-    if (existingMember) {
+    if (existingUser && existingUser.teamId === team.id) {
       return NextResponse.json({ error: 'Cet utilisateur est déjà membre de l\'équipe' }, { status: 400 })
     }
 

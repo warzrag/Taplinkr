@@ -61,7 +61,6 @@ model User {
   banner                  File?                   @relation("UserBanner", fields: [bannerId], references: [id])
   team                    Team?                   @relation(fields: [teamId], references: [id])
   ownedTeam               Team?                   @relation("TeamOwner")
-  teamInvitations         TeamInvitation[]
   sentInvitations         TeamInvitation[]        @relation("InvitedBy")
   verificationTokens      VerificationToken[]
 
@@ -469,7 +468,6 @@ model TeamInvitation {
   
   team        Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
   invitedBy   User              @relation("InvitedBy", fields: [invitedById], references: [id])
-  user        User?             @relation(fields: [email], references: [email])
   
   @@unique([teamId, email])
   @@map("team_invitations")
