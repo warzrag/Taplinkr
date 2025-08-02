@@ -81,18 +81,22 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Vérifier d'abord si l'utilisateur existe et est membre de l'équipe
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (existingUser && existingUser.teamId === team.id) {
+      return NextResponse.json({ error: 'Cet utilisateur est déjà membre de l\'équipe' }, { status: 400 })
+    }
+
     if (existingInvitation) {
-      // Si l'invitation est déjà acceptée
-      if (existingInvitation.status === 'accepted') {
-        return NextResponse.json({ error: 'Cet utilisateur a déjà rejoint l\'équipe' }, { status: 400 })
-      }
-      
       // Si l'invitation est toujours en attente et non expirée
       if (existingInvitation.status === 'pending' && new Date(existingInvitation.expiresAt) > new Date()) {
         return NextResponse.json({ error: 'Une invitation est déjà en attente pour cet email' }, { status: 400 })
       }
       
-      // Si l'invitation est expirée ou déclinée, la supprimer pour pouvoir en créer une nouvelle
+      // Dans tous les autres cas (acceptée mais pas dans l'équipe, expirée, déclinée), supprimer l'ancienne invitation
       try {
         await prisma.teamInvitation.delete({
           where: { id: existingInvitation.id }
@@ -106,14 +110,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Vérifier si un utilisateur avec cet email existe ET est déjà membre
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (existingUser && existingUser.teamId === team.id) {
-      return NextResponse.json({ error: 'Cet utilisateur est déjà membre de l\'équipe' }, { status: 400 })
-    }
 
     // Créer l'invitation
     const token = nanoid(32)
