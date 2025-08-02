@@ -10,9 +10,7 @@ import CreateLinkModal from '@/components/CreateLinkModal'
 import Link from 'next/link'
 import EditLinkModal from '@/components/EditLinkModal'
 import EditPhonePreview from '@/components/EditPhonePreview'
-import MoveToFolderMenu from '@/components/MoveToFolderMenu'
-import DragDropDashboard from '@/components/DragDropDashboard'
-import EditFolderModal from '@/components/EditFolderModal'
+import SimpleLinksGrid from '@/components/SimpleLinksGrid'
 import { useLinkUpdate } from '@/contexts/LinkUpdateContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import { useLinks } from '@/contexts/LinksContext'
@@ -20,45 +18,27 @@ import { Link as LinkType } from '@/types'
 import AnalyticsCharts from '@/components/analytics/AnalyticsCharts'
 import { fetchAnalyticsData } from '@/lib/analytics/api-wrapper'
 
-interface Folder {
-  id: string
-  name: string
-  description?: string
-  color: string
-  icon: string
-  isExpanded: boolean
-  links: LinkType[]
-  order: number
-  parentId?: string | null
-  children?: Folder[]
-}
-
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const { updateLinkInPreview } = useLinkUpdate()
   const { profile: userProfile } = useProfile()
-  const { links: contextLinks, folders: contextFolders, loading: contextLoading, refreshLinks, refreshFolders } = useLinks()
-  const [folders, setFolders] = useState<Folder[]>([])
+  const { links: contextLinks, loading: contextLoading, refreshLinks } = useLinks()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
   const [liveEditingLink, setLiveEditingLink] = useState<LinkType | null>(null)
-  const [movingLink, setMovingLink] = useState<LinkType | null>(null)
-  const [showEditFolderModal, setShowEditFolderModal] = useState(false)
-  const [editingFolder, setEditingFolder] = useState<Folder | null>(null)
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'authenticated') {
       refreshLinks()
-      fetchFolders()
       fetchDashboardStats()
     }
   }, [status]) // refreshLinks retiré des dépendances pour éviter la boucle infinie
 
-  // Filtrer les liens sans dossier depuis le contexte
-  const links = contextLinks.filter(link => !link.folderId)
+  // Utiliser tous les liens depuis le contexte
+  const links = contextLinks
 
   const fetchDashboardStats = async () => {
     try {
@@ -72,22 +52,6 @@ export default function Dashboard() {
     }
   }
 
-  const fetchFolders = async () => {
-    try {
-      const response = await fetch('/api/folders')
-      if (response.ok) {
-        const data = await response.json()
-        setFolders(data)
-      }
-    } catch (error) {
-      toast.error('Erreur lors du chargement des dossiers')
-    }
-  }
-
-  const handleLinksReorder = async (newLinks: LinkType[]) => {
-    // Mettre à jour l'ordre dans la base de données
-    // Pour l'instant, on ne fait rien car le contexte gère déjà les liens
-  }
 
   const handleToggle = async (linkId: string, isActive: boolean) => {
     try {
@@ -127,70 +91,6 @@ export default function Dashboard() {
     }
   }
 
-  const handleMoveLink = async (linkId: string, folderId: string | null) => {
-    try {
-      const response = await fetch(`/api/links/${linkId}/move`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folderId })
-      })
-      
-      if (response.ok) {
-        // Recharger les liens et dossiers
-        await refreshLinks()
-        fetchFolders()
-        toast.success(folderId ? 'Lien déplacé dans le dossier' : 'Lien sorti du dossier')
-      }
-    } catch (error) {
-      toast.error('Erreur lors du déplacement')
-    }
-  }
-
-  const handleSaveFolder = async (folderData: Partial<Folder>) => {
-    try {
-      if (editingFolder) {
-        // Mise à jour d'un dossier existant
-        const response = await fetch(`/api/folders/${editingFolder.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(folderData)
-        })
-
-        if (response.ok) {
-          const updatedFolder = await response.json()
-          setFolders(folders.map(f => f.id === editingFolder.id ? { ...f, ...updatedFolder } : f))
-          setEditingFolder(null)
-          setShowEditFolderModal(false)
-          toast.success('Dossier mis à jour')
-        } else {
-          const errorData = await response.json()
-          console.error('Erreur API mise à jour dossier:', errorData)
-          toast.error(errorData.error || 'Erreur lors de la mise à jour du dossier')
-        }
-      } else {
-        // Création d'un nouveau dossier
-        const response = await fetch('/api/folders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(folderData)
-        })
-
-        if (response.ok) {
-          const newFolder = await response.json()
-          setFolders([...folders, newFolder])
-          setShowEditFolderModal(false)
-          toast.success('Dossier créé')
-        } else {
-          const errorData = await response.json()
-          console.error('Erreur API création dossier:', errorData)
-          toast.error(errorData.error || 'Erreur lors de la création du dossier')
-        }
-      }
-    } catch (error) {
-      console.error('Erreur réseau:', error)
-      toast.error(editingFolder ? 'Erreur réseau lors de la mise à jour' : 'Erreur réseau lors de la création')
-    }
-  }
 
   if (contextLoading) {
     return (
@@ -398,62 +298,11 @@ export default function Dashboard() {
           </div>
         )}
 
-        <DragDropDashboard
-          folders={folders}
-          unorganizedLinks={links}
-          onFoldersChange={setFolders}
-          onLinksChange={async () => {
-            // Ne rien faire car les liens sont gérés par le contexte
-            await refreshLinks()
-          }}
+        <SimpleLinksGrid
+          links={links}
           onToggleLink={handleToggle}
           onEditLink={handleEdit}
           onDeleteLink={handleDelete}
-          onMoveLink={handleMoveLink}
-          onCreateFolder={() => {
-            setShowEditFolderModal(true)
-            setEditingFolder(null)
-          }}
-          onEditFolder={(folder) => {
-            setEditingFolder(folder)
-            setShowEditFolderModal(true)
-          }}
-          onDeleteFolder={async (folderId) => {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce dossier ?')) return
-            
-            try {
-              const response = await fetch(`/api/folders/${folderId}`, {
-                method: 'DELETE'
-              })
-              
-              if (response.ok) {
-                await refreshLinks()
-                fetchFolders()
-                toast.success('Dossier supprimé')
-              }
-            } catch (error) {
-              toast.error('Erreur lors de la suppression')
-            }
-          }}
-          onToggleFolder={async (folderId) => {
-            const folder = folders.find(f => f.id === folderId)
-            if (!folder) return
-            
-            try {
-              const response = await fetch(`/api/folders/${folderId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isExpanded: !folder.isExpanded })
-              })
-              
-              if (response.ok) {
-                const updatedFolder = await response.json()
-                setFolders(folders.map(f => f.id === folderId ? updatedFolder : f))
-              }
-            } catch (error) {
-              toast.error('Erreur lors de la mise à jour')
-            }
-          }}
         />
       </main>
 
@@ -517,26 +366,6 @@ export default function Dashboard() {
         </>
       )}
 
-      {/* Move to folder menu */}
-      {movingLink && (
-        <MoveToFolderMenu
-          linkId={movingLink.id}
-          currentFolderId={movingLink.folderId}
-          onClose={() => setMovingLink(null)}
-          onMove={handleMoveLink}
-        />
-      )}
-
-      {/* Edit folder modal */}
-      <EditFolderModal
-        isOpen={showEditFolderModal}
-        folder={editingFolder}
-        onClose={() => {
-          setShowEditFolderModal(false)
-          setEditingFolder(null)
-        }}
-        onSave={handleSaveFolder}
-      />
     </>
   )
 }
