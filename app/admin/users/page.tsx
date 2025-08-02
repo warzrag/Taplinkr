@@ -52,7 +52,7 @@ export default function AdminUsersPage() {
   const [showRoleModal, setShowRoleModal] = useState<string | null>(null)
 
   useEffect(() => {
-    if (session?.user?.role !== 'admin') {
+    if (session?.user?.role !== 'admin' && session?.user?.role !== 'manager') {
       router.push('/dashboard')
       return
     }
@@ -349,6 +349,9 @@ export default function AdminUsersPage() {
                             {user.role === 'admin' && (
                               <Shield className="w-4 h-4 text-red-500" />
                             )}
+                            {user.role === 'manager' && (
+                              <Shield className="w-4 h-4 text-purple-500" />
+                            )}
                           </div>
                           <div className="text-sm text-gray-500">{user.email}</div>
                           <div className="text-xs text-gray-400">@{user.username}</div>
@@ -449,7 +452,7 @@ export default function AdminUsersPage() {
                                 <span>Changer le rôle</span>
                               </button>
                               
-                              {user.role !== 'admin' && (
+                              {user.role !== 'admin' && user.role !== 'manager' && (
                                 <button
                                   onClick={() => handleDeleteUser(user.id)}
                                   className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
@@ -506,7 +509,11 @@ export default function AdminUsersPage() {
                   </p>
                   <p className="text-sm text-gray-600">
                     Rôle actuel : <span className="font-medium text-gray-900">
-                      {users.find(u => u.id === showRoleModal)?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
+                      {users.find(u => u.id === showRoleModal)?.role === 'admin' 
+                        ? 'Administrateur' 
+                        : users.find(u => u.id === showRoleModal)?.role === 'manager' 
+                        ? 'Manager' 
+                        : 'Utilisateur'}
                     </span>
                   </p>
                 </div>
@@ -531,19 +538,39 @@ export default function AdminUsersPage() {
                   </button>
 
                   <button
-                    onClick={() => handleRoleChange(showRoleModal, 'admin')}
-                    disabled={users.find(u => u.id === showRoleModal)?.role === 'admin'}
+                    onClick={() => handleRoleChange(showRoleModal, 'manager')}
+                    disabled={users.find(u => u.id === showRoleModal)?.role === 'manager' || session?.user?.role !== 'admin'}
                     className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                      users.find(u => u.id === showRoleModal)?.role === 'admin'
-                        ? 'border-red-500 bg-red-50 cursor-not-allowed opacity-50'
-                        : 'border-gray-200 hover:border-red-500 hover:bg-red-50'
+                      users.find(u => u.id === showRoleModal)?.role === 'manager'
+                        ? 'border-purple-500 bg-purple-50 cursor-not-allowed opacity-50'
+                        : session?.user?.role !== 'admin'
+                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
+                        : 'border-gray-200 hover:border-purple-500 hover:bg-purple-50'
                     }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Shield className="w-5 h-5 text-purple-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">Manager</p>
+                        <p className="text-sm text-gray-500">Peut gérer les utilisateurs (sauf admin/manager)</p>
+                        {session?.user?.role !== 'admin' && (
+                          <p className="text-xs text-red-500 mt-1">Seul l'admin peut attribuer ce rôle</p>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleRoleChange(showRoleModal, 'admin')}
+                    disabled={true}
+                    className="w-full p-4 rounded-xl border-2 text-left transition-all border-gray-200 bg-gray-50 cursor-not-allowed opacity-50"
                   >
                     <div className="flex items-center gap-3">
                       <Shield className="w-5 h-5 text-red-600" />
                       <div>
                         <p className="font-medium text-gray-900">Administrateur</p>
-                        <p className="text-sm text-gray-500">Accès complet avec gestion des utilisateurs</p>
+                        <p className="text-sm text-gray-500">Accès complet - Un seul admin autorisé</p>
+                        <p className="text-xs text-red-500 mt-1">Il ne peut y avoir qu'un seul administrateur</p>
                       </div>
                     </div>
                   </button>

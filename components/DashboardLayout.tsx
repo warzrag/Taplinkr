@@ -93,8 +93,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   ]
   
   // Admin section (if applicable)
-  const adminItems = session?.user?.role === 'admin' 
-    ? [{ icon: Shield, label: 'Admin', href: '/admin' }]
+  const adminItems = (session?.user?.role === 'admin' || session?.user?.role === 'manager')
+    ? [{ icon: Shield, label: 'Admin', href: '/admin/users' }]
     : []
 
   const isActive = (href: string) => {

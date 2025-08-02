@@ -7,8 +7,8 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    // Vérifier que l'utilisateur est admin
-    if (!session?.user || (session.user as any).role !== 'admin') {
+    // Vérifier que l'utilisateur est admin ou manager
+    if (!session?.user || ((session.user as any).role !== 'admin' && (session.user as any).role !== 'manager')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     }
 

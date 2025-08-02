@@ -10,7 +10,7 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session || session.user.role !== 'admin') {
+    if (!session || (session.user.role !== 'admin' && session.user.role !== 'manager')) {
       return NextResponse.json(
         { error: 'Non autorisé' },
         { status: 403 }
@@ -30,9 +30,17 @@ export async function DELETE(
       )
     }
 
-    if (userToDelete.role === 'admin') {
+    if (userToDelete.role === 'admin' || userToDelete.role === 'manager') {
       return NextResponse.json(
-        { error: 'Impossible de supprimer un administrateur' },
+        { error: 'Impossible de supprimer un administrateur ou manager' },
+        { status: 403 }
+      )
+    }
+
+    // Un manager ne peut pas supprimer d'autres utilisateurs ayant des rôles spéciaux
+    if (session.user.role === 'manager' && userToDelete.role !== 'user') {
+      return NextResponse.json(
+        { error: 'Vous ne pouvez supprimer que les utilisateurs standards' },
         { status: 403 }
       )
     }

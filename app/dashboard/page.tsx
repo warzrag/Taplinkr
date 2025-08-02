@@ -110,8 +110,8 @@ export default function Dashboard() {
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Gérez vos liens et consultez vos statistiques</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap lg:gap-3">
-            {/* Bouton Admin - Visible uniquement pour les admins */}
-            {(session?.user as any)?.role === 'admin' && (
+            {/* Bouton Admin - Visible pour les admins et managers */}
+            {((session?.user as any)?.role === 'admin' || (session?.user as any)?.role === 'manager') && (
               <Link href="/admin/users">
                 <motion.button
                   className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white px-3 py-2 text-sm lg:px-4 lg:text-base rounded-lg flex items-center justify-center gap-2 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl"
