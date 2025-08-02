@@ -68,7 +68,8 @@
       "Bash(cd:*)",
       "Bash(git push:*)",
       "Bash(npx prettier:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(cd:*)"
     ],
     "deny": []
   }

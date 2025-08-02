@@ -137,7 +137,7 @@ export default function TeamPage() {
     })
     
     try {
-      const response = await fetch('/api/teams/invite', {
+      const response = await fetch('/api/teams/invite-temp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
