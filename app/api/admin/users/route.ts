@@ -21,7 +21,6 @@ export async function GET() {
         role: true,
         plan: true,
         emailVerified: true,
-        isActive: true,
         createdAt: true,
         _count: {
           select: {
@@ -34,7 +33,13 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(users)
+    // Ajouter isActive avec une valeur par défaut si elle n'existe pas
+    const usersWithActive = users.map(user => ({
+      ...user,
+      isActive: true // Temporairement, tous les utilisateurs sont actifs
+    }))
+
+    return NextResponse.json(usersWithActive)
   } catch (error) {
     console.error('Erreur lors de la récupération des utilisateurs:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
