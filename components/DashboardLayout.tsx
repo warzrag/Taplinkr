@@ -83,15 +83,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const accountItems = [
     { icon: User, label: 'Profile', href: '/dashboard/profile' },
     { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
-    { icon: Gift, label: 'Affiliates Program', href: '/dashboard/affiliates' },
-    { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
+    { icon: Settings, label: 'Settings', href: '/settings' },
   ]
 
-  // Help Section
+  // Help Section - Temporairement vide car pages non créées
   const helpItems = [
-    { icon: HelpCircle, label: 'FAQ', href: '/dashboard/faq' },
-    { icon: Map, label: 'Roadmap', href: '/dashboard/roadmap' },
-    { icon: MessageCircle, label: 'Support', href: '/dashboard/support' },
+    // { icon: HelpCircle, label: 'FAQ', href: '/dashboard/faq' },
+    // { icon: Map, label: 'Roadmap', href: '/dashboard/roadmap' },
+    // { icon: MessageCircle, label: 'Support', href: '/dashboard/support' },
   ]
   
   // Admin section (if applicable)
@@ -190,31 +189,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
 
-          {/* Help Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
-              Help
-            </h3>
-            <div className="space-y-1">
-              {helpItems.map((item) => {
-                const active = isActive(item.href)
-                return (
-                  <button
-                    key={item.label}
-                    onClick={() => router.push(item.href)}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                      active 
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span className="text-sm font-medium">{item.label}</span>
-                  </button>
-                )
-              })}
+          {/* Help Section - Hidden for now */}
+          {helpItems.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
+                Help
+              </h3>
+              <div className="space-y-1">
+                {helpItems.map((item) => {
+                  const active = isActive(item.href)
+                  return (
+                    <button
+                      key={item.label}
+                      onClick={() => router.push(item.href)}
+                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                        active 
+                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Admin Section (if applicable) */}
           {adminItems.length > 0 && (

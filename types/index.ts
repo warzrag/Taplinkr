@@ -41,6 +41,7 @@ export interface Link {
   youtubeUrl?: string
   order: number
   clicks: number
+  views: number
   createdAt: string
   updatedAt: string
   folderId?: string

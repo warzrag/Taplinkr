@@ -44,7 +44,7 @@ export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
   free: {
     maxPages: 1,
     maxLinksPerPage: 5,
-    maxFolders: 0,
+    maxFolders: 3, // Permettre 3 dossiers en gratuit
     hasAnalytics: true, // Basic analytics only
     hasAdvancedAnalytics: false,
     hasCustomThemes: false,
@@ -213,7 +213,7 @@ export function getUpgradeMessage(feature: keyof PlanLimits): string {
   const messages: Record<keyof PlanLimits, string> = {
     maxPages: 'Passez au plan Standard pour créer des pages illimitées',
     maxLinksPerPage: 'Passez au plan Standard pour ajouter plus de liens',
-    maxFolders: 'Passez au plan Standard pour créer des dossiers',
+    maxFolders: 'Passez au plan Standard pour créer plus de dossiers',
     hasAnalytics: 'Cette fonctionnalité nécessite un plan payant',
     hasAdvancedAnalytics: 'Les analytics avancés nécessitent le plan Standard',
     hasCustomThemes: 'Les thèmes personnalisés nécessitent le plan Standard',

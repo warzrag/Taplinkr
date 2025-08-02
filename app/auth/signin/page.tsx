@@ -250,6 +250,21 @@ export default function SignIn() {
                   </AnimatePresence>
                 </motion.div>
 
+                {/* Forgot Password Link */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.75 }}
+                  className="text-right"
+                >
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-sm text-blue-300 hover:text-blue-200 transition-colors"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
+                </motion.div>
+
                 {/* Submit */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

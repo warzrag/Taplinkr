@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap } from 'lucide-react'
 import { Link as LinkType } from '@/types'
 import { usePermissions } from '@/hooks/usePermissions'
+import ImageUpload from './upload/ImageUpload'
+import CoverImageUpload from './upload/CoverImageUpload'
 
 interface CreateLinkModalProps {
   isOpen: boolean
@@ -43,6 +45,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         }))
       : [{ title: '', url: '' }]
   )
+  const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
+  const [coverImage, setCoverImage] = useState(editingLink?.coverImage || '')
   
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>({
     defaultValues: editingLink ? {
@@ -62,6 +66,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setShieldEnabled(false)
       setIsUltraLink(false)
       setMultiLinks([{ title: '', url: '' }])
+      setProfileImage('')
+      setCoverImage('')
       reset()
       onClose()
     }
@@ -117,7 +123,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         directUrl: linkType === 'direct' ? directUrl : null,
         shieldEnabled: linkType === 'direct' ? shieldEnabled : false,
         isUltraLink: linkType === 'direct' ? isUltraLink : false,
-        multiLinks: linkType === 'multi' ? multiLinks.filter(link => link.title && link.url) : []
+        multiLinks: linkType === 'multi' ? multiLinks.filter(link => link.title && link.url) : [],
+        profileImage: profileImage || null,
+        coverImage: coverImage || null
       }
       
       console.log('Sending request:', { url, method, body: requestBody })
@@ -472,14 +480,46 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   )}
 
                   {linkType === 'multi' && (
-                    <button
-                      type="button"
-                      onClick={addMultiLink}
-                      className="w-full py-2.5 border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
-                    >
-                      <Plus className="w-5 h-5" />
-                      Ajouter un lien
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={addMultiLink}
+                        className="w-full py-2.5 border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
+                      >
+                        <Plus className="w-5 h-5" />
+                        Ajouter un lien
+                      </button>
+
+                      {/* Section des images */}
+                      <div className="space-y-4 pt-4 border-t">
+                        <h4 className="text-sm font-medium text-gray-700">Personnalisation visuelle</h4>
+                        
+                        {/* Photo de profil */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Photo de profil
+                          </label>
+                          <ImageUpload
+                            value={profileImage}
+                            onChange={setProfileImage}
+                            type="profile"
+                            aspectRatio="square"
+                            className="w-32"
+                          />
+                        </div>
+
+                        {/* Photo de couverture */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Photo de couverture
+                          </label>
+                          <CoverImageUpload
+                            value={coverImage}
+                            onChange={setCoverImage}
+                          />
+                        </div>
+                      </div>
+                    </>
                   )}
 
                   {/* Boutons d'action */}
