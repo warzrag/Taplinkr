@@ -63,6 +63,7 @@ model User {
   ownedTeam               Team?                   @relation("TeamOwner")
   teamInvitations         TeamInvitation[]
   sentInvitations         TeamInvitation[]        @relation("InvitedBy")
+  verificationTokens      VerificationToken[]
 
   @@map("users")
 }
@@ -503,4 +504,18 @@ model TeamAnalytics {
   
   @@unique([teamId, date])
   @@map("team_analytics")
+}
+
+model VerificationToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  type       String   // 'email' or 'password_reset'
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("verification_tokens")
 }

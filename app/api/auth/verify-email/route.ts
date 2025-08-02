@@ -13,15 +13,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Chercher l'utilisateur avec ce token
-    const user = await prisma.user.findFirst({
-      where: {
-        emailVerificationToken: token,
-        emailVerified: false
-      }
+    // Chercher le token de vérification
+    const verificationToken = await prisma.verificationToken.findUnique({
+      where: { 
+        token,
+        type: 'email'
+      },
+      include: { user: true }
     })
 
-    if (!user) {
+    if (!verificationToken) {
       return NextResponse.json(
         { message: 'Token invalide ou déjà utilisé' },
         { status: 404 }
@@ -29,21 +30,45 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier si le token n'a pas expiré
-    if (user.emailVerificationExpiry && new Date() > user.emailVerificationExpiry) {
+    if (new Date() > verificationToken.expiresAt) {
+      // Supprimer le token expiré
+      await prisma.verificationToken.delete({
+        where: { id: verificationToken.id }
+      })
+      
       return NextResponse.json(
         { message: 'Le lien de vérification a expiré' },
         { status: 400 }
       )
     }
 
+    // Vérifier si l'email est déjà vérifié
+    if (verificationToken.user.emailVerified) {
+      // Supprimer le token
+      await prisma.verificationToken.delete({
+        where: { id: verificationToken.id }
+      })
+      
+      return NextResponse.json(
+        { 
+          message: 'Email déjà vérifié. Vous pouvez vous connecter.',
+          success: true
+        },
+        { status: 200 }
+      )
+    }
+
     // Marquer l'email comme vérifié
     await prisma.user.update({
-      where: { id: user.id },
+      where: { id: verificationToken.userId },
       data: {
-        emailVerified: true,
-        emailVerificationToken: null,
-        emailVerificationExpiry: null
+        emailVerified: true
       }
+    })
+
+    // Supprimer le token utilisé
+    await prisma.verificationToken.delete({
+      where: { id: verificationToken.id }
     })
 
     return NextResponse.json(

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { EmailService } from '@/lib/email-service'
+import { nanoid } from 'nanoid'
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,21 +42,32 @@ export async function POST(request: NextRequest) {
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Créer l'utilisateur
+    // Créer l'utilisateur avec email non vérifié
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name: name || email.split('@')[0],
         username,
-        emailVerified: true // Email auto-vérifié temporairement
+        emailVerified: false // Email doit être vérifié
       }
     })
 
-    // Envoyer l'email de bienvenue
-    await EmailService.sendWelcomeEmail(
+    // Créer un token de vérification
+    const verificationToken = await prisma.verificationToken.create({
+      data: {
+        userId: user.id,
+        token: nanoid(32),
+        type: 'email',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 heures
+      }
+    })
+
+    // Envoyer l'email de vérification
+    await EmailService.sendVerificationEmail(
       user.email,
-      user.name || user.username
+      user.name || user.username,
+      verificationToken.token
     )
 
     // Retourner l'utilisateur sans le mot de passe
@@ -63,8 +75,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { 
-        message: 'Compte créé avec succès !',
-        user: userWithoutPassword
+        message: 'Compte créé avec succès ! Vérifiez votre email pour activer votre compte.',
+        user: userWithoutPassword,
+        requiresEmailVerification: true
       },
       { status: 201 }
     )
