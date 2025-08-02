@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { EmailService } from '@/lib/email-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,6 +51,12 @@ export async function POST(request: NextRequest) {
         emailVerified: true // Email auto-vérifié temporairement
       }
     })
+
+    // Envoyer l'email de bienvenue
+    await EmailService.sendWelcomeEmail(
+      user.email,
+      user.name || user.username
+    )
 
     // Retourner l'utilisateur sans le mot de passe
     const { password: _, ...userWithoutPassword } = user
