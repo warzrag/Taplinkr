@@ -159,28 +159,28 @@ export default function Dashboard() {
       icon: Plus,
       onClick: () => setShowCreateModal(true),
       gradient: 'from-blue-500 to-cyan-500',
-      description: 'Ajouter un nouveau lien'
+      description: 'Lancez-vous en 2 clics ✨'
     },
     {
       label: 'Analytics',
       icon: Activity,
       href: '/dashboard/analytics',
       gradient: 'from-purple-500 to-pink-500',
-      description: 'Voir les statistiques détaillées'
+      description: 'Vos stats en temps réel 📊'
     },
     {
       label: 'Mes liens',
       icon: Link2,
       href: '/dashboard/links',
       gradient: 'from-emerald-500 to-teal-500',
-      description: 'Gérer tous vos liens'
+      description: 'Votre univers digital 🌐'
     },
     {
       label: userProfile?.plan === 'free' ? 'Passer Pro' : 'Abonnement',
       icon: userProfile?.plan === 'free' ? Crown : Zap,
       href: '/dashboard/billing',
       gradient: userProfile?.plan === 'free' ? 'from-yellow-500 to-orange-500' : 'from-gray-500 to-gray-600',
-      description: userProfile?.plan === 'free' ? 'Débloquer toutes les fonctionnalités' : 'Gérer votre abonnement'
+      description: userProfile?.plan === 'free' ? 'Débloquez la puissance Pro 🚀' : 'Gérez votre plan Premium ⚡'
     }
   ]
 
