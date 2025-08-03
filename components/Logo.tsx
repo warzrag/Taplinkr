@@ -88,8 +88,8 @@ export default function Logo({ size = 'md', showText = true, animated = true, cl
           {/* Gradient Definition */}
           <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#8B5CF6" />
-              <stop offset="100%" stopColor="#EC4899" />
+              <stop offset="0%" stopColor="#4F46E5" />
+              <stop offset="100%" stopColor="#2563EB" />
             </linearGradient>
           </defs>
         </svg>
@@ -122,7 +122,7 @@ export default function Logo({ size = 'md', showText = true, animated = true, cl
       {/* Text */}
       {showText && (
         <motion.span
-          className="font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent select-none"
+          className="font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent select-none"
           style={{ fontSize: currentSize.text }}
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
@@ -160,8 +160,8 @@ export function LogoIcon({ size = 32, className = '' }: { size?: number; classNa
       
       <defs>
         <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#8B5CF6" />
-          <stop offset="100%" stopColor="#EC4899" />
+          <stop offset="0%" stopColor="#4F46E5" />
+          <stop offset="100%" stopColor="#2563EB" />
         </linearGradient>
       </defs>
     </svg>
