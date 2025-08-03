@@ -110,11 +110,11 @@ export default function SignUp() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 p-6 z-20">
+      <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 z-20">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <Link 
             href="/"
-            className="group flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="group flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors text-sm sm:text-base"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Retour</span>
@@ -122,7 +122,7 @@ export default function SignUp() {
           
           <Link 
             href="/auth/signin"
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+            className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-sm sm:text-base"
           >
             Se connecter
           </Link>
@@ -131,19 +131,19 @@ export default function SignUp() {
 
       <div className="flex min-h-screen">
         {/* Left Side - Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-20">
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-16 sm:py-20">
           <div className="w-full max-w-md">
             {/* Logo */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-10"
+              className="text-center mb-8 sm:mb-10"
             >
               <div className="mb-4 flex justify-center">
-                <Logo size="lg" showText={false} />
+                <Logo size="md" showText={false} />
               </div>
-              <h1 className="text-3xl font-bold text-gray-900">Créer votre compte</h1>
-              <p className="text-gray-600 mt-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Créer votre compte</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-2 px-4">
                 {suggestedUsername 
                   ? `Votre nom d'utilisateur sera : taplinkr.com/${suggestedUsername}`
                   : 'Rejoignez des milliers de créateurs'
@@ -173,14 +173,14 @@ export default function SignUp() {
             )}
 
             {/* Progress Steps */}
-            <div className="flex items-center justify-center mb-8">
+            <div className="flex items-center justify-center mb-6 sm:mb-8">
               <div className="flex items-center gap-2">
                 <motion.div
                   animate={{
                     backgroundColor: step >= 1 ? '#8b5cf6' : '#e5e7eb',
                     scale: step === 1 ? 1.1 : 1
                   }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+                  className="w-7 sm:w-8 h-7 sm:h-8 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm"
                 >
                   {step > 1 ? <CheckCircle className="w-4 h-4" /> : '1'}
                 </motion.div>
@@ -188,14 +188,14 @@ export default function SignUp() {
                   animate={{
                     backgroundColor: step >= 2 ? '#8b5cf6' : '#e5e7eb',
                   }}
-                  className="w-16 h-1 rounded"
+                  className="w-12 sm:w-16 h-1 rounded"
                 />
                 <motion.div
                   animate={{
                     backgroundColor: step >= 2 ? '#8b5cf6' : '#e5e7eb',
                     scale: step === 2 ? 1.1 : 1
                   }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+                  className="w-7 sm:w-8 h-7 sm:h-8 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm"
                 >
                   2
                 </motion.div>
@@ -228,7 +228,7 @@ export default function SignUp() {
                               message: 'Le nom doit contenir au moins 2 caractères'
                             }
                           })}
-                          className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                          className="w-full pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
                           placeholder="Jean Dupont"
                         />
                       </div>
@@ -255,7 +255,7 @@ export default function SignUp() {
                               message: 'Email invalide'
                             }
                           })}
-                          className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                          className="w-full pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
                           placeholder="votre@email.com"
                         />
                       </div>
@@ -269,7 +269,7 @@ export default function SignUp() {
                     <button
                       type="button"
                       onClick={nextStep}
-                      className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-2"
+                      className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
                     >
                       Continuer
                       <ChevronRight className="w-4 h-4" />
@@ -305,7 +305,7 @@ export default function SignUp() {
                               message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre'
                             }
                           })}
-                          className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                          className="w-full pl-11 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
                           placeholder="••••••••"
                         />
                         <button
@@ -349,18 +349,18 @@ export default function SignUp() {
                       </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 sm:gap-3">
                       <button
                         type="button"
                         onClick={() => setStep(1)}
-                        className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+                        className="flex-1 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all text-sm sm:text-base"
                       >
                         Retour
                       </button>
                       <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="flex-1 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
                       >
                         {loading ? (
                           <>
@@ -394,7 +394,7 @@ export default function SignUp() {
             <button
               type="button"
               onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-              className="w-full py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-3"
+              className="w-full py-2.5 sm:py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-sm sm:text-base"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -406,7 +406,7 @@ export default function SignUp() {
             </button>
 
             {/* Terms */}
-            <p className="mt-6 text-xs text-gray-500 text-center">
+            <p className="mt-6 text-xs text-gray-500 text-center px-4">
               En créant un compte, vous acceptez nos{' '}
               <Link href="/terms" className="text-purple-600 hover:text-purple-700">
                 Conditions d'utilisation

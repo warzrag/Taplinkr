@@ -10,10 +10,10 @@ interface LogoProps {
 
 export default function Logo({ size = 'md', showText = true, animated = true, className = '' }: LogoProps) {
   const sizes = {
-    sm: { icon: 32, text: 18 },
-    md: { icon: 40, text: 20 },
-    lg: { icon: 48, text: 24 },
-    xl: { icon: 64, text: 32 }
+    sm: { icon: 28, text: 16 },
+    md: { icon: 36, text: 18 },
+    lg: { icon: 44, text: 22 },
+    xl: { icon: 56, text: 28 }
   }
 
   const currentSize = sizes[size]

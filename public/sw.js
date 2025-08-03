@@ -5,11 +5,8 @@ const DYNAMIC_CACHE_NAME = 'linktracker-dynamic-v1'
 // Static assets to cache
 const STATIC_ASSETS = [
   '/',
-  '/dashboard',
-  '/auth/signin',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/manifest.json'
+  // Les autres assets seront mis en cache dynamiquement
 ]
 
 // API routes that should be cached

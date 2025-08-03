@@ -116,7 +116,7 @@ export default function SignIn() {
         transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
       />
       
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4 sm:p-6">
         <div className="max-w-md w-full">
           {/* Back to home */}
           <motion.div
@@ -126,7 +126,7 @@ export default function SignIn() {
           >
             <Link 
               href="/"
-              className="inline-flex items-center space-x-2 text-white/80 hover:text-white mb-8 transition-colors group"
+              className="inline-flex items-center space-x-2 text-white/80 hover:text-white mb-6 sm:mb-8 transition-colors group text-sm sm:text-base"
             >
               <motion.div
                 whileHover={{ x: -5 }}
@@ -146,7 +146,7 @@ export default function SignIn() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             {/* Header */}
-            <div className="relative px-8 py-8 text-center">
+            <div className="relative px-6 sm:px-8 py-6 sm:py-8 text-center">
               {/* Decorative background */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-600/10" />
               
@@ -156,8 +156,8 @@ export default function SignIn() {
                 transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
                 className="relative"
               >
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                  <LogIn className="w-10 h-10 text-white" />
+                <div className="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl">
+                  <LogIn className="w-8 sm:w-10 h-8 sm:h-10 text-white" />
                 </div>
                 <motion.div
                   className="absolute -top-2 -right-2"
@@ -169,7 +169,7 @@ export default function SignIn() {
               </motion.div>
               
               <motion.h1 
-                className="text-3xl font-bold text-white mb-3"
+                className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
@@ -177,7 +177,7 @@ export default function SignIn() {
                 Bon retour !
               </motion.h1>
               <motion.p 
-                className="text-white/80 text-lg"
+                className="text-white/80 text-base sm:text-lg px-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -187,15 +187,15 @@ export default function SignIn() {
             </div>
 
             {/* Form */}
-            <div className="px-8 pb-8">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                 {/* Email */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.6 }}
                 >
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 sm:mb-3">
                     <div className="flex items-center space-x-2">
                       <Mail className="w-4 h-4" />
                       <span>Adresse email</span>
@@ -210,7 +210,7 @@ export default function SignIn() {
                         message: 'Email invalide'
                       }
                     })}
-                    className={`w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.email ? 'border-red-400 ring-2 ring-red-400/50' : ''}`}
+                    className={`w-full px-4 py-2.5 sm:py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base ${errors.email ? 'border-red-400 ring-2 ring-red-400/50' : ''}`}
                     placeholder="votre@email.com"
                     whileFocus={{ scale: 1.02 }}
                   />
@@ -235,7 +235,7 @@ export default function SignIn() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.7 }}
                 >
-                  <label className="block text-sm font-semibold text-white mb-3">
+                  <label className="block text-sm font-semibold text-white mb-2 sm:mb-3">
                     <div className="flex items-center space-x-2">
                       <Lock className="w-4 h-4" />
                       <span>Mot de passe</span>
@@ -251,7 +251,7 @@ export default function SignIn() {
                           message: 'Le mot de passe doit contenir au moins 6 caractères'
                         }
                       })}
-                      className={`w-full px-4 py-3 pr-12 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.password ? 'border-red-400 ring-2 ring-red-400/50' : ''}`}
+                      className={`w-full px-4 py-2.5 sm:py-3 pr-12 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base ${errors.password ? 'border-red-400 ring-2 ring-red-400/50' : ''}`}
                       placeholder="••••••••"
                       whileFocus={{ scale: 1.02 }}
                     />
@@ -308,7 +308,7 @@ export default function SignIn() {
                   <motion.button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-2xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-2xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                     whileHover={loading ? {} : { scale: 1.02, y: -2 }}
                     whileTap={loading ? {} : { scale: 0.98 }}
                   >
@@ -353,7 +353,7 @@ export default function SignIn() {
                 <motion.button
                   type="button"
                   onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-                  className="mt-4 w-full bg-white hover:bg-gray-50 text-gray-900 font-medium py-3 px-4 rounded-xl flex items-center justify-center space-x-3 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                  className="mt-4 w-full bg-white hover:bg-gray-50 text-gray-900 font-medium py-2.5 sm:py-3 px-4 rounded-xl flex items-center justify-center space-x-3 transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -374,7 +374,7 @@ export default function SignIn() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.9 }}
               >
-                <p className="text-white/80">
+                <p className="text-white/80 text-sm sm:text-base">
                   Pas encore de compte ?{' '}
                   <Link 
                     href="/auth/signup" 

@@ -196,7 +196,8 @@ export default function Home() {
                 href="/auth/signup" 
                 className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm sm:text-base font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
               >
-                S'inscrire
+                <span className="hidden sm:inline">Inscription</span>
+                <span className="sm:hidden">S'inscrire</span>
               </Link>
             </div>
           </div>
@@ -204,126 +205,103 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="pt-32 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto text-center">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-20 left-10 w-64 h-64 bg-purple-200 rounded-full blur-3xl opacity-30 animate-pulse" />
+            <div className="absolute bottom-20 right-10 w-64 h-64 bg-pink-200 rounded-full blur-3xl opacity-30 animate-pulse delay-1000" />
+          </div>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+            transition={{ duration: 0.6 }}
+            className="relative"
           >
             {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-8"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
             >
-              <TrendingUp className="w-4 h-4" />
-              Plus de 50,000 créateurs nous font confiance
+              <Zap className="w-4 h-4" />
+              <span>Nouveau : Analytics en temps réel</span>
             </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 px-4">
-              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Un seul lien
-              </span>
+            {/* Main heading */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+              Une seule page,
               <br />
-              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl">pour tout partager</span>
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                tous vos liens
+              </span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
-              Créez votre page personnalisée et partagez tous vos liens importants en un seul endroit. 
-              Simple, élégant et puissant.
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto">
+              Créez votre page bio interactive et partagez tous vos contenus en un seul lien
             </p>
 
             {/* Username Checker */}
-            <div className="max-w-xl mx-auto mb-8 sm:mb-12 px-4">
+            <div className="max-w-xl mx-auto mb-8">
               <div className="relative">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-gray-50 rounded-2xl p-2 border-2 border-gray-200 focus-within:border-purple-500 transition-all">
-                  <div className="flex items-center flex-1 mb-2 sm:mb-0">
-                    <span className="text-gray-500 pl-2 sm:pl-4 pr-1 text-base sm:text-lg">taplinkr.com/</span>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 items-stretch sm:items-center bg-white rounded-xl sm:rounded-2xl shadow-2xl p-2 border border-gray-100">
+                  <div className="flex-1 flex items-center px-4 py-2 sm:py-0">
+                    <span className="text-gray-400 text-sm sm:text-base">taplinkr.com/</span>
                     <input
                       type="text"
                       value={username}
                       onChange={handleUsernameChange}
-                      placeholder="votreusername"
-                      className="flex-1 bg-transparent outline-none text-base sm:text-lg px-2 py-2 sm:py-3"
+                      placeholder="votrenom"
+                      className="flex-1 ml-1 outline-none text-gray-900 placeholder-gray-400 text-sm sm:text-base"
                       maxLength={30}
                     />
-                    
-                    <AnimatePresence mode="wait">
-                      {checking && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="mr-2"
-                        >
-                          <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-                        </motion.div>
-                      )}
-                      
-                      {!checking && available === true && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="mr-2"
-                        >
-                          <Check className="w-5 h-5 text-green-500" />
-                        </motion.div>
-                      )}
-                      
-                      {!checking && available === false && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="mr-2"
-                        >
-                          <X className="w-5 h-5 text-red-500" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {checking && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 ml-2" />
+                    )}
+                    {!checking && available === true && username && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="ml-2"
+                      >
+                        <Check className="w-5 h-5 text-green-500" />
+                      </motion.div>
+                    )}
+                    {!checking && available === false && username && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="ml-2"
+                      >
+                        <X className="w-5 h-5 text-red-500" />
+                      </motion.div>
+                    )}
                   </div>
-
                   <button
                     onClick={handleGetStarted}
-                    disabled={!available || checking}
-                    className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
-                      available
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
+                    disabled={!available || !username}
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100"
                   >
-                    C'est parti !
+                    Créer mon lien
                   </button>
                 </div>
-              </div>
-              
-              {/* Status Message */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mt-2 text-sm text-red-600"
-                  >
-                    {error}
-                  </motion.div>
-                )}
                 
-                {available === true && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mt-2 text-sm text-green-600"
-                  >
-                    Parfait ! Ce nom d'utilisateur est disponible
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                {/* Error message */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute -bottom-6 left-0 right-0 text-sm text-red-500 text-center"
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Popular Examples */}
