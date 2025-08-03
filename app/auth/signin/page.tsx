@@ -168,7 +168,7 @@ export default function SignIn() {
                         message: 'Email invalide'
                       }
                     })}
-                    className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
+                    className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm sm:text-base"
                     placeholder="votre@email.com"
                   />
                 </div>
@@ -191,7 +191,7 @@ export default function SignIn() {
                   </label>
                   <Link
                     href="/auth/forgot-password"
-                    className="text-sm text-purple-600 hover:text-purple-700 transition-colors"
+                    className="text-sm text-indigo-600 hover:text-indigo-700 transition-colors"
                   >
                     Mot de passe oublié ?
                   </Link>
@@ -209,7 +209,7 @@ export default function SignIn() {
                         message: 'Le mot de passe doit contenir au moins 6 caractères'
                       }
                     })}
-                    className="w-full pl-10 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
+                    className="w-full pl-10 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm sm:text-base"
                     placeholder="••••••••"
                   />
                   <button
@@ -240,7 +240,7 @@ export default function SignIn() {
                 <input
                   id="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Se souvenir de moi
@@ -251,7 +251,7 @@ export default function SignIn() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
+                className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 {loading ? (
                   <>
@@ -295,7 +295,7 @@ export default function SignIn() {
             {/* Sign Up Link */}
             <p className="mt-8 text-center text-sm text-gray-600">
               Pas encore de compte ?{' '}
-              <Link href="/auth/signup" className="font-medium text-purple-600 hover:text-purple-700">
+              <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-700">
                 Créer un compte gratuitement
               </Link>
             </p>
@@ -303,7 +303,7 @@ export default function SignIn() {
         </div>
 
         {/* Right Side - Image/Graphics */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 to-pink-600 items-center justify-center p-12">
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 to-blue-700 items-center justify-center p-12">
           <div className="max-w-lg">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
