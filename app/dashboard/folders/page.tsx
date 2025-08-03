@@ -171,11 +171,11 @@ export default function FoldersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-3 border-blue-600 border-t-transparent rounded-full"
+          className="w-12 h-12 border-3 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full"
         />
       </div>
     )
@@ -197,14 +197,14 @@ export default function FoldersPage() {
               </button>
             </Link>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Mes dossiers et liens
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Organisez vos liens avec des dossiers et glissez-déposez pour réorganiser
               </p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <FolderPlus className="w-4 h-4" />
               <span>Cliquez sur "Nouveau" pour créer des dossiers</span>
             </div>

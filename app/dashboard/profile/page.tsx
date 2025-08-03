@@ -119,11 +119,11 @@ export default function ProfilePage() {
 
   if (loading || status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-3 border-blue-600 border-t-transparent rounded-full"
+          className="w-12 h-12 border-3 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full"
         />
       </div>
     )
@@ -132,7 +132,7 @@ export default function ProfilePage() {
   const isPremium = profile.plan === 'premium'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="p-6 max-w-6xl mx-auto">
         {/* Header */}
         <motion.div 
@@ -142,10 +142,10 @@ export default function ProfilePage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 dark:from-gray-100 dark:to-blue-400 bg-clip-text text-transparent">
                 Mon Profil
               </h1>
-              <p className="text-gray-600 mt-1">Gérez vos informations personnelles et votre abonnement</p>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Gérez vos informations personnelles et votre abonnement</p>
             </div>
           </div>
         </motion.div>
@@ -158,10 +158,10 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
             >
-              <h2 className="text-lg font-semibold mb-2">Photo de profil</h2>
-              <p className="text-sm text-gray-600 mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Photo de profil</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                 Cette photo sera affichée sur votre profil et à travers la plateforme.
               </p>
               
@@ -175,15 +175,15 @@ export default function ProfilePage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <User className="w-12 h-12 text-blue-600" />
+                      <User className="w-12 h-12 text-blue-600 dark:text-blue-400" />
                     )}
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="absolute -bottom-2 -right-2 p-2 bg-white rounded-xl shadow-lg border border-gray-200"
+                    className="absolute -bottom-2 -right-2 p-2 bg-white dark:bg-gray-700 rounded-xl shadow-lg border border-gray-200 dark:border-gray-600"
                   >
-                    <Camera className="w-4 h-4 text-gray-600" />
+                    <Camera className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                   </motion.button>
                 </div>
                 
@@ -209,7 +209,7 @@ export default function ProfilePage() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Supprimer
                   </motion.button>
@@ -222,37 +222,37 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
             >
-              <h2 className="text-lg font-semibold mb-6">Informations personnelles</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Informations personnelles</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Prénom
                   </label>
                   <input
                     type="text"
                     value={profile.name.split(' ')[0] || ''}
                     onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Nom
                   </label>
                   <input
                     type="text"
                     value={profile.name.split(' ')[1] || ''}
                     onChange={(e) => setProfile({ ...profile, name: profile.name.split(' ')[0] + ' ' + e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Nom d'utilisateur
                   </label>
                   <div className="relative">
@@ -260,16 +260,16 @@ export default function ProfilePage() {
                       type="text"
                       value={profile.username}
                       disabled
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <Lock className="w-4 h-4 text-gray-400" />
+                      <Lock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                     </div>
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Adresse email
                   </label>
                   <div className="relative">
@@ -277,7 +277,7 @@ export default function ProfilePage() {
                       type="email"
                       value={profile.email}
                       disabled
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                     />
                     {profile.emailVerified && (
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -288,7 +288,7 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Contactez le support pour modifier votre adresse email
                   </p>
                 </div>
@@ -310,31 +310,31 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-red-100 to-orange-100 rounded-xl">
-                  <Shield className="w-5 h-5 text-red-600" />
+                <div className="p-2 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl">
+                  <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
-                <h2 className="text-lg font-semibold">Sécurité</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Sécurité</h2>
               </div>
               
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <div>
-                  <h3 className="font-medium text-gray-900">Mot de passe</h3>
-                  <p className="text-sm text-gray-600 mt-1">Dernière modification : Jamais</p>
+                  <h3 className="font-medium text-gray-900 dark:text-white">Mot de passe</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Dernière modification : Jamais</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex gap-1">
                     {[...Array(12)].map((_, i) => (
-                      <div key={i} className="w-2 h-2 bg-gray-400 rounded-full" />
+                      <div key={i} className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full" />
                     ))}
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setShowPasswordModal(true)}
-                    className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-white flex items-center gap-2"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600 flex items-center gap-2"
                   >
                     Modifier
                     <ChevronRight className="w-4 h-4" />
@@ -354,7 +354,7 @@ export default function ProfilePage() {
               className={`relative overflow-hidden rounded-2xl shadow-sm border ${
                 isPremium 
                   ? 'bg-gradient-to-br from-purple-600 to-indigo-600 border-purple-200' 
-                  : 'bg-white border-gray-100'
+                  : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'
               }`}
             >
               {isPremium && (
@@ -368,13 +368,13 @@ export default function ProfilePage() {
                       {isPremium ? (
                         <Crown className="w-5 h-5 text-yellow-400" />
                       ) : (
-                        <Sparkles className="w-5 h-5 text-gray-600" />
+                        <Sparkles className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       )}
-                      <h3 className={`font-semibold ${isPremium ? 'text-white' : 'text-gray-900'}`}>
+                      <h3 className={`font-semibold ${isPremium ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
                         Plan {isPremium ? 'Premium' : 'Gratuit'}
                       </h3>
                     </div>
-                    <p className={`text-2xl font-bold ${isPremium ? 'text-white' : 'text-gray-900'}`}>
+                    <p className={`text-2xl font-bold ${isPremium ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
                       {isPremium ? '9,99€' : 'Gratuit'}
                     </p>
                   </div>
@@ -385,7 +385,7 @@ export default function ProfilePage() {
                   )}
                 </div>
                 
-                <div className={`text-sm ${isPremium ? 'text-white/80' : 'text-gray-600'} mb-4`}>
+                <div className={`text-sm ${isPremium ? 'text-white/80' : 'text-gray-600 dark:text-gray-400'} mb-4`}>
                   {isPremium ? (
                     <>Renouvellement le {new Date(profile.planExpiresAt || '').toLocaleDateString()}</>
                   ) : (
@@ -412,9 +412,9 @@ export default function ProfilePage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
             >
-              <h3 className="font-semibold mb-4">Utilisation du plan</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Utilisation du plan</h3>
               
               <div className="space-y-4">
                 <div>
@@ -424,7 +424,7 @@ export default function ProfilePage() {
                       {usage.deepLinks} / {limits.deepLinks}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all ${
                         usage.deepLinks >= limits.deepLinks 
@@ -443,7 +443,7 @@ export default function ProfilePage() {
                       {usage.landingPages} / {limits.landingPages}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all ${
                         usage.landingPages >= limits.landingPages 
@@ -492,7 +492,7 @@ export default function ProfilePage() {
                       <feature.icon className="w-4 h-4" />
                     </div>
                     <span className={`text-sm ${
-                      feature.available ? 'text-gray-700' : 'text-gray-400'
+                      feature.available ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'
                     }`}>
                       {feature.label}
                     </span>
@@ -506,7 +506,7 @@ export default function ProfilePage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full mt-6 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 font-medium"
+                className="w-full mt-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium"
               >
                 Comparer tous les plans
               </motion.button>
