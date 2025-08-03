@@ -228,7 +228,7 @@ export default function SignUp() {
                               message: 'Le nom doit contenir au moins 2 caractères'
                             }
                           })}
-                          className="w-full pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
+                          className="w-full pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm sm:text-base"
                           placeholder="Jean Dupont"
                         />
                       </div>
@@ -255,7 +255,7 @@ export default function SignUp() {
                               message: 'Email invalide'
                             }
                           })}
-                          className="w-full pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
+                          className="w-full pl-11 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm sm:text-base"
                           placeholder="votre@email.com"
                         />
                       </div>
@@ -269,7 +269,7 @@ export default function SignUp() {
                     <button
                       type="button"
                       onClick={nextStep}
-                      className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+                      className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
                     >
                       Continuer
                       <ChevronRight className="w-4 h-4" />
@@ -305,7 +305,7 @@ export default function SignUp() {
                               message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre'
                             }
                           })}
-                          className="w-full pl-11 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base"
+                          className="w-full pl-11 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm sm:text-base"
                           placeholder="••••••••"
                         />
                         <button
@@ -360,7 +360,7 @@ export default function SignUp() {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
+                        className="flex-1 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
                       >
                         {loading ? (
                           <>
@@ -408,11 +408,11 @@ export default function SignUp() {
             {/* Terms */}
             <p className="mt-6 text-xs text-gray-500 text-center px-4">
               En créant un compte, vous acceptez nos{' '}
-              <Link href="/terms" className="text-purple-600 hover:text-purple-700">
+              <Link href="/terms" className="text-indigo-600 hover:text-indigo-700">
                 Conditions d'utilisation
               </Link>{' '}
               et notre{' '}
-              <Link href="/privacy" className="text-purple-600 hover:text-purple-700">
+              <Link href="/privacy" className="text-indigo-600 hover:text-indigo-700">
                 Politique de confidentialité
               </Link>
             </p>
@@ -420,7 +420,7 @@ export default function SignUp() {
         </div>
 
         {/* Right Side - Benefits */}
-        <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-purple-600 to-pink-600 items-center justify-center px-12 relative overflow-hidden">
+        <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-indigo-600 to-blue-600 items-center justify-center px-12 relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl" />

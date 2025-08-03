@@ -87,9 +87,9 @@ const testimonials = [
 ]
 
 const popularUsers = [
-  { name: "influenceur", icon: Instagram, color: "from-pink-500 to-purple-500" },
-  { name: "createur", icon: Youtube, color: "from-red-500 to-pink-500" },
-  { name: "artiste", icon: Heart, color: "from-purple-500 to-indigo-500" },
+  { name: "influenceur", icon: Instagram, color: "from-blue-500 to-indigo-500" },
+  { name: "createur", icon: Youtube, color: "from-red-500 to-blue-500" },
+  { name: "artiste", icon: Heart, color: "from-indigo-500 to-indigo-500" },
   { name: "entrepreneur", icon: TrendingUp, color: "from-blue-500 to-cyan-500" }
 ]
 
@@ -155,7 +155,7 @@ export default function Home() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     )
   }
@@ -194,7 +194,7 @@ export default function Home() {
               </Link>
               <Link 
                 href="/auth/signup" 
-                className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm sm:text-base font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+                className="px-3 sm:px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg text-sm sm:text-base font-medium hover:from-indigo-700 hover:to-blue-700 transition-all"
               >
                 S'inscrire
               </Link>
@@ -216,14 +216,14 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-8"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-8"
             >
               <TrendingUp className="w-4 h-4" />
               Plus de 50,000 créateurs nous font confiance
             </motion.div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 px-4">
-              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
                 Un seul lien
               </span>
               <br />
@@ -238,7 +238,7 @@ export default function Home() {
             {/* Username Checker */}
             <div className="max-w-xl mx-auto mb-8 sm:mb-12 px-4">
               <div className="relative">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-gray-50 rounded-2xl p-2 border-2 border-gray-200 focus-within:border-purple-500 transition-all">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-gray-50 rounded-2xl p-2 border-2 border-gray-200 focus-within:border-indigo-500 transition-all">
                   <div className="flex items-center flex-1 mb-2 sm:mb-0">
                     <span className="text-gray-500 pl-2 sm:pl-4 pr-1 text-base sm:text-lg">taplinkr.com/</span>
                     <input
@@ -258,7 +258,7 @@ export default function Home() {
                           exit={{ opacity: 0, scale: 0.8 }}
                           className="mr-2"
                         >
-                          <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                          <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                         </motion.div>
                       )}
                       
@@ -291,7 +291,7 @@ export default function Home() {
                     disabled={!available || checking}
                     className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
                       available
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                        ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
@@ -378,8 +378,8 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                  <feature.icon className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
+                  <feature.icon className="w-6 h-6 text-indigo-600" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">{feature.title}</h3>
                 <p className="text-sm sm:text-base text-gray-600">{feature.description}</p>
@@ -420,7 +420,7 @@ export default function Home() {
                 <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6">"{testimonial.content}"</p>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                     {testimonial.avatar}
                   </div>
                   <div>
@@ -435,7 +435,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-600 to-pink-600">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-600 to-blue-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 sm:mb-6">
             Prêt à commencer ?
@@ -445,7 +445,7 @@ export default function Home() {
           </p>
           <Link
             href="/auth/signup"
-            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white text-purple-600 rounded-xl font-semibold text-base sm:text-lg hover:bg-gray-100 transition-all transform hover:scale-105"
+            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white text-indigo-600 rounded-xl font-semibold text-base sm:text-lg hover:bg-gray-100 transition-all transform hover:scale-105"
           >
             Créer mon TapLinkr gratuitement
             <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5" />
