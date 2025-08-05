@@ -79,6 +79,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   })
 
   const watchedSlug = watch('slug')
+  const watchedTitle = watch('title')
+  const watchedDescription = watch('description')
+  
+  // Debug
+  useEffect(() => {
+    console.log('Titre surveillé:', watchedTitle)
+    console.log('Étape actuelle:', step)
+  }, [watchedTitle, step])
 
   // Vérifier la disponibilité du slug
   useEffect(() => {
@@ -1389,8 +1397,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   links={[{
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
-                    title: step >= 4 ? (watch('title') || 'Mon lien') : 'Mon lien',
-                    description: step >= 4 ? (watch('description') || '') : '',
+                    title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+                    description: step >= 4 ? (watchedDescription || '') : '',',
                     profileImage: step >= 2 ? profileImage : '',
                     coverImage: step >= 4 ? coverImage : '',
                     isDirect: false,
@@ -1446,8 +1454,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               links={[{
                 id: Date.now().toString(),
                 slug: watch('slug') || 'preview',
-                title: step >= 4 ? (watch('title') || 'Mon lien') : 'Mon lien',
-                description: step >= 4 ? (watch('description') || '') : '',
+                title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+                description: step >= 4 ? (watchedDescription || '') : '',
                 profileImage: step >= 2 ? profileImage : '',
                 coverImage: step >= 4 ? coverImage : '',
                 isDirect: false,
