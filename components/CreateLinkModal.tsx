@@ -907,6 +907,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               </motion.button>
               
               <div className="mt-16">
+                {console.log('Preview profileImage:', profileImage)}
                 <LivePhonePreview
                   links={[{
                     id: Date.now().toString(),

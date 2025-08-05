@@ -51,6 +51,9 @@ interface LivePhonePreviewProps {
 }
 
 export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewProps) {
+  console.log('LivePhonePreview - links received:', links)
+  console.log('LivePhonePreview - profileImage:', links[0]?.profileImage)
+  
   // Fonction pour obtenir la classe CSS de la police
   const getFontClass = (fontFamily?: string) => {
     const fontMap: { [key: string]: string } = {
@@ -288,13 +291,16 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
                 className="text-center mb-6"
               >
                 {/* Photo de profil */}
-                {displayableLinks[0]?.profileImage && (
+                {console.log('Profile image check:', displayableLinks[0]?.profileImage)}
+                {displayableLinks[0]?.profileImage && displayableLinks[0].profileImage !== '' && (
                   <div className="flex justify-center mb-4">
                     <div className="relative">
+                      {console.log('Rendering profile image:', displayableLinks[0].profileImage)}
                       <img
                         src={displayableLinks[0].profileImage}
                         alt="Profile"
                         className="w-24 h-24 object-cover rounded-full shadow-lg"
+                        onError={(e) => console.error('Image load error:', e)}
                       />
                       {/* Indicateur en ligne discret à côté de la photo */}
                       {displayableLinks[0]?.isOnline && (
