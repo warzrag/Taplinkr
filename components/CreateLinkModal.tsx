@@ -86,7 +86,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   useEffect(() => {
     console.log('Titre surveillé:', watchedTitle)
     console.log('Étape actuelle:', step)
-  }, [watchedTitle, step])
+    console.log('MultiLinks:', multiLinks)
+  }, [watchedTitle, step, multiLinks])
 
   // Vérifier la disponibilité du slug
   useEffect(() => {
@@ -1407,7 +1408,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     tiktokUrl: step >= 3 ? watch('tiktokUrl') : '',
                     twitterUrl: step >= 3 ? watch('twitterUrl') : '',
                     youtubeUrl: step >= 3 ? watch('youtubeUrl') : '',
-                    multiLinks: step >= 4 ? multiLinks.filter(ml => ml.title && ml.url).map((ml, index) => ({
+                    multiLinks: step >= 4 ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
                       id: index.toString(),
                       parentLinkId: '',
                       title: ml.title,
@@ -1464,7 +1465,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 tiktokUrl: step >= 3 ? watch('tiktokUrl') : '',
                 twitterUrl: step >= 3 ? watch('twitterUrl') : '',
                 youtubeUrl: step >= 3 ? watch('youtubeUrl') : '',
-                multiLinks: step >= 4 ? multiLinks.filter(ml => ml.title && ml.url).map((ml, index) => ({
+                multiLinks: step >= 4 ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
                   id: index.toString(),
                   parentLinkId: '',
                   title: ml.title,
