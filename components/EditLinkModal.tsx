@@ -233,7 +233,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
               damping: 25,
               stiffness: 200
             }}
-            className="fixed inset-0 md:inset-auto md:top-0 md:left-0 md:bottom-0 md:h-full md:w-full md:max-w-xl lg:max-w-2xl bg-white dark:bg-gray-800 shadow-2xl z-50 flex flex-col"
+            className="fixed inset-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:h-[90vh] md:w-[90vw] md:max-w-4xl md:max-h-[800px] bg-white dark:bg-gray-800 shadow-2xl rounded-2xl z-50 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
