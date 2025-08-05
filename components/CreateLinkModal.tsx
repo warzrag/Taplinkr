@@ -14,7 +14,7 @@ import LivePhonePreview from './LivePhonePreview'
 interface CreateLinkModalProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (newLink?: any) => void
   editingLink?: LinkType | null
 }
 
@@ -31,9 +31,9 @@ interface MultiLinkData {
 export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
   const { hasPermission, requirePermission } = usePermissions()
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState(1)
-  const [linkType, setLinkType] = useState<'direct' | 'multi'>(
-    editingLink?.isDirect ? 'direct' : 'multi'
+  const [step, setStep] = useState(editingLink ? 2 : 1) // Si on édite, on passe directement à l'étape 2
+  const [linkType, setLinkType] = useState<'direct' | 'multi' | null>(
+    editingLink?.isDirect ? 'direct' : editingLink ? 'multi' : null
   )
   const [directUrl, setDirectUrl] = useState(editingLink?.directUrl || '')
   const [shieldEnabled, setShieldEnabled] = useState(editingLink?.shieldEnabled || false)
@@ -62,14 +62,15 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
   const handleClose = () => {
     if (!loading) {
-      setStep(1)
-      setLinkType('multi')
+      setStep(editingLink ? 2 : 1)
+      setLinkType(editingLink?.isDirect ? 'direct' : editingLink ? 'multi' : null)
       setDirectUrl('')
       setShieldEnabled(false)
       setIsUltraLink(false)
       setMultiLinks([{ title: '', url: '' }])
       setProfileImage('')
       setCoverImage('')
+      setShowPreview(false)
       reset()
       onClose()
     }
@@ -144,8 +145,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         throw new Error(errorData.message || errorData.error || 'Erreur lors de la sauvegarde')
       }
 
+      const newLink = await response.json()
       toast.success(editingLink ? 'Lien modifié avec succès' : 'Lien créé avec succès')
-      onSuccess()
+      onSuccess(newLink)
       handleClose()
     } catch (error) {
       console.error('Erreur:', error)
@@ -214,12 +216,242 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
             <div className="space-y-6">
               {step === 1 ? (
-                /* Étape 1: Informations de base */
+                /* Étape 1: Choix du type de lien */
                 <motion.div
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center min-h-[400px] py-8"
+                >
+                  <motion.h3 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-2xl font-bold text-gray-900 mb-8 text-center"
+                  >
+                    Quel type de lien souhaitez-vous créer ?
+                  </motion.h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
+                    {/* Multi-liens */}
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ 
+                        delay: 0.2,
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 10
+                      }}
+                      whileHover={{ 
+                        scale: 1.05,
+                        y: -5,
+                        transition: { duration: 0.2 }
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setLinkType('multi')
+                        setShowPreview(true)
+                        setStep(2)
+                      }}
+                      className="relative p-8 rounded-2xl border-2 border-gray-200 hover:border-indigo-500 bg-white hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 transition-all duration-300 group overflow-hidden"
+                    >
+                      {/* Background animation */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        initial={false}
+                      />
+                      
+                      <motion.div 
+                        className="absolute top-4 right-4"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.5, type: "spring" }}
+                      >
+                        <motion.span 
+                          animate={{ 
+                            scale: [1, 1.1, 1],
+                          }}
+                          transition={{ 
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                          className="text-xs bg-indigo-600 text-white px-2 py-1 rounded-full font-semibold shadow-lg"
+                        >
+                          Recommandé
+                        </motion.span>
+                      </motion.div>
+                      
+                      <motion.div
+                        className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center relative z-10 shadow-xl"
+                        whileHover={{ 
+                          rotate: [0, -10, 10, -10, 0],
+                          transition: { duration: 0.5 }
+                        }}
+                      >
+                        <motion.div
+                          animate={{ 
+                            scale: [1, 1.2, 1],
+                          }}
+                          transition={{ 
+                            duration: 3,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                          className="absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-700 rounded-2xl opacity-50 blur-xl"
+                        />
+                        <Layers className="w-10 h-10 text-white relative z-10" />
+                      </motion.div>
+                      
+                      <h4 className="text-xl font-bold text-gray-900 mb-2 relative z-10">Multi-liens</h4>
+                      <p className="text-gray-600 text-sm relative z-10">
+                        Page avec plusieurs liens, parfait pour partager tous vos réseaux
+                      </p>
+                      
+                      <motion.div 
+                        className="mt-4 flex items-center justify-center gap-2 text-indigo-600 font-medium relative z-10"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <span>Créer</span>
+                        <motion.div
+                          animate={{ x: [0, 5, 0] }}
+                          transition={{ 
+                            duration: 1.5,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                        >
+                          <ArrowRight className="w-4 h-4" />
+                        </motion.div>
+                      </motion.div>
+                    </motion.button>
+
+                    {/* Lien direct */}
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ 
+                        delay: 0.3,
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 10
+                      }}
+                      whileHover={{ 
+                        scale: 1.05,
+                        y: -5,
+                        transition: { duration: 0.2 }
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        if (!hasPermission('hasCustomThemes')) {
+                          requirePermission('hasCustomThemes')
+                          return
+                        }
+                        setLinkType('direct')
+                        setStep(2)
+                      }}
+                      className="relative p-8 rounded-2xl border-2 border-gray-200 hover:border-purple-500 bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 transition-all duration-300 group overflow-hidden"
+                    >
+                      {/* Background animation */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        initial={false}
+                      />
+                      
+                      {!hasPermission('hasCustomThemes') && (
+                        <motion.div 
+                          className="absolute top-4 right-4"
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.6, type: "spring" }}
+                        >
+                          <motion.span 
+                            animate={{ 
+                              rotate: [0, -5, 5, -5, 0],
+                            }}
+                            transition={{ 
+                              duration: 3,
+                              repeat: Infinity,
+                              repeatType: "reverse"
+                            }}
+                            className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full font-semibold shadow-lg inline-block"
+                          >
+                            🔒 PRO
+                          </motion.span>
+                        </motion.div>
+                      )}
+                      
+                      <motion.div
+                        className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center relative z-10 shadow-xl"
+                        whileHover={{ 
+                          scale: [1, 1.2, 1.1],
+                          transition: { duration: 0.3 }
+                        }}
+                      >
+                        <motion.div
+                          animate={{ 
+                            scale: [1, 1.3, 1],
+                            opacity: [0.5, 0.8, 0.5]
+                          }}
+                          transition={{ 
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                          className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-700 rounded-2xl blur-xl"
+                        />
+                        <motion.div
+                          animate={{ 
+                            rotate: 45,
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{ 
+                            rotate: { duration: 0.5 },
+                            scale: { duration: 2, repeat: Infinity, repeatType: "reverse" }
+                          }}
+                        >
+                          <Zap className="w-10 h-10 text-white relative z-10" />
+                        </motion.div>
+                      </motion.div>
+                      
+                      <h4 className="text-xl font-bold text-gray-900 mb-2 relative z-10">Lien direct</h4>
+                      <p className="text-gray-600 text-sm relative z-10">
+                        Redirection instantanée vers une URL unique
+                      </p>
+                      
+                      <motion.div 
+                        className="mt-4 flex items-center justify-center gap-2 text-purple-600 font-medium relative z-10"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                      >
+                        <span>Créer</span>
+                        <motion.div
+                          animate={{ x: [0, 5, 0] }}
+                          transition={{ 
+                            duration: 1.5,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                        >
+                          <ArrowRight className="w-4 h-4" />
+                        </motion.div>
+                      </motion.div>
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ) : (
+                /* Étape 2: Détails du lien */
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   className="space-y-4"
                 >
+                  {/* Informations de base */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Titre du lien
@@ -241,7 +473,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       URL personnalisée (optionnel)
                     </label>
                     <div className="flex items-center">
-                      <span className="text-gray-500 text-sm mr-2">/link/</span>
+                      <span className="text-gray-500 text-sm mr-2">taplinkr.com/</span>
                       <input
                         type="text"
                         {...register('slug')}
@@ -252,83 +484,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <p className="text-xs text-gray-500 mt-1">
                       Laissez vide pour générer automatiquement
                     </p>
-                  </div>
-
-                  {/* Bouton suivant */}
-                  <button
-                    type="button"
-                    onClick={goToStep2}
-                    className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg sm:rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg text-base"
-                  >
-                    Suivant
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                </motion.div>
-              ) : (
-                /* Étape 2: Type de lien */
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-4"
-                >
-                  {/* Sélecteur de type */}
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700">
-                      Type de lien
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {hasPermission('hasCustomThemes') ? (
-                        <button
-                          type="button"
-                          onClick={() => setLinkType('direct')}
-                          className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all ${
-                            linkType === 'direct'
-                              ? 'border-indigo-500 bg-indigo-50'
-                              : 'border-gray-300 bg-white hover:border-gray-400'
-                          }`}
-                        >
-                          <ExternalLink className={`w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 ${
-                            linkType === 'direct' ? 'text-indigo-600' : 'text-gray-400'
-                          }`} />
-                          <h4 className="font-medium text-sm">Lien direct</h4>
-                          <p className="text-xs text-gray-500 mt-1 hidden sm:block">Redirige directement vers une URL</p>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => requirePermission('hasCustomThemes')}
-                          className="p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 border-gray-200 bg-gray-50 relative overflow-hidden"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-gray-100/50 to-gray-200/50" />
-                          <ExternalLink className="w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 text-gray-300" />
-                          <h4 className="font-medium text-sm text-gray-500">Lien direct</h4>
-                          <p className="text-xs text-gray-400 mt-1 hidden sm:block">Plan Standard requis</p>
-                          <div className="absolute top-1 right-1">
-                            <span className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-0.5 rounded-full font-semibold">
-                              🔒 PRO
-                            </span>
-                          </div>
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLinkType('multi')
-                          setShowPreview(true)
-                        }}
-                        className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all ${
-                          linkType === 'multi'
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-300 bg-white hover:border-gray-400'
-                        }`}
-                      >
-                        <Layers className={`w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 ${
-                          linkType === 'multi' ? 'text-indigo-600' : 'text-gray-400'
-                        }`} />
-                        <h4 className="font-medium text-sm">Multi-liens</h4>
-                        <p className="text-xs text-gray-500 mt-1 hidden sm:block">Page avec plusieurs liens</p>
-                      </button>
-                    </div>
                   </div>
 
                   {/* Contenu selon le type */}
