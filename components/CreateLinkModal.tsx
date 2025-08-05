@@ -478,35 +478,38 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       stiffness: 100,
                       damping: 15
                     }}
-                    className="relative"
+                    className="relative w-48 h-48"
                   >
-                    {!profileImage ? (
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="relative"
-                      >
-                        {/* Cercle animé en arrière-plan */}
-                        <motion.div
-                          animate={{
-                            scale: [1, 1.2, 1],
-                            opacity: [0.5, 0.8, 0.5]
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            repeatType: "reverse"
-                          }}
-                          className="absolute inset-0 w-48 h-48 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 rounded-full blur-xl"
-                        />
-                        
-                        {/* Zone d'upload principale */}
-                        <motion.div
-                          whileHover={{ 
-                            rotate: [0, -5, 5, 0],
-                            transition: { duration: 0.5 }
-                          }}
-                          className="relative w-48 h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex flex-col items-center justify-center cursor-pointer border-4 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors"
-                        >
+                    {/* Cercle animé en arrière-plan */}
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.5, 0.8, 0.5]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        repeatType: "reverse"
+                      }}
+                      className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 rounded-full blur-xl"
+                    />
+                    
+                    {/* Sparkles animés autour */}
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 pointer-events-none"
+                    >
+                      <Sparkle className="absolute -top-2 right-8 w-4 h-4 text-yellow-500" />
+                      <Sparkle className="absolute bottom-8 -left-2 w-3 h-3 text-purple-500" />
+                      <Sparkle className="absolute top-16 -left-3 w-5 h-5 text-indigo-500" />
+                    </motion.div>
+                    
+                    {/* Zone d'upload */}
+                    <div className="relative w-full h-full">
+                      {!profileImage ? (
+                        <>
+                          {/* Icône animée en overlay */}
                           <motion.div
                             animate={{ y: [0, -10, 0] }}
                             transition={{ 
@@ -514,74 +517,59 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                               repeat: Infinity,
                               repeatType: "reverse"
                             }}
+                            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
                           >
                             <Camera className="w-12 h-12 text-indigo-600 mb-2" />
+                            <span className="text-sm font-medium text-gray-700">Cliquez pour ajouter</span>
+                            <span className="text-xs text-gray-500 mt-1">JPG, PNG • Max 5MB</span>
                           </motion.div>
-                          <span className="text-sm font-medium text-gray-700">Cliquez pour ajouter</span>
-                          <span className="text-xs text-gray-500 mt-1">JPG, PNG • Max 5MB</span>
                           
-                          {/* Sparkles animés */}
+                          {/* Composant ImageUpload avec style circulaire */}
+                          <div className="[&>div>div:last-child]:rounded-full [&>div>div:last-child]:bg-gradient-to-br [&>div>div:last-child]:from-indigo-100 [&>div>div:last-child]:to-purple-100 [&>div>div:last-child]:border-indigo-300 [&>div>div:last-child:hover]:border-indigo-500 [&>div>div]:h-full">
+                            <ImageUpload
+                              value={profileImage}
+                              onChange={setProfileImage}
+                              type="profile"
+                              aspectRatio="square"
+                              className="w-full h-full [&_svg]:hidden [&_p]:hidden [&_div]:bg-transparent"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Image avec effet de succès */}
                           <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0"
+                            animate={{
+                              boxShadow: [
+                                "0 0 0 0 rgba(99, 102, 241, 0)",
+                                "0 0 0 20px rgba(99, 102, 241, 0.2)",
+                                "0 0 0 40px rgba(99, 102, 241, 0)"
+                              ]
+                            }}
+                            transition={{ duration: 1.5 }}
+                            className="relative w-full h-full rounded-full overflow-hidden border-4 border-indigo-500 shadow-xl"
                           >
-                            <Sparkle className="absolute top-0 right-4 w-4 h-4 text-yellow-500" />
-                            <Sparkle className="absolute bottom-4 left-2 w-3 h-3 text-purple-500" />
-                            <Sparkle className="absolute top-12 left-0 w-5 h-5 text-indigo-500" />
+                            <ImageUpload
+                              value={profileImage}
+                              onChange={setProfileImage}
+                              type="profile"
+                              aspectRatio="square"
+                              className="w-full h-full"
+                            />
                           </motion.div>
-                        </motion.div>
-                        
-                        {/* Composant d'upload invisible */}
-                        <div className="absolute inset-0 opacity-0">
-                          <ImageUpload
-                            value={profileImage}
-                            onChange={setProfileImage}
-                            type="profile"
-                            aspectRatio="square"
-                            className="w-full h-full"
-                          />
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200 }}
-                        className="relative"
-                      >
-                        {/* Image uploadée avec effet de succès */}
-                        <motion.div
-                          animate={{
-                            boxShadow: [
-                              "0 0 0 0 rgba(99, 102, 241, 0)",
-                              "0 0 0 20px rgba(99, 102, 241, 0.2)",
-                              "0 0 0 40px rgba(99, 102, 241, 0)"
-                            ]
-                          }}
-                          transition={{ duration: 1.5 }}
-                          className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-indigo-500 shadow-xl"
-                        >
-                          <ImageUpload
-                            value={profileImage}
-                            onChange={setProfileImage}
-                            type="profile"
-                            aspectRatio="square"
-                            className="w-full h-full"
-                          />
-                        </motion.div>
-                        
-                        {/* Badge de succès */}
-                        <motion.div
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          transition={{ delay: 0.3, type: "spring" }}
-                          className="absolute -bottom-2 -right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg"
-                        >
-                          <Sparkles className="w-6 h-6 text-white" />
-                        </motion.div>
-                      </motion.div>
-                    )}
+                          
+                          {/* Badge de succès */}
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ delay: 0.3, type: "spring" }}
+                            className="absolute -bottom-2 -right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg z-20"
+                          >
+                            <Sparkles className="w-6 h-6 text-white" />
+                          </motion.div>
+                        </>
+                      )}
+                    </div>
                   </motion.div>
 
                   {/* Message d'encouragement */}
