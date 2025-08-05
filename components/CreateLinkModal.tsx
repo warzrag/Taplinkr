@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap } from 'lucide-react'
+import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap, Smartphone, Eye } from 'lucide-react'
 import { Link as LinkType } from '@/types'
 import { usePermissions } from '@/hooks/usePermissions'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
+import LivePhonePreview from './LivePhonePreview'
 
 interface CreateLinkModalProps {
   isOpen: boolean
@@ -47,6 +48,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   )
   const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
   const [coverImage, setCoverImage] = useState(editingLink?.coverImage || '')
+  const [showPreview, setShowPreview] = useState(false)
   
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>({
     defaultValues: editingLink ? {
@@ -310,7 +312,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       )}
                       <button
                         type="button"
-                        onClick={() => setLinkType('multi')}
+                        onClick={() => {
+                          setLinkType('multi')
+                          setShowPreview(true)
+                        }}
                         className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all ${
                           linkType === 'multi'
                             ? 'border-indigo-500 bg-indigo-50'
@@ -558,7 +563,143 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             </div>
           </form>
         </motion.div>
+        
+        {/* Bouton pour afficher le preview sur desktop */}
+        {linkType === 'multi' && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={() => setShowPreview(!showPreview)}
+            className="hidden xl:flex fixed bottom-8 right-8 items-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition-colors z-30"
+          >
+            {showPreview ? (
+              <>
+                <Eye className="w-5 h-5" />
+                Masquer la preview
+              </>
+            ) : (
+              <>
+                <Smartphone className="w-5 h-5" />
+                Voir la preview
+              </>
+            )}
+          </motion.button>
+        )}
       </div>
+
+      {/* Live Phone Preview - similaire à EditLinkModal */}
+      <AnimatePresence>
+        {showPreview && linkType === 'multi' && (
+          <motion.div
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: 'spring', damping: 25 }}
+            className="xl:hidden fixed inset-y-0 right-0 w-full md:w-96 bg-gray-100 z-60 overflow-y-auto shadow-2xl"
+          >
+            <div className="p-4">
+              <motion.button
+                onClick={() => setShowPreview(false)}
+                className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <X className="w-5 h-5 text-gray-700" />
+              </motion.button>
+              
+              <div className="mt-16">
+                <LivePhonePreview
+                  link={{
+                    id: Date.now().toString(),
+                    slug: watch('slug') || 'preview',
+                    title: watch('title') || 'Mon lien',
+                    description: '',
+                    profileImage: profileImage,
+                    coverImage: coverImage,
+                    isDirect: false,
+                    isActive: true,
+                    multiLinks: multiLinks.filter(ml => ml.title && ml.url).map((ml, index) => ({
+                      id: index.toString(),
+                      parentLinkId: '',
+                      title: ml.title,
+                      url: ml.url,
+                      description: '',
+                      icon: '',
+                      iconImage: '',
+                      animation: '',
+                      order: index,
+                      clicks: 0,
+                      createdAt: new Date(),
+                      updatedAt: new Date()
+                    })),
+                    // Valeurs par défaut
+                    userId: '',
+                    directUrl: '',
+                    shieldEnabled: false,
+                    isUltraLink: false,
+                    isOnline: false,
+                    order: 0,
+                    clicks: 0,
+                    views: 0,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                  }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Preview desktop fixe à droite */}
+      <AnimatePresence>
+        {showPreview && linkType === 'multi' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="hidden xl:block fixed right-8 top-24 bottom-8 w-[375px] z-20"
+          >
+            <LivePhonePreview
+              link={{
+                id: Date.now().toString(),
+                slug: watch('slug') || 'preview',
+                title: watch('title') || 'Mon lien',
+                description: '',
+                profileImage: profileImage,
+                coverImage: coverImage,
+                isDirect: false,
+                isActive: true,
+                multiLinks: multiLinks.filter(ml => ml.title && ml.url).map((ml, index) => ({
+                  id: index.toString(),
+                  parentLinkId: '',
+                  title: ml.title,
+                  url: ml.url,
+                  description: '',
+                  icon: '',
+                  iconImage: '',
+                  animation: '',
+                  order: index,
+                  clicks: 0,
+                  createdAt: new Date(),
+                  updatedAt: new Date()
+                })),
+                // Valeurs par défaut
+                userId: '',
+                directUrl: '',
+                shieldEnabled: false,
+                isUltraLink: false,
+                isOnline: false,
+                order: 0,
+                clicks: 0,
+                views: 0,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
