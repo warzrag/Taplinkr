@@ -40,14 +40,32 @@ export async function GET(request: Request) {
       }
     })
 
+    // Vérifier aussi tous les clics sans filtre pour debug
+    const allClicks = await prisma.click.count()
+    
+    // Vérifier s'il y a des MultiLinks
+    const multiLinks = await prisma.multiLink.count({
+      where: {
+        linkId: { in: linkIds }
+      }
+    })
+
     return NextResponse.json({
       success: true,
       userId: session.user.id,
+      userEmail: session.user.email,
       linksCount: userLinks.length,
       linkIds,
       totalClicks,
+      totalClicksInDatabase: allClicks,
+      totalMultiLinks: multiLinks,
       recentClicks: clicks,
-      message: totalClicks === 0 ? 'Aucun clic enregistré pour cet utilisateur' : `${totalClicks} clics trouvés`
+      message: totalClicks === 0 ? 'Aucun clic enregistré pour cet utilisateur' : `${totalClicks} clics trouvés`,
+      debug: {
+        sessionUserId: session.user.id,
+        firstLinkId: linkIds[0] || null,
+        clicksTableExists: true
+      }
     })
 
   } catch (error) {
