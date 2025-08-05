@@ -18,6 +18,8 @@ export async function GET(request: Request) {
     const device = searchParams.get('device') || 'all'
     const offset = (page - 1) * limit
 
+    console.log('API Visiteurs - Params:', { userId: session.user.id, page, limit, device, offset })
+
     // Récupérer tous les liens de l'utilisateur
     const userLinks = await prisma.link.findMany({
       where: { userId: session.user.id },
@@ -25,6 +27,8 @@ export async function GET(request: Request) {
     })
 
     const linkIds = userLinks.map(link => link.id)
+    
+    console.log('API Visiteurs - Liens trouvés:', userLinks.length, 'IDs:', linkIds)
     
     // Créer un map pour accès rapide aux infos des liens
     const linkMap = new Map(userLinks.map(link => [link.id, link]))
@@ -44,6 +48,8 @@ export async function GET(request: Request) {
         whereConditions.device = 'desktop'
       }
     }
+
+    console.log('API Visiteurs - Conditions de recherche:', JSON.stringify(whereConditions))
 
     // Récupérer les clics
     const [clicks, total] = await Promise.all([
@@ -67,6 +73,8 @@ export async function GET(request: Request) {
         where: whereConditions
       })
     ])
+
+    console.log('API Visiteurs - Clics trouvés:', clicks.length, 'Total:', total)
 
     // Transformer les clics en format visiteur
     const visitors = await Promise.all(clicks.map(async (click) => {

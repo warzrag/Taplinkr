@@ -72,15 +72,24 @@ export default function VisitorsPage() {
       if (isRefresh) setRefreshing(true)
       else setLoading(true)
 
+      console.log('Fetching visitors with params:', { currentPage, itemsPerPage, filter })
+      
       const response = await fetch(`/api/analytics/visitors?page=${currentPage}&limit=${itemsPerPage}&device=${filter}`)
       const data = await response.json()
 
+      console.log('Response status:', response.status)
+      console.log('Response data:', data)
+
       if (response.ok) {
-        setVisitors(data.visitors)
+        setVisitors(data.visitors || [])
         setTotalPages(Math.ceil(data.total / itemsPerPage))
+      } else {
+        console.error('Erreur API:', data.error)
+        toast.error(data.error || 'Erreur lors du chargement des visiteurs')
       }
     } catch (error) {
       console.error('Erreur lors du chargement des visiteurs:', error)
+      toast.error('Erreur de connexion au serveur')
     } finally {
       setLoading(false)
       setRefreshing(false)
