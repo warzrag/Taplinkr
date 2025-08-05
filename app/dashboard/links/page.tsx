@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Link2, 
   Plus, 
   Search,
   Filter,
   ChevronLeft,
-  Folder,
-  FolderPlus,
   Eye,
   MousePointer,
   Calendar,
@@ -22,6 +20,19 @@ import {
   Shield,
   Zap,
   Layers,
+  QrCode,
+  BarChart3,
+  Grid3X3,
+  List,
+  ChevronDown,
+  Clock,
+  TrendingUp,
+  Globe,
+  Sparkles,
+  Palette,
+  Lock,
+  Unlock,
+  Image as ImageIcon,
   X
 } from 'lucide-react'
 import Link from 'next/link'
@@ -29,7 +40,7 @@ import CreateLinkModal from '@/components/CreateLinkModal'
 import EditLinkModal from '@/components/EditLinkModal'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { toast } from 'react-hot-toast'
 
@@ -42,6 +53,9 @@ export default function LinksPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'active' | 'inactive'>('all')
   const [sortBy, setSortBy] = useState<'recent' | 'clicks' | 'name'>('recent')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [selectedLinks, setSelectedLinks] = useState<string[]>([])
+  const [showMoreMenu, setShowMoreMenu] = useState<string | null>(null)
 
   // Filtrer et trier les liens
   const filteredLinks = links
@@ -112,318 +126,587 @@ export default function LinksPage() {
     }
   }
 
+  const handleBulkAction = async (action: 'activate' | 'deactivate' | 'delete') => {
+    if (selectedLinks.length === 0) return
+
+    switch (action) {
+      case 'delete':
+        if (!confirm(`Supprimer ${selectedLinks.length} liens ?`)) return
+        // Implémenter la suppression en masse
+        break
+      case 'activate':
+      case 'deactivate':
+        // Implémenter l'activation/désactivation en masse
+        break
+    }
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-3 border-blue-600 border-t-transparent rounded-full"
-        />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <motion.div className="text-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"
+          />
+          <p className="text-gray-600 dark:text-gray-400">Chargement des liens...</p>
+        </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-7xl mx-auto p-4 lg:p-8">
-        {/* Header */}
+        {/* Header moderne */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-4 mb-6">
-            <Link href="/dashboard">
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-            </Link>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                Mes liens
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Gérez tous vos liens en un seul endroit
-              </p>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Link href="/dashboard">
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2.5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl shadow-sm transition-all"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </motion.button>
+              </Link>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
+                  Mes liens
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  {links.length} {links.length > 1 ? 'liens créés' : 'lien créé'}
+                </p>
+              </div>
             </div>
             
-            {/* Create Button */}
-            <motion.button
-              onClick={() => setShowCreateModal(true)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Nouveau lien</span>
-            </motion.button>
+            {/* Actions principales */}
+            <div className="flex items-center gap-3">
+              {selectedLinks.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-2 mr-4"
+                >
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {selectedLinks.length} sélectionné{selectedLinks.length > 1 ? 's' : ''}
+                  </span>
+                  <button
+                    onClick={() => handleBulkAction('activate')}
+                    className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                  >
+                    <Unlock className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('deactivate')}
+                    className="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                  >
+                    <Lock className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('delete')}
+                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </motion.div>
+              )}
+              
+              <motion.button
+                onClick={() => setShowCreateModal(true)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Créer un lien</span>
+              </motion.button>
+            </div>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search */}
+          {/* Barre de recherche et filtres modernes */}
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Recherche améliorée */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="w-5 h-5 text-gray-400" />
+              </div>
               <input
                 type="text"
-                placeholder="Rechercher un lien..."
+                placeholder="Rechercher par nom, slug..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
             </div>
 
-            {/* Filter buttons */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
-                {(['all', 'active', 'inactive'] as const).map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setFilterType(filter)}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      filterType === filter
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {filter === 'all' ? 'Tous' : filter === 'active' ? 'Actifs' : 'Inactifs'}
-                  </button>
-                ))}
+            {/* Filtres et vues */}
+            <div className="flex items-center gap-3">
+              {/* Filtre par statut */}
+              <div className="relative">
+                <button className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <Filter className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {filterType === 'all' ? 'Tous' : filterType === 'active' ? 'Actifs' : 'Inactifs'}
+                  </span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
               </div>
 
-              {/* Sort */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
-              >
-                <option value="recent">Plus récents</option>
-                <option value="clicks">Plus cliqués</option>
-                <option value="name">Nom (A-Z)</option>
-              </select>
+              {/* Tri */}
+              <div className="relative">
+                <button className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {sortBy === 'recent' ? 'Récents' : sortBy === 'clicks' ? 'Populaires' : 'A-Z'}
+                  </span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Vue */}
+              <div className="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg transition-all ${
+                    viewMode === 'grid' 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-all ${
+                    viewMode === 'list' 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {/* Statistiques globales */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                <Link2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-3 bg-indigo-100 dark:bg-indigo-900/20 rounded-xl">
+                <Link2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{links.length}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total liens</p>
-              </div>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Total</span>
             </div>
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{links.length}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens créés</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-xl">
+                <Eye className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {links.filter(l => l.isActive).length}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Liens actifs</p>
-              </div>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Actifs</span>
             </div>
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {links.filter(l => l.isActive).length}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens en ligne</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                <MousePointer className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-xl">
+                <MousePointer className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {links.reduce((total, link) => total + (link.clicks || 0), 0)}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total clics</p>
-              </div>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Clics</span>
             </div>
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {links.reduce((total, link) => total + (link.clicks || 0), 0).toLocaleString()}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total des clics</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-3 bg-orange-100 dark:bg-orange-900/20 rounded-xl">
+                <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+              </div>
+              <span className="text-xs text-gray-500 dark:text-gray-400">CTR</span>
+            </div>
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {links.length > 0 ? Math.round((links.reduce((total, link) => total + (link.clicks || 0), 0) / links.length)) : 0}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Clics moyens</p>
           </motion.div>
         </div>
 
-        {/* Links Grid */}
+        {/* Liste des liens */}
         {filteredLinks.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredLinks.map((link, index) => (
-              <motion.div
-                key={link.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all"
-              >
-                {/* Status indicator */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-3 h-3 rounded-full ${
-                    link.isActive 
-                      ? 'bg-green-500 shadow-lg shadow-green-500/50 animate-pulse' 
-                      : 'bg-gray-400'
-                  }`} />
-                  
-                  {/* More menu */}
-                  <div className="relative group">
-                    <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                      <MoreVertical className="w-5 h-5 text-gray-500" />
-                    </button>
-                    
-                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                      <button
-                        onClick={() => handleEdit(link)}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Modifier
-                      </button>
-                      <button
-                        onClick={() => handleCopyLink(link.slug)}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-                      >
-                        <Copy className="w-4 h-4" />
-                        Copier le lien
-                      </button>
-                      <button
-                        onClick={() => handleDelete(link.id)}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Supprimer
-                      </button>
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {filteredLinks.map((link, index) => (
+                <motion.div
+                  key={link.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group relative"
+                >
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-800">
+                    {/* En-tête de la carte */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        {/* Image ou icône */}
+                        {link.coverImage ? (
+                          <img
+                            src={link.coverImage}
+                            alt={link.title}
+                            className="w-14 h-14 rounded-xl object-cover shadow-sm"
+                          />
+                        ) : link.icon ? (
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-sm">
+                            <span className="text-2xl">{link.icon}</span>
+                          </div>
+                        ) : (
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+                            <Link2 className="w-7 h-7 text-gray-500 dark:text-gray-400" />
+                          </div>
+                        )}
+                        
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 line-clamp-1">
+                            {link.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                              link.isActive 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+                            }`}>
+                              <div className={`w-1.5 h-1.5 rounded-full ${
+                                link.isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
+                              }`} />
+                              {link.isActive ? 'En ligne' : 'Hors ligne'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu actions */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowMoreMenu(showMoreMenu === link.id ? null : link.id)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <MoreVertical className="w-5 h-5 text-gray-500" />
+                        </button>
+                        
+                        <AnimatePresence>
+                          {showMoreMenu === link.id && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-20"
+                            >
+                              <button
+                                onClick={() => {
+                                  handleEdit(link)
+                                  setShowMoreMenu(null)
+                                }}
+                                className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3"
+                              >
+                                <Edit className="w-4 h-4" />
+                                Modifier
+                              </button>
+                              <button
+                                onClick={() => {
+                                  handleCopyLink(link.slug)
+                                  setShowMoreMenu(null)
+                                }}
+                                className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3"
+                              >
+                                <Copy className="w-4 h-4" />
+                                Copier le lien
+                              </button>
+                              <Link href={`/dashboard/analytics/${link.id}`}>
+                                <button className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3">
+                                  <BarChart3 className="w-4 h-4" />
+                                  Voir les analytics
+                                </button>
+                              </Link>
+                              <hr className="my-2 border-gray-100 dark:border-gray-700" />
+                              <button
+                                onClick={() => {
+                                  handleDelete(link.id)
+                                  setShowMoreMenu(null)
+                                }}
+                                className="w-full px-4 py-2.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                Supprimer
+                              </button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+
+                    {/* URL et stats */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <Globe className="w-4 h-4" />
+                        <span className="font-mono">taplinkr.com/{link.slug}</span>
+                      </div>
+
+                      {/* Statistiques */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                            {(link.clicks || 0).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Clics</p>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                            {(link.views || 0).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Vues</p>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                            {link.views > 0 ? Math.round((link.clicks / link.views) * 100) : 0}%
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">CTR</p>
+                        </div>
+                      </div>
+
+                      {/* Features badges */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {link.isDirect && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 rounded-lg text-xs font-medium">
+                            <Zap className="w-3 h-3" />
+                            Direct
+                          </span>
+                        )}
+                        {link.shieldEnabled && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg text-xs font-medium">
+                            <Shield className="w-3 h-3" />
+                            Protégé
+                          </span>
+                        )}
+                        {!link.isDirect && link.multiLinks && link.multiLinks.length > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 rounded-lg text-xs font-medium">
+                            <Layers className="w-3 h-3" />
+                            {link.multiLinks.length} liens
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 pt-2">
+                        <button
+                          onClick={() => handleToggle(link.id, !link.isActive)}
+                          className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
+                            link.isActive
+                              ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                              : 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:shadow-lg hover:shadow-indigo-500/25'
+                          }`}
+                        >
+                          {link.isActive ? 'Désactiver' : 'Activer'}
+                        </button>
+                        <a
+                          href={`/${link.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors"
+                        >
+                          <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                        </a>
+                        <button className="p-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
+                          <QrCode className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                        </button>
+                      </div>
+
+                      {/* Date de création */}
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          Créé {formatDistanceToNow(new Date(link.createdAt), { locale: fr, addSuffix: true })}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {format(new Date(link.updatedAt), 'HH:mm', { locale: fr })}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Link info */}
-                <div className="flex items-start gap-4 mb-4">
-                  {/* Icon/Image */}
-                  <div className="flex-shrink-0">
-                    {link.coverImage ? (
-                      <img
-                        src={link.coverImage}
-                        alt={link.title}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                    ) : link.icon ? (
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                        <span className="text-xl">{link.icon}</span>
-                      </div>
-                    ) : (
-                      <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                        <Link2 className="w-6 h-6 text-gray-500" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Title and URL */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                      {link.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      taplinkr.com/{link.slug}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <MousePointer className="w-4 h-4" />
-                      {link.clicks || 0}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {format(new Date(link.createdAt), 'dd MMM', { locale: fr })}
-                    </span>
-                  </div>
-                  
-                  {/* Badges */}
-                  <div className="flex items-center gap-2">
-                    {link.isDirect && (
-                      <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    )}
-                    {link.shieldEnabled && (
-                      <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    )}
-                    {!link.isDirect && link.multiLinks && link.multiLinks.length > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                        <span className="text-xs">{link.multiLinks.length}</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleToggle(link.id, !link.isActive)}
-                    className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                      link.isActive
-                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
-                  >
-                    {link.isActive ? 'Désactiver' : 'Activer'}
-                  </button>
-                  <a
-                    href={`/${link.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                  >
-                    <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            /* Vue liste */
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Lien
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Clics
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Créé le
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredLinks.map((link) => (
+                    <tr key={link.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          {link.icon ? (
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center">
+                              <span className="text-lg">{link.icon}</span>
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                              <Link2 className="w-5 h-5 text-gray-500" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{link.title}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">/{link.slug}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                          link.isActive 
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
+                            : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+                        }`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            link.isActive ? 'bg-green-500' : 'bg-gray-500'
+                          }`} />
+                          {link.isActive ? 'Actif' : 'Inactif'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-gray-900 dark:text-gray-100">{link.clicks || 0}</span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {format(new Date(link.createdAt), 'dd MMM yyyy', { locale: fr })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEdit(link)}
+                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          >
+                            <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                          </button>
+                          <a
+                            href={`/${link.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          >
+                            <ExternalLink className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                          </a>
+                          <button
+                            onClick={() => handleDelete(link.id)}
+                            className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : (
+          /* État vide */
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-16 text-center"
           >
-            <Link2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {searchTerm || filterType !== 'all' ? 'Aucun lien trouvé' : 'Aucun lien créé'}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {searchTerm || filterType !== 'all' 
-                ? 'Essayez de modifier vos critères de recherche'
-                : 'Commencez par créer votre premier lien'
-              }
-            </p>
-            {!searchTerm && filterType === 'all' && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors"
-              >
-                Créer un lien
-              </button>
-            )}
+            <div className="max-w-md mx-auto">
+              <div className="w-24 h-24 bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Link2 className="w-12 h-12 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                {searchTerm || filterType !== 'all' ? 'Aucun lien trouvé' : 'Créez votre premier lien'}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">
+                {searchTerm || filterType !== 'all' 
+                  ? 'Essayez de modifier vos critères de recherche'
+                  : 'Commencez à partager vos liens avec le monde entier'
+                }
+              </p>
+              {!searchTerm && filterType === 'all' && (
+                <div className="space-y-4">
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    Créer mon premier lien
+                  </button>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Ou importez vos liens depuis une autre plateforme
+                  </p>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </div>
