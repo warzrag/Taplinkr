@@ -198,11 +198,12 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
         twitterUrl: link.twitterUrl,
         youtubeUrl: link.youtubeUrl
       }))
-    } else {
+    } else if (link.isDirect && link.directUrl) {
+      // Pour les liens directs, on affiche seulement s'il y a une URL
       return [{
         id: link.id,
         title: link.title,
-        url: link.url || '#',
+        url: link.directUrl,
         icon: link.icon,
         iconImage: undefined,
         description: link.description,
@@ -222,6 +223,9 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
         twitterUrl: link.twitterUrl,
         youtubeUrl: link.youtubeUrl
       }]
+    } else {
+      // Ne pas créer de lien si on n'a ni multiLinks ni directUrl
+      return []
     }
   }).slice(0, 4) // Limiter à 4 liens max pour l'affichage
 
