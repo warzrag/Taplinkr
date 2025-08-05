@@ -318,12 +318,17 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   </div>
                 )}
                 
-                <h1 className="text-white text-2xl font-bold mb-1" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                  {displayableLinks[0]?.title || user?.name || user?.username || 'Laura'}
-                </h1>
-                {(displayableLinks[0]?.description || user?.bio || 'gratuit pour les prochaines 24h') && (
+                {/* Titre - s'affiche seulement à partir de l'étape 4 */}
+                {(!currentStep || currentStep >= 4) && (
+                  <h1 className="text-white text-2xl font-bold mb-1" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                    {displayableLinks[0]?.title || user?.name || user?.username || 'Laura'}
+                  </h1>
+                )}
+                
+                {/* Description - s'affiche seulement à partir de l'étape 4 */}
+                {(!currentStep || currentStep >= 4) && (displayableLinks[0]?.description || user?.bio) && (
                   <p className="text-white/95 text-sm" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
-                    {displayableLinks[0]?.description || user?.bio || 'gratuit pour les prochaines 24h'}
+                    {displayableLinks[0]?.description || user?.bio}
                   </p>
                 )}
                 
