@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { analyticsService } from '@/lib/analytics-service'
+import { getLocationFromIP } from '@/lib/geo-location-helper'
 
 export async function POST(request: NextRequest) {
   try {
@@ -75,15 +76,26 @@ export async function POST(request: NextRequest) {
     const device = userAgent?.toLowerCase().includes('mobile') ? 'mobile' : 
                   userAgent?.toLowerCase().includes('tablet') ? 'tablet' : 'desktop'
 
+    // Récupérer la géolocalisation
+    const ipAddress = ip.toString().split(',')[0].trim()
+    let locationData
+    try {
+      locationData = await getLocationFromIP(ipAddress)
+    } catch (error) {
+      console.log('Erreur géolocalisation:', error)
+      locationData = { country: 'Unknown' }
+    }
+
     // Créer aussi un enregistrement dans la table Click pour la page visiteurs
     await prisma.click.create({
       data: {
         linkId,
         userId: link.userId,
-        ip: ip.toString().split(',')[0].trim(),
+        ip: ipAddress,
         userAgent: userAgent || '',
         referer: referrer || '',
-        device
+        device,
+        country: locationData.country
       }
     })
 

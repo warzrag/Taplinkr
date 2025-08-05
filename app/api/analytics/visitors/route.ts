@@ -76,17 +76,25 @@ export async function GET(request: Request) {
 
     console.log('API Visiteurs - Clics trouvés:', clicks.length, 'Total:', total)
 
-    // Transformer les clics en format visiteur (sans appels externes pour éviter les erreurs)
-    const visitors = clicks.map((click) => {
+    // Transformer les clics en format visiteur avec géolocalisation
+    const visitors = await Promise.all(clicks.map(async (click) => {
       const link = linkMap.get(click.linkId)
       const parsedUA = parseUserAgent(click.userAgent || '')
-      // Pour l'instant, on n'utilise pas la géolocalisation pour éviter les erreurs
-      const location = {
-        city: 'N/A',
-        region: 'N/A',
-        country: click.country || 'Unknown',
-        countryCode: 'XX'
+      
+      // Utiliser la géolocalisation
+      let location
+      try {
+        location = await getLocationFromIP(click.ip || '')
+      } catch (error) {
+        console.log('Erreur géolocalisation pour IP:', click.ip, error)
+        location = {
+          city: 'N/A',
+          region: 'N/A',
+          country: click.country || 'Unknown',
+          countryCode: 'XX'
+        }
       }
+      
       const parsedReferrer = parseReferer(click.referer || '')
       
       // Déterminer le type d'appareil
@@ -125,7 +133,7 @@ export async function GET(request: Request) {
         ip: click.ip || '',
         userAgent: click.userAgent || ''
       }
-    })
+    }))
 
     return NextResponse.json({
       visitors,
