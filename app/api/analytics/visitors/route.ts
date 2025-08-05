@@ -75,13 +75,23 @@ export async function GET(request: Request) {
     ])
 
     console.log('API Visiteurs - Clics trouvés:', clicks.length, 'Total:', total)
+    
+    // Log les premiers clics pour debug
+    if (clicks.length > 0) {
+      console.log('Premier clic:', {
+        id: clicks[0].id,
+        ip: clicks[0].ip,
+        country: clicks[0].country,
+        createdAt: clicks[0].createdAt
+      })
+    }
 
     // Transformer les clics en format visiteur
     const visitors = await Promise.all(clicks.map(async (click) => {
       const link = linkMap.get(click.linkId)
       const parsedUA = parseUserAgent(click.userAgent || '')
       
-      // Utiliser les données stockées en priorité
+      // Initialiser la localisation
       let location = {
         city: 'N/A',
         region: 'N/A', 
@@ -89,18 +99,25 @@ export async function GET(request: Request) {
         countryCode: 'XX'
       }
       
-      // Si on a une IP et pas de localisation précise, essayer la géolocalisation
-      if (click.ip && (location.city === 'N/A' || location.country === 'Unknown')) {
+      // Toujours essayer la géolocalisation si on a une IP
+      if (click.ip) {
         try {
+          console.log(`Géolocalisation pour IP: ${click.ip}`)
           const geoData = await getLocationFromIP(click.ip)
+          console.log(`Données reçues:`, geoData)
+          
+          // Utiliser les données de l'API de géolocalisation
           location = {
             city: geoData.city || 'N/A',
             region: geoData.region || 'N/A',
-            country: geoData.country || location.country,
+            country: geoData.country || click.country || 'Unknown',
             countryCode: geoData.countryCode || 'XX'
           }
+          
+          console.log(`Location finale:`, location)
         } catch (error) {
-          console.log('Erreur géolocalisation:', error)
+          console.error('Erreur géolocalisation:', error)
+          // En cas d'erreur, garder les valeurs par défaut
         }
       }
       

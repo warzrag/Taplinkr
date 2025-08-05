@@ -23,6 +23,7 @@ import {
 import { format, formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 interface Visitor {
   id: string
