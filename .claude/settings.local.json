@@ -70,7 +70,10 @@
       "Bash(npx prettier:*)",
       "Bash(source:*)",
       "Bash(cd:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(vercel:*)",
+      "Bash(npx vercel:*)",
+      "Bash(gh api:*)"
     ],
     "deny": []
   }

@@ -31,24 +31,23 @@ export async function GET(request: Request) {
 
     // Construire les conditions de filtre
     const whereConditions: any = {
-      linkId: { in: linkIds },
-      eventType: 'click'
+      linkId: { in: linkIds }
     }
 
     if (device !== 'all') {
       if (device === 'mobile') {
         whereConditions.OR = [
-          { metadata: { path: ['device', 'type'], equals: 'mobile' } },
-          { metadata: { path: ['device', 'type'], equals: 'tablet' } }
+          { device: 'mobile' },
+          { device: 'tablet' }
         ]
       } else if (device === 'desktop') {
-        whereConditions.metadata = { path: ['device', 'type'], equals: 'desktop' }
+        whereConditions.device = 'desktop'
       }
     }
 
-    // Récupérer les événements
-    const [events, total] = await Promise.all([
-      prisma.analyticsEvent.findMany({
+    // Récupérer les clics
+    const [clicks, total] = await Promise.all([
+      prisma.click.findMany({
         where: whereConditions,
         orderBy: { createdAt: 'desc' },
         skip: offset,
@@ -58,55 +57,59 @@ export async function GET(request: Request) {
           createdAt: true,
           userAgent: true,
           ip: true,
-          referrer: true,
-          metadata: true,
-          linkId: true
+          referer: true,
+          device: true,
+          linkId: true,
+          country: true
         }
       }),
-      prisma.analyticsEvent.count({
+      prisma.click.count({
         where: whereConditions
       })
     ])
 
-    // Transformer les événements en format visiteur
-    const visitors = await Promise.all(events.map(async (event) => {
-      const link = linkMap.get(event.linkId)
-      const parsedUA = parseUserAgent(event.userAgent || '')
-      const location = await getLocationFromIP(event.ip || '')
-      const parsedReferrer = parseReferer(event.referrer)
+    // Transformer les clics en format visiteur
+    const visitors = await Promise.all(clicks.map(async (click) => {
+      const link = linkMap.get(click.linkId)
+      const parsedUA = parseUserAgent(click.userAgent || '')
+      const location = await getLocationFromIP(click.ip || '')
+      const parsedReferrer = parseReferer(click.referer || '')
       
       // Déterminer le type d'appareil
       let deviceName = 'Desktop Computer'
+      let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop'
       
-      if (parsedUA.deviceType === 'mobile') {
+      if (click.device === 'mobile') {
         deviceName = 'Mobile Phone'
-      } else if (parsedUA.deviceType === 'tablet') {
+        deviceType = 'mobile'
+      } else if (click.device === 'tablet') {
         deviceName = 'Tablet'
+        deviceType = 'tablet'
       }
 
       // Déterminer le statut (toujours success pour l'instant)
       let status: 'success' | 'blocked' | 'bot' = 'success'
 
       return {
-        id: event.id,
-        timestamp: event.createdAt.toISOString(),
+        id: click.id,
+        timestamp: click.createdAt.toISOString(),
         location: {
           city: location.city || 'N/A',
           region: location.region || 'N/A',
-          country: location.country || 'Unknown',
+          country: location.country || click.country || 'Unknown',
           countryCode: location.countryCode || 'XX'
         },
         linkSlug: link?.slug || 'unknown',
         linkTitle: link?.title || 'Lien supprimé',
         browser: parsedUA.browser || 'Unknown Browser',
         os: parsedUA.os || 'Unknown OS',
-        referrer: event.referrer || '',
+        referrer: click.referer || '',
         referrerDomain: parsedReferrer.source,
         device: deviceName,
-        deviceType: parsedUA.deviceType,
+        deviceType: deviceType,
         status: status,
-        ip: event.ip || '',
-        userAgent: event.userAgent || ''
+        ip: click.ip || '',
+        userAgent: click.userAgent || ''
       }
     }))
 
