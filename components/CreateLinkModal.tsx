@@ -83,10 +83,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     const timer = setTimeout(async () => {
       try {
         const response = await fetch(`/api/links/check-slug?slug=${encodeURIComponent(watchedSlug)}${editingLink ? `&linkId=${editingLink.id}` : ''}`)
+        if (!response.ok) {
+          console.error('Erreur API:', response.status)
+          setSlugAvailable(null)
+          return
+        }
         const data = await response.json()
+        console.log('Vérification slug:', watchedSlug, 'Disponible:', data.available)
         setSlugAvailable(data.available)
       } catch (error) {
         console.error('Erreur vérification slug:', error)
+        setSlugAvailable(null)
       } finally {
         setCheckingSlug(false)
       }
@@ -745,7 +752,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           <span className="text-gray-500 text-sm mr-2 font-medium">taplinkr.com/</span>
                           <input
                             type="text"
-                            {...register('slug')}
+                            {...register('slug', {
+                              pattern: {
+                                value: /^[a-zA-Z0-9-]+$/,
+                                message: 'Seuls les lettres, chiffres et tirets sont autorisés'
+                              }
+                            })}
                             className={`flex-1 px-4 py-3 pr-12 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all text-base ${
                               slugAvailable === false 
                                 ? 'border-red-400 focus:border-red-500' 
@@ -754,6 +766,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                 : 'border-gray-300 focus:border-indigo-500'
                             }`}
                             placeholder="mon-lien-unique"
+                            onChange={(e) => {
+                              // Nettoyer automatiquement les caractères non autorisés
+                              e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                              register('slug').onChange(e)
+                            }}
                           />
                           
                           {/* Indicateur de statut */}
@@ -772,12 +789,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                               {!checkingSlug && slugAvailable === true && watchedSlug && (
                                 <motion.div
                                   key="available"
-                                  initial={{ opacity: 0, scale: 0 }}
-                                  animate={{ opacity: 1, scale: 1 }}
+                                  initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
                                   exit={{ opacity: 0, scale: 0 }}
-                                  className="bg-green-500 rounded-full p-1"
+                                  transition={{ type: "spring", stiffness: 200 }}
+                                  className="bg-green-500 rounded-full p-1.5 shadow-lg"
                                 >
-                                  <Check className="w-3 h-3 text-white" />
+                                  <Check className="w-4 h-4 text-white" />
                                 </motion.div>
                               )}
                               {!checkingSlug && slugAvailable === false && (
@@ -786,9 +804,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                   initial={{ opacity: 0, scale: 0 }}
                                   animate={{ opacity: 1, scale: 1 }}
                                   exit={{ opacity: 0, scale: 0 }}
-                                  className="bg-red-500 rounded-full p-1"
+                                  transition={{ type: "spring", stiffness: 200 }}
+                                  className="bg-red-500 rounded-full p-1.5 shadow-lg"
                                 >
-                                  <AlertCircle className="w-3 h-3 text-white" />
+                                  <X className="w-4 h-4 text-white" />
                                 </motion.div>
                               )}
                             </AnimatePresence>
@@ -811,28 +830,47 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           </motion.p>
                         )}
                         {slugAvailable === true && watchedSlug && (
-                          <motion.p
+                          <motion.div
                             key="available-msg"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="text-xs text-green-600 mt-1 flex items-center gap-1"
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            transition={{ type: "spring", stiffness: 150 }}
+                            className="mt-2 bg-green-50 border border-green-200 rounded-lg p-2"
                           >
-                            <Check className="w-3 h-3" />
-                            Cette URL est disponible !
-                          </motion.p>
+                            <p className="text-sm text-green-700 flex items-center gap-2 font-medium">
+                              <motion.div
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <Check className="w-4 h-4" />
+                              </motion.div>
+                              Super ! Cette URL est disponible
+                            </p>
+                          </motion.div>
                         )}
                         {slugAvailable === false && (
-                          <motion.p
+                          <motion.div
                             key="unavailable-msg"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="text-xs text-red-600 mt-1 flex items-center gap-1"
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            transition={{ type: "spring", stiffness: 150 }}
+                            className="mt-2 bg-red-50 border border-red-200 rounded-lg p-2"
                           >
-                            <AlertCircle className="w-3 h-3" />
-                            Cette URL est déjà utilisée, essayez une autre
-                          </motion.p>
+                            <p className="text-sm text-red-700 flex items-center gap-2 font-medium">
+                              <motion.div
+                                animate={{ rotate: [0, -10, 10, -10, 0] }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <AlertCircle className="w-4 h-4" />
+                              </motion.div>
+                              Oops ! Cette URL est déjà prise
+                            </p>
+                            <p className="text-xs text-red-600 mt-1 ml-6">
+                              Essayez d'ajouter des chiffres ou des tirets
+                            </p>
+                          </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
