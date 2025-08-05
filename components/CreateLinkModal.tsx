@@ -49,19 +49,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
   const [coverImage, setCoverImage] = useState(editingLink?.coverImage || '')
   const [showPreview, setShowPreview] = useState(false)
-  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
-  
-  // Avatars prédéfinis avec emojis et gradients
-  const predefinedAvatars = [
-    { id: '1', emoji: '😎', gradient: 'from-blue-400 to-purple-600', name: 'Cool' },
-    { id: '2', emoji: '🚀', gradient: 'from-pink-400 to-red-600', name: 'Rocket' },
-    { id: '3', emoji: '✨', gradient: 'from-yellow-400 to-orange-600', name: 'Star' },
-    { id: '4', emoji: '🎨', gradient: 'from-green-400 to-teal-600', name: 'Artist' },
-    { id: '5', emoji: '💼', gradient: 'from-gray-600 to-gray-800', name: 'Business' },
-    { id: '6', emoji: '🌟', gradient: 'from-purple-400 to-pink-600', name: 'Shine' },
-    { id: '7', emoji: '🎯', gradient: 'from-red-400 to-orange-600', name: 'Target' },
-    { id: '8', emoji: '💎', gradient: 'from-cyan-400 to-blue-600', name: 'Diamond' },
-  ]
   
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>({
     defaultValues: editingLink ? {
@@ -264,6 +251,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       whileTap={{ scale: 0.95 }}
                       onClick={() => {
                         setLinkType('multi')
+                        setShowPreview(true) // Activer automatiquement la preview
                         setStep(2)
                       }}
                       className="relative p-8 rounded-2xl border-2 border-gray-200 hover:border-indigo-500 bg-white hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 transition-all duration-300 group overflow-hidden"
@@ -457,7 +445,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   </div>
                 </motion.div>
               ) : step === 2 && linkType === 'multi' ? (
-                /* Étape 2: Sélection de l'avatar (uniquement pour multi-liens) */
+                /* Étape 2: Upload de photo de profil (uniquement pour multi-liens) */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -469,7 +457,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     transition={{ delay: 0.1 }}
                     className="text-2xl font-bold text-gray-900 mb-2 text-center"
                   >
-                    Choisissez votre avatar
+                    Ajoutez votre photo de profil
                   </motion.h3>
                   <motion.p 
                     initial={{ opacity: 0 }}
@@ -477,102 +465,156 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     transition={{ delay: 0.2 }}
                     className="text-gray-600 mb-8 text-center"
                   >
-                    Sélectionnez un style qui vous représente
+                    Une photo de profil rend votre page plus personnelle et professionnelle
                   </motion.p>
                   
-                  <div className="grid grid-cols-4 gap-4 mb-8">
-                    {predefinedAvatars.map((avatar, index) => (
-                      <motion.button
-                        key={avatar.id}
-                        type="button"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ 
-                          delay: index * 0.05,
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 15
-                        }}
-                        whileHover={{ 
-                          scale: 1.1,
-                          rotate: [0, -5, 5, 0],
-                          transition: { duration: 0.3 }
-                        }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => {
-                          setSelectedAvatar(avatar.id)
-                          // Effet de particules ou confettis
-                          const button = document.getElementById(`avatar-${avatar.id}`)
-                          if (button) {
-                            // Animation de sélection
-                            button.classList.add('animate-pulse')
-                            setTimeout(() => button.classList.remove('animate-pulse'), 1000)
-                          }
-                        }}
-                        id={`avatar-${avatar.id}`}
-                        className={`relative w-20 h-20 rounded-2xl bg-gradient-to-br ${avatar.gradient} flex items-center justify-center transition-all ${
-                          selectedAvatar === avatar.id 
-                            ? 'ring-4 ring-offset-2 ring-indigo-500 shadow-xl' 
-                            : 'hover:shadow-lg'
-                        }`}
-                      >
-                        <span className="text-3xl">{avatar.emoji}</span>
-                        {selectedAvatar === avatar.id && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center"
-                          >
-                            <Sparkle className="w-4 h-4 text-white" />
-                          </motion.div>
-                        )}
-                      </motion.button>
-                    ))}
-                  </div>
-
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-center"
+                  {/* Zone d'upload centrale avec animations */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ 
+                      delay: 0.3,
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 15
+                    }}
+                    className="relative"
                   >
-                    <p className="text-sm text-gray-600 mb-4">Ou téléchargez votre propre photo</p>
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        // Activer l'upload de photo personnalisée
-                        setSelectedAvatar('custom')
-                      }}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-200"
-                    >
-                      <Camera className="w-5 h-5 text-gray-600" />
-                      <span className="font-medium text-gray-700">Photo personnalisée</span>
-                    </motion.button>
+                    {!profileImage ? (
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="relative"
+                      >
+                        {/* Cercle animé en arrière-plan */}
+                        <motion.div
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.5, 0.8, 0.5]
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                          className="absolute inset-0 w-48 h-48 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 rounded-full blur-xl"
+                        />
+                        
+                        {/* Zone d'upload principale */}
+                        <motion.div
+                          whileHover={{ 
+                            rotate: [0, -5, 5, 0],
+                            transition: { duration: 0.5 }
+                          }}
+                          className="relative w-48 h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex flex-col items-center justify-center cursor-pointer border-4 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors"
+                        >
+                          <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ 
+                              duration: 2,
+                              repeat: Infinity,
+                              repeatType: "reverse"
+                            }}
+                          >
+                            <Camera className="w-12 h-12 text-indigo-600 mb-2" />
+                          </motion.div>
+                          <span className="text-sm font-medium text-gray-700">Cliquez pour ajouter</span>
+                          <span className="text-xs text-gray-500 mt-1">JPG, PNG • Max 5MB</span>
+                          
+                          {/* Sparkles animés */}
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                            className="absolute inset-0"
+                          >
+                            <Sparkle className="absolute top-0 right-4 w-4 h-4 text-yellow-500" />
+                            <Sparkle className="absolute bottom-4 left-2 w-3 h-3 text-purple-500" />
+                            <Sparkle className="absolute top-12 left-0 w-5 h-5 text-indigo-500" />
+                          </motion.div>
+                        </motion.div>
+                        
+                        {/* Composant d'upload invisible */}
+                        <div className="absolute inset-0 opacity-0">
+                          <ImageUpload
+                            value={profileImage}
+                            onChange={setProfileImage}
+                            type="profile"
+                            aspectRatio="square"
+                            className="w-full h-full"
+                          />
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200 }}
+                        className="relative"
+                      >
+                        {/* Image uploadée avec effet de succès */}
+                        <motion.div
+                          animate={{
+                            boxShadow: [
+                              "0 0 0 0 rgba(99, 102, 241, 0)",
+                              "0 0 0 20px rgba(99, 102, 241, 0.2)",
+                              "0 0 0 40px rgba(99, 102, 241, 0)"
+                            ]
+                          }}
+                          transition={{ duration: 1.5 }}
+                          className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-indigo-500 shadow-xl"
+                        >
+                          <ImageUpload
+                            value={profileImage}
+                            onChange={setProfileImage}
+                            type="profile"
+                            aspectRatio="square"
+                            className="w-full h-full"
+                          />
+                        </motion.div>
+                        
+                        {/* Badge de succès */}
+                        <motion.div
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: 0.3, type: "spring" }}
+                          className="absolute -bottom-2 -right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg"
+                        >
+                          <Sparkles className="w-6 h-6 text-white" />
+                        </motion.div>
+                      </motion.div>
+                    )}
                   </motion.div>
 
-                  {selectedAvatar === 'custom' && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      className="mt-6 w-full max-w-xs"
+                  {/* Message d'encouragement */}
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="text-sm text-gray-500 mt-6 text-center max-w-sm"
+                  >
+                    {profileImage 
+                      ? "Parfait ! Votre photo est superbe 🎉" 
+                      : "Les profils avec photo reçoivent 3x plus de clics"}
+                  </motion.p>
+
+                  {/* Option pour passer sans photo */}
+                  {!profileImage && (
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 }}
+                      onClick={() => setStep(3)}
+                      className="text-sm text-gray-500 hover:text-gray-700 underline mt-4"
                     >
-                      <ImageUpload
-                        value={profileImage}
-                        onChange={setProfileImage}
-                        type="profile"
-                        aspectRatio="square"
-                        className="w-32 mx-auto"
-                      />
-                    </motion.div>
+                      Continuer sans photo
+                    </motion.button>
                   )}
 
                   {/* Boutons d'action */}
                   <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
+                    transition={{ delay: 0.7 }}
                     className="flex gap-3 mt-8"
                   >
                     <button
@@ -584,25 +626,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </button>
                     <motion.button
                       type="button"
-                      onClick={() => {
-                        if (!selectedAvatar) {
-                          toast.error('Veuillez choisir un avatar')
-                          return
-                        }
-                        // Si un avatar prédéfini est sélectionné, on utilise l'emoji comme image
-                        if (selectedAvatar !== 'custom') {
-                          const avatar = predefinedAvatars.find(a => a.id === selectedAvatar)
-                          if (avatar) {
-                            // On pourrait stocker l'emoji dans profileImage ou créer un champ séparé
-                            setProfileImage(`emoji:${avatar.emoji}`)
-                          }
-                        }
-                        setShowPreview(true)
-                        setStep(3)
-                      }}
+                      onClick={() => setStep(3)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center gap-2"
+                      className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                        profileImage 
+                          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700' 
+                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}
                     >
                       Continuer
                       <ArrowRight className="w-4 h-4" />
@@ -865,27 +896,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           </form>
         </motion.div>
         
-        {/* Bouton pour afficher le preview sur desktop */}
-        {linkType === 'multi' && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            onClick={() => setShowPreview(!showPreview)}
-            className="hidden xl:flex fixed bottom-8 right-8 items-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition-colors z-30"
-          >
-            {showPreview ? (
-              <>
-                <Eye className="w-5 h-5" />
-                Masquer la preview
-              </>
-            ) : (
-              <>
-                <Smartphone className="w-5 h-5" />
-                Voir la preview
-              </>
-            )}
-          </motion.button>
-        )}
       </div>
 
       {/* Live Phone Preview - similaire à EditLinkModal */}
