@@ -631,44 +631,90 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               ) : (
                 /* Étape 3: Détails du lien */
                 <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-4"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ 
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                  }}
+                  className="space-y-6"
                 >
-                  {/* Informations de base */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Titre du lien
-                    </label>
-                    <input
-                      type="text"
-                      {...register('title', { required: true })}
-                      className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-base"
-                      placeholder="Mon super lien"
-                      autoFocus
-                    />
-                    {errors.title && (
-                      <p className="text-red-500 text-sm mt-1">Le titre est requis</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      URL personnalisée (optionnel)
-                    </label>
-                    <div className="flex items-center">
-                      <span className="text-gray-500 text-sm mr-2">taplinkr.com/</span>
-                      <input
-                        type="text"
-                        {...register('slug')}
-                        className="flex-1 px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-base"
-                        placeholder="mon-lien"
-                      />
+                  {/* Titre avec animation */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <div className="relative">
+                      <motion.div
+                        className="absolute -top-3 -left-3"
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                      >
+                        <Sparkle className="w-5 h-5 text-yellow-500" />
+                      </motion.div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Donnez un titre à votre page
+                      </label>
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <input
+                          type="text"
+                          {...register('title', { required: true })}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base font-medium"
+                          placeholder="Ex: Mes liens favoris ✨"
+                          autoFocus
+                        />
+                      </motion.div>
+                      {errors.title && (
+                        <motion.p 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-red-500 text-sm mt-1"
+                        >
+                          Le titre est requis
+                        </motion.p>
+                      )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Laissez vide pour générer automatiquement
-                    </p>
-                  </div>
+                  </motion.div>
+
+                  {/* URL personnalisée avec animation */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Personnalisez votre URL
+                    </label>
+                    <div className="relative">
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex items-center"
+                      >
+                        <span className="text-gray-500 text-sm mr-2 font-medium">taplinkr.com/</span>
+                        <input
+                          type="text"
+                          {...register('slug')}
+                          className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base"
+                          placeholder="mon-lien-unique"
+                        />
+                      </motion.div>
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="text-xs text-gray-500 mt-1 flex items-center gap-1"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        Laissez vide pour une URL magique automatique
+                      </motion.p>
+                    </div>
+                  </motion.div>
 
                   {/* Contenu selon le type */}
                   {linkType === 'direct' ? (
@@ -786,15 +832,36 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </div>
                   ) : (
                     /* Multi-liens */
-                    <div className="max-h-64 overflow-y-auto space-y-3 pr-2">
-                      {multiLinks.map((link, index) => (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-800">Vos liens</h3>
                         <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-gray-50 rounded-xl p-4 space-y-3"
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="text-sm text-indigo-600 font-medium"
                         >
+                          {multiLinks.filter(l => l.title && l.url).length} / ∞
+                        </motion.div>
+                      </div>
+                      
+                      <div className="max-h-64 overflow-y-auto space-y-3 pr-2">
+                        {multiLinks.map((link, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ 
+                              delay: 0.3 + index * 0.1,
+                              type: "spring",
+                              stiffness: 100
+                            }}
+                            whileHover={{ scale: 1.02, x: 5 }}
+                            className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 space-y-3 border-2 border-transparent hover:border-indigo-300 transition-all"
+                          >
                           <input
                             type="text"
                             value={link.title}
@@ -820,19 +887,30 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           )}
                         </motion.div>
                       ))}
-                    </div>
+                      </div>
+                    </motion.div>
                   )}
 
                   {linkType === 'multi' && (
                     <>
-                      <button
+                      <motion.button
                         type="button"
                         onClick={addMultiLink}
-                        className="w-full py-2.5 border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-3 border-2 border-dashed border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl text-indigo-600 hover:border-indigo-500 hover:from-indigo-100 hover:to-purple-100 transition-all duration-200 flex items-center justify-center gap-2 font-medium"
                       >
-                        <Plus className="w-5 h-5" />
-                        Ajouter un lien
-                      </button>
+                        <motion.div
+                          animate={{ rotate: [0, 180, 360] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <Plus className="w-5 h-5" />
+                        </motion.div>
+                        Ajouter un nouveau lien magique
+                      </motion.button>
 
                       {/* Photo de couverture */}
                       <div className="pt-4 border-t">
@@ -907,7 +985,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               </motion.button>
               
               <div className="mt-16">
-                {console.log('Preview profileImage:', profileImage)}
                 <LivePhonePreview
                   links={[{
                     id: Date.now().toString(),
