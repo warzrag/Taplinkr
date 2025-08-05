@@ -1398,7 +1398,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
                     title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
-                    description: step >= 4 ? (watchedDescription || '') : '',',
+                    description: step >= 4 ? (watchedDescription || '') : '',
                     profileImage: step >= 2 ? profileImage : '',
                     coverImage: step >= 4 ? coverImage : '',
                     isDirect: false,
