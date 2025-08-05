@@ -18,6 +18,19 @@
     @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
   
+  /* Animation delays for staggered effects */
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+  
   /* Styles pour les aperçus */
   .line-clamp-2 {
     display: -webkit-box;

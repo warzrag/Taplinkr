@@ -235,40 +235,87 @@ export default function Dashboard() {
           {quickActions.map((action, index) => (
             <motion.div
               key={action.label}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, type: "spring", stiffness: 300, damping: 30 }}
+              whileHover={{ y: -8 }}
             >
               {action.href ? (
                 <Link href={action.href}>
-                  <div className={`relative overflow-hidden bg-gradient-to-br ${action.gradient} p-6 rounded-2xl text-white cursor-pointer hover:shadow-xl transition-all group`}>
+                  <div className="relative h-full bg-white dark:bg-gray-800 rounded-3xl p-6 cursor-pointer overflow-hidden group border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300">
+                    {/* Gradient overlay on hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    
+                    {/* Glass effect overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    
+                    {/* Content */}
                     <div className="relative z-10">
-                      <action.icon className="w-8 h-8 mb-3 group-hover:scale-110 transition-transform" />
-                      <h3 className="font-semibold text-lg mb-1">{action.label}</h3>
-                      <p className="text-sm opacity-90">{action.description}</p>
-                    </div>
-                    <div className="absolute top-2 right-2 opacity-20 group-hover:opacity-30 transition-opacity">
-                      <action.icon className="w-24 h-24" />
-                    </div>
-                    {action.label.includes('Pro') && userProfile?.plan === 'free' && (
-                      <div className="absolute top-2 right-2 animate-pulse">
-                        <Sparkles className="w-6 h-6" />
+                      {/* Icon container with animation */}
+                      <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${action.gradient} mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                        <action.icon className="w-7 h-7 text-white" strokeWidth={2.5} />
                       </div>
-                    )}
+                      
+                      {/* Text content */}
+                      <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300 mb-2">
+                        {action.label}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-white/90 transition-colors duration-300 leading-relaxed">
+                        {action.description}
+                      </p>
+                      
+                      {/* Special badges */}
+                      {action.label.includes('Pro') && userProfile?.plan === 'free' && (
+                        <div className="absolute top-4 right-4 group-hover:scale-110 transition-transform duration-300">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-50 animate-pulse" />
+                            <div className="relative bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                              UPGRADE
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Decorative element */}
+                    <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                   </div>
                 </Link>
               ) : (
                 <button
                   onClick={action.onClick}
-                  className={`relative overflow-hidden bg-gradient-to-br ${action.gradient} p-6 rounded-2xl text-white cursor-pointer hover:shadow-xl transition-all group w-full text-left`}
+                  className="relative h-full bg-white dark:bg-gray-800 rounded-3xl p-6 cursor-pointer overflow-hidden group border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 w-full text-left"
                 >
+                  {/* Gradient overlay on hover */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                  
+                  {/* Glass effect overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  {/* Content */}
                   <div className="relative z-10">
-                    <action.icon className="w-8 h-8 mb-3 group-hover:scale-110 transition-transform" />
-                    <h3 className="font-semibold text-lg mb-1">{action.label}</h3>
-                    <p className="text-sm opacity-90">{action.description}</p>
+                    {/* Icon container with animation */}
+                    <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${action.gradient} mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                      <action.icon className="w-7 h-7 text-white" strokeWidth={2.5} />
+                    </div>
+                    
+                    {/* Text content */}
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300 mb-2">
+                      {action.label}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-white/90 transition-colors duration-300 leading-relaxed">
+                      {action.description}
+                    </p>
                   </div>
-                  <div className="absolute top-2 right-2 opacity-20 group-hover:opacity-30 transition-opacity">
-                    <action.icon className="w-24 h-24" />
+                  
+                  {/* Decorative element */}
+                  <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                  
+                  {/* Floating particles effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-white rounded-full animate-ping" />
+                    <div className="absolute top-3/4 right-1/3 w-1 h-1 bg-white rounded-full animate-ping animation-delay-200" />
+                    <div className="absolute bottom-1/4 left-2/3 w-1 h-1 bg-white rounded-full animate-ping animation-delay-400" />
                   </div>
                 </button>
               )}
