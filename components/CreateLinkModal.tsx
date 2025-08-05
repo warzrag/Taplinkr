@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap, Smartphone, Eye, Camera, User, Sparkle } from 'lucide-react'
+import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap, Smartphone, Eye, Camera, User, Sparkle, Check, AlertCircle, Loader2 } from 'lucide-react'
 import { Link as LinkType } from '@/types'
 import { usePermissions } from '@/hooks/usePermissions'
 import ImageUpload from './upload/ImageUpload'
@@ -49,6 +49,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
   const [coverImage, setCoverImage] = useState(editingLink?.coverImage || '')
   const [showPreview, setShowPreview] = useState(false)
+  const [checkingSlug, setCheckingSlug] = useState(false)
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
+  const [slugTimer, setSlugTimer] = useState<NodeJS.Timeout | null>(null)
   
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>({
     defaultValues: editingLink ? {
@@ -59,6 +62,42 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       slug: ''
     }
   })
+
+  const watchedSlug = watch('slug')
+
+  // Vérifier la disponibilité du slug
+  useEffect(() => {
+    if (slugTimer) {
+      clearTimeout(slugTimer)
+    }
+
+    if (!watchedSlug || watchedSlug === editingLink?.slug) {
+      setSlugAvailable(null)
+      setCheckingSlug(false)
+      return
+    }
+
+    setCheckingSlug(true)
+    setSlugAvailable(null)
+
+    const timer = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/links/check-slug?slug=${encodeURIComponent(watchedSlug)}${editingLink ? `&linkId=${editingLink.id}` : ''}`)
+        const data = await response.json()
+        setSlugAvailable(data.available)
+      } catch (error) {
+        console.error('Erreur vérification slug:', error)
+      } finally {
+        setCheckingSlug(false)
+      }
+    }, 500) // Debounce de 500ms
+
+    setSlugTimer(timer)
+
+    return () => {
+      if (timer) clearTimeout(timer)
+    }
+  }, [watchedSlug, editingLink])
 
   const handleClose = () => {
     if (!loading) {
@@ -93,6 +132,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }
 
   const onSubmit = async (data: FormData) => {
+    // Vérifier la disponibilité du slug
+    if (data.slug && slugAvailable === false) {
+      toast.error('Cette URL est déjà utilisée')
+      return
+    }
+
     // Validation selon le type de lien
     if (linkType === 'direct') {
       // Vérifier si l'utilisateur peut créer des liens directs
@@ -694,25 +739,102 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="flex items-center"
+                        className="relative"
                       >
-                        <span className="text-gray-500 text-sm mr-2 font-medium">taplinkr.com/</span>
-                        <input
-                          type="text"
-                          {...register('slug')}
-                          className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base"
-                          placeholder="mon-lien-unique"
-                        />
+                        <div className="flex items-center">
+                          <span className="text-gray-500 text-sm mr-2 font-medium">taplinkr.com/</span>
+                          <input
+                            type="text"
+                            {...register('slug')}
+                            className={`flex-1 px-4 py-3 pr-12 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all text-base ${
+                              slugAvailable === false 
+                                ? 'border-red-400 focus:border-red-500' 
+                                : slugAvailable === true 
+                                ? 'border-green-400 focus:border-green-500' 
+                                : 'border-gray-300 focus:border-indigo-500'
+                            }`}
+                            placeholder="mon-lien-unique"
+                          />
+                          
+                          {/* Indicateur de statut */}
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <AnimatePresence mode="wait">
+                              {checkingSlug && (
+                                <motion.div
+                                  key="checking"
+                                  initial={{ opacity: 0, scale: 0 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0 }}
+                                >
+                                  <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
+                                </motion.div>
+                              )}
+                              {!checkingSlug && slugAvailable === true && watchedSlug && (
+                                <motion.div
+                                  key="available"
+                                  initial={{ opacity: 0, scale: 0 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0 }}
+                                  className="bg-green-500 rounded-full p-1"
+                                >
+                                  <Check className="w-3 h-3 text-white" />
+                                </motion.div>
+                              )}
+                              {!checkingSlug && slugAvailable === false && (
+                                <motion.div
+                                  key="unavailable"
+                                  initial={{ opacity: 0, scale: 0 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0 }}
+                                  className="bg-red-500 rounded-full p-1"
+                                >
+                                  <AlertCircle className="w-3 h-3 text-white" />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
                       </motion.div>
-                      <motion.p 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="text-xs text-gray-500 mt-1 flex items-center gap-1"
-                      >
-                        <Sparkles className="w-3 h-3" />
-                        Laissez vide pour une URL magique automatique
-                      </motion.p>
+                      
+                      <AnimatePresence mode="wait">
+                        {!watchedSlug && (
+                          <motion.p 
+                            key="empty"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="text-xs text-gray-500 mt-1 flex items-center gap-1"
+                          >
+                            <Sparkles className="w-3 h-3" />
+                            Laissez vide pour une URL magique automatique
+                          </motion.p>
+                        )}
+                        {slugAvailable === true && watchedSlug && (
+                          <motion.p
+                            key="available-msg"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="text-xs text-green-600 mt-1 flex items-center gap-1"
+                          >
+                            <Check className="w-3 h-3" />
+                            Cette URL est disponible !
+                          </motion.p>
+                        )}
+                        {slugAvailable === false && (
+                          <motion.p
+                            key="unavailable-msg"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="text-xs text-red-600 mt-1 flex items-center gap-1"
+                          >
+                            <AlertCircle className="w-3 h-3" />
+                            Cette URL est déjà utilisée, essayez une autre
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </motion.div>
 
