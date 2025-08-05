@@ -52,6 +52,9 @@ interface LivePhonePreviewProps {
 }
 
 export default function LivePhonePreview({ user, links = [], currentStep }: LivePhonePreviewProps) {
+  // Debug
+  console.log('LivePhonePreview - currentStep:', currentStep)
+  console.log('LivePhonePreview - links[0]?.title:', links[0]?.title)
   // Fonction pour obtenir la classe CSS de la police
   const getFontClass = (fontFamily?: string) => {
     const fontMap: { [key: string]: string } = {
@@ -323,6 +326,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   <h1 className="text-white text-2xl font-bold mb-1" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                     {links[0]?.title || user?.name || user?.username || 'Laura'}
                   </h1>
+                )}
+                {currentStep === 4 && !links[0]?.title && (
+                  <p className="text-white/70 text-sm italic">En attente du titre...</p>
                 )}
                 
                 {/* Description - s'affiche seulement à partir de l'étape 4 */}
