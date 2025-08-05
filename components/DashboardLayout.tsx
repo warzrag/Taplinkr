@@ -272,8 +272,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-64">
-        {/* Header with Theme Toggle */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between">
+        {/* Fixed Header with Theme Toggle */}
+        <div className="fixed top-0 right-0 left-0 lg:left-64 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between">
           <div className="flex items-center">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -290,13 +290,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </div>
 
-        <ProfileProvider>
-          <LinksProvider>
-            <LinkUpdateProvider updateLinkInPreview={updateLinkInPreview}>
-              {children}
-            </LinkUpdateProvider>
-          </LinksProvider>
-        </ProfileProvider>
+        {/* Content with padding top to account for fixed header */}
+        <div className="flex-1 overflow-auto pt-[60px] lg:pt-[72px]">
+          <ProfileProvider>
+            <LinksProvider>
+              <LinkUpdateProvider updateLinkInPreview={updateLinkInPreview}>
+                {children}
+              </LinkUpdateProvider>
+            </LinksProvider>
+          </ProfileProvider>
+        </div>
       </div>
 
     </div>
