@@ -51,7 +51,9 @@ export async function POST(request: NextRequest) {
         userAgent,
         referer,
         device,
-        country: locationData.country
+        country: locationData.country,
+        city: locationData.city || null,
+        region: locationData.region || null
       }
     })
 

@@ -142,6 +142,8 @@ model Click {
   userAgent String?
   referer   String?
   country   String?
+  city      String?
+  region    String?
   device    String?
   createdAt DateTime @default(now())
   link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)

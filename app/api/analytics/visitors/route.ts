@@ -66,7 +66,9 @@ export async function GET(request: Request) {
           referer: true,
           device: true,
           linkId: true,
-          country: true
+          country: true,
+          city: true,
+          region: true
         }
       }),
       prisma.click.count({
@@ -76,22 +78,31 @@ export async function GET(request: Request) {
 
     console.log('API Visiteurs - Clics trouvés:', clicks.length, 'Total:', total)
 
-    // Transformer les clics en format visiteur avec géolocalisation
+    // Transformer les clics en format visiteur
     const visitors = await Promise.all(clicks.map(async (click) => {
       const link = linkMap.get(click.linkId)
       const parsedUA = parseUserAgent(click.userAgent || '')
       
-      // Utiliser la géolocalisation
-      let location
-      try {
-        location = await getLocationFromIP(click.ip || '')
-      } catch (error) {
-        console.log('Erreur géolocalisation pour IP:', click.ip, error)
-        location = {
-          city: 'N/A',
-          region: 'N/A',
-          country: click.country || 'Unknown',
-          countryCode: 'XX'
+      // Utiliser les données stockées en priorité
+      let location = {
+        city: click.city || 'N/A',
+        region: click.region || 'N/A', 
+        country: click.country || 'Unknown',
+        countryCode: 'XX'
+      }
+      
+      // Si on n'a pas de ville/région stockée, essayer la géolocalisation
+      if (!click.city && click.ip) {
+        try {
+          const geoData = await getLocationFromIP(click.ip)
+          location = {
+            city: geoData.city || 'N/A',
+            region: geoData.region || 'N/A',
+            country: geoData.country || click.country || 'Unknown',
+            countryCode: geoData.countryCode || 'XX'
+          }
+        } catch (error) {
+          console.log('Erreur géolocalisation fallback:', error)
         }
       }
       
