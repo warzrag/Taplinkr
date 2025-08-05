@@ -81,7 +81,7 @@ export async function GET(request: Request) {
       const link = linkMap.get(click.linkId)
       const parsedUA = parseUserAgent(click.userAgent || '')
       
-      // Utiliser les données stockées en priorité (gérer le cas où city/region n'existent pas encore)
+      // Utiliser les données stockées en priorité
       let location = {
         city: 'N/A',
         region: 'N/A', 
@@ -89,18 +89,18 @@ export async function GET(request: Request) {
         countryCode: 'XX'
       }
       
-      // Essayer la géolocalisation depuis l'IP
-      if (click.ip) {
+      // Si on a une IP et pas de localisation précise, essayer la géolocalisation
+      if (click.ip && (location.city === 'N/A' || location.country === 'Unknown')) {
         try {
           const geoData = await getLocationFromIP(click.ip)
           location = {
             city: geoData.city || 'N/A',
             region: geoData.region || 'N/A',
-            country: geoData.country || click.country || 'Unknown',
+            country: geoData.country || location.country,
             countryCode: geoData.countryCode || 'XX'
           }
         } catch (error) {
-          console.log('Erreur géolocalisation fallback:', error)
+          console.log('Erreur géolocalisation:', error)
         }
       }
       
