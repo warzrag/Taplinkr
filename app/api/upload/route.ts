@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { nanoid } from 'nanoid'
 import sharp from 'sharp'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -36,15 +33,6 @@ export async function POST(request: NextRequest) {
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json({ error: 'Fichier trop volumineux (max 10MB)' }, { status: 400 })
     }
-
-    // Créer le dossier uploads s'il n'existe pas
-    const uploadDir = join(process.cwd(), 'public', 'uploads')
-    await mkdir(uploadDir, { recursive: true })
-
-    // Générer un nom unique
-    const fileExtension = file.name.split('.').pop()
-    const fileName = `${nanoid()}.${fileExtension}`
-    const filePath = join(uploadDir, fileName)
 
     // Convertir le fichier en buffer
     const bytes = await file.arrayBuffer()
@@ -119,25 +107,14 @@ export async function POST(request: NextRequest) {
       // Si l'optimisation échoue, utiliser l'image originale
     }
 
-    // Sauvegarder le fichier
-    await writeFile(filePath, optimizedBuffer)
-
-    // Sauvegarder en base de données
-    const fileRecord = await prisma.file.create({
-      data: {
-        filename: fileName,
-        originalName: file.name,
-        mimeType: file.type,
-        size: optimizedBuffer.length,
-        url: `/uploads/${fileName}`,
-        userId: session.user.id
-      }
-    })
-
+    // Convertir en base64 pour stockage direct
+    const base64Image = `data:image/jpeg;base64,${optimizedBuffer.toString('base64')}`
+    
+    // Pour une solution temporaire, on retourne directement l'image en base64
+    // Dans un cas réel, vous devriez utiliser un service comme Cloudinary, AWS S3, etc.
     return NextResponse.json({
-      id: fileRecord.id,
-      url: fileRecord.url,
-      filename: fileRecord.filename
+      url: base64Image,
+      filename: file.name
     })
 
   } catch (error) {
