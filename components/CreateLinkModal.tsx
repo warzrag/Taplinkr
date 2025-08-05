@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap, Smartphone, Eye, Camera, User, Sparkle, Check, AlertCircle, Loader2 } from 'lucide-react'
+import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap, Smartphone, Eye, Camera, User, Sparkle, Check, AlertCircle, Loader2, Instagram, Twitter, Youtube, Info } from 'lucide-react'
 import { Link as LinkType } from '@/types'
 import { usePermissions } from '@/hooks/usePermissions'
 import ImageUpload from './upload/ImageUpload'
@@ -21,6 +21,11 @@ interface CreateLinkModalProps {
 interface FormData {
   title: string
   slug?: string
+  description?: string
+  instagramUrl?: string
+  tiktokUrl?: string
+  twitterUrl?: string
+  youtubeUrl?: string
 }
 
 interface MultiLinkData {
@@ -31,7 +36,7 @@ interface MultiLinkData {
 export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
   const { hasPermission, requirePermission } = usePermissions()
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState(editingLink ? 3 : 1) // Si on édite, on passe directement à l'étape 3
+  const [step, setStep] = useState(editingLink ? 4 : 1) // Si on édite, on passe directement à l'étape finale
   const [linkType, setLinkType] = useState<'direct' | 'multi' | null>(
     editingLink?.isDirect ? 'direct' : editingLink ? 'multi' : null
   )
@@ -56,10 +61,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>({
     defaultValues: editingLink ? {
       title: editingLink.title,
-      slug: editingLink.slug
+      slug: editingLink.slug,
+      description: editingLink.description || '',
+      instagramUrl: editingLink.instagramUrl || '',
+      tiktokUrl: editingLink.tiktokUrl || '',
+      twitterUrl: editingLink.twitterUrl || '',
+      youtubeUrl: editingLink.youtubeUrl || ''
     } : {
       title: '',
-      slug: ''
+      slug: '',
+      description: '',
+      instagramUrl: '',
+      tiktokUrl: '',
+      twitterUrl: '',
+      youtubeUrl: ''
     }
   })
 
@@ -180,7 +195,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         isUltraLink: linkType === 'direct' ? isUltraLink : false,
         multiLinks: linkType === 'multi' ? multiLinks.filter(link => link.title && link.url) : [],
         profileImage: profileImage || null,
-        coverImage: coverImage || null
+        coverImage: coverImage || null,
+        description: data.description || null,
+        instagramUrl: data.instagramUrl || null,
+        tiktokUrl: data.tiktokUrl || null,
+        twitterUrl: data.twitterUrl || null,
+        youtubeUrl: data.youtubeUrl || null
       }
       
       console.log('Sending request:', { url, method, body: requestBody })
@@ -252,7 +272,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   {editingLink ? 'Modifier le lien' : 'Créer un nouveau lien'}
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-500">
-                  Étape {step} sur {linkType === 'multi' ? '3' : '2'}
+                  Étape {step} sur {linkType === 'multi' ? '4' : '2'}
                 </p>
               </div>
             </div>
@@ -680,8 +700,197 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </motion.button>
                   </motion.div>
                 </motion.div>
+              ) : step === 3 && linkType === 'multi' ? (
+                /* Étape 3: Liens sociaux */
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center mb-8"
+                  >
+                    <motion.h3 
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-2xl font-bold text-gray-900 mb-2"
+                    >
+                      Connectez vos réseaux sociaux
+                    </motion.h3>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                      className="text-gray-600"
+                    >
+                      Ajoutez vos profils pour faciliter le suivi (optionnel)
+                    </motion.p>
+                  </motion.div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Instagram */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                      whileHover={{ scale: 1.02 }}
+                      className="group"
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <motion.div
+                          whileHover={{ rotate: 360 }}
+                          transition={{ duration: 0.5 }}
+                          className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-500 rounded-lg flex items-center justify-center"
+                        >
+                          <Instagram className="w-4 h-4 text-white" />
+                        </motion.div>
+                        Instagram
+                      </label>
+                      <input
+                        type="text"
+                        {...register('instagramUrl')}
+                        placeholder="@votrecompte"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                      />
+                    </motion.div>
+
+                    {/* TikTok */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                      whileHover={{ scale: 1.02 }}
+                      className="group"
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <motion.div
+                          whileHover={{ rotate: 360 }}
+                          transition={{ duration: 0.5 }}
+                          className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center"
+                        >
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                          </svg>
+                        </motion.div>
+                        TikTok
+                      </label>
+                      <input
+                        type="text"
+                        {...register('tiktokUrl')}
+                        placeholder="@votrecompte"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-500/20 focus:border-gray-700 transition-all"
+                      />
+                    </motion.div>
+
+                    {/* Twitter */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                      whileHover={{ scale: 1.02 }}
+                      className="group"
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <motion.div
+                          whileHover={{ rotate: 360 }}
+                          transition={{ duration: 0.5 }}
+                          className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center"
+                        >
+                          <Twitter className="w-4 h-4 text-white" />
+                        </motion.div>
+                        Twitter
+                      </label>
+                      <input
+                        type="text"
+                        {...register('twitterUrl')}
+                        placeholder="@votrecompte"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
+                    </motion.div>
+
+                    {/* YouTube */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 }}
+                      whileHover={{ scale: 1.02 }}
+                      className="group"
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <motion.div
+                          whileHover={{ rotate: 360 }}
+                          transition={{ duration: 0.5 }}
+                          className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center"
+                        >
+                          <Youtube className="w-4 h-4 text-white" />
+                        </motion.div>
+                        YouTube
+                      </label>
+                      <input
+                        type="text"
+                        {...register('youtubeUrl')}
+                        placeholder="@votrecompte"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                      />
+                    </motion.div>
+                  </div>
+
+                  {/* Note informative avec animation */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="bg-blue-50 border border-blue-200 rounded-xl p-4"
+                  >
+                    <motion.div
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="flex items-start gap-3"
+                    >
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Info className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-blue-800 font-medium mb-1">
+                          Astuce Pro
+                        </p>
+                        <p className="text-xs text-blue-700">
+                          Les icônes de réseaux sociaux apparaîtront en bas de votre page pour un accès rapide à vos profils
+                        </p>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Boutons d'action */}
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="flex gap-3 mt-8"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
+                    >
+                      Retour
+                    </button>
+                    <motion.button
+                      type="button"
+                      onClick={() => setStep(4)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center gap-2"
+                    >
+                      Continuer
+                      <ArrowRight className="w-4 h-4" />
+                    </motion.button>
+                  </motion.div>
+                </motion.div>
               ) : (
-                /* Étape 3: Détails du lien */
+                /* Étape 4: Détails du lien */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -874,6 +1083,36 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         )}
                       </AnimatePresence>
                     </div>
+                  </motion.div>
+
+                  {/* Description avec animation */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description (optionnel)
+                    </label>
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <textarea
+                        {...register('description')}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base resize-none"
+                        placeholder="Décrivez votre page en quelques mots..."
+                        rows={3}
+                      />
+                    </motion.div>
+                    <motion.p 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="text-xs text-gray-500 mt-1"
+                    >
+                      Une bonne description aide vos visiteurs à comprendre votre contenu
+                    </motion.p>
                   </motion.div>
 
                   {/* Contenu selon le type */}
@@ -1089,7 +1328,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   <div className="flex gap-2 sm:gap-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(linkType === 'multi' ? 2 : 1)}
+                      onClick={() => setStep(linkType === 'multi' ? 3 : 1)}
                       className="flex-1 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 text-base"
                     >
                       Retour
@@ -1149,13 +1388,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   links={[{
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
-                    title: watch('title') || 'Mon lien',
-                    description: '',
-                    profileImage: profileImage,
-                    coverImage: coverImage,
+                    title: step >= 4 ? (watch('title') || 'Mon lien') : 'Mon lien',
+                    description: step >= 4 ? (watch('description') || '') : '',
+                    profileImage: step >= 2 ? profileImage : '',
+                    coverImage: step >= 4 ? coverImage : '',
                     isDirect: false,
                     isActive: true,
-                    multiLinks: multiLinks.filter(ml => ml.title && ml.url).map((ml, index) => ({
+                    instagramUrl: step >= 3 ? watch('instagramUrl') : '',
+                    tiktokUrl: step >= 3 ? watch('tiktokUrl') : '',
+                    twitterUrl: step >= 3 ? watch('twitterUrl') : '',
+                    youtubeUrl: step >= 3 ? watch('youtubeUrl') : '',
+                    multiLinks: step >= 4 ? multiLinks.filter(ml => ml.title && ml.url).map((ml, index) => ({
                       id: index.toString(),
                       parentLinkId: '',
                       title: ml.title,
@@ -1168,7 +1411,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       clicks: 0,
                       createdAt: new Date(),
                       updatedAt: new Date()
-                    })),
+                    })) : [],
                     // Valeurs par défaut
                     userId: '',
                     directUrl: '',
@@ -1201,13 +1444,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               links={[{
                 id: Date.now().toString(),
                 slug: watch('slug') || 'preview',
-                title: watch('title') || 'Mon lien',
-                description: '',
-                profileImage: profileImage,
-                coverImage: coverImage,
+                title: step >= 4 ? (watch('title') || 'Mon lien') : 'Mon lien',
+                description: step >= 4 ? (watch('description') || '') : '',
+                profileImage: step >= 2 ? profileImage : '',
+                coverImage: step >= 4 ? coverImage : '',
                 isDirect: false,
                 isActive: true,
-                multiLinks: multiLinks.filter(ml => ml.title && ml.url).map((ml, index) => ({
+                instagramUrl: step >= 3 ? watch('instagramUrl') : '',
+                tiktokUrl: step >= 3 ? watch('tiktokUrl') : '',
+                twitterUrl: step >= 3 ? watch('twitterUrl') : '',
+                youtubeUrl: step >= 3 ? watch('youtubeUrl') : '',
+                multiLinks: step >= 4 ? multiLinks.filter(ml => ml.title && ml.url).map((ml, index) => ({
                   id: index.toString(),
                   parentLinkId: '',
                   title: ml.title,
@@ -1220,7 +1467,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   clicks: 0,
                   createdAt: new Date(),
                   updatedAt: new Date()
-                })),
+                })) : [],
                 // Valeurs par défaut
                 userId: '',
                 directUrl: '',
