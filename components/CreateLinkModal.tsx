@@ -908,7 +908,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               
               <div className="mt-16">
                 <LivePhonePreview
-                  link={{
+                  links={[{
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
                     title: watch('title') || 'Mon lien',
@@ -942,7 +942,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     views: 0,
                     createdAt: new Date(),
                     updatedAt: new Date()
-                  }}
+                  }]}
                 />
               </div>
             </div>
@@ -960,7 +960,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             className="hidden xl:block fixed right-8 top-24 bottom-8 w-[375px] z-20"
           >
             <LivePhonePreview
-              link={{
+              links={[{
                 id: Date.now().toString(),
                 slug: watch('slug') || 'preview',
                 title: watch('title') || 'Mon lien',
@@ -994,7 +994,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 views: 0,
                 createdAt: new Date(),
                 updatedAt: new Date()
-              }}
+              }]}
             />
           </motion.div>
         )}
