@@ -66,9 +66,7 @@ export async function GET(request: Request) {
           referer: true,
           device: true,
           linkId: true,
-          country: true,
-          city: true,
-          region: true
+          country: true
         }
       }),
       prisma.click.count({
@@ -83,16 +81,16 @@ export async function GET(request: Request) {
       const link = linkMap.get(click.linkId)
       const parsedUA = parseUserAgent(click.userAgent || '')
       
-      // Utiliser les données stockées en priorité
+      // Utiliser les données stockées en priorité (gérer le cas où city/region n'existent pas encore)
       let location = {
-        city: click.city || 'N/A',
-        region: click.region || 'N/A', 
+        city: 'N/A',
+        region: 'N/A', 
         country: click.country || 'Unknown',
         countryCode: 'XX'
       }
       
-      // Si on n'a pas de ville/région stockée, essayer la géolocalisation
-      if (!click.city && click.ip) {
+      // Essayer la géolocalisation depuis l'IP
+      if (click.ip) {
         try {
           const geoData = await getLocationFromIP(click.ip)
           location = {
