@@ -18,37 +18,56 @@ export async function GET(request: Request) {
 
     const linkIds = userLinks.map(link => link.id)
 
-    const clicks = await prisma.click.findMany({
-      where: {
-        linkId: { in: linkIds }
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-      include: {
-        link: {
-          select: {
-            slug: true,
-            title: true
+    let clicks: any[] = []
+    let totalClicks = 0
+
+    // Gérer le cas où il n'y a pas de liens
+    if (linkIds.length > 0) {
+      clicks = await prisma.click.findMany({
+        where: {
+          linkId: { in: linkIds }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        include: {
+          link: {
+            select: {
+              slug: true,
+              title: true
+            }
           }
         }
-      }
-    })
+      })
 
-    const totalClicks = await prisma.click.count({
-      where: {
-        linkId: { in: linkIds }
-      }
-    })
+      totalClicks = await prisma.click.count({
+        where: {
+          linkId: { in: linkIds }
+        }
+      })
+    }
 
     // Vérifier aussi tous les clics sans filtre pour debug
-    const allClicks = await prisma.click.count()
+    let allClicks = 0
+    let multiLinks = 0
     
-    // Vérifier s'il y a des MultiLinks
-    const multiLinks = await prisma.multiLink.count({
-      where: {
-        linkId: { in: linkIds }
+    try {
+      allClicks = await prisma.click.count()
+    } catch (e) {
+      console.log('Erreur count all clicks:', e)
+    }
+    
+    try {
+      // Vérifier s'il y a des MultiLinks seulement si on a des linkIds
+      if (linkIds.length > 0) {
+        multiLinks = await prisma.multiLink.count({
+          where: {
+            linkId: { in: linkIds }
+          }
+        })
       }
-    })
+    } catch (e) {
+      console.log('Erreur count multiLinks:', e)
+    }
 
     return NextResponse.json({
       success: true,
