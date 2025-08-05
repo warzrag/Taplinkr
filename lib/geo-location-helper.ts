@@ -1,3 +1,5 @@
+import { geoCache } from './geo-cache'
+
 interface LocationData {
   country: string
   countryCode: string
@@ -31,18 +33,35 @@ export async function getLocationFromIP(ip: string): Promise<LocationData> {
       }
     }
 
+    // Vérifier le cache d'abord
+    const cached = geoCache.get(ip)
+    if (cached) {
+      console.log('Géolocalisation depuis le cache pour:', ip)
+      return cached
+    }
+
     // Use ipapi.co (free, no key required, 1000 requests per day)
-    const response = await fetch(`https://ipapi.co/${ip}/json/`)
+    const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+      // Timeout après 3 secondes pour éviter les blocages
+      signal: AbortSignal.timeout(3000)
+    })
     
     if (!response.ok) {
+      console.log(`Erreur API géolocalisation: ${response.status} pour IP: ${ip}`)
       return defaultLocation
     }
 
     const data = await response.json()
     
+    // Vérifier si on a atteint la limite de taux
+    if (data.error && data.reason === 'RateLimited') {
+      console.log('Limite de taux atteinte pour ipapi.co')
+      return defaultLocation
+    }
+    
     // ipapi.co returns data directly without status field
     if (data && !data.error) {
-      return {
+      const locationData = {
         country: data.country_name || 'Unknown',
         countryCode: data.country_code || 'XX',
         region: data.region || 'N/A',
@@ -51,6 +70,12 @@ export async function getLocationFromIP(ip: string): Promise<LocationData> {
         lat: data.latitude || 0,
         lon: data.longitude || 0
       }
+      
+      // Mettre en cache le résultat
+      geoCache.set(ip, locationData)
+      console.log('Géolocalisation mise en cache pour:', ip)
+      
+      return locationData
     }
 
     return defaultLocation
