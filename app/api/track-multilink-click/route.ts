@@ -10,18 +10,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'multiLinkId requis' }, { status: 400 })
     }
 
-    // Vérifier que le MultiLink existe
+    // Vérifier que le MultiLink existe et récupérer le lien parent
     const multiLink = await prisma.multiLink.findUnique({
-      where: { id: multiLinkId }
+      where: { id: multiLinkId },
+      include: {
+        link: true
+      }
     })
 
     if (!multiLink) {
       return NextResponse.json({ error: 'MultiLink non trouvé' }, { status: 404 })
     }
 
+    // Récupérer les informations de la requête
+    const ip = request.ip || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const userAgent = request.headers.get('user-agent') || ''
+    const referer = request.headers.get('referer') || ''
+
+    // Détection simple du device
+    const device = userAgent.toLowerCase().includes('mobile') ? 'mobile' : 
+                  userAgent.toLowerCase().includes('tablet') ? 'tablet' : 'desktop'
+
+    // Créer un enregistrement dans la table Click
+    await prisma.click.create({
+      data: {
+        linkId: multiLink.linkId,
+        userId: multiLink.link.userId,
+        ip: ip.toString().split(',')[0].trim(),
+        userAgent,
+        referer,
+        device
+      }
+    })
+
     // Incrémenter le compteur de clics du MultiLink
     await prisma.multiLink.update({
       where: { id: multiLinkId },
+      data: {
+        clicks: {
+          increment: 1
+        }
+      }
+    })
+
+    // Incrémenter aussi le compteur du lien principal
+    await prisma.link.update({
+      where: { id: multiLink.linkId },
       data: {
         clicks: {
           increment: 1

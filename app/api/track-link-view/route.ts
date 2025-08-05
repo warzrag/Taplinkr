@@ -71,6 +71,22 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Détection simple du device
+    const device = userAgent?.toLowerCase().includes('mobile') ? 'mobile' : 
+                  userAgent?.toLowerCase().includes('tablet') ? 'tablet' : 'desktop'
+
+    // Créer aussi un enregistrement dans la table Click pour la page visiteurs
+    await prisma.click.create({
+      data: {
+        linkId,
+        userId: link.userId,
+        ip: ip.toString().split(',')[0].trim(),
+        userAgent: userAgent || '',
+        referer: referrer || '',
+        device
+      }
+    })
+
     // Créer la réponse avec le cookie de session
     const response = NextResponse.json({ 
       success: true,
