@@ -11,6 +11,7 @@ interface LivePhonePreviewProps {
     image?: string
     bio?: string
   }
+  currentStep?: number
   links?: Array<{
     id: string
     title: string
@@ -50,7 +51,7 @@ interface LivePhonePreviewProps {
   }>
 }
 
-export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewProps) {
+export default function LivePhonePreview({ user, links = [], currentStep }: LivePhonePreviewProps) {
   // Fonction pour obtenir la classe CSS de la police
   const getFontClass = (fontFamily?: string) => {
     const fontMap: { [key: string]: string } = {
@@ -377,7 +378,57 @@ export default function LivePhonePreview({ user, links = [] }: LivePhonePreviewP
               {/* Links - Au centre/bas */}
               <div className="flex-1 flex flex-col justify-center space-y-3">
                 <AnimatePresence mode="wait">
-                  {displayLinks.length > 0 ? (
+                  {currentStep && currentStep < 4 ? (
+                    /* Avant l'étape 4, on affiche un message d'attente ou rien */
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex items-center justify-center h-full"
+                    >
+                      {currentStep === 1 && (
+                        <div className="text-center">
+                          <motion.div
+                            animate={{ rotate: [0, 360] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            className="text-4xl mb-2"
+                          >
+                            ✨
+                          </motion.div>
+                          <p className="text-white/80 text-sm">
+                            Commencez votre création...
+                          </p>
+                        </div>
+                      )}
+                      {currentStep === 2 && (
+                        <div className="text-center">
+                          <motion.div
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="text-4xl mb-2"
+                          >
+                            📸
+                          </motion.div>
+                          <p className="text-white/80 text-sm">
+                            Ajoutez votre photo...
+                          </p>
+                        </div>
+                      )}
+                      {currentStep === 3 && (
+                        <div className="text-center">
+                          <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="text-4xl mb-2"
+                          >
+                            🌐
+                          </motion.div>
+                          <p className="text-white/80 text-sm">
+                            Connectez vos réseaux...
+                          </p>
+                        </div>
+                      )}
+                    </motion.div>
+                  ) : displayLinks.length > 0 ? (
                     displayLinks.map((link, index) => {
                       const hasAnimation = link.animation && link.animation !== 'none'
                       const animationProps = hasAnimation ? getAnimationVariants(link.animation) : {}

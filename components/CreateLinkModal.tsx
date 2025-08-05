@@ -1385,6 +1385,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               
               <div className="mt-16">
                 <LivePhonePreview
+                  currentStep={step}
                   links={[{
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
@@ -1441,6 +1442,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             className="hidden xl:block fixed right-8 top-24 bottom-8 w-[375px] z-20"
           >
             <LivePhonePreview
+              currentStep={step}
               links={[{
                 id: Date.now().toString(),
                 slug: watch('slug') || 'preview',
