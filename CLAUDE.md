@@ -28,3 +28,11 @@ npm run start    # Lancer en production
 npm run db:push  # Synchroniser la base de données
 npm run db:studio # Interface Prisma Studio
 ```
+
+## ⚠️ RAPPEL IMPORTANT - TOUJOURS PUSHER
+**APRÈS CHAQUE MODIFICATION DE CODE, TU DOIS :**
+1. `git add -A`
+2. `git commit -m "Description claire des changements"`
+3. `git push origin main`
+
+**NE JAMAIS OUBLIER DE PUSHER !** Flore veut que chaque modification soit immédiatement sur GitHub.
