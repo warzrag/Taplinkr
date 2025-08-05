@@ -270,10 +270,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             {/* Background Image */}
             <div className="absolute inset-0">
               {/* Afficher uniquement l'image de couverture du lien si elle existe */}
-              {displayableLinks[0]?.coverImage ? (
+              {links[0]?.coverImage ? (
                 <div className="relative w-full h-full">
                   <img
-                    src={displayableLinks[0].coverImage}
+                    src={links[0].coverImage}
                     alt="Cover"
                     className="w-full h-full object-cover"
                   />
@@ -293,16 +293,16 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 className="text-center mb-6"
               >
                 {/* Photo de profil */}
-                {displayableLinks[0]?.profileImage && displayableLinks[0].profileImage !== '' && (
+                {links[0]?.profileImage && links[0].profileImage !== '' && (
                   <div className="flex justify-center mb-4">
                     <div className="relative">
                       <img
-                        src={displayableLinks[0].profileImage}
+                        src={links[0].profileImage}
                         alt="Profile"
                         className="w-24 h-24 object-cover rounded-full shadow-lg"
                       />
                       {/* Indicateur en ligne discret à côté de la photo */}
-                      {displayableLinks[0]?.isOnline && (
+                      {links[0]?.isOnline && (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
@@ -321,21 +321,21 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 {/* Titre - s'affiche seulement à partir de l'étape 4 */}
                 {(!currentStep || currentStep >= 4) && (
                   <h1 className="text-white text-2xl font-bold mb-1" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                    {displayableLinks[0]?.title || user?.name || user?.username || 'Laura'}
+                    {links[0]?.title || user?.name || user?.username || 'Laura'}
                   </h1>
                 )}
                 
                 {/* Description - s'affiche seulement à partir de l'étape 4 */}
-                {(!currentStep || currentStep >= 4) && (displayableLinks[0]?.description || user?.bio) && (
+                {(!currentStep || currentStep >= 4) && (links[0]?.description || user?.bio) && (
                   <p className="text-white/95 text-sm" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
-                    {displayableLinks[0]?.description || user?.bio}
+                    {links[0]?.description || user?.bio}
                   </p>
                 )}
                 
                 {/* Status en ligne et localisation - Design élégant */}
                 <div className="mt-3 space-y-2">
                   {/* Status en ligne - seulement si pas de photo de profil */}
-                  {displayableLinks[0]?.isOnline && !displayableLinks[0]?.profileImage && (
+                  {links[0]?.isOnline && !links[0]?.profileImage && (
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -359,7 +359,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   )}
                   
                   {/* Localisation avec style moderne */}
-                  {displayableLinks[0]?.city && (
+                  {links[0]?.city && (
                     <motion.div 
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -371,7 +371,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
                         <span className="text-white/90 text-xs font-medium">
-                          {displayableLinks[0].city}
+                          {links[0].city}
                         </span>
                       </div>
                     </motion.div>
@@ -558,19 +558,19 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
 
               {/* Social Media Icons */}
-              {(displayableLinks[0]?.instagramUrl || displayableLinks[0]?.tiktokUrl || 
-                displayableLinks[0]?.twitterUrl || displayableLinks[0]?.youtubeUrl) && (
+              {(links[0]?.instagramUrl || links[0]?.tiktokUrl || 
+                links[0]?.twitterUrl || links[0]?.youtubeUrl) && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                   className="mt-6 flex justify-center gap-4"
                 >
-                  {displayableLinks[0]?.instagramUrl && (
+                  {links[0]?.instagramUrl && (
                     <motion.a
-                      href={displayableLinks[0].instagramUrl.startsWith('@') 
-                        ? `https://instagram.com/${displayableLinks[0].instagramUrl.slice(1)}`
-                        : displayableLinks[0].instagramUrl
+                      href={links[0].instagramUrl.startsWith('@') 
+                        ? `https://instagram.com/${links[0].instagramUrl.slice(1)}`
+                        : links[0].instagramUrl
                       }
                       target="_blank"
                       rel="noopener noreferrer"
@@ -582,11 +582,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     </motion.a>
                   )}
                   
-                  {displayableLinks[0]?.tiktokUrl && (
+                  {links[0]?.tiktokUrl && (
                     <motion.a
-                      href={displayableLinks[0].tiktokUrl.startsWith('@') 
-                        ? `https://tiktok.com/${displayableLinks[0].tiktokUrl.slice(1)}`
-                        : displayableLinks[0].tiktokUrl
+                      href={links[0].tiktokUrl.startsWith('@') 
+                        ? `https://tiktok.com/${links[0].tiktokUrl.slice(1)}`
+                        : links[0].tiktokUrl
                       }
                       target="_blank"
                       rel="noopener noreferrer"
@@ -600,11 +600,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     </motion.a>
                   )}
                   
-                  {displayableLinks[0]?.twitterUrl && (
+                  {links[0]?.twitterUrl && (
                     <motion.a
-                      href={displayableLinks[0].twitterUrl.startsWith('@') 
-                        ? `https://twitter.com/${displayableLinks[0].twitterUrl.slice(1)}`
-                        : displayableLinks[0].twitterUrl
+                      href={links[0].twitterUrl.startsWith('@') 
+                        ? `https://twitter.com/${links[0].twitterUrl.slice(1)}`
+                        : links[0].twitterUrl
                       }
                       target="_blank"
                       rel="noopener noreferrer"
@@ -616,11 +616,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     </motion.a>
                   )}
                   
-                  {displayableLinks[0]?.youtubeUrl && (
+                  {links[0]?.youtubeUrl && (
                     <motion.a
-                      href={displayableLinks[0].youtubeUrl.startsWith('@') 
-                        ? `https://youtube.com/${displayableLinks[0].youtubeUrl.slice(1)}`
-                        : displayableLinks[0].youtubeUrl
+                      href={links[0].youtubeUrl.startsWith('@') 
+                        ? `https://youtube.com/${links[0].youtubeUrl.slice(1)}`
+                        : links[0].youtubeUrl
                       }
                       target="_blank"
                       rel="noopener noreferrer"
