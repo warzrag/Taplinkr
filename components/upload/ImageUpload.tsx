@@ -100,6 +100,7 @@ export default function ImageUpload({
 
       if (!uploadResponse.ok) {
         const error = await uploadResponse.json()
+        console.error('Upload API error:', error)
         throw new Error(error.error || 'Erreur lors de l\'upload')
       }
 

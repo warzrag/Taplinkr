@@ -13,6 +13,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'ima
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
+    console.log('Upload session:', session?.user?.id)
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
