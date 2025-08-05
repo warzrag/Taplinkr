@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronLeft, FolderPlus } from 'lucide-react'
+import { ChevronLeft, FolderPlus, Plus } from 'lucide-react'
 import Link from 'next/link'
 import DragDropDashboard from '@/components/DragDropDashboard'
+import CreateLinkModal from '@/components/CreateLinkModal'
+import EditLinkModal from '@/components/EditLinkModal'
 import { toast } from 'react-hot-toast'
 import { Link as LinkType } from '@/types'
 
@@ -25,6 +27,10 @@ export default function FoldersPage() {
   const [folders, setFolders] = useState<Folder[]>([])
   const [unorganizedLinks, setUnorganizedLinks] = useState<LinkType[]>([])
   const [loading, setLoading] = useState(true)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingLink, setEditingLink] = useState<LinkType | null>(null)
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
 
   // Récupérer les dossiers et les liens
   useEffect(() => {
@@ -82,8 +88,8 @@ export default function FoldersPage() {
   }
 
   const handleEditLink = (link: LinkType) => {
-    // TODO: Ouvrir le modal d'édition
-    console.log('Edit link:', link)
+    setEditingLink(link)
+    setShowEditModal(true)
   }
 
   const handleDeleteLink = async (id: string) => {
@@ -204,9 +210,23 @@ export default function FoldersPage() {
                 Organisez vos liens avec des dossiers et glissez-déposez pour réorganiser
               </p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-              <FolderPlus className="w-4 h-4" />
-              <span>Cliquez sur "Nouveau" pour créer des dossiers</span>
+            <div className="flex items-center gap-3">
+              <motion.button
+                onClick={() => {
+                  setSelectedFolderId(null)
+                  setShowCreateModal(true)
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Créer un lien</span>
+              </motion.button>
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <FolderPlus className="w-4 h-4" />
+                <span>Cliquez sur "Nouveau" pour créer des dossiers</span>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -225,8 +245,48 @@ export default function FoldersPage() {
           onEditFolder={handleEditFolder}
           onDeleteFolder={handleDeleteFolder}
           onToggleFolder={handleToggleFolder}
+          onCreateLinkInFolder={(folderId) => {
+            setSelectedFolderId(folderId)
+            setShowCreateModal(true)
+          }}
         />
       </div>
+
+      {/* Modals */}
+      <CreateLinkModal
+        isOpen={showCreateModal}
+        editingLink={null}
+        onClose={() => {
+          setShowCreateModal(false)
+          setSelectedFolderId(null)
+        }}
+        onSuccess={async (newLink) => {
+          // Si un dossier est sélectionné, déplacer le lien dans ce dossier
+          if (selectedFolderId && newLink?.id) {
+            await handleMoveLink(newLink.id, selectedFolderId)
+          }
+          setShowCreateModal(false)
+          setSelectedFolderId(null)
+          await fetchData()
+        }}
+      />
+      
+      {editingLink && (
+        <EditLinkModal
+          isOpen={showEditModal}
+          editingLink={editingLink}
+          onClose={() => {
+            setShowEditModal(false)
+            setEditingLink(null)
+          }}
+          onSuccess={async () => {
+            setShowEditModal(false)
+            setEditingLink(null)
+            await fetchData()
+          }}
+          onLiveUpdate={() => {}}
+        />
+      )}
     </div>
   )
 }

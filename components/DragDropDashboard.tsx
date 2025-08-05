@@ -65,6 +65,7 @@ interface DragDropDashboardProps {
   onEditFolder: (folder: Folder) => void
   onDeleteFolder: (folderId: string) => void
   onToggleFolder: (folderId: string) => void
+  onCreateLinkInFolder?: (folderId: string) => void
 }
 
 function SortableFolder({ 
@@ -74,6 +75,7 @@ function SortableFolder({
   onDelete, 
   onToggle,
   onCreateSubfolder,
+  onCreateLink,
   onMouseEnter,
   onMouseLeave,
   isOver,
@@ -85,6 +87,7 @@ function SortableFolder({
   onDelete: () => void
   onToggle: () => void
   onCreateSubfolder: () => void
+  onCreateLink?: () => void
   onMouseEnter?: (event: React.MouseEvent) => void
   onMouseLeave?: () => void
   isOver?: boolean
@@ -177,6 +180,17 @@ function SortableFolder({
         </div>
         
         <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
+          {onCreateLink && (
+            <motion.button
+              onClick={onCreateLink}
+              className="p-2 hover:bg-green-100 rounded-lg transition-colors text-green-600 hover:text-green-700"
+              title="Créer un lien dans ce dossier"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Plus className="w-4 h-4" />
+            </motion.button>
+          )}
           <motion.button
             onClick={onCreateSubfolder}
             className="p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-700"
@@ -289,6 +303,7 @@ export default function DragDropDashboard({
   onEditFolder,
   onDeleteFolder,
   onToggleFolder,
+  onCreateLinkInFolder,
 }: DragDropDashboardProps) {
   const { refreshAll: refreshLinksContext } = useLinks()
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -740,6 +755,7 @@ export default function DragDropDashboard({
             setCreateInParent(folder.id)
             setShowCreateForm(true)
           }}
+          onCreateLink={onCreateLinkInFolder ? () => onCreateLinkInFolder(folder.id) : undefined}
           onMouseEnter={(event) => handleFolderMouseEnter(event, folder.id, folder.name)}
           onMouseLeave={handleFolderMouseLeave}
           isOver={overId === `folder-${folder.id}`}
