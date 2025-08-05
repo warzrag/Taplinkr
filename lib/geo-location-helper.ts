@@ -31,8 +31,8 @@ export async function getLocationFromIP(ip: string): Promise<LocationData> {
       }
     }
 
-    // Use ip-api.com (free, no key required, 45 requests per minute)
-    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,countryCode,region,regionName,city,timezone,lat,lon`)
+    // Use ipapi.co (free, no key required, 1000 requests per day)
+    const response = await fetch(`https://ipapi.co/${ip}/json/`)
     
     if (!response.ok) {
       return defaultLocation
@@ -40,15 +40,16 @@ export async function getLocationFromIP(ip: string): Promise<LocationData> {
 
     const data = await response.json()
     
-    if (data.status === 'success') {
+    // ipapi.co returns data directly without status field
+    if (data && !data.error) {
       return {
-        country: data.country || 'Unknown',
-        countryCode: data.countryCode || 'XX',
-        region: data.regionName || data.region || 'N/A',
+        country: data.country_name || 'Unknown',
+        countryCode: data.country_code || 'XX',
+        region: data.region || 'N/A',
         city: data.city || 'N/A',
         timezone: data.timezone || 'UTC',
-        lat: data.lat || 0,
-        lon: data.lon || 0
+        lat: data.latitude || 0,
+        lon: data.longitude || 0
       }
     }
 
