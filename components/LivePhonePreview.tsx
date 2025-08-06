@@ -83,21 +83,20 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'pulse':
         return {
           animate: {
-            scale: [1, 1.02, 1],
+            scale: [1, 1.15, 1],
             transition: {
-              duration: 1.5,
+              duration: 1.2,
               repeat: Infinity,
-              ease: 'easeInOut',
-              repeatType: 'reverse'
+              ease: 'easeInOut'
             }
           }
         }
       case 'bounce':
         return {
           animate: {
-            y: [0, -5, 0],
+            y: [0, -20, 0],
             transition: {
-              duration: 1.5,
+              duration: 1,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -106,20 +105,20 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'shake':
         return {
           animate: {
-            x: [0, -2, 2, -2, 2, 0],
+            x: [0, -10, 10, -10, 10, 0],
             transition: {
-              duration: 0.5,
+              duration: 0.6,
               repeat: Infinity,
-              repeatDelay: 2
+              repeatDelay: 1.5
             }
           }
         }
       case 'wobble':
         return {
           animate: {
-            rotate: [0, -2, 2, -2, 2, 0],
+            rotate: [0, -8, 8, -8, 8, 0],
             transition: {
-              duration: 1,
+              duration: 0.8,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -128,9 +127,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'swing':
         return {
           animate: {
-            rotate: [0, 15, -10, 5, -5, 0],
+            rotate: [0, 20, -15, 10, -8, 0],
             transition: {
-              duration: 2,
+              duration: 1.5,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -139,35 +138,36 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'tada':
         return {
           animate: {
-            scale: [1, 0.9, 1.1, 1.1, 1],
-            rotate: [0, -3, 3, -3, 3, 0],
+            scale: [1, 0.85, 1.2, 1.2, 1],
+            rotate: [0, -5, 5, -5, 5, 0],
             transition: {
               duration: 1,
               repeat: Infinity,
-              repeatDelay: 3
+              repeatDelay: 2
             }
           }
         }
       case 'flash':
         return {
           animate: {
-            scale: [1, 1.1, 1],
+            opacity: [1, 0.3, 1],
+            scale: [1, 1.05, 1],
             transition: {
-              duration: 0.5,
+              duration: 0.8,
               repeat: Infinity,
-              repeatDelay: 2
+              repeatDelay: 1.5
             }
           }
         }
       case 'rubberBand':
         return {
           animate: {
-            scaleX: [1, 1.25, 0.75, 1.15, 0.95, 1],
-            scaleY: [1, 0.75, 1.25, 0.85, 1.05, 1],
+            scaleX: [1, 1.35, 0.65, 1.25, 0.85, 1],
+            scaleY: [1, 0.65, 1.35, 0.75, 1.15, 1],
             transition: {
-              duration: 1,
+              duration: 1.2,
               repeat: Infinity,
-              repeatDelay: 3
+              repeatDelay: 2.5
             }
           }
         }
@@ -442,7 +442,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     displayLinks.map((link, index) => {
                       const hasAnimation = link.animation && link.animation !== 'none'
                       const animationProps = hasAnimation ? getAnimationVariants(link.animation) : {}
-                      console.log('Link animation:', link.animation, 'hasAnimation:', hasAnimation, 'animationProps:', animationProps)
                       
                       if (hasAnimation) {
                         return (
