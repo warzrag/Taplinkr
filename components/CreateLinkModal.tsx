@@ -954,18 +954,19 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {[
-                        { value: 'none', label: 'Aucune', icon: '⭕' },
+                        { value: 'none', label: 'Aucune', icon: '⚪' },
+                        { value: 'glow', label: 'Glow', icon: '✨' },
+                        { value: 'lift', label: 'Lift', icon: '🔺' },
+                        { value: 'morph', label: 'Morph', icon: '🔮' },
+                        { value: 'slide', label: 'Slide', icon: '➡️' },
+                        { value: 'fade', label: 'Fade', icon: '💫' },
+                        { value: 'scale', label: 'Scale', icon: '🔍' },
+                        { value: 'rotate', label: 'Rotate', icon: '🔄' },
+                        { value: 'highlight', label: 'Highlight', icon: '💡' },
+                        { value: 'shimmer', label: 'Shimmer', icon: '⚡' },
                         { value: 'pulse', label: 'Pulse', icon: '💗' },
-                        { value: 'bounce', label: 'Rebond', icon: '🏀' },
-                        { value: 'shake', label: 'Shake', icon: '🫨' },
-                        { value: 'wobble', label: 'Wobble', icon: '🌊' },
-                        { value: 'swing', label: 'Swing', icon: '🎠' },
-                        { value: 'tada', label: 'Tada', icon: '🎊' },
-                        { value: 'flash', label: 'Flash', icon: '⚡' },
-                        { value: 'rubberBand', label: 'Elastic', icon: '🎯' },
-                        { value: 'jello', label: 'Jello', icon: '🍮' },
-                        { value: 'heartBeat', label: 'Coeur', icon: '❤️' },
-                        { value: 'flip', label: 'Flip', icon: '🔄' }
+                        { value: 'wave', label: 'Wave', icon: '🌊' },
+                        { value: 'breathe', label: 'Breathe', icon: '💨' }
                       ].map((anim) => (
                         <motion.button
                           key={anim.value}

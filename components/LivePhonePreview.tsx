@@ -80,63 +80,132 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   // Fonction pour obtenir les animations Framer Motion
   const getAnimationVariants = (animationType?: string) => {
     switch (animationType) {
+      case 'glow':
+        return {
+          animate: {
+            boxShadow: [
+              '0 0 0 0 rgba(139, 92, 246, 0)',
+              '0 0 30px 10px rgba(139, 92, 246, 0.3)',
+              '0 0 0 0 rgba(139, 92, 246, 0)'
+            ],
+            transition: {
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'lift':
+        return {
+          animate: {
+            y: [0, -8, 0],
+            boxShadow: [
+              '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            ],
+            transition: {
+              duration: 3,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'morph':
+        return {
+          animate: {
+            borderRadius: ['1rem', '2rem', '1rem'],
+            transition: {
+              duration: 3,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'slide':
+        return {
+          animate: {
+            x: [-5, 5, -5],
+            transition: {
+              duration: 3,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'fade':
+        return {
+          animate: {
+            opacity: [1, 0.7, 1],
+            transition: {
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'scale':
+        return {
+          animate: {
+            scale: [1, 1.03, 1],
+            transition: {
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'rotate':
+        return {
+          animate: {
+            rotate: [0, 2, -2, 0],
+            transition: {
+              duration: 4,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'highlight':
+        return {
+          animate: {
+            backgroundColor: [
+              'rgba(255, 255, 255, 0.95)',
+              'rgba(239, 246, 255, 0.95)',
+              'rgba(255, 255, 255, 0.95)'
+            ],
+            borderColor: [
+              'rgba(229, 231, 235, 1)',
+              'rgba(147, 197, 253, 1)',
+              'rgba(229, 231, 235, 1)'
+            ],
+            transition: {
+              duration: 2.5,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'shimmer':
+        return {
+          animate: {
+            backgroundImage: [
+              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 60%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 60%, transparent 100%)'
+            ],
+            backgroundPosition: ['-200% 0', '200% 0'],
+            transition: {
+              duration: 3,
+              repeat: Infinity,
+              ease: 'linear'
+            }
+          }
+        }
       case 'pulse':
         return {
           animate: {
-            scale: [1, 1.3, 1],
-            boxShadow: [
-              '0 0 0 0 rgba(99, 102, 241, 0)',
-              '0 0 20px 10px rgba(99, 102, 241, 0.4)',
-              '0 0 0 0 rgba(99, 102, 241, 0)'
-            ],
-            transition: {
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'bounce':
-        return {
-          animate: {
-            y: [0, -30, 0],
-            scaleY: [1, 0.9, 1],
-            transition: {
-              duration: 0.8,
-              repeat: Infinity,
-              ease: [0.68, -0.55, 0.265, 1.55]
-            }
-          }
-        }
-      case 'shake':
-        return {
-          animate: {
-            x: [0, -15, 15, -15, 15, -10, 10, -5, 5, 0],
-            rotate: [0, -2, 2, -2, 2, -1, 1, 0],
-            transition: {
-              duration: 0.8,
-              repeat: Infinity,
-              repeatDelay: 1
-            }
-          }
-        }
-      case 'wobble':
-        return {
-          animate: {
-            rotate: [0, -15, 15, -15, 15, -10, 10, -5, 5, 0],
-            scale: [1, 1.05, 1],
-            transition: {
-              duration: 1,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'swing':
-        return {
-          animate: {
-            rotate: [0, 30, -25, 20, -15, 10, -5, 0],
-            transformOrigin: 'top center',
+            scale: [1, 1.02, 1],
+            opacity: [1, 0.9, 1],
             transition: {
               duration: 2,
               repeat: Infinity,
@@ -144,81 +213,26 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             }
           }
         }
-      case 'tada':
+      case 'wave':
         return {
           animate: {
-            scale: [1, 0.8, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1],
-            rotate: [0, -3, -3, 5, -5, 5, -5, 5, -5, 0],
+            y: [0, -3, 0],
+            rotate: [0, 1, -1, 0],
             transition: {
-              duration: 1.2,
+              duration: 2.5,
               repeat: Infinity,
-              repeatDelay: 1.5
-            }
-          }
-        }
-      case 'flash':
-        return {
-          animate: {
-            opacity: [1, 0, 1, 0, 1],
-            scale: [1, 1.1, 1],
-            backgroundColor: [
-              'rgba(255, 255, 255, 0.95)',
-              'rgba(255, 255, 100, 0.95)',
-              'rgba(255, 255, 255, 0.95)'
-            ],
-            transition: {
-              duration: 1,
-              repeat: Infinity,
-              repeatDelay: 1
-            }
-          }
-        }
-      case 'rubberBand':
-        return {
-          animate: {
-            scaleX: [1, 1.5, 0.5, 1.35, 0.7, 1.2, 0.9, 1],
-            scaleY: [1, 0.5, 1.5, 0.65, 1.3, 0.8, 1.1, 1],
-            rotate: [0, -5, 3, -3, 2, -1, 0],
-            transition: {
-              duration: 1.5,
-              repeat: Infinity,
-              repeatDelay: 2
-            }
-          }
-        }
-      case 'jello':
-        return {
-          animate: {
-            skewX: [0, -12.5, 6.25, -3.125, 1.5625, -0.78125, 0.390625, -0.1953125, 0],
-            skewY: [0, -12.5, 6.25, -3.125, 1.5625, -0.78125, 0.390625, -0.1953125, 0],
-            transition: {
-              duration: 1.5,
-              repeat: Infinity,
-              repeatDelay: 2,
               ease: 'easeInOut'
             }
           }
         }
-      case 'heartBeat':
+      case 'breathe':
         return {
           animate: {
-            scale: [1, 1.4, 1, 1.4, 1],
+            scale: [1, 1.01, 1],
+            y: [0, -2, 0],
             transition: {
-              duration: 1.3,
+              duration: 4,
               repeat: Infinity,
-              repeatDelay: 0.5,
-              times: [0, 0.14, 0.28, 0.42, 0.7]
-            }
-          }
-        }
-      case 'flip':
-        return {
-          animate: {
-            rotateY: [0, 180, 360],
-            transition: {
-              duration: 2,
-              repeat: Infinity,
-              repeatDelay: 1,
               ease: 'easeInOut'
             }
           }
