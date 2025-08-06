@@ -954,14 +954,18 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {[
-                        { value: 'none', label: 'Aucune', icon: '🚫' },
-                        { value: 'pulse', label: 'Pulse', icon: '💓' },
-                        { value: 'bounce', label: 'Rebond', icon: '⛹️' },
-                        { value: 'shake', label: 'Shake', icon: '🤝' },
-                        { value: 'wobble', label: 'Wobble', icon: '🌀' },
-                        { value: 'swing', label: 'Swing', icon: '🎪' },
-                        { value: 'tada', label: 'Tada', icon: '🎉' },
-                        { value: 'flash', label: 'Flash', icon: '⚡' }
+                        { value: 'none', label: 'Aucune', icon: '⭕' },
+                        { value: 'pulse', label: 'Pulse', icon: '💗' },
+                        { value: 'bounce', label: 'Rebond', icon: '🏀' },
+                        { value: 'shake', label: 'Shake', icon: '🫨' },
+                        { value: 'wobble', label: 'Wobble', icon: '🌊' },
+                        { value: 'swing', label: 'Swing', icon: '🎠' },
+                        { value: 'tada', label: 'Tada', icon: '🎊' },
+                        { value: 'flash', label: 'Flash', icon: '⚡' },
+                        { value: 'rubberBand', label: 'Elastic', icon: '🎯' },
+                        { value: 'jello', label: 'Jello', icon: '🍮' },
+                        { value: 'heartBeat', label: 'Coeur', icon: '❤️' },
+                        { value: 'flip', label: 'Flip', icon: '🔄' }
                       ].map((anim) => (
                         <motion.button
                           key={anim.value}
