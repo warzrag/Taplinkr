@@ -1672,26 +1672,26 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 4 ? (
-                      step === 5 
-                        ? [
+                      step === 4 
+                        ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                            id: index.toString(),
+                            parentLinkId: '',
+                            title: ml.title,
+                            url: ml.url,
+                            description: '',
+                            icon: '',
+                            iconImage: '',
+                            animation: '',
+                            order: index,
+                            clicks: 0,
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                          }))
+                        : [
                             { title: 'Mon Instagram', url: 'https://instagram.com' },
                             { title: 'Mon Portfolio', url: 'https://example.com' },
                             { title: 'Contactez-moi', url: 'mailto:contact@example.com' }
                           ].map((ml, index) => ({
-                      id: index.toString(),
-                      parentLinkId: '',
-                      title: ml.title,
-                      url: ml.url,
-                      description: '',
-                      icon: '',
-                      iconImage: '',
-                      animation: '',
-                      order: index,
-                      clicks: 0,
-                      createdAt: new Date(),
-                      updatedAt: new Date()
-                    }))
-                        : multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
                             id: index.toString(),
                             parentLinkId: '',
                             title: ml.title,
@@ -1755,12 +1755,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                 textColor: step >= 5 ? textColor : '#1f2937',
                 multiLinks: step >= 4 ? (
-                  step === 5 
-                    ? [
-                        { title: 'Mon Instagram', url: 'https://instagram.com' },
-                        { title: 'Mon Portfolio', url: 'https://example.com' },
-                        { title: 'Contactez-moi', url: 'mailto:contact@example.com' }
-                      ].map((ml, index) => ({
+                  step === 4 
+                    ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
                         id: index.toString(),
                         parentLinkId: '',
                         title: ml.title,
@@ -1774,7 +1770,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         createdAt: new Date(),
                         updatedAt: new Date()
                       }))
-                    : multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                    : [
+                        { title: 'Mon Instagram', url: 'https://instagram.com' },
+                        { title: 'Mon Portfolio', url: 'https://example.com' },
+                        { title: 'Contactez-moi', url: 'mailto:contact@example.com' }
+                      ].map((ml, index) => ({
                         id: index.toString(),
                         parentLinkId: '',
                         title: ml.title,
