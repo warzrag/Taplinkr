@@ -955,18 +955,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {[
                         { value: 'none', label: 'Aucune', icon: '⚪' },
-                        { value: 'glow', label: 'Glow', icon: '✨' },
-                        { value: 'lift', label: 'Lift', icon: '🚀' },
-                        { value: 'morph', label: 'Morph', icon: '🔮' },
-                        { value: 'slide', label: 'Slide', icon: '➡️' },
-                        { value: 'fade', label: 'Fade', icon: '💫' },
-                        { value: 'scale', label: 'Scale', icon: '🔍' },
-                        { value: 'rotate', label: 'Rotate', icon: '🔄' },
-                        { value: 'highlight', label: 'Highlight', icon: '💜' },
-                        { value: 'bounce', label: 'Bounce', icon: '⚡' },
                         { value: 'pulse', label: 'Pulse', icon: '💗' },
-                        { value: 'wave', label: 'Wave', icon: '🌊' },
-                        { value: 'shake', label: 'Shake', icon: '🫨' }
+                        { value: 'rotate', label: 'Rotate', icon: '🔄' },
+                        { value: 'lift', label: 'Lift', icon: '🚀' }
                       ].map((anim) => (
                         <motion.button
                           key={anim.value}

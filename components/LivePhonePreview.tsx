@@ -80,15 +80,23 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   // Fonction pour obtenir les animations Framer Motion
   const getAnimationVariants = (animationType?: string) => {
     switch (animationType) {
-      case 'glow':
+      case 'pulse':
         return {
           animate: {
-            boxShadow: [
-              '0 0 0 0 rgba(99, 102, 241, 0)',
-              '0 0 60px 20px rgba(99, 102, 241, 0.6)',
-              '0 0 0 0 rgba(99, 102, 241, 0)'
-            ],
-            scale: [1, 1.05, 1],
+            scale: [1, 1.08, 1],
+            opacity: [1, 0.8, 1],
+            transition: {
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }
+        }
+      case 'rotate':
+        return {
+          animate: {
+            rotate: [0, 5, -5, 0],
+            scale: [1, 1.02, 1.02, 1],
             transition: {
               duration: 2,
               repeat: Infinity,
@@ -110,127 +118,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               duration: 2,
               repeat: Infinity,
               ease: 'easeInOut'
-            }
-          }
-        }
-      case 'morph':
-        return {
-          animate: {
-            borderRadius: ['0.5rem', '2.5rem', '0.5rem'],
-            scale: [1, 1.05, 1],
-            transition: {
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'slide':
-        return {
-          animate: {
-            x: [-20, 20, -20],
-            transition: {
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'fade':
-        return {
-          animate: {
-            opacity: [1, 0.3, 1],
-            scale: [1, 0.95, 1],
-            transition: {
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'scale':
-        return {
-          animate: {
-            scale: [1, 1.1, 1],
-            transition: {
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'rotate':
-        return {
-          animate: {
-            rotate: [0, 5, -5, 0],
-            scale: [1, 1.02, 1.02, 1],
-            transition: {
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'highlight':
-        return {
-          animate: {
-            backgroundColor: [
-              'rgba(255, 255, 255, 0.95)',
-              'rgba(168, 85, 247, 0.95)',
-              'rgba(255, 255, 255, 0.95)'
-            ],
-            scale: [1, 1.03, 1],
-            transition: {
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'bounce':
-        return {
-          animate: {
-            y: [0, -20, 0],
-            transition: {
-              duration: 1,
-              repeat: Infinity,
-              ease: [0.4, 0, 0.6, 1]
-            }
-          }
-        }
-      case 'pulse':
-        return {
-          animate: {
-            scale: [1, 1.08, 1],
-            opacity: [1, 0.8, 1],
-            transition: {
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'wave':
-        return {
-          animate: {
-            y: [0, -10, 0],
-            rotate: [0, 3, -3, 0],
-            transition: {
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'shake':
-        return {
-          animate: {
-            x: [0, -10, 10, -10, 10, 0],
-            rotate: [0, -1, 1, -1, 1, 0],
-            transition: {
-              duration: 0.5,
-              repeat: Infinity,
-              repeatDelay: 2
             }
           }
         }
