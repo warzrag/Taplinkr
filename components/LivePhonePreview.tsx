@@ -388,7 +388,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
               {/* Links - Au centre/bas */}
               <div className="flex-1 flex flex-col justify-center space-y-3">
-                <AnimatePresence mode="wait">
                   {currentStep && currentStep < 4 ? (
                     /* Avant l'étape 4, on affiche un message d'attente */
                     <motion.div
@@ -448,10 +447,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         return (
                           <motion.div
                             key={link.id}
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -20, opacity: 0 }}
-                            transition={{ delay: index * 0.1 }}
                           >
                             <motion.div
                               animate={animationProps.animate}
@@ -499,10 +494,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         return (
                           <motion.div
                             key={link.id}
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -20, opacity: 0 }}
-                            transition={{ delay: index * 0.1 }}
                             className={`p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
                               getBorderRadiusClass(link.borderRadius)} ${
                               link.isActive !== false ? '' : 'opacity-60'
@@ -560,7 +551,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       </p>
                     </motion.div>
                   )}
-                </AnimatePresence>
               </div>
 
               {/* Social Media Icons */}
