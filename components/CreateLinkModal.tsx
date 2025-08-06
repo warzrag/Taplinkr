@@ -910,8 +910,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </motion.button>
                   </motion.div>
                 </motion.div>
-              ) : step === 4 && linkType === 'multi' ? (
-                /* Étape 4: Personnalisation des liens */
+              ) : step === 5 && linkType === 'multi' ? (
+                /* Étape 5: Personnalisation des liens (dernière étape) */
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1136,7 +1136,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   >
                     <button
                       type="button"
-                      onClick={() => setStep(3)}
+                      onClick={() => setStep(4)}
                       className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
                     >
                       Retour
@@ -1153,8 +1153,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </motion.button>
                   </motion.div>
                 </motion.div>
-              ) : (
-                /* Étape 5: Détails du lien */
+              ) : step === 4 && linkType === 'multi' ? (
+                /* Étape 4: Détails du lien */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1592,7 +1592,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   <div className="flex gap-2 sm:gap-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(linkType === 'multi' ? 4 : 1)}
+                      onClick={() => setStep(linkType === 'multi' ? 3 : 1)}
                       className="flex-1 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 text-base"
                     >
                       Retour
@@ -1620,6 +1620,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </button>
                   </div>
                 </motion.div>
+              ) : (
+                /* Dernière étape alternative si pas multi */
+                null
               )}
             </div>
           </form>
@@ -1653,23 +1656,23 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   links={[{
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
-                    title: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
-                    description: step >= 5 ? (watchedDescription || '') : '',
+                    title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+                    description: step >= 4 ? (watchedDescription || '') : '',
                     profileImage: step >= 2 ? profileImage : '',
-                    coverImage: step >= 5 ? coverImage : '',
+                    coverImage: step >= 4 ? coverImage : '',
                     isDirect: false,
                     isActive: true,
                     instagramUrl: step >= 3 ? watch('instagramUrl') : '',
                     tiktokUrl: step >= 3 ? watch('tiktokUrl') : '',
                     twitterUrl: step >= 3 ? watch('twitterUrl') : '',
                     youtubeUrl: step >= 3 ? watch('youtubeUrl') : '',
-                    animation: step >= 4 ? linkAnimation : 'none',
-                    borderRadius: step >= 4 ? borderRadius : 'rounded-xl',
-                    fontFamily: step >= 4 ? fontFamily : 'system',
-                    backgroundColor: step >= 4 ? backgroundColor : '#ffffff',
-                    textColor: step >= 4 ? textColor : '#1f2937',
+                    animation: step >= 5 ? linkAnimation : 'none',
+                    borderRadius: step >= 5 ? borderRadius : 'rounded-xl',
+                    fontFamily: step >= 5 ? fontFamily : 'system',
+                    backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
+                    textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 4 ? (
-                      step === 4 
+                      step === 5 
                         ? [
                             { title: 'Mon Instagram', url: 'https://instagram.com' },
                             { title: 'Mon Portfolio', url: 'https://example.com' },
@@ -1736,23 +1739,23 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               links={[{
                 id: Date.now().toString(),
                 slug: watch('slug') || 'preview',
-                title: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
-                description: step >= 5 ? (watchedDescription || '') : '',
+                title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+                description: step >= 4 ? (watchedDescription || '') : '',
                 profileImage: step >= 2 ? profileImage : '',
-                coverImage: step >= 5 ? coverImage : '',
+                coverImage: step >= 4 ? coverImage : '',
                 isDirect: false,
                 isActive: true,
                 instagramUrl: step >= 3 ? watch('instagramUrl') : '',
                 tiktokUrl: step >= 3 ? watch('tiktokUrl') : '',
                 twitterUrl: step >= 3 ? watch('twitterUrl') : '',
                 youtubeUrl: step >= 3 ? watch('youtubeUrl') : '',
-                animation: step >= 4 ? linkAnimation : 'none',
-                borderRadius: step >= 4 ? borderRadius : 'rounded-xl',
-                fontFamily: step >= 4 ? fontFamily : 'system',
-                backgroundColor: step >= 4 ? backgroundColor : '#ffffff',
-                textColor: step >= 4 ? textColor : '#1f2937',
+                animation: step >= 5 ? linkAnimation : 'none',
+                borderRadius: step >= 5 ? borderRadius : 'rounded-xl',
+                fontFamily: step >= 5 ? fontFamily : 'system',
+                backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
+                textColor: step >= 5 ? textColor : '#1f2937',
                 multiLinks: step >= 4 ? (
-                  step === 4 
+                  step === 5 
                     ? [
                         { title: 'Mon Instagram', url: 'https://instagram.com' },
                         { title: 'Mon Portfolio', url: 'https://example.com' },
