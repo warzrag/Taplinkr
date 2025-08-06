@@ -186,7 +186,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
         icon: multiLink.icon || link.icon,
         iconImage: multiLink.iconImage,
         description: null,
-        animation: multiLink.animation,
+        animation: link.animation || multiLink.animation,
         isActive: link.isActive,
         coverImage: link.coverImage,
         coverImagePosition: link.coverImagePosition,
@@ -442,6 +442,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     displayLinks.map((link, index) => {
                       const hasAnimation = link.animation && link.animation !== 'none'
                       const animationProps = hasAnimation ? getAnimationVariants(link.animation) : {}
+                      console.log('Link animation:', link.animation, 'hasAnimation:', hasAnimation, 'animationProps:', animationProps)
                       
                       if (hasAnimation) {
                         return (
@@ -450,7 +451,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           >
                             <motion.div
                               animate={animationProps.animate}
-                              transition={animationProps.animate?.transition}
                               className={`p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
                                 getBorderRadiusClass(link.borderRadius)} ${
                                 link.isActive !== false ? '' : 'opacity-60'
