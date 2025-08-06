@@ -1146,14 +1146,27 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       Retour
                     </button>
                     <motion.button
-                      type="button"
-                      onClick={() => setStep(5)}
+                      type="submit"
+                      disabled={loading}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center gap-2"
+                      className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      Continuer
-                      <ArrowRight className="w-4 h-4" />
+                      {loading ? (
+                        <>
+                          <motion.div
+                            className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          />
+                          Création...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5" />
+                          {editingLink ? 'Enregistrer' : 'Créer'}
+                        </>
+                      )}
                     </motion.button>
                   </motion.div>
                 </motion.div>
@@ -1602,25 +1615,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       Retour
                     </button>
                     <button
-                      type="submit"
-                      disabled={loading}
-                      className="flex-1 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg sm:rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg text-base"
+                      type="button"
+                      onClick={() => setStep(5)}
+                      className="flex-1 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg sm:rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg text-base"
                     >
-                      {loading ? (
-                        <>
-                          <motion.div
-                            className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          />
-                          Création...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-5 h-5" />
-                          {editingLink ? 'Enregistrer' : 'Créer'}
-                        </>
-                      )}
+                      <ArrowRight className="w-5 h-5" />
+                      Suivant
                     </button>
                   </div>
                 </motion.div>
