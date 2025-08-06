@@ -83,12 +83,12 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'pulse':
         return {
           animate: {
-            scale: [1, 1.08, 1],
-            opacity: [1, 0.8, 1],
+            scale: [1, 1.03, 1.06, 1.03, 1],
             transition: {
-              duration: 1.5,
+              duration: 3,
               repeat: Infinity,
-              ease: 'easeInOut'
+              ease: [0.4, 0, 0.6, 1],
+              times: [0, 0.25, 0.5, 0.75, 1]
             }
           }
         }

@@ -73,7 +73,8 @@
       "Bash(npm uninstall:*)",
       "Bash(vercel:*)",
       "Bash(npx vercel:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "WebFetch(domain:gaml.io)"
     ],
     "deny": []
   }
