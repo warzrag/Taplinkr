@@ -1668,7 +1668,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     fontFamily: step >= 4 ? fontFamily : 'system',
                     backgroundColor: step >= 4 ? backgroundColor : '#ffffff',
                     textColor: step >= 4 ? textColor : '#1f2937',
-                    multiLinks: step >= 5 ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                    multiLinks: step >= 4 ? (
+                      step === 4 
+                        ? [
+                            { title: 'Mon Instagram', url: 'https://instagram.com' },
+                            { title: 'Mon Portfolio', url: 'https://example.com' },
+                            { title: 'Contactez-moi', url: 'mailto:contact@example.com' }
+                          ].map((ml, index) => ({
                       id: index.toString(),
                       parentLinkId: '',
                       title: ml.title,
@@ -1681,7 +1687,22 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       clicks: 0,
                       createdAt: new Date(),
                       updatedAt: new Date()
-                    })) : [],
+                    }))
+                        : multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                            id: index.toString(),
+                            parentLinkId: '',
+                            title: ml.title,
+                            url: ml.url,
+                            description: '',
+                            icon: '',
+                            iconImage: '',
+                            animation: '',
+                            order: index,
+                            clicks: 0,
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                          }))
+                    ) : [],
                     // Valeurs par défaut
                     userId: '',
                     directUrl: '',
@@ -1730,20 +1751,41 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 fontFamily: step >= 4 ? fontFamily : 'system',
                 backgroundColor: step >= 4 ? backgroundColor : '#ffffff',
                 textColor: step >= 4 ? textColor : '#1f2937',
-                multiLinks: step >= 5 ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
-                  id: index.toString(),
-                  parentLinkId: '',
-                  title: ml.title,
-                  url: ml.url,
-                  description: '',
-                  icon: '',
-                  iconImage: '',
-                  animation: '',
-                  order: index,
-                  clicks: 0,
-                  createdAt: new Date(),
-                  updatedAt: new Date()
-                })) : [],
+                multiLinks: step >= 4 ? (
+                  step === 4 
+                    ? [
+                        { title: 'Mon Instagram', url: 'https://instagram.com' },
+                        { title: 'Mon Portfolio', url: 'https://example.com' },
+                        { title: 'Contactez-moi', url: 'mailto:contact@example.com' }
+                      ].map((ml, index) => ({
+                        id: index.toString(),
+                        parentLinkId: '',
+                        title: ml.title,
+                        url: ml.url,
+                        description: '',
+                        icon: '',
+                        iconImage: '',
+                        animation: '',
+                        order: index,
+                        clicks: 0,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                      }))
+                    : multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                        id: index.toString(),
+                        parentLinkId: '',
+                        title: ml.title,
+                        url: ml.url,
+                        description: '',
+                        icon: '',
+                        iconImage: '',
+                        animation: '',
+                        order: index,
+                        clicks: 0,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                      }))
+                ) : [],
                 // Valeurs par défaut
                 userId: '',
                 directUrl: '',
