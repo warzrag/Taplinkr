@@ -321,18 +321,18 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   </div>
                 )}
                 
-                {/* Titre - s'affiche seulement à partir de l'étape 4 */}
-                {(!currentStep || currentStep >= 4) && (
+                {/* Titre - s'affiche seulement à partir de l'étape 5 */}
+                {(!currentStep || currentStep >= 5) && (
                   <h1 className="text-white text-2xl font-bold mb-1" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                     {links[0]?.title || user?.name || user?.username || 'Laura'}
                   </h1>
                 )}
-                {currentStep === 4 && !links[0]?.title && (
+                {currentStep === 5 && !links[0]?.title && (
                   <p className="text-white/70 text-sm italic">En attente du titre...</p>
                 )}
                 
-                {/* Description - s'affiche seulement à partir de l'étape 4 */}
-                {(!currentStep || currentStep >= 4) && (links[0]?.description || user?.bio) && (
+                {/* Description - s'affiche seulement à partir de l'étape 5 */}
+                {(!currentStep || currentStep >= 5) && (links[0]?.description || user?.bio) && (
                   <p className="text-white/95 text-sm" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
                     {links[0]?.description || user?.bio}
                   </p>
@@ -389,7 +389,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               {/* Links - Au centre/bas */}
               <div className="flex-1 flex flex-col justify-center space-y-3">
                 <AnimatePresence mode="wait">
-                  {currentStep && currentStep < 4 ? (
+                  {currentStep && currentStep < 5 ? (
                     /* Avant l'étape 4, on affiche un message d'attente ou rien */
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -435,6 +435,20 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           </motion.div>
                           <p className="text-white/80 text-sm">
                             Connectez vos réseaux...
+                          </p>
+                        </div>
+                      )}
+                      {currentStep === 4 && (
+                        <div className="text-center">
+                          <motion.div
+                            animate={{ rotate: [0, 360] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            className="text-4xl mb-2"
+                          >
+                            🎨
+                          </motion.div>
+                          <p className="text-white/80 text-sm">
+                            Personnalisez vos liens...
                           </p>
                         </div>
                       )}

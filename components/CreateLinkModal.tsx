@@ -36,7 +36,7 @@ interface MultiLinkData {
 export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
   const { hasPermission, requirePermission } = usePermissions()
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState(editingLink ? 4 : 1) // Si on édite, on passe directement à l'étape finale
+  const [step, setStep] = useState(editingLink ? 5 : 1) // Si on édite, on passe directement à l'étape finale
   const [linkType, setLinkType] = useState<'direct' | 'multi' | null>(
     editingLink?.isDirect ? 'direct' : editingLink ? 'multi' : null
   )
@@ -57,6 +57,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [checkingSlug, setCheckingSlug] = useState(false)
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
   const [slugTimer, setSlugTimer] = useState<NodeJS.Timeout | null>(null)
+  
+  // États pour la personnalisation
+  const [linkAnimation, setLinkAnimation] = useState(editingLink?.animation || 'none')
+  const [borderRadius, setBorderRadius] = useState(editingLink?.borderRadius || 'rounded-xl')
+  const [fontFamily, setFontFamily] = useState(editingLink?.fontFamily || 'system')
+  const [backgroundColor, setBackgroundColor] = useState(editingLink?.backgroundColor || '#ffffff')
+  const [textColor, setTextColor] = useState(editingLink?.textColor || '#1f2937')
   
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>({
     defaultValues: editingLink ? {
@@ -202,14 +209,19 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         directUrl: linkType === 'direct' ? directUrl : null,
         shieldEnabled: linkType === 'direct' ? shieldEnabled : false,
         isUltraLink: linkType === 'direct' ? isUltraLink : false,
-        multiLinks: linkType === 'multi' ? multiLinks.filter(link => link.title && link.url) : [],
+        multiLinks: linkType === 'multi' ? multiLinks.filter(link => link.title || link.url) : [],
         profileImage: profileImage || null,
         coverImage: coverImage || null,
         description: data.description || null,
         instagramUrl: data.instagramUrl || null,
         tiktokUrl: data.tiktokUrl || null,
         twitterUrl: data.twitterUrl || null,
-        youtubeUrl: data.youtubeUrl || null
+        youtubeUrl: data.youtubeUrl || null,
+        animation: linkAnimation || 'none',
+        borderRadius: borderRadius || 'rounded-xl',
+        fontFamily: fontFamily || 'system',
+        backgroundColor: backgroundColor || '#ffffff',
+        textColor: textColor || '#1f2937'
       }
       
       console.log('Sending request:', { url, method, body: requestBody })
@@ -281,7 +293,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   {editingLink ? 'Modifier le lien' : 'Créer un nouveau lien'}
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-500">
-                  Étape {step} sur {linkType === 'multi' ? '4' : '2'}
+                  Étape {step} sur {linkType === 'multi' ? '5' : '2'}
                 </p>
               </div>
             </div>
@@ -898,8 +910,251 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </motion.button>
                   </motion.div>
                 </motion.div>
+              ) : step === 4 && linkType === 'multi' ? (
+                /* Étape 4: Personnalisation des liens */
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center mb-8"
+                  >
+                    <motion.h3 
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-2xl font-bold text-gray-900 mb-2"
+                    >
+                      Personnalisez vos liens
+                    </motion.h3>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                      className="text-gray-600"
+                    >
+                      Donnez du style à vos liens pour les rendre uniques
+                    </motion.p>
+                  </motion.div>
+
+                  {/* Animation des liens */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Animation des liens
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {[
+                        { value: 'none', label: 'Aucune', icon: '🚫' },
+                        { value: 'pulse', label: 'Pulse', icon: '💓' },
+                        { value: 'bounce', label: 'Rebond', icon: '⛹️' },
+                        { value: 'shake', label: 'Shake', icon: '🤝' },
+                        { value: 'wobble', label: 'Wobble', icon: '🌀' },
+                        { value: 'swing', label: 'Swing', icon: '🎪' },
+                        { value: 'tada', label: 'Tada', icon: '🎉' },
+                        { value: 'flash', label: 'Flash', icon: '⚡' }
+                      ].map((anim) => (
+                        <motion.button
+                          key={anim.value}
+                          type="button"
+                          onClick={() => setLinkAnimation(anim.value)}
+                          className={`p-3 rounded-xl border-2 transition-all ${
+                            linkAnimation === anim.value
+                              ? 'border-indigo-500 bg-indigo-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <div className="text-2xl mb-1">{anim.icon}</div>
+                          <div className="text-xs font-medium">{anim.label}</div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Forme des liens */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Forme des liens
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { value: 'rounded', label: 'Léger', preview: 'rounded' },
+                        { value: 'rounded-xl', label: 'Moyen', preview: 'rounded-xl' },
+                        { value: 'rounded-2xl', label: 'Arrondi', preview: 'rounded-2xl' },
+                        { value: 'rounded-3xl', label: 'Très arrondi', preview: 'rounded-3xl' },
+                        { value: 'rounded-full', label: 'Pilule', preview: 'rounded-full' },
+                        { value: 'rounded-none', label: 'Carré', preview: 'rounded-none' }
+                      ].map((shape) => (
+                        <motion.button
+                          key={shape.value}
+                          type="button"
+                          onClick={() => setBorderRadius(shape.value)}
+                          className={`p-4 border-2 transition-all ${
+                            borderRadius === shape.value
+                              ? 'border-indigo-500 bg-indigo-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <div className={`w-full h-8 bg-gradient-to-r from-indigo-400 to-purple-400 ${shape.preview}`} />
+                          <div className="text-xs font-medium mt-2">{shape.label}</div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Typographie */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Police de caractères
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { value: 'system', label: 'Système', className: 'font-sans' },
+                        { value: 'inter', label: 'Inter', className: 'font-inter' },
+                        { value: 'roboto', label: 'Roboto', className: 'font-roboto' },
+                        { value: 'poppins', label: 'Poppins', className: 'font-poppins' },
+                        { value: 'montserrat', label: 'Montserrat', className: 'font-montserrat' },
+                        { value: 'playfair', label: 'Playfair', className: 'font-playfair' },
+                        { value: 'mono', label: 'Mono', className: 'font-mono' }
+                      ].map((font) => (
+                        <motion.button
+                          key={font.value}
+                          type="button"
+                          onClick={() => setFontFamily(font.value)}
+                          className={`p-4 border-2 transition-all ${
+                            fontFamily === font.value
+                              ? 'border-indigo-500 bg-indigo-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          } ${font.className}`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <div className="text-lg font-bold">Aa</div>
+                          <div className="text-xs mt-1">{font.label}</div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Couleurs */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                  >
+                    {/* Couleur de fond */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Couleur de fond des liens
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={backgroundColor}
+                          onChange={(e) => setBackgroundColor(e.target.value)}
+                          className="w-16 h-16 rounded-lg border-2 border-gray-300 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={backgroundColor}
+                          onChange={(e) => setBackgroundColor(e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          placeholder="#ffffff"
+                        />
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        {['#ffffff', '#f3f4f6', '#e5e7eb', '#fef3c7', '#dbeafe', '#e9d5ff', '#fecaca'].map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setBackgroundColor(color)}
+                            className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:scale-110 transition-transform"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Couleur du texte */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Couleur du texte
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={textColor}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          className="w-16 h-16 rounded-lg border-2 border-gray-300 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={textColor}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          placeholder="#1f2937"
+                        />
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        {['#1f2937', '#374151', '#6b7280', '#0f172a', '#7c3aed', '#2563eb', '#dc2626'].map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setTextColor(color)}
+                            className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:scale-110 transition-transform"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Boutons d'action */}
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="flex gap-3 mt-8"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setStep(3)}
+                      className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
+                    >
+                      Retour
+                    </button>
+                    <motion.button
+                      type="button"
+                      onClick={() => setStep(5)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center gap-2"
+                    >
+                      Continuer
+                      <ArrowRight className="w-4 h-4" />
+                    </motion.button>
+                  </motion.div>
+                </motion.div>
               ) : (
-                /* Étape 4: Détails du lien */
+                /* Étape 5: Détails du lien */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1337,7 +1592,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   <div className="flex gap-2 sm:gap-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(linkType === 'multi' ? 3 : 1)}
+                      onClick={() => setStep(linkType === 'multi' ? 4 : 1)}
                       className="flex-1 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 text-base"
                     >
                       Retour
@@ -1398,17 +1653,22 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   links={[{
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
-                    title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
-                    description: step >= 4 ? (watchedDescription || '') : '',
+                    title: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+                    description: step >= 5 ? (watchedDescription || '') : '',
                     profileImage: step >= 2 ? profileImage : '',
-                    coverImage: step >= 4 ? coverImage : '',
+                    coverImage: step >= 5 ? coverImage : '',
                     isDirect: false,
                     isActive: true,
                     instagramUrl: step >= 3 ? watch('instagramUrl') : '',
                     tiktokUrl: step >= 3 ? watch('tiktokUrl') : '',
                     twitterUrl: step >= 3 ? watch('twitterUrl') : '',
                     youtubeUrl: step >= 3 ? watch('youtubeUrl') : '',
-                    multiLinks: step >= 4 ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                    animation: step >= 4 ? linkAnimation : 'none',
+                    borderRadius: step >= 4 ? borderRadius : 'rounded-xl',
+                    fontFamily: step >= 4 ? fontFamily : 'system',
+                    backgroundColor: step >= 4 ? backgroundColor : '#ffffff',
+                    textColor: step >= 4 ? textColor : '#1f2937',
+                    multiLinks: step >= 5 ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
                       id: index.toString(),
                       parentLinkId: '',
                       title: ml.title,
@@ -1455,17 +1715,22 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               links={[{
                 id: Date.now().toString(),
                 slug: watch('slug') || 'preview',
-                title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
-                description: step >= 4 ? (watchedDescription || '') : '',
+                title: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+                description: step >= 5 ? (watchedDescription || '') : '',
                 profileImage: step >= 2 ? profileImage : '',
-                coverImage: step >= 4 ? coverImage : '',
+                coverImage: step >= 5 ? coverImage : '',
                 isDirect: false,
                 isActive: true,
                 instagramUrl: step >= 3 ? watch('instagramUrl') : '',
                 tiktokUrl: step >= 3 ? watch('tiktokUrl') : '',
                 twitterUrl: step >= 3 ? watch('twitterUrl') : '',
                 youtubeUrl: step >= 3 ? watch('youtubeUrl') : '',
-                multiLinks: step >= 4 ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                animation: step >= 4 ? linkAnimation : 'none',
+                borderRadius: step >= 4 ? borderRadius : 'rounded-xl',
+                fontFamily: step >= 4 ? fontFamily : 'system',
+                backgroundColor: step >= 4 ? backgroundColor : '#ffffff',
+                textColor: step >= 4 ? textColor : '#1f2937',
+                multiLinks: step >= 5 ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => {{
                   id: index.toString(),
                   parentLinkId: '',
                   title: ml.title,
