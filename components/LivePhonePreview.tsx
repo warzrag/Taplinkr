@@ -389,8 +389,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               {/* Links - Au centre/bas */}
               <div className="flex-1 flex flex-col justify-center space-y-3">
                 <AnimatePresence mode="wait">
-                  {currentStep && currentStep < 5 ? (
-                    /* Avant l'étape 4, on affiche un message d'attente ou rien */
+                  {currentStep && currentStep < 4 ? (
+                    /* Avant l'étape 4, on affiche un message d'attente */
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -435,20 +435,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           </motion.div>
                           <p className="text-white/80 text-sm">
                             Connectez vos réseaux...
-                          </p>
-                        </div>
-                      )}
-                      {currentStep === 4 && (
-                        <div className="text-center">
-                          <motion.div
-                            animate={{ rotate: [0, 360] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                            className="text-4xl mb-2"
-                          >
-                            🎨
-                          </motion.div>
-                          <p className="text-white/80 text-sm">
-                            Personnalisez vos liens...
                           </p>
                         </div>
                       )}
