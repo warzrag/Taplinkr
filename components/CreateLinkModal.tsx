@@ -94,6 +94,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     console.log('Titre surveillé:', watchedTitle)
     console.log('Étape actuelle:', step)
     console.log('MultiLinks:', multiLinks)
+    console.log('Nombre de multiLinks:', multiLinks.length)
+    console.log('MultiLinks filtrés:', multiLinks.filter(ml => ml.title || ml.url))
   }, [watchedTitle, step, multiLinks])
 
   // Vérifier la disponibilité du slug
@@ -154,7 +156,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }
 
   const addMultiLink = () => {
-    setMultiLinks([...multiLinks, { title: '', url: '' }])
+    const newLinks = [...multiLinks, { title: '', url: '' }]
+    console.log('Ajout d\'un nouveau lien. Total:', newLinks.length)
+    setMultiLinks(newLinks)
   }
 
   const removeMultiLink = (index: number) => {
@@ -1673,11 +1677,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 4 ? (
                       step === 4 
-                        ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                        ? multiLinks.map((ml, index) => ({
                             id: index.toString(),
                             parentLinkId: '',
-                            title: ml.title,
-                            url: ml.url,
+                            title: ml.title || `Lien ${index + 1}`,
+                            url: ml.url || '#',
                             description: '',
                             icon: '',
                             iconImage: '',
@@ -1756,11 +1760,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 textColor: step >= 5 ? textColor : '#1f2937',
                 multiLinks: step >= 4 ? (
                   step === 4 
-                    ? multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+                    ? multiLinks.map((ml, index) => ({
                         id: index.toString(),
                         parentLinkId: '',
-                        title: ml.title,
-                        url: ml.url,
+                        title: ml.title || `Lien ${index + 1}`,
+                        url: ml.url || '#',
                         description: '',
                         icon: '',
                         iconImage: '',
