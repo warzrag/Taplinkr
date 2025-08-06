@@ -956,17 +956,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       {[
                         { value: 'none', label: 'Aucune', icon: '⚪' },
                         { value: 'glow', label: 'Glow', icon: '✨' },
-                        { value: 'lift', label: 'Lift', icon: '🔺' },
+                        { value: 'lift', label: 'Lift', icon: '🚀' },
                         { value: 'morph', label: 'Morph', icon: '🔮' },
                         { value: 'slide', label: 'Slide', icon: '➡️' },
                         { value: 'fade', label: 'Fade', icon: '💫' },
                         { value: 'scale', label: 'Scale', icon: '🔍' },
                         { value: 'rotate', label: 'Rotate', icon: '🔄' },
-                        { value: 'highlight', label: 'Highlight', icon: '💡' },
-                        { value: 'shimmer', label: 'Shimmer', icon: '⚡' },
+                        { value: 'highlight', label: 'Highlight', icon: '💜' },
+                        { value: 'bounce', label: 'Bounce', icon: '⚡' },
                         { value: 'pulse', label: 'Pulse', icon: '💗' },
                         { value: 'wave', label: 'Wave', icon: '🌊' },
-                        { value: 'breathe', label: 'Breathe', icon: '💨' }
+                        { value: 'shake', label: 'Shake', icon: '🫨' }
                       ].map((anim) => (
                         <motion.button
                           key={anim.value}

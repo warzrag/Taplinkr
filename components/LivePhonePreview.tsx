@@ -84,10 +84,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
         return {
           animate: {
             boxShadow: [
-              '0 0 0 0 rgba(139, 92, 246, 0)',
-              '0 0 30px 10px rgba(139, 92, 246, 0.3)',
-              '0 0 0 0 rgba(139, 92, 246, 0)'
+              '0 0 0 0 rgba(99, 102, 241, 0)',
+              '0 0 60px 20px rgba(99, 102, 241, 0.6)',
+              '0 0 0 0 rgba(99, 102, 241, 0)'
             ],
+            scale: [1, 1.05, 1],
             transition: {
               duration: 2,
               repeat: Infinity,
@@ -98,14 +99,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'lift':
         return {
           animate: {
-            y: [0, -8, 0],
+            y: [0, -15, 0],
             boxShadow: [
               '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
               '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
             ],
+            scale: [1, 1.02, 1],
             transition: {
-              duration: 3,
+              duration: 2,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -114,9 +116,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'morph':
         return {
           animate: {
-            borderRadius: ['1rem', '2rem', '1rem'],
+            borderRadius: ['0.5rem', '2.5rem', '0.5rem'],
+            scale: [1, 1.05, 1],
             transition: {
-              duration: 3,
+              duration: 2,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -125,9 +128,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'slide':
         return {
           animate: {
-            x: [-5, 5, -5],
+            x: [-20, 20, -20],
             transition: {
-              duration: 3,
+              duration: 2,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -136,9 +139,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'fade':
         return {
           animate: {
-            opacity: [1, 0.7, 1],
+            opacity: [1, 0.3, 1],
+            scale: [1, 0.95, 1],
             transition: {
-              duration: 2,
+              duration: 1.5,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -147,9 +151,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'scale':
         return {
           animate: {
-            scale: [1, 1.03, 1],
+            scale: [1, 1.1, 1],
             transition: {
-              duration: 2,
+              duration: 1.5,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -158,9 +162,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'rotate':
         return {
           animate: {
-            rotate: [0, 2, -2, 0],
+            rotate: [0, 5, -5, 0],
+            scale: [1, 1.02, 1.02, 1],
             transition: {
-              duration: 4,
+              duration: 2,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -171,43 +176,35 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           animate: {
             backgroundColor: [
               'rgba(255, 255, 255, 0.95)',
-              'rgba(239, 246, 255, 0.95)',
+              'rgba(168, 85, 247, 0.95)',
               'rgba(255, 255, 255, 0.95)'
             ],
-            borderColor: [
-              'rgba(229, 231, 235, 1)',
-              'rgba(147, 197, 253, 1)',
-              'rgba(229, 231, 235, 1)'
-            ],
+            scale: [1, 1.03, 1],
             transition: {
-              duration: 2.5,
+              duration: 2,
               repeat: Infinity,
               ease: 'easeInOut'
             }
           }
         }
-      case 'shimmer':
+      case 'bounce':
         return {
           animate: {
-            backgroundImage: [
-              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 60%, transparent 100%)',
-              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 60%, transparent 100%)'
-            ],
-            backgroundPosition: ['-200% 0', '200% 0'],
+            y: [0, -20, 0],
             transition: {
-              duration: 3,
+              duration: 1,
               repeat: Infinity,
-              ease: 'linear'
+              ease: [0.4, 0, 0.6, 1]
             }
           }
         }
       case 'pulse':
         return {
           animate: {
-            scale: [1, 1.02, 1],
-            opacity: [1, 0.9, 1],
+            scale: [1, 1.08, 1],
+            opacity: [1, 0.8, 1],
             transition: {
-              duration: 2,
+              duration: 1.5,
               repeat: Infinity,
               ease: 'easeInOut'
             }
@@ -216,24 +213,24 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       case 'wave':
         return {
           animate: {
-            y: [0, -3, 0],
-            rotate: [0, 1, -1, 0],
+            y: [0, -10, 0],
+            rotate: [0, 3, -3, 0],
             transition: {
-              duration: 2.5,
+              duration: 2,
               repeat: Infinity,
               ease: 'easeInOut'
             }
           }
         }
-      case 'breathe':
+      case 'shake':
         return {
           animate: {
-            scale: [1, 1.01, 1],
-            y: [0, -2, 0],
+            x: [0, -10, 10, -10, 10, 0],
+            rotate: [0, -1, 1, -1, 1, 0],
             transition: {
-              duration: 4,
+              duration: 0.5,
               repeat: Infinity,
-              ease: 'easeInOut'
+              repeatDelay: 2
             }
           }
         }
