@@ -85,7 +85,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           animate: {
             scale: [0.9, 1.05, 0.9],
             transition: {
-              duration: 1.5,
+              duration: 1.2,
               repeat: Infinity,
               ease: 'easeInOut'
             }
