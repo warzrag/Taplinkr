@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Instagram, Twitter, MessageCircle, Globe, ExternalLink, Youtube } from 'lucide-react'
+import { Instagram, Twitter, MessageCircle, Globe, Youtube } from 'lucide-react'
 
 interface LivePhonePreviewProps {
   user?: {
@@ -430,9 +430,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                               </p>
                             )}
                           </div>
-
-                          {/* Arrow */}
-                          <ExternalLink className="w-4 h-4 opacity-50 flex-shrink-0 self-center" style={{ color: 'inherit' }} />
                         </div>
                           </motion.div>
                         )
@@ -474,9 +471,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                                   </p>
                                 )}
                               </div>
-
-                              {/* Arrow */}
-                              <ExternalLink className="w-4 h-4 opacity-50 flex-shrink-0 self-center" style={{ color: 'inherit' }} />
                             </div>
                           </motion.div>
                         )
