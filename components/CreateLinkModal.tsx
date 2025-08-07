@@ -9,6 +9,7 @@ import { Link as LinkType } from '@/types'
 import { usePermissions } from '@/hooks/usePermissions'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
+import IconUpload from './upload/IconUpload'
 import LivePhonePreview from './LivePhonePreview'
 
 interface CreateLinkModalProps {
@@ -31,6 +32,7 @@ interface FormData {
 interface MultiLinkData {
   title: string
   url: string
+  icon?: string
 }
 
 export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
@@ -1538,20 +1540,28 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             whileHover={{ scale: 1.02, x: 5 }}
                             className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 space-y-3 border-2 border-transparent hover:border-indigo-300 transition-all"
                           >
-                          <input
-                            type="text"
-                            value={link.title}
-                            onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
-                            className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
-                            placeholder="Titre du lien"
-                          />
-                          <input
-                            type="url"
-                            value={link.url}
-                            onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
-                            className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
-                            placeholder="https://example.com"
-                          />
+                          <div className="flex gap-3">
+                            <IconUpload
+                              value={link.icon}
+                              onChange={(iconUrl) => updateMultiLink(index, 'icon', iconUrl)}
+                            />
+                            <div className="flex-1 space-y-3">
+                              <input
+                                type="text"
+                                value={link.title}
+                                onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
+                                className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
+                                placeholder="Titre du lien"
+                              />
+                              <input
+                                type="url"
+                                value={link.url}
+                                onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
+                                className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
+                                placeholder="https://example.com"
+                              />
+                            </div>
+                          </div>
                           {multiLinks.length > 1 && (
                             <button
                               type="button"
@@ -1763,7 +1773,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         url: ml.url || '#',
                         description: '',
                         icon: '',
-                        iconImage: '',
+                        iconImage: ml.icon || '',
                         animation: '',
                         order: index,
                         clicks: 0,
@@ -1781,7 +1791,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         url: ml.url,
                         description: '',
                         icon: '',
-                        iconImage: '',
+                        iconImage: ml.icon || '',
                         animation: '',
                         order: index,
                         clicks: 0,

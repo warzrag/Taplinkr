@@ -414,7 +414,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                               <img
                                 src={link.iconImage}
                                 alt=""
-                                className="w-12 h-12 object-cover rounded-xl"
+                                className="w-8 h-8 object-cover rounded-lg"
                               />
                             </div>
                           )}
