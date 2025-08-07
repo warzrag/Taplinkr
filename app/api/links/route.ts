@@ -174,6 +174,12 @@ export async function POST(request: NextRequest) {
         color: color || null,
         icon: icon || null,
         coverImage: coverImage || null,
+        profileImage: body.profileImage || null,
+        fontFamily: body.fontFamily || null,
+        borderRadius: body.borderRadius || null,
+        backgroundColor: body.backgroundColor || null,
+        textColor: body.textColor || null,
+        animation: body.animation || null,
         order: (maxOrder?.order || 0) + 1,
         userId: session.user.id,
         isDirect: isDirect || false,
@@ -205,6 +211,8 @@ export async function POST(request: NextRequest) {
               url: subLink.url,
               description: subLink.description || null,
               icon: subLink.icon || null,
+              iconImage: subLink.iconImage || null,
+              animation: subLink.animation || null,
               order: index,
               parentLinkId: link.id
             }

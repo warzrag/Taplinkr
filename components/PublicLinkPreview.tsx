@@ -202,12 +202,11 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
       case 'pulse':
         return {
           animate: {
-            scale: [1, 1.02, 1],
+            scale: [0.9, 1.05, 0.9],
             transition: {
-              duration: 1.5,
+              duration: 1.2,
               repeat: Infinity,
-              ease: 'easeInOut',
-              repeatType: 'reverse'
+              ease: 'easeInOut'
             }
           }
         }
@@ -461,7 +460,7 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
                     >
                       <div
                         onClick={() => handleLinkClick(multiLink.id, multiLink.url)}
-                        className={`w-full p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${getBorderRadiusClass(link.borderRadius)}`}
+                        className={`w-full px-4 py-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${getBorderRadiusClass(link.borderRadius)}`}
                         style={{
                           backgroundColor: link.backgroundColor || '#ffffff',
                           color: link.textColor || '#1f2937'
@@ -474,23 +473,21 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
                               <img
                                 src={multiLink.iconImage}
                                 alt=""
-                                className="w-12 h-12 object-cover rounded-xl"
+                                className="w-8 h-8 object-cover rounded-lg"
                               />
                             </div>
                           )}
                           {/* Content */}
-                          <div className="flex-1">
-                            <h3 className="font-bold text-sm" style={{ color: 'inherit' }}>
+                          <div className="flex-1 min-w-0 text-center px-4">
+                            <h3 className="font-semibold text-sm leading-tight break-words" style={{ color: 'inherit' }}>
                               {multiLink.title}
                             </h3>
                             {multiLink.description && (
-                              <p className="text-xs mt-1 opacity-80" style={{ color: 'inherit' }}>
+                              <p className="text-xs mt-1 opacity-75 leading-relaxed break-words" style={{ color: 'inherit' }}>
                                 {multiLink.description}
                               </p>
                             )}
                           </div>
-                          {/* Arrow */}
-                          <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
                         </div>
                       </div>
                     </motion.div>
