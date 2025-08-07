@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -83,6 +83,7 @@ model Link {
   borderRadius       String?
   backgroundColor    String?
   textColor          String?
+  animation          String?
   isActive           Boolean             @default(true)
   isDirect           Boolean             @default(false)
   directUrl          String?
