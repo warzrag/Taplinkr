@@ -420,19 +420,19 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           )}
 
                           {/* Content */}
-                          <div className="flex-1">
-                            <h3 className="font-bold text-sm" style={{ color: 'inherit' }}>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-sm truncate" style={{ color: 'inherit' }}>
                               {link.title}
                             </h3>
                             {link.description && (
-                              <p className="text-xs mt-1 opacity-80" style={{ color: 'inherit' }}>
+                              <p className="text-xs mt-1 opacity-80 truncate" style={{ color: 'inherit' }}>
                                 {link.description}
                               </p>
                             )}
                           </div>
 
                           {/* Arrow */}
-                          <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
+                          <ExternalLink className="w-4 h-4 opacity-60 flex-shrink-0 ml-2" style={{ color: 'inherit' }} />
                         </div>
                           </motion.div>
                         )
@@ -464,19 +464,19 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                               </div>
 
                               {/* Content */}
-                              <div className="flex-1">
-                                <h3 className="font-bold text-sm" style={{ color: 'inherit' }}>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-bold text-sm truncate" style={{ color: 'inherit' }}>
                                   {link.title}
                                 </h3>
                                 {link.description && (
-                                  <p className="text-xs mt-1 opacity-80" style={{ color: 'inherit' }}>
+                                  <p className="text-xs mt-1 opacity-80 truncate" style={{ color: 'inherit' }}>
                                     {link.description}
                                   </p>
                                 )}
                               </div>
 
                               {/* Arrow */}
-                              <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
+                              <ExternalLink className="w-4 h-4 opacity-60 flex-shrink-0 ml-2" style={{ color: 'inherit' }} />
                             </div>
                           </motion.div>
                         )
