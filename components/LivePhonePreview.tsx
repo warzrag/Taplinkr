@@ -398,7 +398,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           <motion.div
                             key={link.id}
                             animate={animationProps.animate}
-                            className={`p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
+                            className={`px-4 py-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
                               getBorderRadiusClass(link.borderRadius)} ${
                               link.isActive !== false ? '' : 'opacity-60'
                             } ${getFontClass(link.fontFamily)}`}
@@ -420,19 +420,19 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           )}
 
                           {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-sm truncate" style={{ color: 'inherit' }}>
+                          <div className="flex-1 min-w-0 pr-2">
+                            <h3 className="font-semibold text-sm leading-tight break-words" style={{ color: 'inherit' }}>
                               {link.title}
                             </h3>
                             {link.description && (
-                              <p className="text-xs mt-1 opacity-80 truncate" style={{ color: 'inherit' }}>
+                              <p className="text-xs mt-1 opacity-75 leading-relaxed break-words" style={{ color: 'inherit' }}>
                                 {link.description}
                               </p>
                             )}
                           </div>
 
                           {/* Arrow */}
-                          <ExternalLink className="w-4 h-4 opacity-60 flex-shrink-0 ml-2" style={{ color: 'inherit' }} />
+                          <ExternalLink className="w-4 h-4 opacity-50 flex-shrink-0 self-center" style={{ color: 'inherit' }} />
                         </div>
                           </motion.div>
                         )
@@ -440,7 +440,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         return (
                           <motion.div
                             key={link.id}
-                            className={`p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
+                            className={`px-4 py-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
                               getBorderRadiusClass(link.borderRadius)} ${
                               link.isActive !== false ? '' : 'opacity-60'
                             } ${getFontClass(link.fontFamily)}`}
@@ -464,19 +464,19 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                               </div>
 
                               {/* Content */}
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-sm truncate" style={{ color: 'inherit' }}>
+                              <div className="flex-1 min-w-0 pr-2">
+                                <h3 className="font-semibold text-sm leading-tight break-words" style={{ color: 'inherit' }}>
                                   {link.title}
                                 </h3>
                                 {link.description && (
-                                  <p className="text-xs mt-1 opacity-80 truncate" style={{ color: 'inherit' }}>
+                                  <p className="text-xs mt-1 opacity-75 leading-relaxed break-words" style={{ color: 'inherit' }}>
                                     {link.description}
                                   </p>
                                 )}
                               </div>
 
                               {/* Arrow */}
-                              <ExternalLink className="w-4 h-4 opacity-60 flex-shrink-0 ml-2" style={{ color: 'inherit' }} />
+                              <ExternalLink className="w-4 h-4 opacity-50 flex-shrink-0 self-center" style={{ color: 'inherit' }} />
                             </div>
                           </motion.div>
                         )
