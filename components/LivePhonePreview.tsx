@@ -420,7 +420,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           )}
 
                           {/* Content */}
-                          <div className="flex-1 min-w-0 pr-2">
+                          <div className="flex-1 min-w-0 text-center px-4">
                             <h3 className="font-semibold text-sm leading-tight break-words" style={{ color: 'inherit' }}>
                               {link.title}
                             </h3>
@@ -464,7 +464,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                               </div>
 
                               {/* Content */}
-                              <div className="flex-1 min-w-0 pr-2">
+                              <div className="flex-1 min-w-0 text-center px-4">
                                 <h3 className="font-semibold text-sm leading-tight break-words" style={{ color: 'inherit' }}>
                                   {link.title}
                                 </h3>
