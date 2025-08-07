@@ -10,12 +10,29 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    // Mode développement : utiliser un utilisateur test si pas de session
+    let userId = session?.user?.id
+    
+    if (!userId) {
+      // En développement, utiliser l'utilisateur test
+      if (process.env.NODE_ENV === 'development') {
+        const testUser = await prisma.user.findFirst({
+          where: { email: 'test@example.com' }
+        })
+        if (testUser) {
+          userId = testUser.id
+        } else {
+          // Si pas d'utilisateur test, retourner un tableau vide
+          return NextResponse.json([])
+        }
+      } else {
+        // En production, retourner un tableau vide si pas authentifié
+        return NextResponse.json([])
+      }
     }
 
     const links = await prisma.link.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { order: 'asc' },
       include: {
         multiLinks: {
