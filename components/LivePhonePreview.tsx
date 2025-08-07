@@ -392,23 +392,22 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     displayLinks.map((link, index) => {
                       const hasAnimation = link.animation && link.animation !== 'none'
                       const animationProps = hasAnimation ? getAnimationVariants(link.animation) : {}
+                      console.log('Link animation:', link.animation, 'hasAnimation:', hasAnimation, 'animationProps:', animationProps)
                       
                       if (hasAnimation) {
                         return (
                           <motion.div
                             key={link.id}
+                            animate={animationProps.animate}
+                            className={`p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
+                              getBorderRadiusClass(link.borderRadius)} ${
+                              link.isActive !== false ? '' : 'opacity-60'
+                            } ${getFontClass(link.fontFamily)}`}
+                            style={{
+                              backgroundColor: link.backgroundColor || (link.isActive !== false ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.7)'),
+                              color: link.textColor || '#1f2937'
+                            }}
                           >
-                            <motion.div
-                              animate={animationProps.animate}
-                              className={`p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
-                                getBorderRadiusClass(link.borderRadius)} ${
-                                link.isActive !== false ? '' : 'opacity-60'
-                              } ${getFontClass(link.fontFamily)}`}
-                              style={{
-                                backgroundColor: link.backgroundColor || (link.isActive !== false ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.7)'),
-                                color: link.textColor || '#1f2937'
-                              }}
-                            >
                         <div className="flex items-center">
                           {/* Icon */}
                           {link.iconImage && (
@@ -436,7 +435,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           {/* Arrow */}
                           <ExternalLink className="w-4 h-4 opacity-60" style={{ color: 'inherit' }} />
                         </div>
-                            </motion.div>
                           </motion.div>
                         )
                       } else {
