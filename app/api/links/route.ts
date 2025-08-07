@@ -35,8 +35,23 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    // Mode développement : utiliser un utilisateur test si pas de session
+    let userId = session?.user?.id
+    
+    if (!userId) {
+      // En développement, utiliser l'utilisateur test
+      if (process.env.NODE_ENV === 'development') {
+        const testUser = await prisma.user.findFirst({
+          where: { email: 'test@example.com' }
+        })
+        if (testUser) {
+          userId = testUser.id
+        } else {
+          return NextResponse.json({ error: 'Créez d\'abord un utilisateur test' }, { status: 401 })
+        }
+      } else {
+        return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      }
     }
 
     const body = await request.json()
@@ -68,15 +83,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier les limites du plan en tenant compte de l'équipe
-    const userPermissions = await getTeamAwareUserPermissions(session.user.id)
+    const userPermissions = await getTeamAwareUserPermissions(userId)
 
     // Compter les liens existants
     const linkCount = await prisma.link.count({
-      where: { userId: session.user.id }
+      where: { userId }
     })
 
     // Vérifier la limite de liens par page pour le plan gratuit
-    if (!(await checkTeamLimit(session.user.id, 'maxLinksPerPage', linkCount))) {
+    if (!(await checkTeamLimit(userId, 'maxLinksPerPage', linkCount))) {
       return NextResponse.json({ 
         error: 'Limite de liens atteinte',
         message: getUpgradeMessage('maxLinksPerPage')
@@ -152,7 +167,7 @@ export async function POST(request: NextRequest) {
 
     // Obtenir le prochain ordre
     const maxOrder = await prisma.link.findFirst({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { order: 'desc' },
       select: { order: true }
     })
@@ -181,7 +196,7 @@ export async function POST(request: NextRequest) {
         textColor: body.textColor || null,
         animation: body.animation || null,
         order: (maxOrder?.order || 0) + 1,
-        userId: session.user.id,
+        userId,
         isDirect: isDirect || false,
         directUrl: isDirect ? directUrl : null,
         shieldEnabled: isDirect ? (shieldEnabled || false) : false,
