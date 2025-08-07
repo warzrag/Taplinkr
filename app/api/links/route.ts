@@ -10,29 +10,13 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    // Mode développement : utiliser un utilisateur test si pas de session
-    let userId = session?.user?.id
-    
-    if (!userId) {
-      // En développement, utiliser l'utilisateur test
-      if (process.env.NODE_ENV === 'development') {
-        const testUser = await prisma.user.findFirst({
-          where: { email: 'test@example.com' }
-        })
-        if (testUser) {
-          userId = testUser.id
-        } else {
-          // Si pas d'utilisateur test, retourner un tableau vide
-          return NextResponse.json([])
-        }
-      } else {
-        // En production, retourner un tableau vide si pas authentifié
-        return NextResponse.json([])
-      }
+    // Si pas de session, retourner un tableau vide au lieu d'une erreur
+    if (!session?.user?.id) {
+      return NextResponse.json([])
     }
 
     const links = await prisma.link.findMany({
-      where: { userId },
+      where: { userId: session.user.id },
       orderBy: { order: 'asc' },
       include: {
         multiLinks: {
@@ -44,7 +28,8 @@ export async function GET() {
     return NextResponse.json(links)
   } catch (error) {
     console.error('Erreur lors de la récupération des liens:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    // Retourner un tableau vide en cas d'erreur au lieu d'une erreur 500
+    return NextResponse.json([])
   }
 }
 
@@ -52,24 +37,12 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    // Mode développement : utiliser un utilisateur test si pas de session
-    let userId = session?.user?.id
-    
-    if (!userId) {
-      // En développement, utiliser l'utilisateur test
-      if (process.env.NODE_ENV === 'development') {
-        const testUser = await prisma.user.findFirst({
-          where: { email: 'test@example.com' }
-        })
-        if (testUser) {
-          userId = testUser.id
-        } else {
-          return NextResponse.json({ error: 'Créez d\'abord un utilisateur test' }, { status: 401 })
-        }
-      } else {
-        return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-      }
+    // Si pas de session, retourner une erreur 401
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
+    
+    const userId = session.user.id
 
     const body = await request.json()
     console.log('Received body:', body)
