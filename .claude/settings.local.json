@@ -74,7 +74,9 @@
       "Bash(vercel:*)",
       "Bash(npx vercel:*)",
       "Bash(gh api:*)",
-      "WebFetch(domain:gaml.io)"
+      "WebFetch(domain:gaml.io)",
+      "Bash(export DATABASE_URL=\"file:./prisma/dev.db\")",
+      "Bash(openssl rand:*)"
     ],
     "deny": []
   }
