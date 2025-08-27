@@ -166,13 +166,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* TEST DEPLOIEMENT FLORE - 27/08 21:15 */}
-      <div className="bg-green-500 text-white text-center py-2 text-sm font-medium animate-pulse">
-        🚀 TEST DÉPLOIEMENT OK - Modifié le 27/08 à 21:15
-      </div>
-      
       {/* Header */}
-      <header className="fixed top-16 left-0 right-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100">
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Logo size="sm" animated={false} />
