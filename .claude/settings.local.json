@@ -77,7 +77,8 @@
       "WebFetch(domain:gaml.io)",
       "Bash(export DATABASE_URL=\"file:./prisma/dev.db\")",
       "Bash(openssl rand:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:5432/postgres\" npx prisma db push --skip-generate)"
     ],
     "deny": []
   }
