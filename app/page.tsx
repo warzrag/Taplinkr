@@ -30,6 +30,7 @@ import { debounce } from 'lodash'
 import Logo from '@/components/Logo'
 
 // TapLinkr - One tap, tout accessible
+// Connecté à Vercel - Déploiement automatique activé
 
 const features = [
   {
