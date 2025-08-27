@@ -29,6 +29,8 @@ import {
 import { debounce } from 'lodash'
 import Logo from '@/components/Logo'
 
+// TapLinkr - One tap, tout accessible
+
 const features = [
   {
     icon: Link2,
