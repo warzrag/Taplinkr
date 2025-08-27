@@ -56,6 +56,8 @@ interface PublicLinkPreviewProps {
     borderRadius?: string | null
     backgroundColor?: string | null
     textColor?: string | null
+    isDirect?: boolean
+    directUrl?: string | null
     isOnline?: boolean
     city?: string | null
     country?: string | null
