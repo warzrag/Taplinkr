@@ -39,7 +39,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // Construire l'URL absolue pour l'image
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
   const imageUrl = link.cover?.url || link.coverImage || link.profileImage || link.user.avatar?.url || link.user.image || '/favicon.ico'
-  const absoluteImageUrl = imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`
+  
+  // Gérer les différents types d'URLs
+  let absoluteImageUrl: string
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    // URL absolue
+    absoluteImageUrl = imageUrl
+  } else if (imageUrl.startsWith('data:')) {
+    // Data URI (base64)
+    absoluteImageUrl = imageUrl
+  } else {
+    // URL relative
+    absoluteImageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+  }
   
   console.log('URL finale pour OpenGraph:', absoluteImageUrl)
 
