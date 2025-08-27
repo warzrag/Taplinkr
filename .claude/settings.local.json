@@ -76,7 +76,8 @@
       "Bash(gh api:*)",
       "WebFetch(domain:gaml.io)",
       "Bash(export DATABASE_URL=\"file:./prisma/dev.db\")",
-      "Bash(openssl rand:*)"
+      "Bash(openssl rand:*)",
+      "Bash(git log:*)"
     ],
     "deny": []
   }

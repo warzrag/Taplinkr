@@ -166,13 +166,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* BANNIERE TEST DEPLOIEMENT - 27/08 21:35 */}
-      <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white text-center py-3 text-lg font-bold animate-pulse shadow-lg">
-        🚀 DÉPLOIEMENT AUTOMATIQUE RÉUSSI - Mise à jour : {new Date().toLocaleTimeString('fr-FR')}
-      </div>
-      
       {/* Header */}
-      <header className="fixed top-12 left-0 right-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100">
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Logo size="sm" animated={false} />
