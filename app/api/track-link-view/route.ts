@@ -87,9 +87,8 @@ export async function POST(request: NextRequest) {
         userAgent: userAgent || '',
         referer: referrer || '',
         device,
-        country: locationData.country,
-        city: locationData.city || null,
-        region: locationData.region || null
+        country: locationData.country
+        // Pas de city ni region - ces colonnes n'existent pas dans la table Click
       }
     })
 

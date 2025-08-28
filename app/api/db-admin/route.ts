@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
                 referer: 'test',
                 device: 'desktop',
                 country: 'France'
+                // Pas de city ni region - ces colonnes n'existent pas
               }
             })
           }
