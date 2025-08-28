@@ -31,7 +31,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
-    // On ne compte les vues que pour les pages multi-liens (pas pour les liens directs)
+    // On ne compte les vues que pour les liens directs (pas pour les multi-liens)
+    // Car les multi-liens ont leur propre tracking
     if (link.isDirect) {
       return NextResponse.json({ 
         success: true, 
@@ -40,23 +41,14 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Utiliser un cookie de session pour éviter les vues multiples
-    const sessionCookie = request.cookies.get(`viewed_${linkId}`)
-    
-    if (sessionCookie) {
-      // La vue a déjà été comptée pour cette session
-      return NextResponse.json({ 
-        success: true, 
-        message: 'View already counted',
-        views: link.views 
-      })
-    }
-
-    // Incrémenter le compteur de vues
+    // Incrémenter le compteur de clics (c'est ce qui est affiché dans le dashboard)
     const updatedLink = await prisma.link.update({
       where: { id: linkId },
-      data: { views: { increment: 1 } },
-      select: { views: true }
+      data: { 
+        clicks: { increment: 1 },  // Incrémenter les clics
+        views: { increment: 1 }     // Et aussi les vues pour garder les stats complètes
+      },
+      select: { views: true, clicks: true }
     })
 
     // Enregistrer l'événement dans le service analytics
@@ -101,21 +93,12 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Créer la réponse avec le cookie de session
-    const response = NextResponse.json({ 
+    // Retourner la réponse avec les compteurs mis à jour
+    return NextResponse.json({ 
       success: true,
-      views: updatedLink.views 
+      views: updatedLink.views,
+      clicks: updatedLink.clicks
     })
-
-    // Définir un cookie qui expire dans 24 heures pour éviter les vues multiples
-    response.cookies.set(`viewed_${linkId}`, '1', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 86400 // 24 heures
-    })
-
-    return response
 
   } catch (error) {
     console.error('Error tracking view:', error)
