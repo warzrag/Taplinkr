@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 import { nanoid } from 'nanoid'
 import { getUpgradeMessage } from '@/lib/permissions'
 import { getTeamAwareUserPermissions, checkTeamLimit } from '@/lib/team-permissions'
 
 export async function GET() {
+  // Créer une nouvelle instance pour éviter les problèmes de connexion
+  const prisma = new PrismaClient()
+  
   try {
     const session = await getServerSession(authOptions)
     
@@ -25,11 +28,15 @@ export async function GET() {
       }
     })
 
+    console.log(`✅ API Links: ${links.length} liens trouvés pour l'utilisateur ${session.user.id}`)
     return NextResponse.json(links)
   } catch (error) {
-    console.error('Erreur lors de la récupération des liens:', error)
-    // Retourner un tableau vide en cas d'erreur au lieu d'une erreur 500
-    return NextResponse.json([])
+    console.error('❌ Erreur lors de la récupération des liens:', error)
+    // IMPORTANT: Retourner une erreur 500 avec un message d'erreur
+    // Pour que le contexte sache qu'il y a eu une erreur et ne vide pas les liens
+    return NextResponse.json({ error: 'Database connection error' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 

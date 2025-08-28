@@ -40,11 +40,20 @@ export function LinksProvider({ children }: { children: ReactNode }) {
       const response = await fetch('/api/links')
       if (response.ok) {
         const data = await response.json()
-        console.log('🔄 LinksContext - Links rechargés:', data.length)
-        setLinks(data)
+        // Vérifier que c'est bien un tableau avant de mettre à jour
+        if (Array.isArray(data)) {
+          console.log('🔄 LinksContext - Links rechargés:', data.length)
+          setLinks(data)
+        } else {
+          console.error('❌ LinksContext - Réponse invalide (pas un tableau)')
+        }
+      } else {
+        // En cas d'erreur 500, NE PAS vider les liens
+        console.error('❌ LinksContext - Erreur serveur, conservation des liens actuels')
       }
     } catch (error) {
-      console.error('❌ LinksContext - Erreur chargement links:', error)
+      // En cas d'erreur réseau, NE PAS vider les liens
+      console.error('❌ LinksContext - Erreur réseau, conservation des liens actuels:', error)
     }
   }
 
@@ -97,12 +106,15 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refreshAll()
     
-    // Rafraîchir les liens toutes les 5 secondes pour capturer les nouveaux clics
+    // DÉSACTIVÉ : Le rafraîchissement automatique causait des problèmes de connexion
+    // Les liens disparaissaient quand la base de données ne répondait pas
+    /*
     const interval = setInterval(() => {
-      fetchLinks() // Pas de log pour éviter de polluer la console
-    }, 5000) // 5 secondes
+      fetchLinks()
+    }, 5000)
+    */
     
-    // Rafraîchir quand on revient sur l'onglet
+    // Rafraîchir SEULEMENT quand on revient sur l'onglet (plus sûr)
     const handleFocus = () => {
       console.log('🔄 Onglet actif - Rafraîchissement des liens')
       fetchLinks()
@@ -111,7 +123,7 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     window.addEventListener('focus', handleFocus)
     
     return () => {
-      clearInterval(interval)
+      // clearInterval(interval) // Plus d'interval à nettoyer
       window.removeEventListener('focus', handleFocus)
     }
   }, [])
