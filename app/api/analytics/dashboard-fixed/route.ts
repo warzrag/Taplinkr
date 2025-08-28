@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 
 export async function GET() {
+  // Créer une nouvelle instance pour avoir les données fraîches
+  const prisma = new PrismaClient()
+  
   try {
     const session = await getServerSession(authOptions)
     
@@ -38,7 +41,16 @@ export async function GET() {
     const totalClicksFromLinks = links.reduce((sum, link) => sum + (link.clicks || 0), 0)
     const totalViewsFromLinks = links.reduce((sum, link) => sum + (link.views || 0), 0)
     
-    // Prendre le maximum des deux pour être sûr
+    // Debug logs
+    console.log('Dashboard Stats Debug:', {
+      userId,
+      linksCount: links.length,
+      totalClicksFromLinks,
+      totalViewsFromLinks,
+      totalClicksFromClickTable
+    })
+    
+    // Prendre le maximum des trois pour être sûr
     const totalClicks = Math.max(totalClicksFromClickTable, totalClicksFromLinks, totalViewsFromLinks)
 
     // Pour les vues, on utilise le même nombre que les clics
@@ -112,5 +124,8 @@ export async function GET() {
   } catch (error) {
     console.error('Erreur lors de la récupération des stats dashboard:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  } finally {
+    // Toujours déconnecter pour libérer les ressources
+    await prisma.$disconnect()
   }
 }
