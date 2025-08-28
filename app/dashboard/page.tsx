@@ -83,7 +83,7 @@ export default function Dashboard() {
       setAnalyticsLoading(true)
       
       // Récupérer les vraies données analytics
-      const response = await fetch('/api/analytics/dashboard')
+      const response = await fetch('/api/analytics/dashboard-fixed')
       if (response.ok) {
         const data = await response.json()
         setDashboardStats(data)
