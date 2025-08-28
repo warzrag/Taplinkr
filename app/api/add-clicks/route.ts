@@ -35,15 +35,40 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    const links = await getResponse.json()
+    const responseText = await getResponse.text()
+    console.log('Response from Supabase:', responseText)
+    
+    let links
+    try {
+      links = JSON.parse(responseText)
+    } catch (e) {
+      return NextResponse.json({ 
+        error: 'Erreur parsing réponse Supabase',
+        response: responseText,
+        status: getResponse.status
+      }, { status: 500 })
+    }
     
     if (!links || links.length === 0) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ 
+        error: 'Lien non trouvé',
+        slug,
+        response: links
+      }, { status: 404 })
     }
 
     const link = links[0]
-    const newClicks = (link.clicks || 0) + clicksToAdd
-    const newViews = (link.views || 0) + clicksToAdd
+    if (!link) {
+      return NextResponse.json({ 
+        error: 'Lien vide',
+        links
+      }, { status: 404 })
+    }
+    
+    const currentClicks = link.clicks !== undefined ? link.clicks : 0
+    const currentViews = link.views !== undefined ? link.views : 0
+    const newClicks = currentClicks + clicksToAdd
+    const newViews = currentViews + clicksToAdd
 
     // Mettre à jour le lien
     const updateResponse = await fetch(
@@ -73,7 +98,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Ajouté ${clicksToAdd} clics au lien ${slug}`,
-      before: { clicks: link.clicks, views: link.views },
+      before: { clicks: currentClicks, views: currentViews },
       after: { clicks: newClicks, views: newViews },
       updated
     })
