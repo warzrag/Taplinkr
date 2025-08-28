@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import PublicLinkPreview from '@/components/PublicLinkPreview'
-import PublicLinkPreviewSimple from '@/components/PublicLinkPreviewSimple'
+import PublicLinkPreviewBeautiful from '@/components/PublicLinkPreviewBeautiful'
 
 interface PageProps {
   params: { slug: string }
@@ -96,6 +96,6 @@ export default async function LinkPage({ params }: PageProps) {
     notFound()
   }
 
-  // Utiliser la version simplifiée qui fonctionne
-  return <PublicLinkPreviewSimple link={link} />
+  // Utiliser la nouvelle version magnifique
+  return <PublicLinkPreviewBeautiful link={link} />
 }
