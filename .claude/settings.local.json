@@ -80,7 +80,9 @@
       "Bash(git log:*)",
       "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:5432/postgres\" npx prisma db push --skip-generate)",
       "WebFetch(domain:www.taplinkr.com)",
-      "Bash(gh repo view:*)"
+      "Bash(gh repo view:*)",
+      "Bash(psql:*)",
+      "Bash(DATABASE_URL:*)"
     ],
     "deny": []
   }
