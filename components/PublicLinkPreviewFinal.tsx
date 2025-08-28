@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface PublicLinkPreviewProps {
   link: any
@@ -8,15 +8,48 @@ interface PublicLinkPreviewProps {
 
 export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps) {
   const [clickedLinks, setClickedLinks] = useState<string[]>([])
+  
+  // Tracker la vue de la page au chargement
+  useEffect(() => {
+    if (link?.id) {
+      fetch('/api/track-link-view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          linkId: link.id,
+          referrer: document.referrer,
+          userAgent: navigator.userAgent
+        })
+      }).catch(console.error)
+    }
+  }, [link?.id])
 
   if (!link) {
     return <div className="min-h-screen bg-gray-900" />
   }
 
-  const handleLinkClick = (id: string, url: string) => {
+  const handleLinkClick = async (id: string, url: string) => {
+    // Marquer comme cliqué visuellement
     if (!clickedLinks.includes(id)) {
       setClickedLinks([...clickedLinks, id])
     }
+    
+    // Enregistrer le clic dans la base de données
+    try {
+      await fetch('/api/track-multilink-click', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ multiLinkId: id })
+      })
+    } catch (error) {
+      console.error('Erreur tracking clic:', error)
+    }
+    
+    // Ouvrir le lien
     window.open(url, '_blank')
   }
 
