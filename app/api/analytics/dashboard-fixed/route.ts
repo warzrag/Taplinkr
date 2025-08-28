@@ -23,10 +23,19 @@ export async function GET() {
     // Calculer le total des clics (somme de tous les clicks sur tous les liens)
     const links = await prisma.link.findMany({
       where: { userId },
-      select: { clicks: true }
+      select: { 
+        id: true,
+        title: true,
+        clicks: true 
+      }
     })
     
+    console.log('Debug - UserId:', userId)
+    console.log('Debug - Links trouvés:', links.length)
+    console.log('Debug - Détail des liens:', links.map(l => ({ id: l.id, title: l.title, clicks: l.clicks })))
+    
     const totalClicks = links.reduce((sum, link) => sum + (link.clicks || 0), 0)
+    console.log('Debug - Total des clics calculé:', totalClicks)
 
     // Pour les vues, on utilise le même nombre que les clics
     const totalViews = totalClicks
