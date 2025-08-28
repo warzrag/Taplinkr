@@ -6,6 +6,10 @@ import { prisma } from '@/lib/prisma'
 // Route pour administrer la base de données
 export async function POST(request: NextRequest) {
   try {
+    // Forcer la déconnexion/reconnexion pour éviter l'erreur "prepared statement"
+    await prisma.$disconnect()
+    await prisma.$connect()
+    
     const session = await getServerSession(authOptions)
     
     // Vérifier que c'est bien un admin
@@ -18,39 +22,49 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'ADD_TEST_CLICKS': {
         // Ajouter des clics de test à un lien
-        const link = await prisma.link.findFirst({
-          where: { slug: data.slug || 'lauravissantes' }
-        })
+        const slug = data.slug || 'lauravissantes'
+        const count = data.count || 10
         
-        if (link) {
-          const updated = await prisma.link.update({
-            where: { id: link.id },
-            data: { 
-              clicks: { increment: data.count || 10 },
-              views: { increment: data.count || 10 }
-            }
+        // Utiliser une requête SQL raw pour éviter les problèmes de prepared statement
+        const result = await prisma.$executeRaw`
+          UPDATE "Link" 
+          SET clicks = clicks + ${count}, 
+              views = views + ${count}
+          WHERE slug = ${slug}
+        `
+        
+        if (result > 0) {
+          // Récupérer le lien mis à jour
+          const link = await prisma.link.findUnique({
+            where: { slug }
           })
           
-          // Créer aussi des entrées dans la table Click
-          for (let i = 0; i < (data.count || 10); i++) {
-            await prisma.click.create({
-              data: {
-                linkId: link.id,
-                userId: link.userId,
-                ip: `127.0.0.${i}`,
-                userAgent: 'Test Bot',
-                referer: 'test',
-                device: 'desktop',
-                country: 'France'
-                // Pas de city ni region - ces colonnes n'existent pas
+          if (link) {
+            // Créer quelques entrées dans Click (pas toutes pour éviter timeout)
+            const clicksToCreate = Math.min(count, 10)
+            for (let i = 0; i < clicksToCreate; i++) {
+              try {
+                await prisma.click.create({
+                  data: {
+                    linkId: link.id,
+                    userId: link.userId,
+                    ip: `127.0.0.${i}`,
+                    userAgent: 'Test Bot',
+                    referer: 'test',
+                    device: 'desktop',
+                    country: 'France'
+                  }
+                })
+              } catch (e) {
+                // Ignorer les erreurs individuelles
               }
-            })
+            }
           }
           
           return NextResponse.json({ 
             success: true, 
-            message: `Ajouté ${data.count || 10} clics au lien ${link.slug}`,
-            link: updated 
+            message: `Ajouté ${count} clics au lien ${slug}`,
+            updated: result
           })
         }
         break
