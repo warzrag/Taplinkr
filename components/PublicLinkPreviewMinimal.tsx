@@ -60,15 +60,15 @@ export default function PublicLinkPreviewMinimal({ link }: PublicLinkPreviewProp
           {link.title || 'Mon profil'}
         </h1>
         
-        {/* Bio/Description */}
-        {(link.bio || link.description) && (
+        {/* Bio */}
+        {link.bio && (
           <p className="text-white/90 text-lg mb-6 max-w-md mx-auto drop-shadow">
-            {link.bio || link.description}
+            {link.bio}
           </p>
         )}
         
         {/* Stats si disponibles */}
-        {link.clicks > 0 && (
+        {link.clicks && link.clicks > 0 && (
           <div className="text-white/70 text-sm mb-4">
             👁 {link.clicks} vues
           </div>
