@@ -20,22 +20,26 @@ export async function GET() {
       where: { userId }
     })
 
-    // Calculer le total des clics (somme de tous les clicks sur tous les liens)
+    // FORCER LE COMPTAGE DE TOUS LES CLICS DE TOUS LES LIENS
+    // Méthode 1: Compter directement dans la table Click
+    const totalClicksFromClickTable = await prisma.click.count({
+      where: { userId }
+    })
+    
+    // Méthode 2: Somme des clics sur les liens
     const links = await prisma.link.findMany({
       where: { userId },
       select: { 
-        id: true,
-        title: true,
-        clicks: true 
+        clicks: true,
+        views: true 
       }
     })
     
-    console.log('Debug - UserId:', userId)
-    console.log('Debug - Links trouvés:', links.length)
-    console.log('Debug - Détail des liens:', links.map(l => ({ id: l.id, title: l.title, clicks: l.clicks })))
+    const totalClicksFromLinks = links.reduce((sum, link) => sum + (link.clicks || 0), 0)
+    const totalViewsFromLinks = links.reduce((sum, link) => sum + (link.views || 0), 0)
     
-    const totalClicks = links.reduce((sum, link) => sum + (link.clicks || 0), 0)
-    console.log('Debug - Total des clics calculé:', totalClicks)
+    // Prendre le maximum des deux pour être sûr
+    const totalClicks = Math.max(totalClicksFromClickTable, totalClicksFromLinks, totalViewsFromLinks)
 
     // Pour les vues, on utilise le même nombre que les clics
     const totalViews = totalClicks
@@ -54,17 +58,24 @@ export async function GET() {
     // On pourrait calculer le changement sur les 30 derniers jours vs les 30 jours d'avant
     const clicksChange = 0
 
-    // Top 5 des liens les plus cliqués
-    const topLinks = await prisma.link.findMany({
+    // Top 5 des liens les plus cliqués (prendre en compte clicks ET views)
+    const allLinks = await prisma.link.findMany({
       where: { userId },
-      orderBy: { clicks: 'desc' },
-      take: 5,
       include: {
         multiLinks: {
           select: { clicks: true }
         }
       }
     })
+    
+    // Trier par le maximum entre clicks et views
+    const topLinks = allLinks
+      .map(link => ({
+        ...link,
+        totalScore: Math.max(link.clicks || 0, link.views || 0)
+      }))
+      .sort((a, b) => b.totalScore - a.totalScore)
+      .slice(0, 5)
 
     // Données pour le graphique (30 derniers jours) - basé sur la table Click
     const dailyClicks = await prisma.$queryRaw`
@@ -90,7 +101,7 @@ export async function GET() {
         id: link.id,
         title: link.title,
         slug: link.slug,
-        clicks: link.clicks,
+        clicks: Math.max(link.clicks || 0, link.views || 0),
         totalMultiLinkClicks: link.multiLinks.reduce((sum, ml) => sum + ml.clicks, 0)
       })),
       chartData: {
