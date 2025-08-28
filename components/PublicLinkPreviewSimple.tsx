@@ -9,6 +9,8 @@ interface MultiLink {
   title: string
   url: string
   description?: string | null
+  icon?: string | null
+  iconImage?: string | null
   order: number
   clicks: number
 }
@@ -35,6 +37,13 @@ interface PublicLinkPreviewProps {
 
 export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps) {
   const [clickedLinks, setClickedLinks] = useState<Set<string>>(new Set())
+
+  // Log pour debug
+  console.log('Link data:', {
+    title: link.title,
+    multiLinksCount: link.multiLinks?.length,
+    firstMultiLink: link.multiLinks?.[0]
+  })
 
   const handleLinkClick = async (multiLinkId: string, url: string) => {
     setClickedLinks(prev => new Set(prev).add(multiLinkId))
@@ -100,7 +109,7 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
           )}
           
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            {link.title}
+            {typeof link.title === 'string' && !link.title.startsWith('data:') ? link.title : 'Mes liens'}
           </h1>
           
           {(link.description || link.bio) && (
@@ -127,6 +136,13 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
 
         {/* Links Section */}
         <div className="space-y-3">
+          {/* Debug info - à retirer après */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-gray-500 mb-2">
+              Debug: {link.multiLinks?.length || 0} liens trouvés
+            </div>
+          )}
+          
           {link.multiLinks && link.multiLinks.length > 0 ? (
             link.multiLinks.map((multiLink) => (
               <button
@@ -140,10 +156,24 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
                 `}
               >
                 <div className="flex items-center gap-3">
-                  <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-purple-600" />
+                  {/* Icône du lien */}
+                  {multiLink.icon || multiLink.iconImage ? (
+                    <img 
+                      src={multiLink.icon || multiLink.iconImage || ''} 
+                      alt=""
+                      className="w-8 h-8 rounded-lg object-cover"
+                      onError={(e) => {
+                        // Si l'image ne charge pas, afficher l'icône par défaut
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <ExternalLink className={`w-5 h-5 text-gray-400 group-hover:text-purple-600 ${multiLink.icon || multiLink.iconImage ? 'hidden' : ''}`} />
+                  
                   <div className="text-left">
                     <div className="font-medium text-gray-900">
-                      {multiLink.title}
+                      {multiLink.title || 'Lien sans titre'}
                     </div>
                     {multiLink.description && (
                       <div className="text-sm text-gray-500">
