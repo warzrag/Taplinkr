@@ -33,28 +33,41 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   const [links, setLinks] = useState<LinkType[]>([])
   const [folders, setFolders] = useState<Folder[]>([])
   const [loading, setLoading] = useState(true)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
 
-  const fetchLinks = async () => {
+  const fetchLinks = async (retryCount = 0) => {
     try {
-      const response = await fetch('/api/links')
+      const response = await fetch('/api/links', {
+        // Ajouter un timeout de 10 secondes
+        signal: AbortSignal.timeout(10000)
+      })
+      
       if (response.ok) {
         const data = await response.json()
         // Vérifier que c'est bien un tableau avant de mettre à jour
         if (Array.isArray(data)) {
-          console.log('🔄 LinksContext - Links rechargés:', data.length)
+          console.log('✅ LinksContext - Links chargés:', data.length)
           setLinks(data)
+          return true // Succès
         } else {
           console.error('❌ LinksContext - Réponse invalide (pas un tableau)')
         }
       } else {
-        // En cas d'erreur 500, NE PAS vider les liens
-        console.error('❌ LinksContext - Erreur serveur, conservation des liens actuels')
+        console.error('❌ LinksContext - Erreur serveur:', response.status)
       }
     } catch (error) {
-      // En cas d'erreur réseau, NE PAS vider les liens
-      console.error('❌ LinksContext - Erreur réseau, conservation des liens actuels:', error)
+      console.error('❌ LinksContext - Erreur:', error)
     }
+    
+    // Réessayer jusqu'à 3 fois avec un délai croissant
+    if (retryCount < 3 && links.length === 0) {
+      const delay = (retryCount + 1) * 1000 // 1s, 2s, 3s
+      console.log(`🔄 Nouvelle tentative dans ${delay}ms...`)
+      setTimeout(() => fetchLinks(retryCount + 1), delay)
+    }
+    
+    return false
   }
 
   const fetchFolders = async () => {
@@ -82,8 +95,10 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
   const refreshAll = async () => {
     console.log('🔄 LinksContext - refreshAll appelé')
+    setLoading(true) // Indiquer qu'on charge
     await Promise.all([fetchLinks(), fetchFolders()])
     setLoading(false)
+    setInitialLoadDone(true) // Marquer le chargement initial comme fait
   }
 
   const forceRefresh = () => {
@@ -104,29 +119,25 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    // Charger immédiatement au montage du composant
+    console.log('🚀 LinksContext - Chargement initial')
     refreshAll()
     
-    // DÉSACTIVÉ : Le rafraîchissement automatique causait des problèmes de connexion
-    // Les liens disparaissaient quand la base de données ne répondait pas
-    /*
-    const interval = setInterval(() => {
-      fetchLinks()
-    }, 5000)
-    */
-    
-    // Rafraîchir SEULEMENT quand on revient sur l'onglet (plus sûr)
+    // Rafraîchir quand on revient sur l'onglet (optionnel)
     const handleFocus = () => {
-      console.log('🔄 Onglet actif - Rafraîchissement des liens')
-      fetchLinks()
+      // Ne rafraîchir que si le chargement initial est terminé
+      if (initialLoadDone) {
+        console.log('🔄 Onglet actif - Rafraîchissement des liens')
+        fetchLinks()
+      }
     }
     
     window.addEventListener('focus', handleFocus)
     
     return () => {
-      // clearInterval(interval) // Plus d'interval à nettoyer
       window.removeEventListener('focus', handleFocus)
     }
-  }, [])
+  }, []) // Vide = exécuté une seule fois au montage
 
   // Effect pour surveiller les changements
   useEffect(() => {
