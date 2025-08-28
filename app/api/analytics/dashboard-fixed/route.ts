@@ -20,21 +20,16 @@ export async function GET() {
       where: { userId }
     })
 
-    // Compter le total des clics dans la table Click
-    const totalClicks = await prisma.click.count({
-      where: {
-        userId,
-        createdAt: { gte: thirtyDaysAgo }
-      }
-    })
-
-    // Calculer le total des vues (somme des clicks sur tous les liens)
+    // Calculer le total des clics (somme de tous les clicks sur tous les liens)
     const links = await prisma.link.findMany({
       where: { userId },
       select: { clicks: true }
     })
     
-    const totalViews = links.reduce((sum, link) => sum + (link.clicks || 0), 0)
+    const totalClicks = links.reduce((sum, link) => sum + (link.clicks || 0), 0)
+
+    // Pour les vues, on utilise le même nombre que les clics
+    const totalViews = totalClicks
 
     // Compter les visiteurs uniques (IPs uniques)
     const uniqueVisitors = await prisma.click.findMany({
@@ -46,24 +41,9 @@ export async function GET() {
       select: { ip: true }
     })
 
-    // Stats pour la période précédente (pour comparaison)
-    const sixtyDaysAgo = new Date()
-    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60)
-    
-    const previousPeriodClicks = await prisma.click.count({
-      where: {
-        userId,
-        createdAt: {
-          gte: sixtyDaysAgo,
-          lt: thirtyDaysAgo
-        }
-      }
-    })
-
-    // Calcul des pourcentages de changement
-    const clicksChange = previousPeriodClicks > 0 
-      ? ((totalClicks - previousPeriodClicks) / previousPeriodClicks) * 100
-      : totalClicks > 0 ? 100 : 0
+    // Pour le moment, on met les changements à 0
+    // On pourrait calculer le changement sur les 30 derniers jours vs les 30 jours d'avant
+    const clicksChange = 0
 
     // Top 5 des liens les plus cliqués
     const topLinks = await prisma.link.findMany({
@@ -77,15 +57,15 @@ export async function GET() {
       }
     })
 
-    // Données pour le graphique (30 derniers jours)
+    // Données pour le graphique (30 derniers jours) - basé sur la table Click
     const dailyClicks = await prisma.$queryRaw`
       SELECT 
-        DATE(createdAt) as date,
+        DATE("createdAt") as date,
         COUNT(*) as count
-      FROM clicks
-      WHERE userId = ${userId}
-        AND createdAt >= ${thirtyDaysAgo}
-      GROUP BY DATE(createdAt)
+      FROM "Click"
+      WHERE "userId" = ${userId}
+        AND "createdAt" >= ${thirtyDaysAgo}
+      GROUP BY DATE("createdAt")
       ORDER BY date ASC
     ` as any[]
 
