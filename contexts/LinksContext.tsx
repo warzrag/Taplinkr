@@ -30,7 +30,24 @@ interface LinksContextType {
 const LinksContext = createContext<LinksContextType | undefined>(undefined)
 
 export function LinksProvider({ children }: { children: ReactNode }) {
-  const [links, setLinks] = useState<LinkType[]>([])
+  // Charger les liens depuis le cache au démarrage
+  const getInitialLinks = () => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('taplinkr_links_cache')
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached)
+          console.log('📦 Cache trouvé:', parsed.length, 'liens')
+          return parsed
+        } catch (e) {
+          console.error('Erreur cache:', e)
+        }
+      }
+    }
+    return []
+  }
+  
+  const [links, setLinks] = useState<LinkType[]>(getInitialLinks())
   const [folders, setFolders] = useState<Folder[]>([])
   const [loading, setLoading] = useState(true)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
@@ -50,6 +67,11 @@ export function LinksProvider({ children }: { children: ReactNode }) {
         if (Array.isArray(data)) {
           console.log('✅ LinksContext - Links chargés:', data.length)
           setLinks(data)
+          // Sauvegarder dans le cache
+          if (typeof window !== 'undefined' && data.length > 0) {
+            localStorage.setItem('taplinkr_links_cache', JSON.stringify(data))
+            console.log('💾 Cache mis à jour')
+          }
           return true // Succès
         } else {
           console.error('❌ LinksContext - Réponse invalide (pas un tableau)')
@@ -61,11 +83,26 @@ export function LinksProvider({ children }: { children: ReactNode }) {
       console.error('❌ LinksContext - Erreur:', error)
     }
     
-    // Réessayer jusqu'à 3 fois avec un délai croissant
-    if (retryCount < 3 && links.length === 0) {
-      const delay = (retryCount + 1) * 1000 // 1s, 2s, 3s
-      console.log(`🔄 Nouvelle tentative dans ${delay}ms...`)
+    // Réessayer jusqu'à 5 fois avec un délai croissant
+    if (retryCount < 5) {
+      const delay = (retryCount + 1) * 500 // 0.5s, 1s, 1.5s...
+      console.log(`🔄 Tentative ${retryCount + 1}/5 dans ${delay}ms...`)
       setTimeout(() => fetchLinks(retryCount + 1), delay)
+    } else if (links.length === 0) {
+      console.error('❌ Tentatives échouées, utilisation de la route de secours')
+      // Dernière tentative avec la route de secours
+      try {
+        const backupResponse = await fetch('/api/links-backup')
+        if (backupResponse.ok) {
+          const backupData = await backupResponse.json()
+          if (Array.isArray(backupData) && backupData.length > 0) {
+            console.log('🆘 Données de secours chargées')
+            setLinks(backupData)
+          }
+        }
+      } catch (e) {
+        console.error('❌ Même la route de secours a échoué:', e)
+      }
     }
     
     return false
@@ -121,7 +158,9 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Charger immédiatement au montage du composant
-    console.log('🚀 LinksContext - Chargement initial')
+    console.log('🚀 LinksContext - Chargement initial, cache:', links.length, 'liens')
+    
+    // Toujours rafraîchir depuis le serveur pour avoir les dernières données
     refreshAll()
     
     // Rafraîchir quand on revient sur l'onglet (optionnel)
