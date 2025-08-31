@@ -39,8 +39,8 @@ export default function FoldersPage() {
 
   const fetchData = async () => {
     try {
-      // Récupérer les dossiers
-      const foldersResponse = await fetch('/api/folders')
+      // Récupérer les dossiers (utiliser folders-direct pour éviter les erreurs)
+      const foldersResponse = await fetch('/api/folders-direct')
       if (foldersResponse.ok) {
         const foldersData = await foldersResponse.json()
         // L'API retourne directement un tableau, ajouter isExpanded
@@ -53,10 +53,11 @@ export default function FoldersPage() {
           })) || []
         }))
         setFolders(foldersWithExpanded)
+        console.log('Dossiers chargés:', foldersWithExpanded)
       }
 
-      // Récupérer les liens non organisés
-      const linksResponse = await fetch('/api/links')
+      // Récupérer les liens non organisés (utiliser links-direct pour éviter les erreurs)
+      const linksResponse = await fetch('/api/links-direct')
       if (linksResponse.ok) {
         const linksData = await linksResponse.json()
         const unorganized = linksData.filter((link: LinkType) => !link.folderId)
