@@ -206,7 +206,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     setLoading(true)
     
     try {
-      const url = editingLink ? `/api/links/${editingLink.id}` : '/api/links'
+      const url = editingLink ? `/api/links/${editingLink.id}` : '/api/links-create-v2'
       const method = editingLink ? 'PUT' : 'POST'
       
       const requestBody = {
