@@ -82,7 +82,8 @@
       "WebFetch(domain:www.taplinkr.com)",
       "Bash(gh repo view:*)",
       "Bash(psql:*)",
-      "Bash(DATABASE_URL:*)"
+      "Bash(DATABASE_URL:*)",
+      "Bash(npx supabase:*)"
     ],
     "deny": []
   }

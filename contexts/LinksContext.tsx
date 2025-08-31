@@ -55,8 +55,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
   const fetchLinks = async (retryCount = 0) => {
     try {
-      // Utiliser la route Supabase qui n'utilise pas Prisma
-      const response = await fetch('/api/links-supabase', {
+      // Utiliser la route PostgreSQL finale avec la bonne structure
+      const response = await fetch('/api/links-final', {
         // Ajouter un timeout de 10 secondes
         signal: AbortSignal.timeout(10000)
       })
