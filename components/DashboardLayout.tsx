@@ -19,7 +19,8 @@ import {
   Map,
   MessageCircle,
   Activity,
-  Folder
+  Folder,
+  Database
 } from 'lucide-react'
 import LinkLogo from '@/components/LinkLogo'
 import LivePhonePreview from '@/components/LivePhonePreview'
@@ -97,7 +98,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   
   // Admin section (if applicable)
   const adminItems = (session?.user?.role === 'admin' || session?.user?.role === 'manager')
-    ? [{ icon: Shield, label: 'Admin', href: '/admin/users' }]
+    ? [
+        { icon: Shield, label: 'Admin', href: '/admin/users' },
+        { icon: Database, label: 'Base de données', href: '/admin/database' }
+      ]
     : []
 
   const isActive = (href: string) => {
