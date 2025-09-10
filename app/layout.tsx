@@ -1,6 +1,8 @@
 import Providers from '@/components/Providers'
 import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import DebugConsole from '@/components/DebugConsole'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 import '../styles/theme-transitions.css'
 
@@ -43,18 +45,21 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="TapLinkr" />
       </head>
       <body className="h-full bg-gray-50 dark:bg-gray-900 antialiased transition-colors duration-300">
-        <ThemeProvider>
-          <Providers>
-            {children}
-            <Toaster 
+        <ErrorBoundary>
+          <ThemeProvider>
+            <Providers>
+              {children}
+              <Toaster 
               position="top-right"
               toastOptions={{
                 className: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100',
                 duration: 4000,
               }}
             />
-          </Providers>
-        </ThemeProvider>
+            </Providers>
+          </ThemeProvider>
+          <DebugConsole />
+        </ErrorBoundary>
         
         {/* Service Worker Registration */}
         <script
