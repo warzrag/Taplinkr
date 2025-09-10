@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/admin') ||
+    pathname.startsWith('/debug') ||
     pathname.startsWith('/link/') ||
     pathname.startsWith('/redirect/') ||
     pathname.startsWith('/shield/') ||
@@ -47,7 +48,9 @@ export const config = {
      * - favicon.ico (favicon file)
      * - auth (auth pages)
      * - dashboard (dashboard pages)
+     * - admin (admin pages)
+     * - debug (debug pages)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|auth|dashboard).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|auth|dashboard|admin|debug).*)',
   ],
 }
