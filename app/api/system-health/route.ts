@@ -17,12 +17,14 @@ export async function GET(request: Request) {
     let dbStatus = 'error'
     let dbStats = {}
     try {
-      const [userCount, linkCount, clickCount, folderCount] = await Promise.all([
-        prisma.user.count(),
-        prisma.link.count(),
-        prisma.click.count(),
-        prisma.folder.count()
-      ])
+      // Tester la connexion d'abord
+      await prisma.$queryRaw`SELECT 1`
+      
+      // Ensuite récupérer les stats une par une pour éviter les erreurs
+      const userCount = await prisma.user.count().catch(() => 0)
+      const linkCount = await prisma.link.count().catch(() => 0)
+      const clickCount = await prisma.click.count().catch(() => 0)
+      const folderCount = await prisma.folder.count().catch(() => 0)
       
       dbStatus = 'healthy'
       dbStats = {
@@ -33,7 +35,10 @@ export async function GET(request: Request) {
       }
     } catch (error) {
       dbStatus = 'error'
-      dbStats = { error: error.message }
+      dbStats = { 
+        error: error.message,
+        hint: 'Database connection issue - may need to restart the app'
+      }
     }
 
     // 2. Informations système

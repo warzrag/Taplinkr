@@ -19,10 +19,18 @@ const prismaClientSingleton = () => {
     throw new Error('DATABASE_URL is not defined')
   }
   
+  // Ajouter pgbouncer=true si pas déjà présent
+  let finalUrl = cleanedUrl
+  if (!finalUrl.includes('pgbouncer=true')) {
+    finalUrl = finalUrl.includes('?') 
+      ? `${finalUrl}&pgbouncer=true&connection_limit=1`
+      : `${finalUrl}?pgbouncer=true&connection_limit=1`
+  }
+  
   return new PrismaClient({
     datasources: {
       db: {
-        url: cleanedUrl
+        url: finalUrl
       }
     },
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
