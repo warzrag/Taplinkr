@@ -19,8 +19,7 @@ export async function GET() {
       include: {
         links: {
           include: {
-            multiLinks: true,
-            clicks: true
+            multiLinks: true
           }
         },
         folders: {
