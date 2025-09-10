@@ -55,8 +55,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
   const fetchLinks = async (retryCount = 0) => {
     try {
-      // Utiliser la route bridge qui fait le pont entre les deux tables users
-      const response = await fetch('/api/links-bridge', {
+      // Utiliser la route principale qui fonctionne
+      const response = await fetch('/api/links', {
         // Ajouter un timeout de 10 secondes
         signal: AbortSignal.timeout(10000)
       })
