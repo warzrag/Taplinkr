@@ -55,8 +55,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
   const fetchLinks = async (retryCount = 0) => {
     try {
-      // Utiliser la route principale qui fonctionne
-      const response = await fetch('/api/links', {
+      // Utiliser la route temporaire qui cherche mieux les liens
+      const response = await fetch('/api/links-temp-fix', {
         // Ajouter un timeout de 10 secondes
         signal: AbortSignal.timeout(10000)
       })
