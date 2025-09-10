@@ -15,23 +15,43 @@ export async function GET() {
     }
 
     const userId = session.user.id
+    const userEmail = session.user.email
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
     
-    // Compter le total des liens
+    // IMPORTANT: Chercher TOUS les utilisateurs avec cet email
+    // Car les liens peuvent être associés à différents user IDs
+    const allUsers = await prisma.user.findMany({
+      where: {
+        email: userEmail
+      },
+      select: {
+        id: true
+      }
+    })
+    
+    const allUserIds = allUsers.map(u => u.id)
+    
+    // Compter le total des liens pour TOUS les utilisateurs avec cet email
     const totalLinks = await prisma.link.count({
-      where: { userId }
+      where: { 
+        userId: { in: allUserIds }
+      }
     })
 
     // FORCER LE COMPTAGE DE TOUS LES CLICS DE TOUS LES LIENS
-    // Méthode 1: Compter directement dans la table Click
+    // Méthode 1: Compter directement dans la table Click pour TOUS les user IDs
     const totalClicksFromClickTable = await prisma.click.count({
-      where: { userId }
+      where: { 
+        userId: { in: allUserIds }
+      }
     })
     
-    // Méthode 2: Somme des clics sur les liens
+    // Méthode 2: Somme des clics sur les liens pour TOUS les user IDs
     const links = await prisma.link.findMany({
-      where: { userId },
+      where: { 
+        userId: { in: allUserIds }
+      },
       select: { 
         clicks: true,
         views: true 
@@ -43,7 +63,8 @@ export async function GET() {
     
     // Debug logs
     console.log('Dashboard Stats Debug:', {
-      userId,
+      currentUserId: userId,
+      allUserIds,
       linksCount: links.length,
       totalClicksFromLinks,
       totalViewsFromLinks,
@@ -56,10 +77,10 @@ export async function GET() {
     // Pour les vues, on utilise le même nombre que les clics
     const totalViews = totalClicks
 
-    // Compter les visiteurs uniques (IPs uniques)
+    // Compter les visiteurs uniques (IPs uniques) pour TOUS les user IDs
     const uniqueVisitors = await prisma.click.findMany({
       where: {
-        userId,
+        userId: { in: allUserIds },
         createdAt: { gte: thirtyDaysAgo }
       },
       distinct: ['ip'],
@@ -70,9 +91,11 @@ export async function GET() {
     // On pourrait calculer le changement sur les 30 derniers jours vs les 30 jours d'avant
     const clicksChange = 0
 
-    // Top 5 des liens les plus cliqués (prendre en compte clicks ET views)
+    // Top 5 des liens les plus cliqués (prendre en compte clicks ET views) pour TOUS les user IDs
     const allLinks = await prisma.link.findMany({
-      where: { userId },
+      where: { 
+        userId: { in: allUserIds }
+      },
       include: {
         multiLinks: {
           select: { clicks: true }
@@ -89,13 +112,13 @@ export async function GET() {
       .sort((a, b) => b.totalScore - a.totalScore)
       .slice(0, 5)
 
-    // Données pour le graphique (30 derniers jours) - basé sur la table Click
+    // Données pour le graphique (30 derniers jours) - basé sur la table Click pour TOUS les user IDs
     const dailyClicks = await prisma.$queryRaw`
       SELECT 
         DATE("createdAt") as date,
         COUNT(*) as count
       FROM "Click"
-      WHERE "userId" = ${userId}
+      WHERE "userId" = ANY(${allUserIds}::text[])
         AND "createdAt" >= ${thirtyDaysAgo}
       GROUP BY DATE("createdAt")
       ORDER BY date ASC

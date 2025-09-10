@@ -11,68 +11,121 @@ export async function GET() {
       return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
     }
 
-    console.log('🔍 Debug Dashboard pour:', session.user.email)
+    const userId = session.user.id
+    const userEmail = session.user.email
 
-    // 1. Vérifier directement avec Prisma
-    const links = await prisma.link.findMany({
+    // 1. Vérifier tous les utilisateurs avec cet email
+    const allUsers = await prisma.user.findMany({
       where: {
-        userId: session.user.id
+        email: userEmail
       },
-      include: {
-        multiLinks: true
-      },
-      orderBy: {
-        order: 'asc'
+      select: {
+        id: true,
+        email: true,
+        username: true
       }
     })
 
-    // 2. Essayer aussi par email
-    const linksByEmail = await prisma.link.findMany({
-      where: {
-        user: {
-          email: session.user.email
+    // 2. Compter les liens pour chaque utilisateur
+    const userLinkCounts = await Promise.all(
+      allUsers.map(async (user) => {
+        const linkCount = await prisma.link.count({
+          where: { userId: user.id }
+        })
+        const links = await prisma.link.findMany({
+          where: { userId: user.id },
+          select: {
+            id: true,
+            title: true,
+            clicks: true,
+            views: true
+          }
+        })
+        return {
+          userId: user.id,
+          linkCount,
+          links,
+          totalClicks: links.reduce((sum, link) => sum + (link.clicks || 0), 0),
+          totalViews: links.reduce((sum, link) => sum + (link.views || 0), 0)
         }
+      })
+    )
+
+    // 3. Vérifier les clics dans la table Click
+    const clickCounts = await Promise.all(
+      allUsers.map(async (user) => {
+        const count = await prisma.click.count({
+          where: { userId: user.id }
+        })
+        return {
+          userId: user.id,
+          clickCount: count
+        }
+      })
+    )
+
+    // 4. Appeler l'API dashboard-fixed pour voir ce qu'elle retourne
+    let dashboardStats = null
+    try {
+      const dashboardResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/analytics/dashboard-fixed`, {
+        headers: {
+          cookie: `next-auth.session-token=${session.sessionToken || ''}; next-auth.callback-url=${process.env.NEXTAUTH_URL || 'http://localhost:3000'}`
+        }
+      })
+      if (dashboardResponse.ok) {
+        dashboardStats = await dashboardResponse.json()
+      }
+    } catch (e) {
+      console.error('Erreur appel dashboard:', e)
+    }
+
+    // 5. Test direct avec l'API actuelle
+    const currentUserId = session.user.id
+    const totalClicksFromClickTable = await prisma.click.count({
+      where: { userId: currentUserId }
+    })
+    
+    const linksForStats = await prisma.link.findMany({
+      where: { userId: currentUserId },
+      select: { 
+        clicks: true,
+        views: true 
       }
     })
-
-    // 3. Vérifier toutes les routes API
-    const apiTests = await Promise.all([
-      fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/links`).then(r => ({ route: '/api/links', ok: r.ok, status: r.status })),
-      fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/links-bridge`).then(r => ({ route: '/api/links-bridge', ok: r.ok, status: r.status })),
-      fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/links-direct`).then(r => ({ route: '/api/links-direct', ok: r.ok, status: r.status }))
-    ]).catch(e => [])
+    
+    const totalClicksFromLinks = linksForStats.reduce((sum, link) => sum + (link.clicks || 0), 0)
+    const totalViewsFromLinks = linksForStats.reduce((sum, link) => sum + (link.views || 0), 0)
+    
+    const calculatedTotalClicks = Math.max(totalClicksFromClickTable, totalClicksFromLinks, totalViewsFromLinks)
 
     return NextResponse.json({
-      session: {
+      currentSession: {
         userId: session.user.id,
         email: session.user.email,
         username: session.user.username
       },
-      
-      results: {
-        byPrisma: {
-          count: links.length,
-          links: links
-        },
-        byEmail: {
-          count: linksByEmail.length,
-          links: linksByEmail
-        }
+      allUsers,
+      linkData: userLinkCounts,
+      clickTableData: clickCounts,
+      dashboardApiResponse: dashboardStats,
+      calculatedStats: {
+        totalClicksFromClickTable,
+        totalClicksFromLinks,
+        totalViewsFromLinks,
+        finalTotalClicks: calculatedTotalClicks
       },
-      
-      apiStatus: apiTests,
-      
       debug: {
-        timestamp: new Date().toISOString(),
-        contextUsed: 'Le dashboard utilise /api/links-bridge qui cherche dans table users (minuscule)',
-        problem: links.length > 0 ? 'Les liens existent mais links-bridge ne les trouve pas' : 'Aucun lien trouvé'
+        totalLinksAcrossAllUsers: userLinkCounts.reduce((sum, u) => sum + u.linkCount, 0),
+        totalClicksAcrossAllUsers: userLinkCounts.reduce((sum, u) => sum + u.totalClicks, 0),
+        totalClicksInClickTable: clickCounts.reduce((sum, u) => sum + u.clickCount, 0)
       }
     })
+
   } catch (error) {
+    console.error('Erreur debug dashboard:', error)
     return NextResponse.json({ 
-      error: 'Erreur debug',
-      details: error.message,
-      stack: error.stack
+      error: 'Erreur serveur',
+      details: error.message 
     }, { status: 500 })
   }
 }
