@@ -82,13 +82,26 @@ export default function Dashboard() {
     try {
       setAnalyticsLoading(true)
       
-      // Récupérer les vraies données analytics
-      const response = await fetch('/api/analytics/dashboard-fixed')
+      // Récupérer les vraies données analytics - utiliser la version simple
+      const response = await fetch('/api/analytics/dashboard-simple')
       if (response.ok) {
         const data = await response.json()
+        console.log('📊 Dashboard stats reçues:', data)
+        console.log('📊 Total clics:', data.totalClicks)
         setDashboardStats(data)
       } else {
-        console.error('Erreur API:', response.status)
+        console.error('Erreur API dashboard-simple:', response.status)
+        // Fallback sur l'ancienne API
+        try {
+          const fallbackResponse = await fetch('/api/analytics/dashboard-fixed')
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json()
+            console.log('📊 Fallback stats:', fallbackData)
+            setDashboardStats(fallbackData)
+          }
+        } catch (e) {
+          console.error('Erreur fallback:', e)
+        }
       }
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error)
@@ -319,6 +332,7 @@ export default function Dashboard() {
                 )}
               </div>
               <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {console.log('🔍 dashboardStats:', dashboardStats) || ''}
                 {dashboardStats?.totalClicks || 0}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total clics</p>
