@@ -40,7 +40,8 @@ export async function GET() {
       const sumClicks = links.reduce((sum, link) => sum + (link.clicks || 0), 0)
       const sumViews = links.reduce((sum, link) => sum + (link.views || 0), 0)
       
-      totalClicks = Math.max(totalClicks, sumClicks, sumViews)
+      // Utiliser seulement la somme des clics (pas les vues)
+      totalClicks = sumClicks
     } catch (e) {
       console.error('Erreur somme clicks:', e)
     }
