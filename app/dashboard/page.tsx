@@ -82,18 +82,18 @@ export default function Dashboard() {
     try {
       setAnalyticsLoading(true)
       
-      // Récupérer les vraies données analytics - utiliser la version simple
-      const response = await fetch('/api/analytics/dashboard-simple')
+      // Récupérer les vraies données analytics - utiliser la version qui affiche TOUT
+      const response = await fetch('/api/analytics/dashboard-all')
       if (response.ok) {
         const data = await response.json()
         console.log('📊 Dashboard stats reçues:', data)
         console.log('📊 Total clics:', data.totalClicks)
         setDashboardStats(data)
       } else {
-        console.error('Erreur API dashboard-simple:', response.status)
-        // Fallback sur l'ancienne API
+        console.error('Erreur API dashboard-all:', response.status)
+        // Fallback sur dashboard-simple
         try {
-          const fallbackResponse = await fetch('/api/analytics/dashboard-fixed')
+          const fallbackResponse = await fetch('/api/analytics/dashboard-simple')
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json()
             console.log('📊 Fallback stats:', fallbackData)
