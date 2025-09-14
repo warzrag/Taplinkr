@@ -14,23 +14,28 @@ export async function GET() {
     // Pour le moment, on affiche TOUS les clics de la plateforme
     // (on corrigera plus tard pour filtrer par utilisateur)
     
-    // 1. Compter TOUS les liens
-    const totalLinks = await prisma.link.count()
+    // 1. Compter les liens de l'utilisateur actuel
+    const totalLinks = await prisma.link.count({
+      where: { userId: session.user.id }
+    })
 
-    // 2. Calculer le total des clics - TOUTES les méthodes
+    // 2. Calculer le total des clics - seulement pour l'utilisateur actuel
     let totalClicks = 0
     
-    // Méthode 1: Compter dans la table Click
+    // Méthode 1: Compter dans la table Click pour cet utilisateur
     try {
-      const clickCount = await prisma.click.count()
+      const clickCount = await prisma.click.count({
+        where: { userId: session.user.id }
+      })
       totalClicks = Math.max(totalClicks, clickCount)
     } catch (e) {
       console.error('Erreur comptage Click:', e)
     }
     
-    // Méthode 2: Somme des clics sur TOUS les liens
+    // Méthode 2: Somme des clics sur les liens de l'utilisateur
     try {
       const links = await prisma.link.findMany({
+        where: { userId: session.user.id },
         select: { 
           clicks: true,
           views: true 
@@ -46,10 +51,11 @@ export async function GET() {
       console.error('Erreur somme clicks:', e)
     }
 
-    // 3. Compter les visiteurs uniques
+    // 3. Compter les visiteurs uniques pour cet utilisateur
     let uniqueVisitors = 0
     try {
       const visitors = await prisma.click.findMany({
+        where: { userId: session.user.id },
         distinct: ['ip'],
         select: { ip: true }
       })
@@ -58,10 +64,11 @@ export async function GET() {
       console.error('Erreur visiteurs:', e)
     }
 
-    // 4. Top 5 liens
+    // 4. Top 5 liens de l'utilisateur
     let topLinks = []
     try {
       const allLinks = await prisma.link.findMany({
+        where: { userId: session.user.id },
         orderBy: [
           { clicks: 'desc' },
           { views: 'desc' }
@@ -102,8 +109,9 @@ export async function GET() {
         clicks: []
       },
       debug: {
-        message: "Affichage de TOUS les clics de la plateforme",
-        currentUser: session.user.email
+        message: "Affichage des clics de l'utilisateur actuel uniquement",
+        currentUser: session.user.email,
+        userId: session.user.id
       }
     })
 
