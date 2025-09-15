@@ -18,7 +18,12 @@ import {
   ChevronRight,
   Activity,
   Wifi,
-  WifiOff
+  WifiOff,
+  Eye,
+  X,
+  Timer,
+  Languages,
+  Maximize2
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -62,6 +67,7 @@ export default function VisitorsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [refreshing, setRefreshing] = useState(false)
   const [filter, setFilter] = useState<'all' | 'mobile' | 'desktop'>('all')
+  const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null)
 
   const itemsPerPage = 20
 
@@ -146,6 +152,13 @@ export default function VisitorsPage() {
     } catch {
       return timestamp
     }
+  }
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return 'N/A'
+    if (seconds < 60) return `${seconds}s`
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`
+    return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`
   }
 
   if (loading && !refreshing) {
@@ -287,6 +300,9 @@ export default function VisitorsPage() {
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Statut
                     </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Détails
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -296,7 +312,8 @@ export default function VisitorsPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.02 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer"
+                    onClick={() => setSelectedVisitor(visitor)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
@@ -361,6 +378,12 @@ export default function VisitorsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(visitor.status)}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                        <Eye className="w-4 h-4" />
+                        <span className="text-sm">Voir plus</span>
+                      </button>
+                    </td>
                   </motion.tr>
                   ))}
                 </tbody>
@@ -395,6 +418,167 @@ export default function VisitorsPage() {
           </div>
           )}
         </motion.div>
+
+        {/* Modal de détails du visiteur */}
+        {selectedVisitor && (
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center p-4 z-50" onClick={() => setSelectedVisitor(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Détails du visiteur</h3>
+                  <button
+                    onClick={() => setSelectedVisitor(null)}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Informations principales */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Date de visite</h4>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {format(new Date(selectedVisitor.timestamp), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {formatTimeAgo(selectedVisitor.timestamp)}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Durée de visite</h4>
+                    <div className="flex items-center gap-2">
+                      <Timer className="w-4 h-4 text-gray-400" />
+                      <p className="text-gray-900 dark:text-gray-100">{formatDuration(selectedVisitor.duration)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Localisation */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Localisation</h4>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="text-gray-900 dark:text-gray-100 font-medium">
+                          {selectedVisitor.location.city || 'N/A'}, {selectedVisitor.location.region || 'N/A'}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400">{selectedVisitor.location.country}</p>
+                        {selectedVisitor.location.latitude && selectedVisitor.location.longitude && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Coordonnées: {selectedVisitor.location.latitude.toFixed(4)}, {selectedVisitor.location.longitude.toFixed(4)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lien visité */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Page visitée</h4>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <Link2 className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                      <div>
+                        <p className="text-gray-900 dark:text-gray-100 font-medium">{selectedVisitor.linkTitle}</p>
+                        <p className="text-gray-600 dark:text-gray-400">/{selectedVisitor.linkSlug}</p>
+                        {selectedVisitor.multiLinkClicked && (
+                          <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                            Multi-link cliqué
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informations techniques */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Informations techniques</h4>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Navigateur</p>
+                        <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.browser}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Système</p>
+                        <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.os}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Appareil</p>
+                        <div className="flex items-center gap-2">
+                          {getDeviceIcon(selectedVisitor.deviceType)}
+                          <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.device}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Résolution</p>
+                        <div className="flex items-center gap-2">
+                          <Maximize2 className="w-4 h-4 text-gray-400" />
+                          <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.screenResolution || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Langue</p>
+                        <div className="flex items-center gap-2">
+                          <Languages className="w-4 h-4 text-gray-400" />
+                          <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.language || 'N/A'}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Fuseau horaire</p>
+                        <p className="text-gray-900 dark:text-gray-100 text-sm">{selectedVisitor.timezone || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Source */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Source de trafic</h4>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <Globe className="w-5 h-5 text-gray-400 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {selectedVisitor.referrerDomain || 'Trafic direct'}
+                        </p>
+                        {selectedVisitor.referrer && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 break-all">
+                            {selectedVisitor.referrer}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* IP et User Agent */}
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="mb-1">IP: {selectedVisitor.ip}</p>
+                  <p className="break-all">User Agent: {selectedVisitor.userAgent}</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   )

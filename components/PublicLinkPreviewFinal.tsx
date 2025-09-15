@@ -8,6 +8,7 @@ interface PublicLinkPreviewProps {
 
 export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps) {
   const [clickedLinks, setClickedLinks] = useState<string[]>([])
+  const [clickId, setClickId] = useState<string | null>(null)
   
   // Tracker la vue de la page au chargement
   useEffect(() => {
@@ -29,18 +30,28 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(trackingData)
-      }).catch(console.error)
+      })
+        .then(response => response.json())
+        .then(data => {
+          // L'API retourne le clickId créé
+          if (data.clickId) {
+            setClickId(data.clickId)
+          }
+        })
+        .catch(console.error)
 
       // Tracker la durée de visite
       const startTime = Date.now()
       
       // Envoyer la durée quand l'utilisateur quitte la page
       const handleBeforeUnload = () => {
-        const duration = Math.floor((Date.now() - startTime) / 1000) // en secondes
-        navigator.sendBeacon('/api/track-duration', JSON.stringify({
-          linkId: link.id,
-          duration
-        }))
+        if (clickId) {
+          const duration = Math.floor((Date.now() - startTime) / 1000) // en secondes
+          navigator.sendBeacon('/api/track-duration', JSON.stringify({
+            clickId: clickId,
+            duration
+          }))
+        }
       }
       
       window.addEventListener('beforeunload', handleBeforeUnload)
@@ -49,7 +60,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         window.removeEventListener('beforeunload', handleBeforeUnload)
       }
     }
-  }, [link?.id])
+  }, [link?.id, clickId])
 
   if (!link) {
     return <div className="min-h-screen bg-gray-900" />
@@ -61,14 +72,19 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
       setClickedLinks([...clickedLinks, id])
     }
     
-    // Enregistrer le clic dans la base de données
+    // Enregistrer le clic dans la base de données avec données enrichies
     try {
       await fetch('/api/track-multilink-click', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ multiLinkId: id })
+        body: JSON.stringify({ 
+          multiLinkId: id,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          language: navigator.language || 'en',
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        })
       })
     } catch (error) {
       console.error('Erreur tracking clic:', error)

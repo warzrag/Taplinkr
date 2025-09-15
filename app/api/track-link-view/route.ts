@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     const os = extractOS(userAgent)
 
     // Créer aussi un enregistrement dans la table Click pour la page visiteurs
-    await prisma.click.create({
+    const clickRecord = await prisma.click.create({
       data: {
         linkId,
         userId: link.userId,
@@ -104,11 +104,12 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Retourner la réponse avec les compteurs mis à jour
+    // Retourner la réponse avec les compteurs mis à jour et le clickId
     return NextResponse.json({ 
       success: true,
       views: updatedLink.views,
-      clicks: updatedLink.clicks
+      clicks: updatedLink.clicks,
+      clickId: clickRecord.id
     })
 
   } catch (error) {

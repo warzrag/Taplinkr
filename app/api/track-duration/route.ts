@@ -3,39 +3,22 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.text()
-    const { linkId, duration } = JSON.parse(body)
-    
-    if (!linkId || !duration) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    const body = await request.json()
+    const { clickId, duration } = body
+
+    if (!clickId || typeof duration !== 'number') {
+      return NextResponse.json({ error: 'clickId et duration requis' }, { status: 400 })
     }
 
-    // Récupérer le dernier clic de ce lien dans les dernières 24h
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    
-    const lastClick = await prisma.click.findFirst({
-      where: {
-        linkId,
-        createdAt: {
-          gte: oneDayAgo
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
+    // Mettre à jour la durée de visite pour ce clic
+    await prisma.click.update({
+      where: { id: clickId },
+      data: { duration: Math.round(duration) } // Durée en secondes
     })
-
-    if (lastClick) {
-      // Mettre à jour la durée
-      await prisma.click.update({
-        where: { id: lastClick.id },
-        data: { duration }
-      })
-    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error tracking duration:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Erreur lors de l\'enregistrement de la durée:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

@@ -5,7 +5,7 @@ import { getLocationFromIP } from '@/lib/geo-location-helper'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { multiLinkId } = body
+    const { multiLinkId, screenResolution, language, timezone } = body
 
     if (!multiLinkId) {
       return NextResponse.json({ error: 'multiLinkId requis' }, { status: 400 })
@@ -57,6 +57,9 @@ export async function POST(request: NextRequest) {
         device,
         browser,
         os,
+        screenResolution: screenResolution || null,
+        language: language || null,
+        timezone: timezone || null,
         country: locationData.country,
         city: locationData.city || null,
         region: locationData.region || null,
