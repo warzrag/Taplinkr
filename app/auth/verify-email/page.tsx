@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { CheckCircle, XCircle, Loader2, Mail, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams()
@@ -38,10 +39,32 @@ export default function VerifyEmailPage() {
         setStatus('success')
         setMessage(data.message || 'Email vérifié avec succès !')
         
-        // Rediriger vers la page de connexion après 3 secondes
-        setTimeout(() => {
-          router.push('/auth/signin?verified=true')
-        }, 3000)
+        // Essayer de se connecter automatiquement avec l'email retourné
+        if (data.email) {
+          setTimeout(async () => {
+            try {
+              // Connexion automatique avec juste l'email (sans mot de passe car déjà vérifié)
+              const result = await signIn('credentials', {
+                email: data.email,
+                verified: true,
+                redirect: false
+              })
+              
+              if (result?.ok) {
+                router.push('/dashboard')
+              } else {
+                router.push('/auth/signin?verified=true')
+              }
+            } catch (error) {
+              router.push('/auth/signin?verified=true')
+            }
+          }, 1500)
+        } else {
+          // Rediriger vers la page de connexion après 3 secondes
+          setTimeout(() => {
+            router.push('/auth/signin?verified=true')
+          }, 3000)
+        }
       } else {
         setStatus('error')
         setMessage(data.message || 'Erreur lors de la vérification')

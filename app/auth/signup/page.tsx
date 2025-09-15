@@ -82,17 +82,11 @@ export default function SignUp() {
         return
       }
 
-      toast.success('Compte créé avec succès!')
-
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false
-      })
-
-      if (result?.ok) {
-        router.push('/dashboard')
-      }
+      toast.success('Compte créé avec succès! Vérifiez vos emails.')
+      
+      // Ne pas se connecter automatiquement
+      // Rediriger vers la page d'attente de vérification d'email
+      router.push('/auth/verify-email-waiting?email=' + encodeURIComponent(data.email))
     } catch (error) {
       toast.error('Erreur lors de l\'inscription')
     } finally {
