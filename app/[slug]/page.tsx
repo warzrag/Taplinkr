@@ -7,21 +7,32 @@ interface PageProps {
 }
 
 export default async function LinkPage({ params }: PageProps) {
-  const link = await prisma.link.findUnique({
-    where: { slug: params.slug },
-    include: {
-      user: true,
-      multiLinks: {
-        orderBy: { order: 'asc' }
+  try {
+    const link = await prisma.link.findUnique({
+      where: { slug: params.slug },
+      include: {
+        user: true,
+        multiLinks: {
+          orderBy: { order: 'asc' }
+        }
       }
-    }
-  })
+    })
 
-  if (!link || !link.isActive) {
+    if (!link) {
+      console.error(`Link not found for slug: ${params.slug}`)
+      notFound()
+    }
+
+    if (!link.isActive) {
+      console.error(`Link is not active: ${params.slug}`)
+      notFound()
+    }
+
+    return <PublicLinkPreviewFinal link={link} />
+  } catch (error) {
+    console.error('Error loading link:', error)
     notFound()
   }
-
-  return <PublicLinkPreviewFinal link={link} />
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -49,3 +60,7 @@ export async function generateMetadata({ params }: PageProps) {
     }
   }
 }
+
+// Force le rechargement dynamique
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
