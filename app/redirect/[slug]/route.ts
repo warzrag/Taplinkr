@@ -88,7 +88,7 @@ export async function GET(
     }
     
     // Pour tous les multi-links, rediriger vers la page de preview
-    return NextResponse.redirect(new URL(`/link/${slug}`, request.url))
+    return NextResponse.redirect(new URL(`/${slug}`, request.url))
     
   } catch (error) {
     console.error('Error in redirect handler:', error)
