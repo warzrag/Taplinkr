@@ -32,7 +32,7 @@ async function inspectDemoUser() {
         console.log(`  Slug: ${link.slug}`)
         console.log(`  Active: ${link.isActive}`)
         console.log(`  User data should show: Name="${demoUser.name}", Username="${demoUser.username}"`)
-        console.log(`  Public URL: http://localhost:3000/link/${link.slug}`)
+        console.log(`  Public URL: http://localhost:3000/${link.slug}`)
       })
     } else {
       console.log('❌ Demo user not found')

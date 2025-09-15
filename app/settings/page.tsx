@@ -181,7 +181,7 @@ export default function Settings() {
               </Link>
               
               <a
-                href={`/link/${session.user.username}`}
+                href={`/${session.user.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50"

@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       link: fullLink,
-      url: `/link/${link.slug}`
+      url: `/${link.slug}`
     }, { status: 201 })
     
   } catch (error) {

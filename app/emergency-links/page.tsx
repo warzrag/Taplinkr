@@ -92,7 +92,7 @@ export default function EmergencyLinks() {
                       </span>
                       <div className="mt-2">
                         <a 
-                          href={`https://www.taplinkr.com/link/${link.slug}`}
+                          href={`https://www.taplinkr.com/${link.slug}`}
                           target="_blank"
                           className="text-blue-400 hover:underline text-sm"
                         >

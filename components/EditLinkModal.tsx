@@ -521,7 +521,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                         </label>
                         <div className="flex">
                           <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                            localhost:3000{linkData.isDirect ? '/' : '/link/'}
+                            localhost:3000/
                           </span>
                           <motion.input
                             type="text"
