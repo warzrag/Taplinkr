@@ -30,9 +30,8 @@ export function middleware(request: NextRequest) {
   const slug = pathname.slice(1) // Enlever le / au début
 
   if (slug && slug.length > 0) {
-    // Rediriger vers notre page de redirection interne
-    const redirectUrl = new URL(`/redirect/${slug}`, request.url)
-    return NextResponse.rewrite(redirectUrl)
+    // Ne rien faire, laisser Next.js router vers /[slug]
+    return NextResponse.next()
   }
 
   return NextResponse.next()
