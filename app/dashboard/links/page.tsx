@@ -43,10 +43,12 @@ import { Link as LinkType } from '@/types'
 import { format, formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { toast } from 'react-hot-toast'
+import { usePermissions } from '@/hooks/usePermissions'
 
 export default function LinksPage() {
   const { data: session } = useSession()
   const { links, loading, refreshLinks } = useLinks()
+  const { requireLimit } = usePermissions()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
@@ -124,6 +126,16 @@ export default function LinksPage() {
     } catch (error) {
       toast.error('Erreur lors de la copie')
     }
+  }
+
+  const handleCreateClick = () => {
+    // Vérifier si l'utilisateur peut créer un nouveau lien
+    const linkCount = links.length
+    if (requireLimit('maxLinksPerPage', linkCount)) {
+      setShowCreateModal(true)
+    }
+    // Si la limite est atteinte, requireLimit affichera automatiquement un message
+    // et redirigera vers la page de pricing
   }
 
   const handleBulkAction = async (action: 'activate' | 'deactivate' | 'delete') => {
@@ -219,7 +231,7 @@ export default function LinksPage() {
               )}
               
               <motion.button
-                onClick={() => setShowCreateModal(true)}
+                onClick={handleCreateClick}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all"

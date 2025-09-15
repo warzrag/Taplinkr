@@ -43,6 +43,7 @@ import DashboardChart from '@/components/analytics/DashboardChart'
 import InteractiveWorldMap from '@/components/analytics/InteractiveWorldMap'
 import CountryBarsChart from '@/components/analytics/CountryBarsChart'
 import { fetchAnalyticsData } from '@/lib/analytics/api-wrapper'
+import { usePermissions } from '@/hooks/usePermissions'
 
 interface QuickAction {
   label: string
@@ -59,6 +60,7 @@ export default function Dashboard() {
   const { updateLinkInPreview } = useLinkUpdate()
   const { profile: userProfile } = useProfile()
   const { links: contextLinks, loading: contextLoading, refreshLinks } = useLinks()
+  const { requireLimit } = usePermissions()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
@@ -166,11 +168,21 @@ export default function Dashboard() {
     }
   }
 
+  const handleCreateClick = () => {
+    // Vérifier si l'utilisateur peut créer un nouveau lien
+    const linkCount = links.length
+    if (requireLimit('maxLinksPerPage', linkCount)) {
+      setShowCreateModal(true)
+    }
+    // Si la limite est atteinte, requireLimit affichera automatiquement un message
+    // et redirigera vers la page de pricing
+  }
+
   const quickActions: QuickAction[] = [
     {
       label: 'Créer un lien',
       icon: Plus,
-      onClick: () => setShowCreateModal(true),
+      onClick: handleCreateClick,
       gradient: 'from-blue-500 to-cyan-500',
       description: 'Lancez-vous en 2 clics ✨'
     },

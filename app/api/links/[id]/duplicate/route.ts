@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { nanoid } from 'nanoid'
+import { getUpgradeMessage } from '@/lib/permissions'
+import { checkTeamLimit } from '@/lib/team-permissions'
 
 export async function POST(
   request: NextRequest,
@@ -15,13 +17,27 @@ export async function POST(
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
+    const userId = session.user.id
+
     // Vérifier que le lien appartient à l'utilisateur
     const existingLink = await prisma.link.findFirst({
-      where: { id: params.id, userId: session.user.id }
+      where: { id: params.id, userId: userId }
     })
 
     if (!existingLink) {
       return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+    }
+
+    // Vérifier les limites du plan avant de dupliquer
+    const linkCount = await prisma.link.count({
+      where: { userId }
+    })
+
+    if (!(await checkTeamLimit(userId, 'maxLinksPerPage', linkCount))) {
+      return NextResponse.json({ 
+        error: 'Limite de liens atteinte',
+        message: getUpgradeMessage('maxLinksPerPage')
+      }, { status: 403 })
     }
 
     // Générer un nouveau slug unique

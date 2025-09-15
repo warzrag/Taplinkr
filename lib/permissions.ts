@@ -185,6 +185,8 @@ export function checkLimit(
     return true
   }
 
+  // Pour maxLinksPerPage avec plan gratuit, on veut vérifier que l'utilisateur
+  // peut créer un nouveau lien. Si currentCount >= maxLimit, il a déjà atteint la limite
   return currentCount < maxLimit
 }
 
