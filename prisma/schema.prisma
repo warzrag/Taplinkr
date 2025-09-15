@@ -136,20 +136,31 @@ model MultiLink {
 }
 
 model Click {
-  id        String   @id @default(cuid())
-  linkId    String
-  userId    String
-  ip        String?
-  userAgent String?
-  referer   String?
-  country   String?
-  city      String?
-  region    String?
-  device    String?
-  createdAt DateTime @default(now())
-  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String   @id @default(cuid())
+  linkId          String
+  userId          String
+  ip              String?
+  userAgent       String?
+  referer         String?
+  country         String?
+  city            String?
+  region          String?
+  device          String?
+  browser         String?
+  os              String?
+  screenResolution String?
+  language        String?
+  timezone        String?
+  duration        Int?     // Durée de visite en secondes
+  multiLinkId     String?  // ID du lien spécifique cliqué
+  latitude        Float?
+  longitude       Float?
+  createdAt       DateTime @default(now())
+  link            Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([linkId, createdAt])
+  @@index([userId, createdAt])
   @@map("clicks")
 }
 

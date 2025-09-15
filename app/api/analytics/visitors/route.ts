@@ -65,8 +65,19 @@ export async function GET(request: Request) {
           ip: true,
           referer: true,
           device: true,
+          browser: true,
+          os: true,
           linkId: true,
-          country: true
+          country: true,
+          city: true,
+          region: true,
+          latitude: true,
+          longitude: true,
+          screenResolution: true,
+          language: true,
+          timezone: true,
+          duration: true,
+          multiLinkId: true
         }
       }),
       prisma.click.count({
@@ -142,22 +153,29 @@ export async function GET(request: Request) {
         id: click.id,
         timestamp: click.createdAt.toISOString(),
         location: {
-          city: location.city || 'N/A',
-          region: location.region || 'N/A',
+          city: location.city || click.city || 'N/A',
+          region: location.region || click.region || 'N/A',
           country: location.country || click.country || 'Unknown',
-          countryCode: location.countryCode || 'XX'
+          countryCode: location.countryCode || 'XX',
+          latitude: click.latitude || location.latitude,
+          longitude: click.longitude || location.longitude
         },
         linkSlug: link?.slug || 'unknown',
         linkTitle: link?.title || 'Lien supprimé',
-        browser: parsedUA.browser || 'Unknown Browser',
-        os: parsedUA.os || 'Unknown OS',
+        browser: click.browser || parsedUA.browser || 'Unknown Browser',
+        os: click.os || parsedUA.os || 'Unknown OS',
         referrer: click.referer || '',
         referrerDomain: parsedReferrer.source,
         device: deviceName,
         deviceType: deviceType,
         status: status,
         ip: click.ip || '',
-        userAgent: click.userAgent || ''
+        userAgent: click.userAgent || '',
+        screenResolution: click.screenResolution || null,
+        language: click.language || null,
+        timezone: click.timezone || null,
+        duration: click.duration || null,
+        multiLinkClicked: click.multiLinkId || null
       }
     }))
 

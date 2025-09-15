@@ -5,7 +5,7 @@ import { getLocationFromIP } from '@/lib/geo-location-helper'
 
 export async function POST(request: NextRequest) {
   try {
-    const { linkId, referrer, userAgent } = await request.json()
+    const { linkId, referrer, userAgent, screenResolution, language, timezone } = await request.json()
     
     if (!linkId) {
       return NextResponse.json({ error: 'Link ID required' }, { status: 400 })
@@ -78,6 +78,10 @@ export async function POST(request: NextRequest) {
       locationData = { country: 'Unknown' }
     }
 
+    // Extraire browser et OS du userAgent
+    const browser = extractBrowser(userAgent)
+    const os = extractOS(userAgent)
+
     // Créer aussi un enregistrement dans la table Click pour la page visiteurs
     await prisma.click.create({
       data: {
@@ -87,8 +91,16 @@ export async function POST(request: NextRequest) {
         userAgent: userAgent || '',
         referer: referrer || '',
         device,
-        country: locationData.country
-        // Pas de city ni region - ces colonnes n'existent pas dans la table Click
+        browser,
+        os,
+        screenResolution,
+        language,
+        timezone,
+        country: locationData.country,
+        city: locationData.city || null,
+        region: locationData.region || null,
+        latitude: locationData.latitude || null,
+        longitude: locationData.longitude || null
       }
     })
 
@@ -133,4 +145,39 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching views:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+
+// Fonctions d'extraction du navigateur et OS
+function extractBrowser(userAgent: string): string {
+  if (!userAgent) return 'Unknown'
+  
+  if (userAgent.includes('Chrome') && !userAgent.includes('Chromium') && !userAgent.includes('Edg')) {
+    return 'Chrome'
+  } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+    return 'Safari'
+  } else if (userAgent.includes('Firefox')) {
+    return 'Firefox'
+  } else if (userAgent.includes('Edg')) {
+    return 'Edge'
+  } else if (userAgent.includes('Opera') || userAgent.includes('OPR')) {
+    return 'Opera'
+  }
+  return 'Other'
+}
+
+function extractOS(userAgent: string): string {
+  if (!userAgent) return 'Unknown'
+  
+  if (userAgent.includes('Windows')) {
+    return 'Windows'
+  } else if (userAgent.includes('Mac OS X')) {
+    return 'macOS'
+  } else if (userAgent.includes('Linux')) {
+    return 'Linux'
+  } else if (userAgent.includes('Android')) {
+    return 'Android'
+  } else if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+    return 'iOS'
+  }
+  return 'Other'
 }

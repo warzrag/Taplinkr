@@ -12,17 +12,42 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   // Tracker la vue de la page au chargement
   useEffect(() => {
     if (link?.id) {
+      // Collecter des informations supplémentaires
+      const trackingData = {
+        linkId: link.id,
+        referrer: document.referrer,
+        userAgent: navigator.userAgent,
+        screenResolution: `${window.screen.width}x${window.screen.height}`,
+        language: navigator.language || 'en',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timestamp: new Date().toISOString()
+      }
+
       fetch('/api/track-link-view', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          linkId: link.id,
-          referrer: document.referrer,
-          userAgent: navigator.userAgent
-        })
+        body: JSON.stringify(trackingData)
       }).catch(console.error)
+
+      // Tracker la durée de visite
+      const startTime = Date.now()
+      
+      // Envoyer la durée quand l'utilisateur quitte la page
+      const handleBeforeUnload = () => {
+        const duration = Math.floor((Date.now() - startTime) / 1000) // en secondes
+        navigator.sendBeacon('/api/track-duration', JSON.stringify({
+          linkId: link.id,
+          duration
+        }))
+      }
+      
+      window.addEventListener('beforeunload', handleBeforeUnload)
+      
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload)
+      }
     }
   }, [link?.id])
 

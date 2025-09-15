@@ -42,6 +42,10 @@ export async function POST(request: NextRequest) {
       locationData = { country: 'Unknown' }
     }
 
+    // Extraire browser et OS
+    const browser = extractBrowser(userAgent)
+    const os = extractOS(userAgent)
+
     // Créer un enregistrement dans la table Click
     await prisma.click.create({
       data: {
@@ -51,9 +55,14 @@ export async function POST(request: NextRequest) {
         userAgent,
         referer,
         device,
+        browser,
+        os,
         country: locationData.country,
         city: locationData.city || null,
-        region: locationData.region || null
+        region: locationData.region || null,
+        latitude: locationData.latitude || null,
+        longitude: locationData.longitude || null,
+        multiLinkId: multiLinkId
       }
     })
 
@@ -82,4 +91,39 @@ export async function POST(request: NextRequest) {
     console.error('Erreur lors de l\'enregistrement du clic MultiLink:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
+}
+
+// Fonctions d'extraction du navigateur et OS
+function extractBrowser(userAgent: string): string {
+  if (!userAgent) return 'Unknown'
+  
+  if (userAgent.includes('Chrome') && !userAgent.includes('Chromium') && !userAgent.includes('Edg')) {
+    return 'Chrome'
+  } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+    return 'Safari'
+  } else if (userAgent.includes('Firefox')) {
+    return 'Firefox'
+  } else if (userAgent.includes('Edg')) {
+    return 'Edge'
+  } else if (userAgent.includes('Opera') || userAgent.includes('OPR')) {
+    return 'Opera'
+  }
+  return 'Other'
+}
+
+function extractOS(userAgent: string): string {
+  if (!userAgent) return 'Unknown'
+  
+  if (userAgent.includes('Windows')) {
+    return 'Windows'
+  } else if (userAgent.includes('Mac OS X')) {
+    return 'macOS'
+  } else if (userAgent.includes('Linux')) {
+    return 'Linux'
+  } else if (userAgent.includes('Android')) {
+    return 'Android'
+  } else if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+    return 'iOS'
+  }
+  return 'Other'
 }

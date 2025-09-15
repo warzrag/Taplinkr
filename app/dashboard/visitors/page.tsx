@@ -33,6 +33,8 @@ interface Visitor {
     region: string
     country: string
     countryCode: string
+    latitude?: number
+    longitude?: number
   }
   linkSlug: string
   linkTitle: string
@@ -45,6 +47,11 @@ interface Visitor {
   status: 'success' | 'blocked' | 'bot'
   ip: string
   userAgent: string
+  screenResolution?: string
+  language?: string
+  timezone?: string
+  duration?: number
+  multiLinkClicked?: string
 }
 
 export default function VisitorsPage() {
