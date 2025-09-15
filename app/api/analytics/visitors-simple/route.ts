@@ -41,16 +41,7 @@ export async function GET(request: Request) {
       linkId: { in: linkIds }
     }
 
-    if (device !== 'all') {
-      if (device === 'mobile') {
-        whereConditions.OR = [
-          { device: 'mobile' },
-          { device: 'tablet' }
-        ]
-      } else if (device === 'desktop') {
-        whereConditions.device = 'desktop'
-      }
-    }
+    // Filtrage par device désactivé pour l'instant car la colonne n'existe pas
 
     // Récupérer les clics avec seulement les colonnes de base
     const [clicks, total] = await Promise.all([
@@ -65,11 +56,7 @@ export async function GET(request: Request) {
           userAgent: true,
           ip: true,
           referer: true,
-          device: true,
-          linkId: true,
-          country: true,
-          city: true,
-          region: true
+          linkId: true
         }
       }),
       prisma.click.count({
@@ -99,14 +86,14 @@ export async function GET(request: Request) {
       else if (userAgent.includes('Android')) os = 'Android'
       else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS'
       
-      // Déterminer le type d'appareil
+      // Déterminer le type d'appareil depuis le userAgent
       let deviceName = 'Desktop Computer'
       let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop'
       
-      if (click.device === 'mobile') {
+      if (userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone')) {
         deviceName = 'Mobile Phone'
         deviceType = 'mobile'
-      } else if (click.device === 'tablet') {
+      } else if (userAgent.includes('Tablet') || userAgent.includes('iPad')) {
         deviceName = 'Tablet'
         deviceType = 'tablet'
       }
@@ -115,9 +102,9 @@ export async function GET(request: Request) {
         id: click.id,
         timestamp: click.createdAt.toISOString(),
         location: {
-          city: click.city || 'N/A',
-          region: click.region || 'N/A',
-          country: click.country || 'Unknown',
+          city: 'N/A',
+          region: 'N/A',
+          country: 'Unknown',
           countryCode: 'XX'
         },
         linkSlug: link?.slug || 'unknown',
