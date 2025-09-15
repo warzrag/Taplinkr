@@ -41,6 +41,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = new PrismaClient()
+  
   try {
     const session = await getServerSession(authOptions)
     
@@ -93,6 +95,23 @@ export async function POST(request: NextRequest) {
         error: 'Limite de liens atteinte',
         message: getUpgradeMessage('maxLinksPerPage')
       }, { status: 403 })
+    }
+
+    // Si c'est un multi-link, vérifier aussi la limite de multi-links
+    if (!isDirect && multiLinks && multiLinks.length > 0) {
+      const multiLinkCount = await prisma.link.count({
+        where: { 
+          userId,
+          isDirect: false
+        }
+      })
+      
+      if (!(await checkTeamLimit(userId, 'maxMultiLinks', multiLinkCount))) {
+        return NextResponse.json({ 
+          error: 'Limite de multi-links atteinte',
+          message: getUpgradeMessage('maxMultiLinks')
+        }, { status: 403 })
+      }
     }
 
     // Validation selon le type de lien
@@ -237,5 +256,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors de la création du lien:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }

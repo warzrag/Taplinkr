@@ -17,7 +17,8 @@ const plans = [
     color: 'from-gray-500 to-gray-600',
     features: [
       '1 page de liens',
-      '10 liens maximum',
+      '1 lien maximum',
+      '1 multi-link maximum',
       'Statistiques de base',
       'Personnalisation limitée',
       'Support par email',

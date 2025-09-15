@@ -10,6 +10,7 @@ export interface UserPermissions {
 export interface PlanLimits {
   maxPages: number
   maxLinksPerPage: number
+  maxMultiLinks: number
   maxFolders: number
   hasAnalytics: boolean
   hasAdvancedAnalytics: boolean
@@ -43,7 +44,8 @@ export interface PlanLimits {
 export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
   free: {
     maxPages: 1,
-    maxLinksPerPage: 5,
+    maxLinksPerPage: 1,
+    maxMultiLinks: 1,
     maxFolders: 3, // Permettre 3 dossiers en gratuit
     hasAnalytics: true, // Basic analytics only
     hasAdvancedAnalytics: false,
@@ -76,6 +78,7 @@ export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
   standard: {
     maxPages: -1, // Unlimited
     maxLinksPerPage: -1, // Unlimited
+    maxMultiLinks: -1, // Unlimited
     maxFolders: -1, // Unlimited
     hasAnalytics: true,
     hasAdvancedAnalytics: true,
@@ -108,6 +111,7 @@ export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
   premium: {
     maxPages: -1, // Unlimited
     maxLinksPerPage: -1, // Unlimited
+    maxMultiLinks: -1, // Unlimited
     maxFolders: -1, // Unlimited
     hasAnalytics: true,
     hasAdvancedAnalytics: true,
@@ -160,7 +164,7 @@ export function checkPermission(
 
 export function checkLimit(
   user: UserPermissions,
-  limit: 'maxPages' | 'maxLinksPerPage' | 'maxFolders' | 'maxTeamMembers',
+  limit: 'maxPages' | 'maxLinksPerPage' | 'maxMultiLinks' | 'maxFolders' | 'maxTeamMembers',
   currentCount: number
 ): boolean {
   // Admin has no limits
@@ -186,7 +190,7 @@ export function checkLimit(
 
 export function getRemainingLimit(
   user: UserPermissions,
-  limit: 'maxPages' | 'maxLinksPerPage' | 'maxFolders' | 'maxTeamMembers',
+  limit: 'maxPages' | 'maxLinksPerPage' | 'maxMultiLinks' | 'maxFolders' | 'maxTeamMembers',
   currentCount: number
 ): number {
   // Admin has unlimited
@@ -212,7 +216,8 @@ export function getRemainingLimit(
 export function getUpgradeMessage(feature: keyof PlanLimits): string {
   const messages: Record<keyof PlanLimits, string> = {
     maxPages: 'Passez au plan Standard pour créer des pages illimitées',
-    maxLinksPerPage: 'Passez au plan Standard pour ajouter plus de liens',
+    maxLinksPerPage: 'Vous avez atteint la limite de 1 lien du plan gratuit. Passez au plan Pro pour créer des liens illimités',
+    maxMultiLinks: 'Vous avez atteint la limite de 1 multi-link du plan gratuit. Passez au plan Pro pour créer des multi-links illimités',
     maxFolders: 'Passez au plan Standard pour créer plus de dossiers',
     hasAnalytics: 'Cette fonctionnalité nécessite un plan payant',
     hasAdvancedAnalytics: 'Les analytics avancés nécessitent le plan Standard',
