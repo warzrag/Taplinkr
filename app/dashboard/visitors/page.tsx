@@ -88,7 +88,7 @@ export default function VisitorsPage() {
 
       console.log('Fetching visitors with params:', { currentPage, itemsPerPage, filter })
       
-      const response = await fetch(`/api/analytics/visitors?page=${currentPage}&limit=${itemsPerPage}&device=${filter}`)
+      const response = await fetch(`/api/analytics/visitors-simple?page=${currentPage}&limit=${itemsPerPage}&device=${filter}`)
       const data = await response.json()
 
       console.log('Response status:', response.status)
