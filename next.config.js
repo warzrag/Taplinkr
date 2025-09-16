@@ -44,6 +44,21 @@ const nextConfig = {
   // },
   poweredByHeader: false,
   compress: false,
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.taplinkr.com',
+          },
+        ],
+        destination: 'https://taplinkr.com/:path*',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig
