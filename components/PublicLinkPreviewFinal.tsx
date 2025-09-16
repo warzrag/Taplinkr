@@ -9,8 +9,8 @@ interface PublicLinkPreviewProps {
 export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps) {
   const [clickedLinks, setClickedLinks] = useState<string[]>([])
   const [clickId, setClickId] = useState<string | null>(null)
-  const [showAgeConfirm, setShowAgeConfirm] = useState(false)
-  const [pendingLink, setPendingLink] = useState<{id: string, url: string} | null>(null)
+  const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
+  const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   
   // Tracker la vue de la page au chargement
   useEffect(() => {
@@ -69,20 +69,19 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   }
 
   const handleLinkClick = async (id: string, url: string) => {
-    // Stocker le lien en attente et afficher la confirmation
-    setPendingLink({ id, url })
-    setShowAgeConfirm(true)
-  }
+    // Si pas encore confirmé, demander confirmation
+    if (!confirmedLinks.includes(id)) {
+      setConfirmingLink(id)
+      return
+    }
 
-  const confirmAndOpenLink = async () => {
-    if (!pendingLink) return
-
+    // Si déjà confirmé, ouvrir directement
     // Marquer comme cliqué visuellement
-    if (!clickedLinks.includes(pendingLink.id)) {
-      setClickedLinks([...clickedLinks, pendingLink.id])
+    if (!clickedLinks.includes(id)) {
+      setClickedLinks([...clickedLinks, id])
     }
     
-    // Enregistrer le clic dans la base de données avec données enrichies
+    // Enregistrer le clic dans la base de données
     try {
       await fetch('/api/track-multilink-click', {
         method: 'POST',
@@ -90,7 +89,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          multiLinkId: pendingLink.id,
+          multiLinkId: id,
           screenResolution: `${window.screen.width}x${window.screen.height}`,
           language: navigator.language || 'en',
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -101,16 +100,16 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     }
     
     // Ouvrir le lien
-    window.open(pendingLink.url, '_blank')
-    
-    // Fermer le modal
-    setShowAgeConfirm(false)
-    setPendingLink(null)
+    window.open(url, '_blank')
+  }
+
+  const confirmAge = (id: string) => {
+    setConfirmedLinks([...confirmedLinks, id])
+    setConfirmingLink(null)
   }
 
   const cancelConfirm = () => {
-    setShowAgeConfirm(false)
-    setPendingLink(null)
+    setConfirmingLink(null)
   }
 
   const profileImage = link?.profileImage || null
@@ -179,11 +178,42 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                 const linkIcon = item?.icon || item?.iconImage || null
                 const isClicked = clickedLinks.includes(linkId)
                 
+                if (confirmingLink === linkId) {
+                  // Afficher la confirmation dans le bouton
+                  return (
+                    <div
+                      key={linkId}
+                      className="w-full bg-red-900 bg-opacity-20 backdrop-blur-md border border-red-500 border-opacity-40 rounded-xl p-4 transform transition-all duration-200"
+                    >
+                      <div className="text-center">
+                        <p className="text-white text-sm mb-3">⚠️ Contenu réservé aux +18 ans</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => cancelConfirm()}
+                            className="flex-1 px-3 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg text-white text-sm font-medium transition-all"
+                          >
+                            Annuler
+                          </button>
+                          <button
+                            onClick={() => {
+                              confirmAge(linkId)
+                              setTimeout(() => handleLinkClick(linkId, linkUrl), 100)
+                            }}
+                            className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-all"
+                          >
+                            J'ai +18 ans
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+
                 return (
                   <button
                     key={linkId}
                     onClick={() => handleLinkClick(linkId, linkUrl)}
-                    className="w-full bg-white bg-opacity-95 hover:bg-opacity-100 rounded-xl p-4 shadow-lg transition-all transform hover:scale-105 flex items-center gap-3"
+                    className="w-full bg-white bg-opacity-95 hover:bg-opacity-100 rounded-xl p-4 shadow-lg transition-all transform hover:scale-105 flex items-center gap-3 group"
                   >
                     {linkIcon && (
                       <img
@@ -200,6 +230,12 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                       {linkTitle}
                     </span>
                     
+                    {!confirmedLinks.includes(linkId) && (
+                      <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded mr-2">
+                        18+
+                      </span>
+                    )}
+                    
                     {isClicked && (
                       <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
                         Visité
@@ -207,7 +243,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                     )}
                     
                     <svg 
-                      className="w-5 h-5 text-gray-400"
+                      className="w-5 h-5 text-gray-400 ml-2"
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -243,44 +279,6 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         </div>
       </div>
 
-      {/* Modal de confirmation d'âge */}
-      {showAgeConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-80">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl">
-            <div className="mb-6">
-              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Confirmation d'âge
-              </h2>
-              <p className="text-gray-600">
-                Êtes-vous majeur ?
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Ce contenu est réservé aux personnes de plus de 18 ans.
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={cancelConfirm}
-                className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all"
-              >
-                Non, j'ai moins de 18 ans
-              </button>
-              <button
-                onClick={confirmAndOpenLink}
-                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-lg"
-              >
-                Oui, j'ai plus de 18 ans
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
