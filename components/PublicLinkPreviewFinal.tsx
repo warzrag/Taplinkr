@@ -148,12 +148,6 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                 {bio}
               </p>
             )}
-            
-            {clicks > 0 && (
-              <div className="text-white text-opacity-70 text-sm">
-                {clicks} vues
-              </div>
-            )}
           </div>
 
           {/* Liste des liens */}
