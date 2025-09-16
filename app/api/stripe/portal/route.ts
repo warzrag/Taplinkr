@@ -22,8 +22,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Aucun abonnement trouvé' }, { status: 404 })
     }
 
-    // URL de retour
-    const returnUrl = `${process.env.NEXTAUTH_URL}/dashboard/billing`
+    // URL de retour - utiliser l'host de la requête pour supporter www et non-www
+    const host = request.headers.get('host') || 'taplinkr.com'
+    const protocol = host.includes('localhost') ? 'http' : 'https'
+    const returnUrl = `${protocol}://${host}/dashboard/billing`
 
     // Créer la session du portail Stripe
     const portalSession = await createPortalSession(

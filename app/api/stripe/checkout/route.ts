@@ -18,9 +18,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
     }
 
-    // URLs de redirection
-    const successUrl = `${process.env.NEXTAUTH_URL}/dashboard/billing?success=true&plan=${plan}`
-    const cancelUrl = `${process.env.NEXTAUTH_URL}/dashboard/pricing`
+    // URLs de redirection - utiliser l'host de la requête pour supporter www et non-www
+    const host = request.headers.get('host') || 'taplinkr.com'
+    const protocol = host.includes('localhost') ? 'http' : 'https'
+    const successUrl = `${protocol}://${host}/dashboard/billing?success=true&plan=${plan}`
+    const cancelUrl = `${protocol}://${host}/pricing`
 
     // Créer la session Stripe Checkout
     const checkoutSession = await createCheckoutSession(
