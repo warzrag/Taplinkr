@@ -509,25 +509,11 @@ export default function LinksPage() {
                       </div>
 
                       {/* Statistiques */}
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {(link.clicks || 0).toLocaleString()}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Clics</p>
-                        </div>
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {(link.views || 0).toLocaleString()}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Vues</p>
-                        </div>
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {link.views > 0 ? Math.round((link.clicks / link.views) * 100) : 0}%
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">CTR</p>
-                        </div>
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          {(link.clicks || 0).toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Clics</p>
                       </div>
 
                       {/* Features badges */}
