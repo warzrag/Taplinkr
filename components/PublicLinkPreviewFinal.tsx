@@ -9,6 +9,8 @@ interface PublicLinkPreviewProps {
 export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps) {
   const [clickedLinks, setClickedLinks] = useState<string[]>([])
   const [clickId, setClickId] = useState<string | null>(null)
+  const [showAgeConfirm, setShowAgeConfirm] = useState(false)
+  const [pendingLink, setPendingLink] = useState<{id: string, url: string} | null>(null)
   
   // Tracker la vue de la page au chargement
   useEffect(() => {
@@ -67,9 +69,17 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   }
 
   const handleLinkClick = async (id: string, url: string) => {
+    // Stocker le lien en attente et afficher la confirmation
+    setPendingLink({ id, url })
+    setShowAgeConfirm(true)
+  }
+
+  const confirmAndOpenLink = async () => {
+    if (!pendingLink) return
+
     // Marquer comme cliqué visuellement
-    if (!clickedLinks.includes(id)) {
-      setClickedLinks([...clickedLinks, id])
+    if (!clickedLinks.includes(pendingLink.id)) {
+      setClickedLinks([...clickedLinks, pendingLink.id])
     }
     
     // Enregistrer le clic dans la base de données avec données enrichies
@@ -80,7 +90,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          multiLinkId: id,
+          multiLinkId: pendingLink.id,
           screenResolution: `${window.screen.width}x${window.screen.height}`,
           language: navigator.language || 'en',
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -91,7 +101,16 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     }
     
     // Ouvrir le lien
-    window.open(url, '_blank')
+    window.open(pendingLink.url, '_blank')
+    
+    // Fermer le modal
+    setShowAgeConfirm(false)
+    setPendingLink(null)
+  }
+
+  const cancelConfirm = () => {
+    setShowAgeConfirm(false)
+    setPendingLink(null)
   }
 
   const profileImage = link?.profileImage || null
@@ -223,6 +242,45 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           </div>
         </div>
       </div>
+
+      {/* Modal de confirmation d'âge */}
+      {showAgeConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-80">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl">
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Confirmation d'âge
+              </h2>
+              <p className="text-gray-600">
+                Êtes-vous majeur ?
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Ce contenu est réservé aux personnes de plus de 18 ans.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={cancelConfirm}
+                className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all"
+              >
+                Non, j'ai moins de 18 ans
+              </button>
+              <button
+                onClick={confirmAndOpenLink}
+                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-lg"
+              >
+                Oui, j'ai plus de 18 ans
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
