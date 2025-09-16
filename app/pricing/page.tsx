@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, X, Sparkles, Zap, Crown, ArrowRight, Star } from 'lucide-react'
+import { Check, X, Sparkles, Zap, Crown, ArrowRight, Star, Shield, Clock, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -26,7 +26,7 @@ const plans = [
     ],
     limitations: [
       'Pas de domaine personnalisé',
-      'Bannière LinkTracker',
+      'Bannière TapLinkr',
       'Pas d\'analytics avancés',
       'Pas de priorité support'
     ],
@@ -111,14 +111,44 @@ const faqs = [
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+
+  const handleStripeCheckout = async (planId: string) => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plan: planId === 'pro' ? 'standard' : 'premium',
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        console.error('Erreur checkout:', data.error)
+        alert('Erreur lors de la création de la session de paiement')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      alert('Erreur lors de la redirection vers le paiement')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSelectPlan = (planId: string) => {
     if (planId === 'free') {
       router.push('/auth/signup')
     } else {
-      // Rediriger vers la page de paiement avec le plan sélectionné
-      router.push(`/checkout?plan=${planId}&billing=${billingCycle}`)
+      // Rediriger vers Stripe checkout
+      handleStripeCheckout(planId)
     }
   }
 
@@ -241,16 +271,19 @@ export default function PricingPage() {
                 {/* CTA */}
                 <motion.button
                   onClick={() => handleSelectPlan(plan.id)}
+                  disabled={isLoading}
                   className={`w-full py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                    plan.popular
+                    isLoading
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : plan.popular
                       ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={!isLoading ? { scale: 1.02 } : {}}
+                  whileTap={!isLoading ? { scale: 0.98 } : {}}
                 >
-                  {plan.cta}
-                  <ArrowRight className="w-4 h-4" />
+                  {isLoading ? 'Chargement...' : plan.cta}
+                  {!isLoading && <ArrowRight className="w-4 h-4" />}
                 </motion.button>
               </div>
             </motion.div>
@@ -344,7 +377,7 @@ export default function PricingPage() {
             Prêt à booster vos liens ?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Rejoignez plus de 10,000 créateurs qui utilisent LinkTracker
+            Rejoignez plus de 10,000 créateurs qui utilisent TapLinkr
           </p>
           <motion.button
             onClick={() => router.push('/auth/signup')}
@@ -361,5 +394,3 @@ export default function PricingPage() {
   )
 }
 
-// Import manquants
-import { Shield, Clock, ChevronDown } from 'lucide-react'
