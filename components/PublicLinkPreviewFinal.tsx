@@ -197,7 +197,25 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                           <button
                             onClick={() => {
                               confirmAge(linkId)
-                              setTimeout(() => handleLinkClick(linkId, linkUrl), 100)
+                              // Marquer comme cliqué
+                              if (!clickedLinks.includes(linkId)) {
+                                setClickedLinks([...clickedLinks, linkId])
+                              }
+                              // Enregistrer le clic
+                              fetch('/api/track-multilink-click', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ 
+                                  multiLinkId: linkId,
+                                  screenResolution: `${window.screen.width}x${window.screen.height}`,
+                                  language: navigator.language || 'en',
+                                  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                })
+                              }).catch(console.error)
+                              // Ouvrir le lien immédiatement
+                              window.open(linkUrl, '_blank')
                             }}
                             className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-all"
                           >
