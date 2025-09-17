@@ -208,7 +208,7 @@ export default function BillingPage() {
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Plan</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 capitalize">
-                {userPlan}
+                {userPlan === 'standard' ? 'Standard' : userPlan === 'premium' ? 'Premium' : 'Gratuit'}
               </p>
             </div>
             
@@ -249,7 +249,7 @@ export default function BillingPage() {
                   <span>Montant</span>
                 </div>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {userPlan === 'standard' ? '9.99€' : '24.99€'} / mois
+                  {userPlan === 'standard' ? '9.99€' : userPlan === 'premium' ? '24.99€' : '0€'} / mois
                 </span>
               </div>
             </div>

@@ -107,6 +107,7 @@ export function usePermissions() {
     isStandard,
     isPremium,
     getPlan,
+    userPlan: userPermissions.plan,
     permissions: {
       ...userPermissions,
       userId: session?.user?.id
