@@ -22,6 +22,8 @@ import {
 } from 'lucide-react'
 import { useTeamPermissions } from '@/hooks/useTeamPermissions'
 import { toast } from 'react-hot-toast'
+import { PLAN_LIMITS } from '@/lib/permissions'
+import { usePermissions } from '@/hooks/usePermissions'
 
 interface TeamMember {
   id: string
@@ -394,6 +396,10 @@ export default function TeamPage() {
   const totalMembers = team.members?.length || 0
   const pendingInvitations = team.invitations?.length || 0
   
+  // Obtenir la limite selon le plan (10 pour tous sauf gratuit)
+  const userPermissions = usePermissions()
+  const teamMembersLimit = userPermissions.permissions.plan === 'free' ? 0 : 10
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
@@ -417,7 +423,7 @@ export default function TeamPage() {
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-gray-500" />
                   <span className="text-gray-600 dark:text-gray-400">
-                    {totalMembers}/{team.maxMembers} membres
+                    {totalMembers}/{teamMembersLimit} membres
                   </span>
                 </div>
                 {pendingInvitations > 0 && (
@@ -431,7 +437,7 @@ export default function TeamPage() {
               </div>
             </div>
             
-            {isOwner && totalMembers < team.maxMembers && (
+            {isOwner && totalMembers < teamMembersLimit && (
               <button
                 onClick={() => setShowInviteModal(true)}
                 className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all flex items-center gap-2 shadow-lg transform hover:scale-105"

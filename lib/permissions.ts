@@ -90,7 +90,7 @@ export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
     hasApiAccess: false,
     hasWhiteLabel: true,
     hasTeamMembers: true,
-    maxTeamMembers: 3,
+    maxTeamMembers: 10,
     hasQRCode: true,
     hasCustomQRCode: true,
     hasPrioritySupport: false,

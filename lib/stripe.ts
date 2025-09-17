@@ -25,7 +25,7 @@ export const PRICING_PLANS = {
       'Géolocalisation des visiteurs',
       'Liens directs one-tap',
       'Analytics mobile détaillées',
-      'Équipe jusqu\'à 3 membres',
+      'Équipe jusqu\'à 10 membres',
       'Support prioritaire'
     ]
   },
