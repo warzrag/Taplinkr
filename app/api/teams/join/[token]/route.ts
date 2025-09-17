@@ -78,12 +78,11 @@ export async function POST(
           name,
           username,
           password: hashedPassword,
-          emailVerified: new Date(), // Email vérifié automatiquement via invitation
+          emailVerified: true, // Email vérifié automatiquement via invitation
           teamId: invitation.teamId,
           teamRole: invitation.role,
-          // Abonnement gratuit par défaut
-          subscription: 'free',
-          subscriptionStatus: 'active'
+          // Plan gratuit par défaut
+          plan: 'free'
         }
       })
 
@@ -99,7 +98,14 @@ export async function POST(
       // Créer le profil utilisateur
       await tx.userProfile.create({
         data: {
-          userId: user.id,
+          userId: user.id
+        }
+      })
+      
+      // Mettre à jour les infos du user avec bio et thème
+      await tx.user.update({
+        where: { id: user.id },
+        data: {
           bio: `Membre de l'équipe ${invitation.team.name}`,
           theme: 'gradient',
           primaryColor: '#3b82f6',
