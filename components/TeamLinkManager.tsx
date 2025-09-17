@@ -246,15 +246,15 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                   <div className="flex items-start gap-4">
                     {/* Avatar du propriétaire */}
                     <div className="relative">
-                      {link.user.image ? (
+                      {link.user?.image ? (
                         <img
                           src={link.user.image}
-                          alt={link.user.name || link.user.email}
+                          alt={link.user?.name || link.user?.email || ''}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                       ) : (
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                          {(link.user.name || link.user.email)[0].toUpperCase()}
+                          {(link.user?.name || link.user?.email || 'U')[0].toUpperCase()}
                         </div>
                       )}
                       {link.teamShared && (
@@ -281,9 +281,9 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                           <UserCheck className="w-3 h-3" />
-                          {link.user.name || link.user.email}
+                          {link.user?.name || link.user?.email || 'Utilisateur'}
                         </span>
-                        {link.lastModifier && link.lastModifier.id !== link.user.id && (
+                        {link.lastModifier && link.lastModifier.id !== link.user?.id && (
                           <span className="flex items-center gap-1">
                             <Edit3 className="w-3 h-3" />
                             Modifié par {link.lastModifier.name || link.lastModifier.email}
@@ -335,7 +335,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     <ExternalLink className="w-4 h-4" />
                   </Link>
 
-                  {canShare && !link.teamShared && link.user.id === userId && (
+                  {canShare && !link.teamShared && link.user?.id === userId && (
                     <button
                       onClick={() => shareLink(link.id)}
                       className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -345,7 +345,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     </button>
                   )}
 
-                  {canShare && link.teamShared && (link.user.id === userId || link.originalOwner?.id === userId) && (
+                  {canShare && link.teamShared && (link.user?.id === userId || link.originalOwner?.id === userId) && (
                     <button
                       onClick={() => unshareLink(link.id)}
                       className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"

@@ -599,7 +599,7 @@ export default function TeamPage() {
           >
             <TeamLinkManager
               userRole={userTeamRole}
-              userId={team.members.find(m => m.email === userEmail)?.id}
+              userId={session?.user?.id}
               teamId={team.id}
             />
           </motion.div>
