@@ -35,10 +35,7 @@ export async function POST(request: NextRequest) {
       team = await prisma.team.findFirst({
         where: {
           id: teamId,
-          OR: [
-            { ownerId: session.user.id },
-            { members: { some: { id: session.user.id, teamRole: 'admin' } } }
-          ]
+          ownerId: session.user.id
         },
         include: {
           members: true,
@@ -57,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!team) {
-      return NextResponse.json({ error: 'Aucune équipe trouvée ou permissions insuffisantes' }, { status: 404 })
+      return NextResponse.json({ error: 'Seul le propriétaire de l\'équipe peut inviter des membres' }, { status: 403 })
     }
 
     // Vérifier les limites d'équipe en tenant compte du plan du propriétaire

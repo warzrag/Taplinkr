@@ -397,7 +397,8 @@ export default function TeamPage() {
   
   // Déterminer qui est le propriétaire
   const owner = team.members?.find(member => member.teamRole === 'owner')
-  const isOwner = isAdmin() || owner?.id === permissions.userId || team.ownerId === permissions.userId
+  const isOwner = owner?.id === permissions.userId || team.ownerId === permissions.userId
+  const isTeamOwner = isOwner // Pour être plus clair
   
   // Obtenir la limite selon le plan (10 pour tous sauf gratuit)
   const teamMembersLimit = userPermissions.permissions.plan === 'free' ? 0 : 10
