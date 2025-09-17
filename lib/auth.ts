@@ -89,7 +89,8 @@ export const authOptions: NextAuthOptions = {
             username: user.username,
             role: user.role,
             plan: user.plan,
-            planExpiresAt: user.planExpiresAt
+            planExpiresAt: user.planExpiresAt,
+            sessionVersion: user.sessionVersion
           }
         } catch (error) {
           console.error('❌ Auth error:', error)
@@ -156,6 +157,7 @@ export const authOptions: NextAuthOptions = {
           ;(user as any).role = dbUser.role
           ;(user as any).plan = dbUser.plan
           ;(user as any).planExpiresAt = dbUser.planExpiresAt
+          ;(user as any).sessionVersion = dbUser.sessionVersion
           
           return true
         } catch (error) {
@@ -168,21 +170,57 @@ export const authOptions: NextAuthOptions = {
     },
     jwt: async ({ token, user }) => {
       if (user) {
+        // Première connexion : stocker les infos
         token.id = user.id
         token.username = (user as any).username
         token.role = (user as any).role
         token.plan = (user as any).plan
         token.planExpiresAt = (user as any).planExpiresAt
+        token.sessionVersion = (user as any).sessionVersion
+      } else if (token.id) {
+        // Vérifier si la session est toujours valide
+        const currentUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { 
+            sessionVersion: true, 
+            banned: true,
+            teamId: true,
+            teamRole: true,
+            role: true,
+            plan: true,
+            planExpiresAt: true
+          }
+        })
+        
+        // Si l'utilisateur n'existe plus ou est banni ou sessionVersion a changé
+        if (!currentUser || currentUser.banned || currentUser.sessionVersion !== token.sessionVersion) {
+          console.log('🚫 Session invalidée pour:', token.id)
+          return null // Invalider la session
+        }
+        
+        // Mettre à jour les infos qui peuvent avoir changé
+        token.role = currentUser.role
+        token.plan = currentUser.plan
+        token.planExpiresAt = currentUser.planExpiresAt
+        token.teamId = currentUser.teamId
+        token.teamRole = currentUser.teamRole
       }
       return token
     },
     session: async ({ session, token }) => {
+      if (!token) {
+        // Si le token est null, la session a été invalidée
+        return null
+      }
+      
       if (token) {
         session.user.id = token.id as string
         session.user.username = token.username as string
         session.user.role = token.role as string
         session.user.plan = token.plan as string
         session.user.planExpiresAt = token.planExpiresAt as Date | null
+        session.user.teamId = token.teamId as string | null
+        session.user.teamRole = token.teamRole as string | null
       }
       return session
     }

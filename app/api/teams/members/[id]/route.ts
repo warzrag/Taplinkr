@@ -39,12 +39,14 @@ export async function DELETE(
       return NextResponse.json({ error: 'Vous ne pouvez pas vous retirer de votre propre équipe' }, { status: 400 })
     }
 
-    // Retirer le membre de l'équipe
+    // Retirer le membre de l'équipe et invalider ses sessions
     await prisma.user.update({
       where: { id: params.id },
       data: {
         teamId: null,
-        teamRole: null
+        teamRole: null,
+        // Incrémenter sessionVersion pour forcer la déconnexion
+        sessionVersion: { increment: 1 }
       }
     })
 
