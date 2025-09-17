@@ -18,11 +18,6 @@ export default function BillingPage() {
   const [subscription, setSubscription] = useState<any>(null)
   const [selectedPromo, setSelectedPromo] = useState<any>(null)
   
-  // Debug
-  useEffect(() => {
-    console.log('Debug Billing - userPlan:', userPlan)
-    console.log('Debug Billing - session.user.plan:', (session?.user as any)?.plan)
-  }, [userPlan, session])
 
   useEffect(() => {
     // Vérifier si on revient de Stripe avec succès
@@ -215,9 +210,6 @@ export default function BillingPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400">Plan</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 capitalize">
                 {userPlan === 'standard' ? 'Standard' : userPlan === 'premium' ? 'Premium' : 'Gratuit'}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                (Debug: userPlan = {userPlan})
               </p>
             </div>
             
