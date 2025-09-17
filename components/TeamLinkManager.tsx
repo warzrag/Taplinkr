@@ -167,17 +167,17 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 dark:bg-gray-900">
       {/* Header avec filtres */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
               <Users className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Liens d'équipe</h2>
-              <p className="text-sm text-gray-600">Gérez et partagez vos liens avec l'équipe</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Liens d'équipe</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Gérez et partagez vos liens avec l'équipe</p>
             </div>
           </div>
 
@@ -216,13 +216,13 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
         </div>
 
         {/* Indicateur de rôle */}
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center gap-2">
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center gap-2">
           {getRoleIcon(userRole)}
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-gray-700 dark:text-gray-300">
             Votre rôle: <span className="font-medium capitalize">{userRole || 'Viewer'}</span>
           </span>
           {canShare && (
-            <span className="ml-auto text-xs text-gray-500">
+            <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
               Vous pouvez partager et modifier les liens
             </span>
           )}
@@ -239,7 +239,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -266,7 +266,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
 
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900">{link.title}</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">{link.title}</h3>
                         {link.teamShared && (
                           <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
                             Partagé
@@ -275,7 +275,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                       </div>
 
                       {link.description && (
-                        <p className="text-sm text-gray-600 mb-2">{link.description}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{link.description}</p>
                       )}
 
                       <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -335,23 +335,23 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     <ExternalLink className="w-4 h-4" />
                   </Link>
 
-                  {canShare && !link.teamShared && link.user?.id === userId && (
+                  {!link.teamShared && (
                     <button
                       onClick={() => shareLink(link.id)}
-                      className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 rounded-lg transition-all shadow-lg transform hover:scale-110"
                       title="Partager avec l'équipe"
                     >
-                      <Share2 className="w-4 h-4" />
+                      <Share2 className="w-5 h-5" />
                     </button>
                   )}
 
-                  {canShare && link.teamShared && (link.user?.id === userId || link.originalOwner?.id === userId) && (
+                  {link.teamShared && (
                     <button
                       onClick={() => unshareLink(link.id)}
-                      className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                      className="p-3 bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 rounded-lg transition-all shadow-lg transform hover:scale-110"
                       title="Retirer du partage"
                     >
-                      <Lock className="w-4 h-4" />
+                      <Lock className="w-5 h-5" />
                     </button>
                   )}
 

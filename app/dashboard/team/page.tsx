@@ -474,7 +474,7 @@ export default function TeamPage() {
               </button>
               <button
                 onClick={() => setActiveTab('links')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors bg-yellow-100 ${
                   activeTab === 'links'
                     ? 'border-purple-500 text-purple-600 dark:text-purple-400'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -482,7 +482,7 @@ export default function TeamPage() {
               >
                 <span className="flex items-center gap-2">
                   <Link2 className="w-4 h-4" />
-                  Liens partagés
+                  🔗 LIENS PARTAGES (NOUVEAU!)
                 </span>
               </button>
               {isOwner && (
