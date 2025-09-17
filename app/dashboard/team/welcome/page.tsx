@@ -1,258 +1,211 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
-  Crown, 
-  Sparkles, 
+  PartyPopper, 
   Users, 
-  CheckCircle, 
-  Zap,
-  Globe,
-  Shield,
+  ArrowRight,
+  Link as LinkIcon,
   BarChart3,
   Palette,
-  Link,
-  Gift,
-  ArrowRight
+  Shield
 } from 'lucide-react'
-import confetti from 'canvas-confetti'
+import { useSession } from 'next-auth/react'
 
 export default function TeamWelcomePage() {
-  const { data: session } = useSession()
   const router = useRouter()
-  const [teamInfo, setTeamInfo] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: session } = useSession()
+  const [teamName, setTeamName] = useState('')
 
   useEffect(() => {
-    // Lancer les confettis
-    const launchConfetti = () => {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#8b5cf6', '#ec4899', '#3b82f6']
-      })
+    // Animation de confettis simple avec CSS
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes confetti-fall {
+        to {
+          transform: translateY(100vh) rotate(360deg);
+        }
+      }
+      .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #f0f;
+        animation: confetti-fall 3s linear forwards;
+      }
+    `
+    document.head.appendChild(style)
+
+    // Créer des confettis
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const confetti = document.createElement('div')
+        confetti.className = 'confetti'
+        confetti.style.left = Math.random() * 100 + '%'
+        confetti.style.top = '-10px'
+        confetti.style.background = ['#ff0', '#f0f', '#0ff', '#0f0', '#f00'][Math.floor(Math.random() * 5)]
+        confetti.style.animationDelay = Math.random() * 3 + 's'
+        document.body.appendChild(confetti)
+        setTimeout(() => confetti.remove(), 6000)
+      }, i * 50)
     }
-    
-    setTimeout(launchConfetti, 500)
-    
-    // Récupérer les infos de l'équipe
+
+    // Récupérer le nom de l'équipe
     fetchTeamInfo()
   }, [])
 
   const fetchTeamInfo = async () => {
     try {
-      const response = await fetch('/api/user/team')
-      if (response.ok) {
-        const data = await response.json()
-        setTeamInfo(data)
+      const response = await fetch('/api/teams')
+      const data = await response.json()
+      if (data.team) {
+        setTeamName(data.team.name)
       }
     } catch (error) {
       console.error('Erreur:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
-  const premiumFeatures = [
+  const features = [
     {
-      icon: Link,
-      title: 'Liens illimités',
-      description: 'Créez autant de liens que vous voulez'
-    },
-    {
-      icon: Palette,
-      title: 'Thèmes Premium',
-      description: 'Accédez à tous les thèmes exclusifs'
+      icon: LinkIcon,
+      title: 'Créez vos liens',
+      description: 'Partagez vos pages et liens avec votre équipe'
     },
     {
       icon: BarChart3,
-      title: 'Analytics avancés',
-      description: 'Statistiques détaillées en temps réel'
+      title: 'Analytics partagées',
+      description: 'Suivez les performances de toute l\'équipe'
     },
     {
-      icon: Globe,
-      title: 'Domaine personnalisé',
-      description: 'Utilisez votre propre nom de domaine'
+      icon: Palette,
+      title: 'Templates d\'équipe',
+      description: 'Utilisez les modèles créés par vos collègues'
     },
     {
       icon: Shield,
-      title: 'Protection par mot de passe',
-      description: 'Sécurisez vos pages sensibles'
-    },
-    {
-      icon: Zap,
-      title: 'Support prioritaire',
-      description: 'Assistance rapide et personnalisée'
+      title: 'Accès sécurisé',
+      description: 'Vos données sont protégées et partagées en toute sécurité'
     }
   ]
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="animate-pulse">
-          <Crown className="w-16 h-16 text-purple-600" />
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
-      {/* Header avec animation */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-      >
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="relative z-10 px-6 py-16 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-center mb-12"
+        >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-            className="inline-flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full mb-6"
+            transition={{ 
+              type: "spring",
+              stiffness: 260,
+              damping: 20,
+              delay: 0.5 
+            }}
+            className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mb-6"
           >
-            <Crown className="w-12 h-12 text-yellow-300" />
+            <PartyPopper className="w-12 h-12 text-white" />
           </motion.div>
-          
-          <motion.h1
+
+          <motion.h1 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-4xl md:text-5xl font-bold mb-4"
+            transition={{ delay: 0.7 }}
+            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4"
           >
-            Bienvenue dans l'équipe {teamInfo?.team?.name} ! 🎉
+            Bienvenue dans l'équipe {teamName} !
           </motion.h1>
-          
-          <motion.p
+
+          <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-xl text-white/90 max-w-2xl mx-auto"
+            transition={{ delay: 0.9 }}
+            className="text-xl text-gray-600 dark:text-gray-400 mb-2"
           >
-            Félicitations ! Vous avez maintenant accès à toutes les fonctionnalités Premium
-            grâce au plan {teamInfo?.teamOwner?.plan === 'premium' ? 'Premium' : 'Standard'} de votre équipe
+            Bonjour {session?.user?.name || session?.user?.email} ! 🎉
           </motion.p>
-        </div>
 
-        {/* Effet de particules */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(20)].map((_, i) => (
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1 }}
+            className="text-lg text-gray-600 dark:text-gray-400"
+          >
+            Vous faites maintenant partie de l'équipe. Découvrez tout ce que vous pouvez faire ensemble !
+          </motion.p>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.3 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"
+        >
+          {features.map((feature, index) => (
             <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-white/20 rounded-full"
-              initial={{
-                x: Math.random() * window.innerWidth,
-                y: -10,
-              }}
-              animate={{
-                y: window.innerHeight + 10,
-                x: Math.random() * window.innerWidth,
-              }}
-              transition={{
-                duration: Math.random() * 10 + 10,
-                repeat: Infinity,
-                delay: Math.random() * 5,
-              }}
-            />
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Contenu principal */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Message de bienvenue personnalisé */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-white rounded-3xl shadow-xl p-8 mb-12"
-        >
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <Gift className="w-6 h-6 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Vos nouveaux super-pouvoirs
-            </h2>
-          </div>
-          
-          <p className="text-gray-600 mb-6">
-            En tant que membre de l'équipe, vous bénéficiez automatiquement de tous les avantages
-            du plan {teamInfo?.teamOwner?.plan === 'premium' ? 'Premium' : 'Standard'}. Aucun paiement supplémentaire n'est requis !
-          </p>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {premiumFeatures.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
-                className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100"
-              >
-                <div className="w-12 h-12 bg-white rounded-xl shadow-md flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-purple-600" />
+              key={index}
+              initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.5 + index * 0.1 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl">
+                  <feature.icon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-sm text-gray-600">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
 
-        {/* Statistiques de l'équipe */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-8 text-white mb-12"
+          transition={{ delay: 2 }}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white text-center"
         >
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <Users className="w-8 h-8 mx-auto mb-2 text-white/80" />
-              <div className="text-3xl font-bold">{teamInfo?.team?.members?.length || 1}</div>
-              <div className="text-white/80">Membres dans l'équipe</div>
-            </div>
-            <div>
-              <Sparkles className="w-8 h-8 mx-auto mb-2 text-white/80" />
-              <div className="text-3xl font-bold">∞</div>
-              <div className="text-white/80">Liens disponibles</div>
-            </div>
-            <div>
-              <CheckCircle className="w-8 h-8 mx-auto mb-2 text-white/80" />
-              <div className="text-3xl font-bold">100%</div>
-              <div className="text-white/80">Fonctionnalités débloquées</div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
-          className="flex flex-col md:flex-row gap-4 justify-center"
-        >
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
-          >
-            Commencer à créer
-            <ArrowRight className="w-5 h-5" />
-          </button>
+          <Users className="w-12 h-12 mx-auto mb-4 opacity-90" />
+          <h2 className="text-2xl font-bold mb-2">Prêt à commencer ?</h2>
+          <p className="mb-6 opacity-90">
+            Explorez votre espace d'équipe et commencez à collaborer
+          </p>
           
-          <button
-            onClick={() => router.push('/dashboard/team')}
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-900 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
-          >
-            <Users className="w-5 h-5" />
-            Voir mon équipe
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/dashboard/team')}
+              className="px-6 py-3 bg-white text-purple-600 rounded-xl font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+            >
+              <Users className="w-5 h-5" />
+              Voir mon équipe
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/dashboard')}
+              className="px-6 py-3 bg-purple-700 text-white rounded-xl font-semibold hover:bg-purple-800 transition-colors flex items-center justify-center gap-2"
+            >
+              Aller au dashboard
+              <ArrowRight className="w-5 h-5" />
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     </div>

@@ -49,6 +49,20 @@ export default function SignIn() {
       })
     }
     
+    // Afficher un message si l'utilisateur vient de rejoindre une équipe
+    if (searchParams.get('message') === 'team_joined') {
+      const teamName = searchParams.get('team')
+      toast.success(`🎉 Bienvenue ! Votre compte a été créé et vous avez rejoint l'équipe ${teamName || ''} avec succès !`, {
+        duration: 7000,
+        icon: <Users className="w-5 h-5 text-purple-600" />,
+        style: {
+          background: '#F3E8FF',
+          color: '#6B21A8',
+          fontWeight: '500'
+        }
+      })
+    }
+    
     // Pré-remplir l'email si fourni
     const email = searchParams.get('email')
     if (email) {
