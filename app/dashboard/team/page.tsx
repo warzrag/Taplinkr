@@ -71,7 +71,8 @@ export default function TeamPage() {
   const [createLoading, setCreateLoading] = useState(false)
   
   const { hasPermission, permissions, isAdmin } = useTeamPermissions()
-  const isOwner = isAdmin() || team?.owner?.id === permissions.userId
+  const owner = team?.members?.find(member => member.teamRole === 'owner')
+  const isOwner = isAdmin() || owner?.id === permissions.userId
   
   useEffect(() => {
     fetchTeam()
@@ -393,7 +394,6 @@ export default function TeamPage() {
     )
   }
   
-  const owner = team.members?.find(member => member.teamRole === 'owner')
   const totalMembers = team.members?.length || 0
   const pendingInvitations = team.invitations?.length || 0
   
