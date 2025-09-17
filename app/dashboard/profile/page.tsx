@@ -130,6 +130,8 @@ export default function ProfilePage() {
   }
 
   const isPremium = profile.plan === 'premium'
+  const isStandard = profile.plan === 'standard'
+  const isPaid = isPremium || isStandard
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -367,26 +369,28 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-2 mb-1">
                       {isPremium ? (
                         <Crown className="w-5 h-5 text-yellow-400" />
+                      ) : isStandard ? (
+                        <Zap className="w-5 h-5 text-blue-400" />
                       ) : (
                         <Sparkles className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       )}
-                      <h3 className={`font-semibold ${isPremium ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                        Plan {isPremium ? 'Premium' : 'Gratuit'}
+                      <h3 className={`font-semibold ${isPaid ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                        Plan {isPremium ? 'Premium' : isStandard ? 'Standard' : 'Gratuit'}
                       </h3>
                     </div>
-                    <p className={`text-2xl font-bold ${isPremium ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                      {isPremium ? '9,99€' : 'Gratuit'}
+                    <p className={`text-2xl font-bold ${isPaid ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                      {isPremium ? '24,99€' : isStandard ? '9,99€' : 'Gratuit'}
                     </p>
                   </div>
-                  {isPremium && (
+                  {isPaid && (
                     <div className="p-3 bg-white/20 rounded-xl">
                       <Zap className="w-6 h-6 text-yellow-400" />
                     </div>
                   )}
                 </div>
                 
-                <div className={`text-sm ${isPremium ? 'text-white/80' : 'text-gray-600 dark:text-gray-400'} mb-4`}>
-                  {isPremium ? (
+                <div className={`text-sm ${isPaid ? 'text-white/80' : 'text-gray-600 dark:text-gray-400'} mb-4`}>
+                  {isPaid ? (
                     <>Renouvellement le {new Date(profile.planExpiresAt || '').toLocaleDateString()}</>
                   ) : (
                     <>Aucun renouvellement</>
@@ -396,13 +400,14 @@ export default function ProfilePage() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => window.location.href = isPaid ? '/dashboard/billing' : '/pricing'}
                   className={`w-full py-2.5 rounded-xl font-medium ${
-                    isPremium 
+                    isPaid 
                       ? 'bg-white text-purple-600 hover:bg-gray-100' 
                       : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
                   }`}
                 >
-                  {isPremium ? 'Gérer l\'abonnement' : 'Passer au Premium'}
+                  {isPaid ? 'Gérer l\'abonnement' : 'Voir les plans'}
                 </motion.button>
               </div>
             </motion.div>
