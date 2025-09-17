@@ -30,7 +30,7 @@ model User {
   banned                  Boolean                 @default(false)
   bannedAt                DateTime?
   bannedReason            String?
-  // sessionVersion          Int                     @default(0) // TODO: À migrer
+  sessionVersion          Int                     @default(0)
   theme                   String                  @default("gradient")
   primaryColor            String                  @default("#3b82f6")
   secondaryColor          String                  @default("#8b5cf6")

@@ -23,6 +23,6 @@ declare module 'next-auth' {
     role: string
     plan: string
     planExpiresAt?: Date | null
-    // sessionVersion: number // TODO: Réactiver après migration DB
+    sessionVersion: number
   }
 }

@@ -90,7 +90,7 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
             plan: user.plan,
             planExpiresAt: user.planExpiresAt
-            // sessionVersion: user.sessionVersion // TODO: Réactiver après migration
+            sessionVersion: user.sessionVersion
           }
         } catch (error) {
           console.error('❌ Auth error:', error)
@@ -157,7 +157,7 @@ export const authOptions: NextAuthOptions = {
           ;(user as any).role = dbUser.role
           ;(user as any).plan = dbUser.plan
           ;(user as any).planExpiresAt = dbUser.planExpiresAt
-          // ;(user as any).sessionVersion = dbUser.sessionVersion // TODO: Réactiver
+          ;(user as any).sessionVersion = dbUser.sessionVersion
           
           return true
         } catch (error) {
@@ -176,13 +176,13 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role
         token.plan = (user as any).plan
         token.planExpiresAt = (user as any).planExpiresAt
-        // token.sessionVersion = (user as any).sessionVersion // TODO: Réactiver
+        token.sessionVersion = (user as any).sessionVersion
       } else if (token.id) {
         // Vérifier si la session est toujours valide
         const currentUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: { 
-            // sessionVersion: true, // TODO: Réactiver après migration
+            sessionVersion: true,
             banned: true,
             teamId: true,
             teamRole: true,
@@ -192,14 +192,15 @@ export const authOptions: NextAuthOptions = {
           }
         })
         
-        // Si l'utilisateur n'existe plus ou est banni
-        if (!currentUser || currentUser.banned) {
-          console.log('🚫 Session invalidée pour:', token.id)
+        // Si l'utilisateur n'existe plus, est banni, ou sa session a été invalidée
+        if (!currentUser || currentUser.banned || currentUser.sessionVersion !== token.sessionVersion) {
+          console.log('🚫 Session invalidée pour:', token.id, {
+            exists: !!currentUser,
+            banned: currentUser?.banned,
+            sessionMismatch: currentUser?.sessionVersion !== token.sessionVersion
+          })
           return null // Invalider la session
         }
-        
-        // TODO: Réactiver après avoir ajouté sessionVersion dans la DB
-        // || currentUser.sessionVersion !== token.sessionVersion
         
         // Mettre à jour les infos qui peuvent avoir changé
         token.role = currentUser.role

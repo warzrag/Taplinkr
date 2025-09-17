@@ -45,6 +45,15 @@ export async function DELETE(
       )
     }
 
+    // Incrémenter sessionVersion pour déconnecter immédiatement, puis supprimer
+    await prisma.user.update({
+      where: { id: params.id },
+      data: { sessionVersion: { increment: 1 } }
+    })
+    
+    // Attendre un moment pour que la déconnexion se propage
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
     // Supprimer l'utilisateur et toutes ses données associées
     await prisma.user.delete({
       where: { id: params.id }
