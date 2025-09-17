@@ -45,8 +45,8 @@ export async function DELETE(
       data: {
         teamId: null,
         teamRole: null,
-        // Incrémenter sessionVersion pour forcer la déconnexion
-        sessionVersion: { increment: 1 }
+        // TODO: Réactiver après migration DB
+        // sessionVersion: { increment: 1 }
       }
     })
 
