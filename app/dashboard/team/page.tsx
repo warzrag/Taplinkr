@@ -71,8 +71,6 @@ export default function TeamPage() {
   const [createLoading, setCreateLoading] = useState(false)
   
   const { hasPermission, permissions, isAdmin } = useTeamPermissions()
-  const owner = team?.members?.find(member => member.teamRole === 'owner')
-  const isOwner = isAdmin() || owner?.id === permissions.userId
   
   useEffect(() => {
     fetchTeam()
@@ -396,6 +394,10 @@ export default function TeamPage() {
   
   const totalMembers = team.members?.length || 0
   const pendingInvitations = team.invitations?.length || 0
+  
+  // Déterminer qui est le propriétaire
+  const owner = team.members?.find(member => member.teamRole === 'owner')
+  const isOwner = isAdmin() || owner?.id === permissions.userId || team.ownerId === permissions.userId
   
   // Obtenir la limite selon le plan (10 pour tous sauf gratuit)
   const teamMembersLimit = userPermissions.permissions.plan === 'free' ? 0 : 10
