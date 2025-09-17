@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Users, 
-  UserPlus, 
-  Mail, 
-  Shield, 
-  Settings, 
-  Check, 
-  X, 
+import {
+  Users,
+  UserPlus,
+  Mail,
+  Shield,
+  Settings,
+  Check,
+  X,
   Copy,
   MoreVertical,
   Crown,
@@ -18,12 +18,15 @@ import {
   Clock,
   Trash2,
   Send,
-  Building
+  Building,
+  Link2
 } from 'lucide-react'
 import { useTeamPermissions } from '@/hooks/useTeamPermissions'
 import { toast } from 'react-hot-toast'
 import { PLAN_LIMITS } from '@/lib/permissions'
 import { usePermissions } from '@/hooks/usePermissions'
+import TeamLinkManager from '@/components/TeamLinkManager'
+import { useSession } from 'next-auth/react'
 
 interface TeamMember {
   id: string
@@ -53,12 +56,13 @@ interface Team {
 }
 
 export default function TeamPage() {
+  const { data: session } = useSession()
   const userPermissions = usePermissions()
   const [team, setTeam] = useState<Team | null>(null)
   const [loading, setLoading] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [activeTab, setActiveTab] = useState<'members' | 'invitations' | 'settings'>('members')
+  const [activeTab, setActiveTab] = useState<'members' | 'links' | 'invitations' | 'settings'>('members')
   
   // États pour le formulaire d'invitation
   const [inviteEmail, setInviteEmail] = useState('')
@@ -398,6 +402,8 @@ export default function TeamPage() {
   // Déterminer qui est le propriétaire
   const owner = team.members?.find(member => member.teamRole === 'owner')
   const isOwner = owner?.id === permissions.userId || team.ownerId === permissions.userId
+  const userEmail = session?.user?.email || ''
+  const userTeamRole = team.members.find(m => m.email === userEmail)?.teamRole || 'viewer'
   const isTeamOwner = isOwner // Pour être plus clair
   
   // Obtenir la limite selon le plan (10 pour tous sauf gratuit)
@@ -465,6 +471,19 @@ export default function TeamPage() {
                 }`}
               >
                 Membres ({totalMembers})
+              </button>
+              <button
+                onClick={() => setActiveTab('links')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'links'
+                    ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Link2 className="w-4 h-4" />
+                  Liens partagés
+                </span>
               </button>
               {isOwner && (
                 <>
@@ -573,6 +592,19 @@ export default function TeamPage() {
           </motion.div>
         )}
         
+        {activeTab === 'links' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <TeamLinkManager
+              userRole={userTeamRole}
+              userId={team.members.find(m => m.email === userEmail)?.id}
+              teamId={team.id}
+            />
+          </motion.div>
+        )}
+
         {activeTab === 'invitations' && isOwner && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
