@@ -390,7 +390,8 @@ export default function TeamPage() {
     )
   }
   
-  const totalMembers = 1 + (team.members?.filter(member => member.id !== team.owner?.id).length || 0)
+  const owner = team.members?.find(member => member.teamRole === 'owner')
+  const totalMembers = team.members?.length || 0
   const pendingInvitations = team.invitations?.length || 0
   
   return (
@@ -499,15 +500,15 @@ export default function TeamPage() {
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-center">
                     <span className="text-white font-bold text-lg">
-                      {team.owner?.name?.[0] || team.owner?.email?.[0]?.toUpperCase() || '?'}
+                      {owner?.name?.[0] || owner?.email?.[0]?.toUpperCase() || '?'}
                     </span>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                      {team.owner?.name || team.owner?.email || 'Propriétaire'}
+                      {owner?.name || owner?.email || 'Propriétaire'}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {team.owner?.email || ''}
+                      {owner?.email || ''}
                     </p>
                   </div>
                 </div>
@@ -523,7 +524,7 @@ export default function TeamPage() {
             </div>
             
             {/* Members */}
-            {team.members?.filter(member => member.id !== team.owner?.id).map((member) => (
+            {team.members?.filter(member => member.teamRole !== 'owner').map((member) => (
               <div key={member.id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
