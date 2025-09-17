@@ -1,0 +1,157 @@
+
+> TapLinkr@1.0.0 dev
+> next dev
+
+  ▲ Next.js 14.2.29
+  - Local:        http://localhost:3000
+  - Environments: .env.local, .env.development, .env
+
+ ✓ Starting...
+ ✓ Ready in 32.3s
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 7.1s (272 modules)
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+PrismaClientInitializationError: Prisma Client could not locate the Query Engine for runtime "debian-openssl-3.0.x".
+
+This happened because Prisma Client was generated for "windows", but the actual deployment required "debian-openssl-3.0.x".
+Add "debian-openssl-3.0.x" to `binaryTargets` in the "schema.prisma" file and run `prisma generate` after saving it:
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+The following locations have been searched:
+  /mnt/d/claude/taplinkr-github/node_modules/.prisma/client
+  /mnt/d/claude/taplinkr-github/node_modules/@prisma/client
+  D:\claude\taplinkr-github\node_modules\@prisma\client
+  /tmp/prisma-engines
+  /mnt/d/claude/taplinkr-github/prisma
+    at za (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:64:805)
+    at async Object.loadLibrary (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:111:10084)
+    at async _r.loadEngine (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:112:448)
+    at async _r.instantiateLibrary (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:111:12599) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ unhandledRejection: PrismaClientInitializationError: Prisma Client could not locate the Query Engine for runtime "debian-openssl-3.0.x".
+
+This happened because Prisma Client was generated for "windows", but the actual deployment required "debian-openssl-3.0.x".
+Add "debian-openssl-3.0.x" to `binaryTargets` in the "schema.prisma" file and run `prisma generate` after saving it:
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+The following locations have been searched:
+  /mnt/d/claude/taplinkr-github/node_modules/.prisma/client
+  /mnt/d/claude/taplinkr-github/node_modules/@prisma/client
+  D:\claude\taplinkr-github\node_modules\@prisma\client
+  /tmp/prisma-engines
+  /mnt/d/claude/taplinkr-github/prisma
+    at za (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:64:805)
+    at async Object.loadLibrary (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:111:10084)
+    at async _r.loadEngine (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:112:448)
+    at async _r.instantiateLibrary (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:111:12599) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ ⨯ unhandledRejection: PrismaClientInitializationError: Prisma Client could not locate the Query Engine for runtime "debian-openssl-3.0.x".
+
+This happened because Prisma Client was generated for "windows", but the actual deployment required "debian-openssl-3.0.x".
+Add "debian-openssl-3.0.x" to `binaryTargets` in the "schema.prisma" file and run `prisma generate` after saving it:
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+The following locations have been searched:
+  /mnt/d/claude/taplinkr-github/node_modules/.prisma/client
+  /mnt/d/claude/taplinkr-github/node_modules/@prisma/client
+  D:\claude\taplinkr-github\node_modules\@prisma\client
+  /tmp/prisma-engines
+  /mnt/d/claude/taplinkr-github/prisma
+    at za (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:64:805)
+    at async Object.loadLibrary (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:111:10084)
+    at async _r.loadEngine (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:112:448)
+    at async _r.instantiateLibrary (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:111:12599) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+ POST /api/auth/signin 200 in 9709ms
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:64
+${et(e)}`}var zd=L("prisma:client:engines:resolveEnginePath"),Yd=()=>new RegExp("runtime[\\\\/]library\\.m?js$");async function za(e,t){let r={binary:process.env.PRISMA_QUERY_ENGINE_BINARY,library:process.env.PRISMA_QUERY_ENGINE_LIBRARY}[e]??t.prismaPath;if(r!==void 0)return r;let{enginePath:n,searchedLocations:i}=await Zd(e,t);if(zd("enginePath",n),n!==void 0&&e==="binary"&&li(n),n!==void 0)return t.prismaPath=n;let o=await nt(),s=t.generator?.binaryTargets??[],a=s.some(d=>d.native),l=!s.some(d=>d.value===o),u=__filename.match(Yd())===null,c={searchedLocations:i,generatorBinaryTargets:s,generator:t.generator,runtimeBinaryTarget:o,queryEngineName:Ya(e,o),expectedLocation:Er.default.relative(process.cwd(),t.dirname),errorStack:new Error().stack},p;throw a&&l?p=Wa(c):l?p=Qa(c):u?p=Ja(c):p=Ha(c),new R(p,t.clientVersion)}async function Zd(engineType,config){let binaryTarget=await nt(),searchedLocations=[],dirname=eval("__dirname"),searchLocations=[config.dirname,Er.default.resolve(dirname,".."),config.generator?.output?.value??dirname,Er.default.resolve(dirname,"../../../.prisma/client"),"/tmp/prisma-engines",config.cwd];__filename.includes("resolveEnginePath")&&searchLocations.push(Yo());for(let e of searchLocations){let t=Ya(engineType,binaryTarget),r=Er.default.join(e,t);if(searchedLocations.push(e),Ka.default.existsSync(r))return{enginePath:r,searchedLocations}}return{enginePath:void 0,searchedLocations}}function Ya(e,t){return e==="library"?qr(t,"fs"):`query-engine-${t}${t==="windows"?".exe":""}`}var Hi=k(bi());function Za(e){return e?e.replace(/".*"/g,'"X"').replace(/[\s:\[]([+-]?([0-9]*[.])?[0-9]+)/g,t=>`${t[0]}5`):""}function Xa(e){return e.split(`
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^
+
+PrismaClientInitializationError: Prisma Client could not locate the Query Engine for runtime "debian-openssl-3.0.x".
+
+This happened because Prisma Client was generated for "windows", but the actual deployment required "debian-openssl-3.0.x".
+Add "debian-openssl-3.0.x" to `binaryTargets` in the "schema.prisma" file and run `prisma generate` after saving it:
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+The following locations have been searched:
+  /mnt/d/claude/taplinkr-github/node_modules/.prisma/client
+  /mnt/d/claude/taplinkr-github/node_modules/@prisma/client
+  D:\claude\taplinkr-github\node_modules\@prisma\client
+  /tmp/prisma-engines
+  /mnt/d/claude/taplinkr-github/prisma
+    at za (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:64:805)
+    at async Object.loadLibrary (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:111:10084)
+    at async _r.loadEngine (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:112:448)
+    at async _r.instantiateLibrary (/mnt/d/claude/taplinkr-github/node_modules/@prisma/client/runtime/library.js:111:12599) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+
+Node.js v18.19.1
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+ ○ Compiling /middleware ...
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+ ✓ Compiled /middleware in 2.1s (72 modules)
+ ○ Compiling / ...
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+ ✓ Compiled / in 44.9s (1699 modules)
+ HEAD / 200 in 46252ms
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+ ✓ Compiled in 3.7s (729 modules)
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+Watchpack Error (initial scan): Error: ENODEV: no such device, lstat '/mnt/e'
+[?25h
