@@ -53,6 +53,7 @@ interface Team {
 }
 
 export default function TeamPage() {
+  const userPermissions = usePermissions()
   const [team, setTeam] = useState<Team | null>(null)
   const [loading, setLoading] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
@@ -397,7 +398,6 @@ export default function TeamPage() {
   const pendingInvitations = team.invitations?.length || 0
   
   // Obtenir la limite selon le plan (10 pour tous sauf gratuit)
-  const userPermissions = usePermissions()
   const teamMembersLimit = userPermissions.permissions.plan === 'free' ? 0 : 10
   
   return (
