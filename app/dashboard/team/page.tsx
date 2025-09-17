@@ -390,7 +390,7 @@ export default function TeamPage() {
     )
   }
   
-  const totalMembers = 1 + (team.members?.length || 0)
+  const totalMembers = 1 + (team.members?.filter(member => member.id !== team.owner?.id).length || 0)
   const pendingInvitations = team.invitations?.length || 0
   
   return (
@@ -523,7 +523,7 @@ export default function TeamPage() {
             </div>
             
             {/* Members */}
-            {team.members?.map((member) => (
+            {team.members?.filter(member => member.id !== team.owner?.id).map((member) => (
               <div key={member.id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
