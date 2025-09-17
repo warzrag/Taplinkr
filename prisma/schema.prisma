@@ -52,6 +52,8 @@ model User {
   folders                 Folder[]
   linkSchedules           LinkSchedule[]
   links                   Link[]
+  originalLinks           Link[]                  @relation("OriginalOwner")
+  modifiedLinks           Link[]                  @relation("LastModifier")
   notificationPreferences NotificationPreference?
   notifications           Notification[]
   passwordProtections     PasswordProtection[]
@@ -65,6 +67,8 @@ model User {
   ownedTeam               Team?                   @relation("TeamOwner")
   sentInvitations         TeamInvitation[]        @relation("InvitedBy")
   verificationTokens      VerificationToken[]
+  teamLinkHistory         TeamLinkHistory[]
+  teamAuditLogs           TeamAuditLog[]
 
   @@map("users")
 }
@@ -105,6 +109,10 @@ model Link {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   folderId           String?
+  teamShared         Boolean             @default(false)
+  teamId             String?
+  originalOwnerId    String?
+  lastModifiedBy     String?
   analyticsEvents    AnalyticsEvent[]
   analyticsSummary   AnalyticsSummary[]
   clickEvents        Click[]
@@ -112,10 +120,16 @@ model Link {
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   cover              File?               @relation("LinkCover", fields: [coverId], references: [id])
   folder             Folder?             @relation(fields: [folderId], references: [id])
+  team               Team?               @relation(fields: [teamId], references: [id])
+  originalOwner      User?               @relation("OriginalOwner", fields: [originalOwnerId], references: [id])
+  lastModifier       User?               @relation("LastModifier", fields: [lastModifiedBy], references: [id])
   multiLinks         MultiLink[]
   passwordAttempts   PasswordAttempt[]
   passwordProtection PasswordProtection?
+  history            TeamLinkHistory[]
+  auditLogs          TeamAuditLog[]
 
+  @@index([teamId, teamShared])
   @@map("links")
 }
 
@@ -463,10 +477,13 @@ model Team {
   
   owner           User             @relation("TeamOwner", fields: [ownerId], references: [id])
   members         User[]
+  links           Link[]
   invitations     TeamInvitation[]
   sharedTemplates TeamTemplate[]
   analytics       TeamAnalytics[]
-  
+  linkHistory     TeamLinkHistory[]
+  auditLogs       TeamAuditLog[]
+
   @@map("teams")
 }
 
@@ -561,9 +578,52 @@ model PromoRedemption {
   promoCodeId String
   userId      String
   redeemedAt  DateTime @default(now())
-  
+
   promoCode   PromoCode @relation(fields: [promoCodeId], references: [id])
-  
+
   @@unique([promoCodeId, userId]) // Un utilisateur ne peut utiliser un code qu'une fois
   @@map("promo_redemptions")
+}
+
+// Nouveau: Historique des modifications des liens d'équipe
+model TeamLinkHistory {
+  id          String   @id @default(cuid())
+  linkId      String
+  teamId      String
+  userId      String
+  action      String   // create, update, delete, share, unshare
+  changes     Json?    // JSON des changements
+  metadata    Json?    // Métadonnées supplémentaires
+  createdAt   DateTime @default(now())
+
+  link        Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([teamId, createdAt])
+  @@index([linkId, createdAt])
+  @@map("team_link_history")
+}
+
+// Nouveau: Audit trail pour la sécurité
+model TeamAuditLog {
+  id          String   @id @default(cuid())
+  teamId      String
+  userId      String
+  linkId      String?
+  action      String   // permission_change, member_added, member_removed, link_accessed, etc.
+  details     Json?    // Détails de l'action
+  ipAddress   String?
+  userAgent   String?
+  severity    String   @default("info") // info, warning, error, critical
+  createdAt   DateTime @default(now())
+
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+  link        Link?    @relation(fields: [linkId], references: [id], onDelete: SetNull)
+
+  @@index([teamId, createdAt])
+  @@index([userId, createdAt])
+  @@index([severity, createdAt])
+  @@map("team_audit_logs")
 }
