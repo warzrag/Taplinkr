@@ -67,14 +67,21 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
       const teamResponse = await fetch('/api/team/sync-links')
       if (teamResponse.ok) {
         const teamData = await teamResponse.json()
-        setTeamLinks(teamData.links)
+        setTeamLinks(teamData.links || [])
+      } else {
+        setTeamLinks([])
       }
 
       // Charger les liens personnels de l'utilisateur
       const userResponse = await fetch('/api/links')
       if (userResponse.ok) {
         const userData = await userResponse.json()
-        setUserLinks(userData.links.filter((link: any) => !link.teamShared))
+        // Vérifier que userData.links existe avant de filtrer
+        if (userData.links && Array.isArray(userData.links)) {
+          setUserLinks(userData.links.filter((link: any) => !link.teamShared))
+        } else {
+          setUserLinks([])
+        }
       }
     } catch (error) {
       console.error('Erreur chargement liens:', error)

@@ -13,9 +13,9 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    // Si pas de session, retourner un tableau vide au lieu d'une erreur
+    // Si pas de session, retourner un objet avec un tableau vide au lieu d'une erreur
     if (!session?.user?.id) {
-      return NextResponse.json([])
+      return NextResponse.json({ links: [] })
     }
 
     const links = await prisma.link.findMany({
@@ -29,7 +29,7 @@ export async function GET() {
     })
 
     console.log(`✅ API Links: ${links.length} liens trouvés pour l'utilisateur ${session.user.id}`)
-    return NextResponse.json(links)
+    return NextResponse.json({ links })
   } catch (error) {
     console.error('❌ Erreur lors de la récupération des liens:', error)
     // IMPORTANT: Retourner une erreur 500 avec un message d'erreur
