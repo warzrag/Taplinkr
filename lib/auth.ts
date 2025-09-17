@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
             username: user.username,
             role: user.role,
             plan: user.plan,
-            planExpiresAt: user.planExpiresAt
+            planExpiresAt: user.planExpiresAt,
             sessionVersion: user.sessionVersion
           }
         } catch (error) {
