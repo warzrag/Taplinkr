@@ -30,6 +30,7 @@ const features: PricingFeature[] = [
   { name: 'Liens directs', free: false, standard: true, premium: true },
   { name: 'Shield Protection', free: false, standard: true, premium: true, icon: Shield },
   { name: 'ULTRA LINK', free: false, standard: false, premium: true, icon: Zap },
+  { name: 'Membres d\'équipe', free: '0', standard: '3', premium: '10', icon: Users },
   { name: 'Analytics', free: 'Basiques', standard: 'Avancées', premium: 'Temps réel', icon: BarChart3 },
   { name: 'Support', free: 'Email', standard: 'Prioritaire', premium: 'VIP 24/7', icon: Clock },
 ]

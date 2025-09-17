@@ -25,6 +25,7 @@ export const PRICING_PLANS = {
       'Géolocalisation des visiteurs',
       'Liens directs one-tap',
       'Analytics mobile détaillées',
+      'Équipe jusqu\'à 3 membres',
       'Support prioritaire'
     ]
   },
@@ -43,6 +44,7 @@ export const PRICING_PLANS = {
       'Animations mobiles avancées',
       'Protection Shield anti-bot',
       'Analytics temps réel + heatmap des taps',
+      'Équipe jusqu\'à 10 membres',
       'Support VIP 24/7'
     ]
   }
