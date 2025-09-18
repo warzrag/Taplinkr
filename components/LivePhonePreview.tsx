@@ -209,14 +209,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               <div className="absolute top-10 left-0 right-0 h-8 flex items-center justify-between px-6 text-white text-xs z-20">
                 <div className="flex items-center space-x-1">
                   <span className="font-semibold" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>9:41</span>
-                <div className="flex items-center ml-2">
-                  <div className="w-1 h-1 bg-white rounded-full"></div>
-                  <div className="w-2 h-1 bg-white rounded-full ml-1"></div>
-                  <div className="w-3 h-1 bg-white rounded-full ml-1"></div>
-                  <div className="w-3 h-1 bg-white rounded-full ml-1"></div>
+                  <div className="flex items-center ml-2">
+                    <div className="w-1 h-1 bg-white rounded-full"></div>
+                    <div className="w-2 h-1 bg-white rounded-full ml-1"></div>
+                    <div className="w-3 h-1 bg-white rounded-full ml-1"></div>
+                    <div className="w-3 h-1 bg-white rounded-full ml-1"></div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-1">
                 <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
                   <path d="M2 17h20v2H2zm1.15-4.05L4 11.47l.85 1.48L3.3 14.43l1.55.27.85-1.48zm3.7-6.42L8 5.05l1.15 1.48L10.7 5.8l-.85 1.48L11.4 8.76 10.25 10.24 8 8zm8 0L16 5.05l1.15 1.48L18.7 5.8l-.85 1.48L19.4 8.76 18.25 10.24 16 8zm3.7 6.42L20 11.47l.85 1.48 1.55-.27-.85 1.48 1.55.27L21.7 15.9 20 14.43z"/>
                 </svg>
