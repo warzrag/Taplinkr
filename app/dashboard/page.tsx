@@ -491,7 +491,7 @@ export default function Dashboard() {
                   Voir tout
                   <ChevronRight className="w-4 h-4" />
                 </span>
-              </Link>
+              </FastLink>
             </div>
 
             {dashboardStats?.topLinks && dashboardStats.topLinks.length > 0 ? (
@@ -557,7 +557,7 @@ export default function Dashboard() {
                   Gérer
                   <ChevronRight className="w-4 h-4" />
                 </span>
-              </Link>
+              </FastLink>
             </div>
 
             {folderStats ? (
@@ -626,7 +626,7 @@ export default function Dashboard() {
                       <button className="mt-2 text-xs text-brand-600 hover:underline">
                         Créer un dossier
                       </button>
-                    </Link>
+                    </FastLink>
                   </div>
                 )}
               </div>
@@ -768,7 +768,7 @@ export default function Dashboard() {
                 </span>
                 <ArrowUpRight className="w-4 h-4 text-foreground/50 group-hover:text-brand-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </motion.button>
-            </Link>
+            </FastLink>
           </div>
 
           {links.length > 0 ? (
