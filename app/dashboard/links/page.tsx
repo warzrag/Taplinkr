@@ -38,6 +38,7 @@ import {
 import Link from 'next/link'
 import CreateLinkModal from '@/components/CreateLinkModal'
 import EditLinkModal from '@/components/EditLinkModal'
+import TeamLinksSection from '@/components/TeamLinksSection'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 import { format, formatDistanceToNow } from 'date-fns'
@@ -47,7 +48,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 
 export default function LinksPage() {
   const { data: session } = useSession()
-  const { links, loading, refreshLinks } = useLinks()
+  const { personalLinks, teamLinks, hasTeam, loading, refreshLinks } = useLinks()
   const { requireLimit } = usePermissions()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -59,12 +60,12 @@ export default function LinksPage() {
   const [selectedLinks, setSelectedLinks] = useState<string[]>([])
   const [showMoreMenu, setShowMoreMenu] = useState<string | null>(null)
 
-  // Filtrer et trier les liens
-  const filteredLinks = links
+  // Filtrer et trier les liens personnels
+  const filteredLinks = personalLinks
     .filter(link => {
       const matchesSearch = link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           link.slug.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesFilter = filterType === 'all' || 
+      const matchesFilter = filterType === 'all' ||
                           (filterType === 'active' && link.isActive) ||
                           (filterType === 'inactive' && !link.isActive)
       return matchesSearch && matchesFilter
@@ -130,7 +131,7 @@ export default function LinksPage() {
 
   const handleCreateClick = () => {
     // Vérifier si l'utilisateur peut créer un nouveau lien
-    const linkCount = links.length
+    const linkCount = personalLinks.length
     if (requireLimit('maxLinksPerPage', linkCount)) {
       setShowCreateModal(true)
     }
@@ -193,7 +194,8 @@ export default function LinksPage() {
                   Mes liens
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {links.length} {links.length > 1 ? 'liens créés' : 'lien créé'}
+                  {personalLinks.length} {personalLinks.length > 1 ? 'liens personnels' : 'lien personnel'}
+                  {teamLinks.length > 0 && ` • ${teamLinks.length} ${teamLinks.length > 1 ? 'liens d\'équipe' : 'lien d\'équipe'}`}
                 </p>
               </div>
             </div>
@@ -330,8 +332,8 @@ export default function LinksPage() {
               </div>
               <span className="text-xs text-gray-500 dark:text-gray-400">Total</span>
             </div>
-            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{links.length}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens créés</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{personalLinks.length + teamLinks.length}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total des liens</p>
           </motion.div>
 
           <motion.div
@@ -347,9 +349,9 @@ export default function LinksPage() {
               <span className="text-xs text-gray-500 dark:text-gray-400">Actifs</span>
             </div>
             <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {links.filter(l => l.isActive).length}
+              {personalLinks.filter(l => l.isActive).length}
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens en ligne</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens actifs</p>
           </motion.div>
 
           <motion.div
@@ -365,7 +367,7 @@ export default function LinksPage() {
               <span className="text-xs text-gray-500 dark:text-gray-400">Clics</span>
             </div>
             <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {links.reduce((total, link) => total + (link.clicks || 0), 0).toLocaleString()}
+              {[...personalLinks, ...teamLinks].reduce((total, link) => total + (link.clicks || 0), 0).toLocaleString()}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total des clics</p>
           </motion.div>
@@ -383,16 +385,38 @@ export default function LinksPage() {
               <span className="text-xs text-gray-500 dark:text-gray-400">CTR</span>
             </div>
             <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {links.length > 0 ? Math.round((links.reduce((total, link) => total + (link.clicks || 0), 0) / links.length)) : 0}
+              {personalLinks.length > 0 ? Math.round((personalLinks.reduce((total, link) => total + (link.clicks || 0), 0) / personalLinks.length)) : 0}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Clics moyens</p>
           </motion.div>
         </div>
 
-        {/* Liste des liens */}
-        {filteredLinks.length > 0 ? (
-          viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {/* Section des liens d'équipe */}
+        {teamLinks.length > 0 && (
+          <TeamLinksSection links={teamLinks} viewMode={viewMode} />
+        )}
+
+        {/* Liste des liens personnels */}
+        {personalLinks.length > 0 && (
+          <div className="mb-8">
+            {/* Header de section pour les liens personnels */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg">
+                <Link2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  Mes liens personnels
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {personalLinks.length} lien{personalLinks.length > 1 ? 's' : ''} créé{personalLinks.length > 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+
+            {filteredLinks.length > 0 ? (
+              viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {filteredLinks.map((link, index) => (
                 <motion.div
                   key={link.id}
@@ -706,6 +730,8 @@ export default function LinksPage() {
               )}
             </div>
           </motion.div>
+        )}
+          </div>
         )}
       </div>
 

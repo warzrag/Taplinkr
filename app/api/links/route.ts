@@ -18,18 +18,71 @@ export async function GET() {
       return NextResponse.json({ links: [] })
     }
 
-    const links = await prisma.link.findMany({
+    // Récupérer d'abord l'utilisateur avec son équipe
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { teamId: true }
+    })
+
+    // Récupérer les liens personnels de l'utilisateur
+    const personalLinks = await prisma.link.findMany({
       where: { userId: session.user.id },
       orderBy: { order: 'asc' },
       include: {
         multiLinks: {
           orderBy: { order: 'asc' }
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
         }
       }
     })
 
-    console.log(`✅ API Links: ${links.length} liens trouvés pour l'utilisateur ${session.user.id}`)
-    return NextResponse.json({ links })
+    // Récupérer les liens partagés de l'équipe (si l'utilisateur fait partie d'une équipe)
+    let teamLinks = []
+    if (user?.teamId) {
+      teamLinks = await prisma.link.findMany({
+        where: {
+          teamId: user.teamId,
+          teamShared: true,
+          userId: { not: session.user.id } // Exclure ses propres liens
+        },
+        orderBy: { order: 'asc' },
+        include: {
+          multiLinks: {
+            orderBy: { order: 'asc' }
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true
+            }
+          },
+          originalOwner: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        }
+      })
+    }
+
+    console.log(`✅ API Links: ${personalLinks.length} liens personnels et ${teamLinks.length} liens d'équipe trouvés pour l'utilisateur ${session.user.id}`)
+    return NextResponse.json({
+      links: personalLinks,
+      personalLinks,
+      teamLinks,
+      hasTeam: !!user?.teamId
+    })
   } catch (error) {
     console.error('❌ Erreur lors de la récupération des liens:', error)
     // IMPORTANT: Retourner une erreur 500 avec un message d'erreur

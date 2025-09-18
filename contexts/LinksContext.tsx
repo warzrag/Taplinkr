@@ -18,8 +18,11 @@ interface Folder {
 
 interface LinksContextType {
   links: LinkType[]
+  personalLinks: LinkType[]
+  teamLinks: LinkType[]
   folders: Folder[]
   loading: boolean
+  hasTeam: boolean
   refreshLinks: () => Promise<void>
   refreshFolders: () => Promise<void>
   refreshAll: () => Promise<void>
@@ -48,6 +51,9 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   }
   
   const [links, setLinks] = useState<LinkType[]>(getInitialLinks())
+  const [personalLinks, setPersonalLinks] = useState<LinkType[]>([])
+  const [teamLinks, setTeamLinks] = useState<LinkType[]>([])
+  const [hasTeam, setHasTeam] = useState(false)
   const [folders, setFolders] = useState<Folder[]>([])
   const [loading, setLoading] = useState(true)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
@@ -55,27 +61,40 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
   const fetchLinks = async (retryCount = 0) => {
     try {
-      // Utiliser la route temporaire qui cherche mieux les liens
-      const response = await fetch('/api/links-temp-fix', {
+      // Utiliser la nouvelle API qui retourne les liens personnels et d'équipe
+      const response = await fetch('/api/links', {
         // Ajouter un timeout de 10 secondes
         signal: AbortSignal.timeout(10000)
       })
-      
+
       if (response.ok) {
         const data = await response.json()
-        // Vérifier que c'est bien un tableau avant de mettre à jour
-        if (Array.isArray(data)) {
-          console.log('✅ LinksContext - Links chargés:', data.length)
-          setLinks(data)
-          // Sauvegarder dans le cache
-          if (typeof window !== 'undefined' && data.length > 0) {
-            localStorage.setItem('taplinkr_links_cache', JSON.stringify(data))
-            console.log('💾 Cache mis à jour')
-          }
-          return true // Succès
-        } else {
-          console.error('❌ LinksContext - Réponse invalide (pas un tableau)')
+
+        // Gérer les liens personnels
+        if (data.personalLinks && Array.isArray(data.personalLinks)) {
+          console.log('✅ LinksContext - Links personnels chargés:', data.personalLinks.length)
+          setPersonalLinks(data.personalLinks)
         }
+
+        // Gérer les liens d'équipe
+        if (data.teamLinks && Array.isArray(data.teamLinks)) {
+          console.log('✅ LinksContext - Links d\'équipe chargés:', data.teamLinks.length)
+          setTeamLinks(data.teamLinks)
+        }
+
+        // Définir si l'utilisateur a une équipe
+        setHasTeam(data.hasTeam || false)
+
+        // Combiner tous les liens pour la compatibilité
+        const allLinks = [...(data.personalLinks || []), ...(data.teamLinks || [])]
+        setLinks(allLinks)
+
+        // Sauvegarder dans le cache
+        if (typeof window !== 'undefined' && allLinks.length > 0) {
+          localStorage.setItem('taplinkr_links_cache', JSON.stringify(allLinks))
+          console.log('💾 Cache mis à jour')
+        }
+        return true // Succès
       } else {
         console.error('❌ LinksContext - Erreur serveur:', response.status)
       }
@@ -191,8 +210,11 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   return (
     <LinksContext.Provider value={{
       links,
+      personalLinks,
+      teamLinks,
       folders,
       loading,
+      hasTeam,
       refreshLinks,
       refreshFolders,
       refreshAll,
