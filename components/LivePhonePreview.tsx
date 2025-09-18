@@ -183,8 +183,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   }).slice(0, 4) // Limiter à 4 liens max pour l'affichage
 
   return (
-    <div className="flex items-center justify-center p-4 transform scale-90 xl:scale-100 2xl:scale-110"
-         style={{ transformOrigin: 'center top' }}
+    <div
+      className="flex items-center justify-center p-4 transform scale-90 xl:scale-100 2xl:scale-110"
+      style={{ transformOrigin: 'center top' }}
     >
       <div className="relative transform hover:scale-[1.02] transition-transform duration-500 ease-out">
         {/* Reflet lumineux */}
