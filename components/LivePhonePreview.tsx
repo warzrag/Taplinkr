@@ -601,18 +601,31 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             
             {/* Right side button */}
             <div className="absolute right-0 top-28 w-1 h-16 bg-gray-600 rounded-l-full"></div>
-            </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 
         {/* Live indicator */}
         <motion.div
           className="absolute -top-2 -right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center space-x-1 z-10"
-          animate={{ 
+          animate={{
             scale: [1, 1.1, 1],
           }}
-          transition={{ 
+          transition={{
             duration: 2,
             repeat: Infinity,
             ease: 'easeInOut'
