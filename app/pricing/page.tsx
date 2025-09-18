@@ -103,7 +103,7 @@ export default function PricingPage() {
             <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-brand-500/25 via-brand-500/10 to-transparent blur-3xl" />
           </div>
           <Container className="relative z-10 flex flex-col items-center gap-8 text-center">
-            <span className="badge-pill bg-white/90 text-brand-600 shadow-sm">
+            <span className="badge-pill bg-[hsl(var(--surface))]/85 text-brand-600 shadow-sm">
               <Sparkles className="h-4 w-4 text-brand-500" />
               Tarifs transparents, croissance illimitée
             </span>
@@ -114,7 +114,7 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className="flex items-center justify-center rounded-full border border-border bg-white/80 p-1 shadow-sm backdrop-blur">
+            <div className="flex items-center justify-center rounded-full border border-border/60 bg-[hsl(var(--surface))]/75 p-1 shadow-sm backdrop-blur">
               <button
                 onClick={() => setBillingCycle('monthly')}
                 className={`rounded-full px-6 py-2 text-sm font-medium transition-all ${
@@ -163,8 +163,8 @@ export default function PricingPage() {
                   transition={{ delay: index * 0.1 }}
                   className={`relative flex h-full flex-col gap-6 rounded-3xl border p-8 shadow-soft transition-transform hover:-translate-y-1 ${
                     plan.highlight
-                      ? 'border-brand-500 bg-white/95 shadow-brand'
-                      : 'border-border bg-white/90'
+                      ? 'border-brand-500 bg-[hsl(var(--surface))] shadow-brand'
+                      : 'border-border bg-[hsl(var(--surface))]/85'
                   }`}
                 >
                   {plan.badge && (
@@ -235,7 +235,7 @@ export default function PricingPage() {
               {faqs.map((faq, index) => {
                 const isOpen = expandedFaq === index
                 return (
-                  <div key={faq.question} className="rounded-2xl border border-border bg-white/90 p-5 shadow-sm">
+                  <div key={faq.question} className="rounded-2xl border border-border/60 bg-[hsl(var(--surface))]/85 p-5 shadow-sm">
                     <button
                       onClick={() => setExpandedFaq(isOpen ? null : index)}
                       className="flex w-full items-center justify-between text-left"
@@ -258,3 +258,4 @@ export default function PricingPage() {
     </div>
   )
 }
+
