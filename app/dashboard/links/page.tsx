@@ -156,7 +156,7 @@ export default function LinksPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <motion.div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
@@ -170,7 +170,7 @@ export default function LinksPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.14),_transparent_55%)] bg-background text-foreground">
+    <div className="relative min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-brand-500/12 via-transparent to-transparent" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-10 lg:px-8 lg:py-12">
         {/* Header moderne */}

@@ -233,7 +233,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.12),_transparent_55%)] bg-background text-foreground">
+    <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-10 lg:px-8 lg:py-12">
         {/* Header amélioré */}
         <motion.div 
