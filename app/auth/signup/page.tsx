@@ -33,24 +33,24 @@ interface FormData {
 const benefits = [
   {
     icon: Shield,
-    title: 'SÈcuritÈ et confiance',
-    description: 'ContrÙlez vos liens, dÈfinissez des accËs privÈs et collaborez en toute sÈrÈnitÈ.'
+    title: 'S√©curit√© et confiance',
+    description: 'Contr√¥lez vos liens, d√©finissez des acc√®s priv√©s et collaborez en toute s√©r√©nit√©.'
   },
   {
     icon: UserPlus,
     title: 'Personnalisation totale',
-    description: 'Composez une page fidËle ‡ votre identitÈ et adaptez-la ‡ chaque campagne.'
+    description: 'Composez une page fid√®le √† votre identit√© et adaptez-la √† chaque campagne.'
   },
   {
     icon: Mail,
-    title: 'Onboarding assistÈ',
-    description: 'Notre Èquipe vous accompagne pour configurer vos premiers liens et vos analytics.'
+    title: 'Onboarding assist√©',
+    description: 'Notre √©quipe vous accompagne pour configurer vos premiers liens et vos analytics.'
   },
 ]
 
 const steps = [
-  { label: 'Votre profil', description: 'PrÈsentez-vous en quelques mots' },
-  { label: 'SÈcuritÈ', description: 'CrÈez votre mot de passe' },
+  { label: 'Votre profil', description: 'Pr√©sentez-vous en quelques mots' },
+  { label: 'S√©curit√©', description: 'Cr√©ez votre mot de passe' },
 ]
 
 export default function SignUp() {
@@ -92,7 +92,7 @@ export default function SignUp() {
         return
       }
 
-      toast.success('Compte crÈÈ avec succËs ! VÈrifiez vos emails pour finaliser.')
+      toast.success('Compte cr√©√© avec succ√®s ! V√©rifiez vos emails pour finaliser.')
       router.push('/auth/verify-email-waiting?email=' + encodeURIComponent(data.email))
     } catch (error) {
       toast.error("Erreur lors de l'inscription")
@@ -117,10 +117,10 @@ export default function SignUp() {
             className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-[hsl(var(--surface))] p-10 shadow-card lg:flex"
           >
             <div className="space-y-4">
-              <span className="badge-pill bg-brand-500/10 text-brand-600">DÈcollage en quelques minutes</span>
-              <h2 className="text-3xl font-semibold">Construisez une prÈsence qui vous ressemble</h2>
+              <span className="badge-pill bg-brand-500/10 text-brand-600">D√©collage en quelques minutes</span>
+              <h2 className="text-3xl font-semibold">Construisez une pr√©sence qui vous ressemble</h2>
               <p className="text-sm text-foreground/65">
-                Centralisez vos liens, vos offres et vos contenus dans une page fluide, responsive et optimisÈe pour la conversion.
+                Centralisez vos liens, vos offres et vos contenus dans une page fluide, responsive et optimis√©e pour la conversion.
               </p>
             </div>
 
@@ -157,7 +157,7 @@ export default function SignUp() {
                 href="/auth/signin"
                 className="text-foreground/70 transition-colors hover:text-foreground"
               >
-                J'ai dÈj‡ un compte
+                J'ai d√©j√† un compte
               </Link>
             </div>
 
@@ -165,11 +165,11 @@ export default function SignUp() {
               <div className="flex justify-center">
                 <Logo size="md" showText={false} />
               </div>
-              <h1 className="text-2xl font-semibold">CrÈez votre compte</h1>
+              <h1 className="text-2xl font-semibold">Cr√©ez votre compte</h1>
               <p className="text-sm text-foreground/60">
                 {suggestedUsername
-                  ? `Votre URL rÈservÈe : taplinkr.com/${suggestedUsername}`
-                  : 'Rejoignez des milliers de crÈateurs inspirants.'}
+                  ? `Votre URL r√©serv√©e : taplinkr.com/${suggestedUsername}`
+                  : 'Rejoignez des milliers de cr√©ateurs inspirants.'}
               </p>
             </div>
 
@@ -282,10 +282,10 @@ export default function SignUp() {
                           type={showPassword ? 'text' : 'password'}
                           {...register('password', {
                             required: 'Le mot de passe est requis',
-                            minLength: { value: 8, message: 'Au moins 8 caractËres' },
+                            minLength: { value: 8, message: 'Au moins 8 caract√®res' },
                           })}
                           className="input pl-12 pr-12"
-                          placeholder="CrÈer un mot de passe"
+                          placeholder="Cr√©er un mot de passe"
                         />
                         <button
                           type="button"
@@ -310,7 +310,7 @@ export default function SignUp() {
                     </div>
 
                     <Button type="submit" fullWidth loading={loading}>
-                      CrÈer mon compte
+                      Cr√©er mon compte
                       <UserPlus className="h-4 w-4" />
                     </Button>
 
@@ -319,7 +319,7 @@ export default function SignUp() {
                       onClick={() => setStep(0)}
                       className="w-full text-sm text-foreground/50 transition-colors hover:text-foreground/70"
                     >
-                      Retour ‡ l'Ètape prÈcÈdente
+                      Retour √† l'√©tape pr√©c√©dente
                     </button>
                   </motion.div>
                 )}
@@ -329,7 +329,7 @@ export default function SignUp() {
             <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
               <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Conseil</p>
               <p className="mt-2 text-sm text-foreground/70">
-                Une fois inscrit, personnalisez votre page avec nos templates premium et activez líanalytics avancÈ en 1 clic.
+                Une fois inscrit, personnalisez votre page avec nos templates premium et activez l'analytics avanc√© en 1 clic.
               </p>
             </div>
           </motion.div>
