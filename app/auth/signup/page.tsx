@@ -1,4 +1,4 @@
-ï»¿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -33,24 +33,24 @@ interface FormData {
 const benefits = [
   {
     icon: Shield,
-    title: 'SÃ©curitÃ© et confiance',
-    description: 'ContrÃ´lez vos liens, dÃ©finissez des accÃ¨s privÃ©s et collaborez en toute sÃ©rÃ©nitÃ©.'
+    title: 'Sécurité et confiance',
+    description: 'Contrôlez vos liens, définissez des accès privés et collaborez en toute sérénité.'
   },
   {
     icon: UserPlus,
     title: 'Personnalisation totale',
-    description: 'Composez une page fidÃ¨le Ã  votre identitÃ© et adaptez-la Ã  chaque campagne.'
+    description: 'Composez une page fidèle à votre identité et adaptez-la à chaque campagne.'
   },
   {
     icon: Mail,
-    title: 'Onboarding assistÃ©',
-    description: 'Notre Ã©quipe vous accompagne pour configurer vos premiers liens et vos analytics.'
+    title: 'Onboarding assisté',
+    description: 'Notre équipe vous accompagne pour configurer vos premiers liens et vos analytics.'
   },
 ]
 
 const steps = [
-  { label: 'Votre profil', description: 'PrÃ©sentez-vous en quelques mots' },
-  { label: 'SÃ©curitÃ©', description: 'CrÃ©ez votre mot de passe' },
+  { label: 'Votre profil', description: 'Présentez-vous en quelques mots' },
+  { label: 'Sécurité', description: 'Créez votre mot de passe' },
 ]
 
 export default function SignUp() {
@@ -92,7 +92,7 @@ export default function SignUp() {
         return
       }
 
-      toast.success('Compte crÃ©Ã© avec succÃ¨s ! VÃ©rifiez vos emails pour finaliser.')
+      toast.success('Compte créé avec succès ! Vérifiez vos emails pour finaliser.')
       router.push('/auth/verify-email-waiting?email=' + encodeURIComponent(data.email))
     } catch (error) {
       toast.error("Erreur lors de l'inscription")
@@ -114,19 +114,19 @@ export default function SignUp() {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-white/92 p-10 shadow-card lg:flex"
+            className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-[hsl(var(--surface))] p-10 shadow-card lg:flex"
           >
             <div className="space-y-4">
-              <span className="badge-pill bg-brand-500/10 text-brand-600">DÃ©collage en quelques minutes</span>
-              <h2 className="text-3xl font-semibold">Construisez une prÃ©sence qui vous ressemble</h2>
+              <span className="badge-pill bg-brand-500/10 text-brand-600">Décollage en quelques minutes</span>
+              <h2 className="text-3xl font-semibold">Construisez une présence qui vous ressemble</h2>
               <p className="text-sm text-foreground/65">
-                Centralisez vos liens, vos offres et vos contenus dans une page fluide, responsive et optimisÃ©e pour la conversion.
+                Centralisez vos liens, vos offres et vos contenus dans une page fluide, responsive et optimisée pour la conversion.
               </p>
             </div>
 
             <div className="space-y-6">
               {benefits.map((benefit) => (
-                <div key={benefit.title} className="flex gap-4 rounded-2xl border border-border/80 bg-white/95 p-4 shadow-sm">
+                <div key={benefit.title} className="flex gap-4 rounded-2xl border border-border/80 bg-[hsl(var(--surface-muted))] p-4 shadow-sm">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600">
                     <benefit.icon className="h-5 w-5" />
                   </div>
@@ -143,7 +143,7 @@ export default function SignUp() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="mx-auto w-full max-w-md rounded-3xl border border-border bg-white/95 p-8 shadow-card backdrop-blur"
+            className="mx-auto w-full max-w-md rounded-3xl border border-border bg-[hsl(var(--surface))] p-8 shadow-card backdrop-blur"
           >
             <div className="mb-6 flex items-center justify-between text-sm">
               <Link
@@ -157,7 +157,7 @@ export default function SignUp() {
                 href="/auth/signin"
                 className="text-foreground/70 transition-colors hover:text-foreground"
               >
-                J'ai dÃ©jÃ  un compte
+                J'ai déjà un compte
               </Link>
             </div>
 
@@ -165,11 +165,11 @@ export default function SignUp() {
               <div className="flex justify-center">
                 <Logo size="md" showText={false} />
               </div>
-              <h1 className="text-2xl font-semibold">CrÃ©ez votre compte</h1>
+              <h1 className="text-2xl font-semibold">Créez votre compte</h1>
               <p className="text-sm text-foreground/60">
                 {suggestedUsername
-                  ? `Votre URL rÃ©servÃ©e : taplinkr.com/${suggestedUsername}`
-                  : 'Rejoignez des milliers de crÃ©ateurs inspirants.'}
+                  ? `Votre URL réservée : taplinkr.com/${suggestedUsername}`
+                  : 'Rejoignez des milliers de créateurs inspirants.'}
               </p>
             </div>
 
@@ -185,7 +185,7 @@ export default function SignUp() {
                         ? 'border-brand-500 bg-brand-500/10 text-brand-600'
                         : completed
                           ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-600'
-                          : 'border-border bg-white/90 text-foreground/60'
+                          : 'border-border bg-[hsl(var(--surface))] text-foreground/60'
                     }`}
                   >
                     <p className="font-semibold">{item.label}</p>
@@ -282,10 +282,10 @@ export default function SignUp() {
                           type={showPassword ? 'text' : 'password'}
                           {...register('password', {
                             required: 'Le mot de passe est requis',
-                            minLength: { value: 8, message: 'Au moins 8 caractÃ¨res' },
+                            minLength: { value: 8, message: 'Au moins 8 caractères' },
                           })}
                           className="input pl-12 pr-12"
-                          placeholder="CrÃ©er un mot de passe"
+                          placeholder="Créer un mot de passe"
                         />
                         <button
                           type="button"
@@ -310,7 +310,7 @@ export default function SignUp() {
                     </div>
 
                     <Button type="submit" fullWidth loading={loading}>
-                      CrÃ©er mon compte
+                      Créer mon compte
                       <UserPlus className="h-4 w-4" />
                     </Button>
 
@@ -319,7 +319,7 @@ export default function SignUp() {
                       onClick={() => setStep(0)}
                       className="w-full text-sm text-foreground/50 transition-colors hover:text-foreground/70"
                     >
-                      Retour Ã  l'Ã©tape prÃ©cÃ©dente
+                      Retour à l'étape précédente
                     </button>
                   </motion.div>
                 )}
@@ -329,7 +329,7 @@ export default function SignUp() {
             <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
               <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Conseil</p>
               <p className="mt-2 text-sm text-foreground/70">
-                Une fois inscrit, personnalisez votre page avec nos templates premium et activez lâ€™analytics avancÃ© en 1 clic.
+                Une fois inscrit, personnalisez votre page avec nos templates premium et activez l’analytics avancé en 1 clic.
               </p>
             </div>
           </motion.div>

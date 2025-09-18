@@ -1,4 +1,4 @@
-ï»¿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { signIn } from 'next-auth/react'
@@ -32,18 +32,18 @@ interface FormData {
 const highlights = [
   {
     icon: Shield,
-    title: 'SÃ©curitÃ© avancÃ©e',
-    description: 'Sessions chiffrÃ©es, double authentification et gestion des Ã©quipes sÃ©curisÃ©e.'
+    title: 'Sécurité avancée',
+    description: 'Sessions chiffrées, double authentification et gestion des équipes sécurisée.'
   },
   {
     icon: Zap,
     title: 'Analytics en direct',
-    description: 'Visualisez vos clics et conversions en temps rÃ©el depuis le dashboard.'
+    description: 'Visualisez vos clics et conversions en temps réel depuis le dashboard.'
   },
   {
     icon: Users,
     title: 'Collaboration fluide',
-    description: 'Invitez votre Ã©quipe, attribuez des rÃ´les et crÃ©ez ensemble vos campagnes.'
+    description: 'Invitez votre équipe, attribuez des rôles et créez ensemble vos campagnes.'
   },
 ]
 
@@ -57,14 +57,14 @@ export default function SignIn() {
 
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
-      toast.success('Email vÃ©rifiÃ© avec succÃ¨s ! Vous pouvez maintenant vous connecter.', {
+      toast.success('Email vérifié avec succès ! Vous pouvez maintenant vous connecter.', {
         duration: 5000,
         icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
       })
     }
 
     if (searchParams.get('message') === 'account_created') {
-      toast.success('Compte crÃ©Ã© avec succÃ¨s ! Connectez-vous pour accÃ©der Ã  votre espace.', {
+      toast.success('Compte créé avec succès ! Connectez-vous pour accéder à votre espace.', {
         duration: 5000,
         icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
       })
@@ -72,7 +72,7 @@ export default function SignIn() {
 
     if (searchParams.get('message') === 'login_to_join') {
       const teamName = searchParams.get('team')
-      toast.success(`Connectez-vous pour rejoindre l'Ã©quipe ${teamName || ''}`, {
+      toast.success(`Connectez-vous pour rejoindre l'équipe ${teamName || ''}`, {
         duration: 5000,
         icon: <Users className="h-5 w-5 text-brand-500" />,
       })
@@ -90,12 +90,12 @@ export default function SignIn() {
 
       if (result?.error) {
         if (result.error === 'EMAIL_NOT_VERIFIED') {
-          toast.error('Veuillez vÃ©rifier votre email avant de vous connecter', { duration: 5000 })
+          toast.error('Veuillez vérifier votre email avant de vous connecter', { duration: 5000 })
         } else {
           toast.error('Email ou mot de passe incorrect')
         }
       } else if (result?.ok) {
-        toast.success('Connexion rÃ©ussie !')
+        toast.success('Connexion réussie !')
         const inviteToken = searchParams.get('invite')
         const welcomeTeam = searchParams.get('welcome') === 'team'
 
@@ -127,19 +127,19 @@ export default function SignIn() {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-white/90 p-10 shadow-card lg:flex"
+            className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-[hsl(var(--surface))] p-10 shadow-card lg:flex"
           >
             <div className="space-y-4">
               <span className="badge-pill bg-brand-500/10 text-brand-600">Dashboard TapLinkr</span>
-              <h2 className="text-3xl font-semibold">GÃ©rez tout depuis un seul espace</h2>
+              <h2 className="text-3xl font-semibold">Gérez tout depuis un seul espace</h2>
               <p className="text-sm text-foreground/65">
-                Visualisez vos analytics, publiez de nouveaux liens, pilotez vos campagnes et collaborez avec votre Ã©quipe en toute sÃ©curitÃ©.
+                Visualisez vos analytics, publiez de nouveaux liens, pilotez vos campagnes et collaborez avec votre équipe en toute sécurité.
               </p>
             </div>
 
             <div className="space-y-6">
               {highlights.map((item) => (
-                <div key={item.title} className="flex gap-4 rounded-2xl border border-border/80 bg-white/90 p-4 shadow-sm">
+                <div key={item.title} className="flex gap-4 rounded-2xl border border-border/80 bg-[hsl(var(--surface-muted))] p-4 shadow-sm">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600">
                     <item.icon className="h-5 w-5" />
                   </div>
@@ -156,7 +156,7 @@ export default function SignIn() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="mx-auto w-full max-w-md rounded-3xl border border-border bg-white/95 p-8 shadow-card backdrop-blur"
+            className="mx-auto w-full max-w-md rounded-3xl border border-border bg-[hsl(var(--surface))] p-8 shadow-card backdrop-blur"
           >
             <div className="mb-6 flex items-center justify-between text-sm">
               <Link
@@ -170,7 +170,7 @@ export default function SignIn() {
                 href="/auth/signup"
                 className="text-foreground/70 transition-colors hover:text-foreground"
               >
-                CrÃ©er un compte
+                Créer un compte
               </Link>
             </div>
 
@@ -179,7 +179,7 @@ export default function SignIn() {
                 <Logo size="md" showText={false} />
               </div>
               <h1 className="text-2xl font-semibold">Bon retour !</h1>
-              <p className="text-sm text-foreground/60">Connectez-vous pour retrouver votre espace personnalisÃ©.</p>
+              <p className="text-sm text-foreground/60">Connectez-vous pour retrouver votre espace personnalisé.</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -218,7 +218,7 @@ export default function SignIn() {
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-foreground">Mot de passe</label>
                   <Link href="/auth/forgot-password" className="text-xs text-brand-600 hover:text-brand-500">
-                    Mot de passe oubliÃ© ?
+                    Mot de passe oublié ?
                   </Link>
                 </div>
                 <div className="relative">
@@ -260,7 +260,7 @@ export default function SignIn() {
             <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
               <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Astuce</p>
               <p className="mt-2 text-sm text-foreground/70">
-                Activez le Mode Focus dans votre dashboard pour voir lâ€™impact de vos nouveaux liens en temps rÃ©el.
+                Activez le Mode Focus dans votre dashboard pour voir l’impact de vos nouveaux liens en temps réel.
               </p>
             </div>
           </motion.div>
