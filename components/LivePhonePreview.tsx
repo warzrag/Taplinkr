@@ -183,7 +183,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   }).slice(0, 4) // Limiter à 4 liens max pour l'affichage
 
   return (
-    <div className="w-full xl:w-80 p-8 flex items-center justify-center h-full relative z-10"
+    <div className="w-full xl:w-80 p-8 flex items-start justify-center h-full relative z-10 pt-4"
     >
       <div className="relative">
         {/* iPhone Frame */}

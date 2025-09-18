@@ -22,7 +22,7 @@ export default function EditPhonePreview({ isVisible, user, links }: EditPhonePr
             damping: 25,
             stiffness: 200
           }}
-          className="hidden xl:block fixed right-24 top-0 h-full bg-transparent"
+          className="hidden xl:block fixed right-24 top-20 h-full bg-transparent"
           style={{ zIndex: 9999 }}
         >
           <LivePhonePreview user={user} links={links} />
