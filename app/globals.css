@@ -276,6 +276,7 @@
     }
   }
 
+  /* Animation border-spin désactivée pour éviter les bugs
   @keyframes border-spin {
     0% {
       transform: rotate(0deg);
@@ -284,6 +285,7 @@
       transform: rotate(360deg);
     }
   }
+  */
 
   .animate-pulse-glow {
     animation: pulse-glow 2.6s ease-in-out infinite;
@@ -293,25 +295,41 @@
     animation: particle-float 3s ease-out infinite;
   }
 
+  /* Animation border-spin désactivée
   .animate-border-spin {
     animation: border-spin 3s linear infinite;
   }
+  */
 
+  /* Scrollbar simple sans animation */
   ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.06);
-    border-radius: 9999px;
+    background: transparent;
+    border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #6366f1, #3b82f6);
-    border-radius: 9999px;
+    background: #d1d5db; /* Gris simple */
+    border-radius: 4px;
+    border: 2px solid transparent;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #4f46e5, #2563eb);
+    background: #9ca3af; /* Gris plus foncé au survol */
+  }
+
+  /* Mode sombre */
+  @media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-thumb {
+      background: #4b5563;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6b7280;
+    }
   }
 }

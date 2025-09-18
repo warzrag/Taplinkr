@@ -153,7 +153,7 @@ body.navigating::before {
 /* 13. Optimisation des listes longues */
 .virtual-list {
   contain: strict;
-  will-change: scroll-position;
+  /* will-change: scroll-position; Désactivé car peut causer des bugs */
 }
 
 .virtual-list-item {
