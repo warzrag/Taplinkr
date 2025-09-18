@@ -40,8 +40,8 @@ export function SiteHeader() {
       className={cn(
         'sticky top-0 z-50 transition-all border-b border-border/60 bg-[hsl(var(--surface))]/80 backdrop-blur',
         scrolled
-          ? 'bg-white/90 backdrop-blur border-b border-border/80 shadow-sm'
-          : 'bg-white/60 backdrop-blur'
+          ? 'bg-[hsl(var(--surface))] border-b border-border shadow-sm'
+          : 'bg-[hsl(var(--surface))]/80 border-b border-border/60'
       )}
     >
       <Container className="flex h-16 items-center justify-between">
