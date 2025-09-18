@@ -183,7 +183,7 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               className="space-y-8"
             >
-              <span className="badge-pill bg-white/80 text-brand-600 shadow-sm">
+              <span className="badge-pill bg-[hsl(var(--surface))]/80 text-brand-600 shadow-sm">
                 <Sparkles className="h-4 w-4 text-brand-500" />
                 TapLinkr 2.0 est arrivé
               </span>
@@ -199,14 +199,14 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="grid gap-6 rounded-3xl border border-border/80 bg-white/90 p-6 shadow-card backdrop-blur">
+              <div className="grid gap-6 rounded-3xl border border-border/80 bg-[hsl(var(--surface))] p-6 shadow-card backdrop-blur">
                 <div>
                   <p className="text-sm font-medium text-foreground/70">
                     Réservez votre URL personnalisée
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <div className="flex flex-1 items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 shadow-sm focus-within:border-brand-500">
+                  <div className="flex flex-1 items-center gap-3 rounded-2xl border border-border bg-[hsl(var(--surface))] px-4 py-3 shadow-sm focus-within:border-brand-500">
                     <span className="text-sm text-foreground/60">taplinkr.com/</span>
                     <input
                       type="text"
@@ -321,7 +321,7 @@ export default function Home() {
               className="relative"
             >
               <div className="relative overflow-hidden rounded-[32px] border border-white/40 bg-gradient-to-br from-brand-500/15 via-white to-blue-100 p-6 shadow-brand backdrop-blur">
-                <div className="space-y-4 rounded-3xl bg-white/80 p-6 shadow-card">
+                <div className="space-y-4 rounded-3xl bg-[hsl(var(--surface))]/80 p-6 shadow-card">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground/60">taplinkr.com/you</p>
@@ -334,7 +334,7 @@ export default function Home() {
                     {[1, 2, 3].map((index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between rounded-2xl border border-border/70 bg-white px-4 py-3 shadow-sm"
+                        className="flex items-center justify-between rounded-2xl border border-border/70 bg-[hsl(var(--surface))] px-4 py-3 shadow-sm"
                       >
                         <div>
                           <p className="text-sm font-semibold text-foreground">
@@ -415,7 +415,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid gap-4 rounded-3xl border border-border bg-white/80 p-6 shadow-card">
+            <div className="grid gap-4 rounded-3xl border border-border bg-[hsl(var(--surface))]/80 p-6 shadow-card">
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex gap-4 rounded-2xl bg-[hsl(var(--surface-muted))] p-4">
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500/10 text-sm font-semibold text-brand-600">
