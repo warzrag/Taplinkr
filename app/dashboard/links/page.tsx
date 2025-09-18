@@ -442,7 +442,7 @@ export default function LinksPage() {
                             <span className="text-2xl">{link.icon}</span>
                           </div>
                         ) : (
-                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
                             <Link2 className="w-7 h-7 text-gray-500 dark:text-gray-400" />
                           </div>
                         )}
@@ -454,7 +454,7 @@ export default function LinksPage() {
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                               link.isActive 
-                                ? 'bg-green-100 text-green-700 
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 
                                 : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300
                             }`}>
                               <div className={`w-1.5 h-1.5 rounded-full ${
@@ -650,7 +650,7 @@ export default function LinksPage() {
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
                           link.isActive 
-                            ? 'bg-green-100 text-green-700 
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 
                             : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300
                         }`}>
                           <div className={`w-1.5 h-1.5 rounded-full ${

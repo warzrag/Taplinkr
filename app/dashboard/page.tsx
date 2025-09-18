@@ -296,7 +296,7 @@ export default function Dashboard() {
                       {/* Special badges */}
                       {action.label.includes('Pro') && userProfile?.plan === 'free' && (
                         <div className="absolute top-3 right-3">
-                          <div className="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded">
+                          <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-medium px-2 py-0.5 rounded">
                             PRO
                           </div>
                         </div>
@@ -564,7 +564,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 {/* Stats globales des dossiers */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-3">
+                  <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Folder className="w-4 h-4 text-indigo-600" />
                       <span className="text-xs text-gray-600 dark:text-gray-400">Total dossiers</span>
@@ -573,7 +573,7 @@ export default function Dashboard() {
                       {folderStats.totalFolders || 0}
                     </p>
                   </div>
-                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3">
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Link2 className="w-4 h-4 text-secondary-600" />
                       <span className="text-xs text-gray-600 dark:text-gray-400">Liens organisés</span>
@@ -785,7 +785,7 @@ export default function Dashboard() {
                     className="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
                   >
                     {/* Background pattern */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                     
                     {/* Statut */}
                     <div className="absolute top-4 right-4">
@@ -815,7 +815,7 @@ export default function Dashboard() {
                               <span className="text-xl">{link.icon}</span>
                             </div>
                           ) : (
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
                               <Link2 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                             </div>
                           )}
@@ -850,22 +850,22 @@ export default function Dashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {link.isDirect ? (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 rounded-lg">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                               <Zap className="w-3.5 h-3.5 text-secondary-600" />
-                              <span className="text-xs font-medium text-secondary-600">Direct</span>
+                              <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Direct</span>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 rounded-lg">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
                               <Layers className="w-3.5 h-3.5 text-indigo-600" />
-                              <span className="text-xs font-medium text-indigo-600">
+                              <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
                                 {link.multiLinks?.length || 0} liens
                               </span>
                             </div>
                           )}
                           {link.shieldEnabled && (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 rounded-lg">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 dark:bg-emerald-500/10 rounded-lg">
                               <Shield className="w-3.5 h-3.5 text-emerald-600" />
-                              <span className="text-xs font-medium text-emerald-600">Shield</span>
+                              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Shield</span>
                             </div>
                           )}
                         </div>
@@ -878,7 +878,7 @@ export default function Dashboard() {
                           }}
                           className={`p-2 rounded-lg transition-all ${
                             link.isActive 
-                              ? 'bg-emerald-500/15 text-emerald-600 hover:bg-green-200 
+                              ? 'bg-emerald-500/15 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/15 
                               : 'bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50/80 dark:bg-gray-700/80
                           }`}
                           title={link.isActive ? 'Désactiver' : 'Activer'}
@@ -927,7 +927,7 @@ export default function Dashboard() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-3xl p-12 text-center"
+              className="bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-12 text-center"
             >
               <div className="max-w-md mx-auto">
                 <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/20">
