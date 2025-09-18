@@ -38,7 +38,7 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 transition-all',
+        'sticky top-0 z-50 transition-all border-b border-border/60 bg-[hsl(var(--surface))]/80 backdrop-blur',
         scrolled
           ? 'bg-white/90 backdrop-blur border-b border-border/80 shadow-sm'
           : 'bg-white/60 backdrop-blur'
