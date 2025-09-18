@@ -601,6 +601,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             
             {/* Right side button */}
             <div className="absolute right-0 top-28 w-1 h-16 bg-gray-600 rounded-l-full"></div>
+            </div>
           </div>
         </div>
 
