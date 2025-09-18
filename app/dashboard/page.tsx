@@ -83,7 +83,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      refreshLinks()
+      // refreshLinks() // Pas besoin, le contexte charge déjà automatiquement
       fetchDashboardStats()
       fetchFolderStats()
     }
