@@ -163,7 +163,7 @@ export default function LinksPage() {
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"
           />
-          <p className="text-foreground/60">Chargement des liens...</p>
+          <p className="text-gray-600 dark:text-gray-400">Chargement des liens...</p>
         </motion.div>
       </div>
     )
@@ -185,7 +185,7 @@ export default function LinksPage() {
                 <motion.button 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-2.5 bg-[hsl(var(--surface))] hover:bg-[hsl(var(--surface-muted))] rounded-xl shadow-sm transition-all"
+                  className="p-2.5 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl shadow-sm transition-all"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </motion.button>
@@ -194,7 +194,7 @@ export default function LinksPage() {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                   Mes liens
                 </h1>
-                <p className="text-foreground/60 mt-1">
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
                   {personalLinks.length} {personalLinks.length > 1 ? 'liens personnels' : 'lien personnel'}
                   {teamLinks.length > 0 && ` • ${teamLinks.length} ${teamLinks.length > 1 ? 'liens d\'équipe' : 'lien d\'équipe'}`}
                 </p>
@@ -209,7 +209,7 @@ export default function LinksPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex items-center gap-2 mr-4"
                 >
-                  <span className="text-sm text-foreground/60">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
                     {selectedLinks.length} sélectionné{selectedLinks.length > 1 ? 's' : ''}
                   </span>
                   <button
@@ -250,19 +250,19 @@ export default function LinksPage() {
             {/* Recherche améliorée */}
             <div className="flex-1 relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="w-5 h-5 text-foreground/45" />
+                <Search className="w-5 h-5 text-gray-900 dark:text-gray-100/45" />
               </div>
               <input
                 type="text"
                 placeholder="Rechercher par nom, slug..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-[hsl(var(--surface))] border border-border/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 hover:text-foreground/60"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-900 dark:text-gray-100/45 hover:text-gray-600 dark:text-gray-400"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -273,7 +273,7 @@ export default function LinksPage() {
             <div className="flex items-center gap-3">
               {/* Filtre par statut */}
               <div className="relative">
-                <button className="flex items-center gap-2 px-4 py-3 bg-[hsl(var(--surface))] border border-border/60 rounded-xl hover:bg-[hsl(var(--surface-muted))] transition-colors">
+                <button className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                   <Filter className="w-4 h-4" />
                   <span className="text-sm font-medium">
                     {filterType === 'all' ? 'Tous' : filterType === 'active' ? 'Actifs' : 'Inactifs'}
@@ -284,7 +284,7 @@ export default function LinksPage() {
 
               {/* Tri */}
               <div className="relative">
-                <button className="flex items-center gap-2 px-4 py-3 bg-[hsl(var(--surface))] border border-border/60 rounded-xl hover:bg-[hsl(var(--surface-muted))] transition-colors">
+                <button className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                   <TrendingUp className="w-4 h-4" />
                   <span className="text-sm font-medium">
                     {sortBy === 'recent' ? 'Récents' : sortBy === 'clicks' ? 'Populaires' : 'A-Z'}
@@ -294,13 +294,13 @@ export default function LinksPage() {
               </div>
 
               {/* Vue */}
-              <div className="flex items-center bg-[hsl(var(--surface))] border border-border/60 rounded-xl p-1">
+              <div className="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-all ${
                     viewMode === 'grid' 
                       ? 'bg-brand-600 text-white' 
-                      : 'text-foreground/60 hover:bg-[hsl(var(--surface-muted))]'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   <Grid3X3 className="w-4 h-4" />
@@ -310,7 +310,7 @@ export default function LinksPage() {
                   className={`p-2 rounded-lg transition-all ${
                     viewMode === 'list' 
                       ? 'bg-brand-600 text-white' 
-                      : 'text-foreground/60 hover:bg-[hsl(var(--surface-muted))]'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -325,70 +325,70 @@ export default function LinksPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[hsl(var(--surface))] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
           >
             <div className="flex items-center justify-between mb-2">
               <div className="p-3 bg-brand-500/15 rounded-xl">
                 <Link2 className="w-6 h-6 text-brand-600" />
               </div>
-              <span className="text-xs text-foreground/55">Total</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Total</span>
             </div>
-            <p className="text-3xl font-bold text-foreground">{personalLinks.length + teamLinks.length}</p>
-            <p className="text-sm text-foreground/60 mt-1">Total des liens</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{personalLinks.length + teamLinks.length}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total des liens</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-[hsl(var(--surface))] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
           >
             <div className="flex items-center justify-between mb-2">
               <div className="p-3 bg-emerald-500/15 rounded-xl">
                 <Eye className="w-6 h-6 text-emerald-600" />
               </div>
-              <span className="text-xs text-foreground/55">Actifs</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Actifs</span>
             </div>
-            <p className="text-3xl font-bold text-foreground">
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               {personalLinks.filter(l => l.isActive).length}
             </p>
-            <p className="text-sm text-foreground/60 mt-1">Liens actifs</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens actifs</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-[hsl(var(--surface))] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
           >
             <div className="flex items-center justify-between mb-2">
               <div className="p-3 bg-[hsl(var(--secondary))]/15 rounded-xl">
                 <MousePointer className="w-6 h-6 text-purple-600" />
               </div>
-              <span className="text-xs text-foreground/55">Clics</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Clics</span>
             </div>
-            <p className="text-3xl font-bold text-foreground">
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               {[...personalLinks, ...teamLinks].reduce((total, link) => total + (link.clicks || 0), 0).toLocaleString()}
             </p>
-            <p className="text-sm text-foreground/60 mt-1">Total des clics</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total des clics</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-[hsl(var(--surface))] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
           >
             <div className="flex items-center justify-between mb-2">
               <div className="p-3 bg-orange-100 rounded-xl">
                 <TrendingUp className="w-6 h-6 text-amber-600" />
               </div>
-              <span className="text-xs text-foreground/55">CTR</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">CTR</span>
             </div>
-            <p className="text-3xl font-bold text-foreground">
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               {personalLinks.length > 0 ? Math.round((personalLinks.reduce((total, link) => total + (link.clicks || 0), 0) / personalLinks.length)) : 0}
             </p>
-            <p className="text-sm text-foreground/60 mt-1">Clics moyens</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Clics moyens</p>
           </motion.div>
         </div>
 
@@ -406,10 +406,10 @@ export default function LinksPage() {
                 <Link2 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-foreground">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                   Mes liens personnels
                 </h3>
-                <p className="text-sm text-foreground/60">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   {personalLinks.length} lien{personalLinks.length > 1 ? 's' : ''} créé{personalLinks.length > 1 ? 's' : ''}
                 </p>
               </div>
@@ -426,7 +426,7 @@ export default function LinksPage() {
                   transition={{ delay: index * 0.05 }}
                   className="group relative"
                 >
-                  <div className="bg-[hsl(var(--surface))] rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-brand-500/40">
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-brand-500/40">
                     {/* En-tête de la carte */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -443,22 +443,22 @@ export default function LinksPage() {
                           </div>
                         ) : (
                           <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                            <Link2 className="w-7 h-7 text-foreground/55" />
+                            <Link2 className="w-7 h-7 text-gray-500 dark:text-gray-400" />
                           </div>
                         )}
                         
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg text-foreground line-clamp-1">
+                          <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 line-clamp-1">
                             {link.title}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                               link.isActive 
                                 ? 'bg-green-100 text-green-700 
-                                : 'bg-[hsl(var(--surface-muted))] text-foreground/70
+                                : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300
                             }`}>
                               <div className={`w-1.5 h-1.5 rounded-full ${
-                                link.isActive ? 'bg-green-500 animate-pulse' : 'bg-[hsl(var(--surface-muted))]/800'
+                                link.isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-50 dark:bg-gray-700/800'
                               }`} />
                               {link.isActive ? 'En ligne' : 'Hors ligne'}
                             </span>
@@ -470,9 +470,9 @@ export default function LinksPage() {
                       <div className="relative">
                         <button
                           onClick={() => setShowMoreMenu(showMoreMenu === link.id ? null : link.id)}
-                          className="p-2 hover:bg-[hsl(var(--surface-muted))] rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                         >
-                          <MoreVertical className="w-5 h-5 text-foreground/55" />
+                          <MoreVertical className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                         </button>
                         
                         <AnimatePresence>
@@ -481,14 +481,14 @@ export default function LinksPage() {
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.95 }}
-                              className="absolute right-0 mt-2 w-52 bg-[hsl(var(--surface))] rounded-xl shadow-2xl border border-gray-100 py-2 z-20"
+                              className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 py-2 z-20"
                             >
                               <button
                                 onClick={() => {
                                   handleEdit(link)
                                   setShowMoreMenu(null)
                                 }}
-                                className="w-full px-4 py-2.5 text-left text-sm text-foreground/70 hover:bg-[hsl(var(--surface-muted))] flex items-center gap-3"
+                                className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3"
                               >
                                 <Edit className="w-4 h-4" />
                                 Modifier
@@ -498,13 +498,13 @@ export default function LinksPage() {
                                   handleCopyLink(link.slug)
                                   setShowMoreMenu(null)
                                 }}
-                                className="w-full px-4 py-2.5 text-left text-sm text-foreground/70 hover:bg-[hsl(var(--surface-muted))] flex items-center gap-3"
+                                className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3"
                               >
                                 <Copy className="w-4 h-4" />
                                 Copier le lien
                               </button>
                               <Link href={`/dashboard/analytics/${link.id}`}>
-                                <button className="w-full px-4 py-2.5 text-left text-sm text-foreground/70 hover:bg-[hsl(var(--surface-muted))] flex items-center gap-3">
+                                <button className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3">
                                   <BarChart3 className="w-4 h-4" />
                                   Voir les analytics
                                 </button>
@@ -528,17 +528,17 @@ export default function LinksPage() {
 
                     {/* URL et stats */}
                     <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm text-foreground/60">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <Globe className="w-4 h-4" />
                         <span className="font-mono">taplinkr.com/{link.slug}</span>
                       </div>
 
                       {/* Statistiques */}
-                      <div className="text-center p-3 bg-[hsl(var(--surface-muted))]/80 rounded-xl">
-                        <p className="text-2xl font-bold text-foreground">
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/80 rounded-xl">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                           {(link.clicks || 0).toLocaleString()}
                         </p>
-                        <p className="text-xs text-foreground/60 mt-1">Clics</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Clics</p>
                       </div>
 
                       {/* Features badges */}
@@ -569,7 +569,7 @@ export default function LinksPage() {
                           onClick={() => handleToggle(link.id, !link.isActive)}
                           className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
                             link.isActive
-                              ? 'bg-[hsl(var(--surface-muted))] text-foreground/70 hover:bg-[hsl(var(--surface-muted))]/80'
+                              ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80'
                               : 'bg-gradient-to-r from-brand-600 to-brand-500 text-white hover:shadow-lg hover:shadow-brand-500/20'
                           }`}
                         >
@@ -579,17 +579,17 @@ export default function LinksPage() {
                           href={`/${link.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2.5 bg-[hsl(var(--surface-muted))] hover:bg-[hsl(var(--surface-muted))]/80 rounded-xl transition-colors"
+                          className="p-2.5 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/80 rounded-xl transition-colors"
                         >
-                          <ExternalLink className="w-5 h-5 text-foreground/60" />
+                          <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                         </a>
-                        <button className="p-2.5 bg-[hsl(var(--surface-muted))] hover:bg-[hsl(var(--surface-muted))]/80 rounded-xl transition-colors">
-                          <QrCode className="w-5 h-5 text-foreground/60" />
+                        <button className="p-2.5 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/80 rounded-xl transition-colors">
+                          <QrCode className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                         </button>
                       </div>
 
                       {/* Date de création */}
-                      <div className="flex items-center justify-between text-xs text-foreground/55 pt-2 border-t border-gray-100">
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           Créé {formatDistanceToNow(new Date(link.createdAt), { locale: fr, addSuffix: true })}
@@ -606,30 +606,30 @@ export default function LinksPage() {
             </div>
           ) : (
             /* Vue liste */
-            <div className="bg-[hsl(var(--surface))] rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[hsl(var(--surface-muted))]/80 border-b border-border/60">
-                    <th className="px-6 py-4 text-left text-xs font-medium text-foreground/55 uppercase tracking-wider">
+                  <tr className="bg-gray-50 dark:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Lien
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-foreground/55 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Statut
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-foreground/55 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Clics
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-foreground/55 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Créé le
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-foreground/55 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredLinks.map((link) => (
-                    <tr key={link.id} className="hover:bg-[hsl(var(--surface-muted))]/30 transition-colors">
+                    <tr key={link.id} className="hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           {link.icon ? (
@@ -637,13 +637,13 @@ export default function LinksPage() {
                               <span className="text-lg">{link.icon}</span>
                             </div>
                           ) : (
-                            <div className="w-10 h-10 rounded-lg bg-[hsl(var(--surface-muted))] flex items-center justify-center">
-                              <Link2 className="w-5 h-5 text-foreground/55" />
+                            <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
+                              <Link2 className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-foreground">{link.title}</p>
-                            <p className="text-sm text-foreground/55">/{link.slug}</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{link.title}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">/{link.slug}</p>
                           </div>
                         </div>
                       </td>
@@ -651,35 +651,35 @@ export default function LinksPage() {
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
                           link.isActive 
                             ? 'bg-green-100 text-green-700 
-                            : 'bg-[hsl(var(--surface-muted))] text-foreground/70
+                            : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300
                         }`}>
                           <div className={`w-1.5 h-1.5 rounded-full ${
-                            link.isActive ? 'bg-green-500' : 'bg-[hsl(var(--surface-muted))]/800'
+                            link.isActive ? 'bg-green-500' : 'bg-gray-50 dark:bg-gray-700/800'
                           }`} />
                           {link.isActive ? 'Actif' : 'Inactif'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-foreground">{link.clicks || 0}</span>
+                        <span className="text-gray-900 dark:text-gray-100">{link.clicks || 0}</span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-foreground/60">
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                         {format(new Date(link.createdAt), 'dd MMM yyyy', { locale: fr })}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEdit(link)}
-                            className="p-1.5 hover:bg-[hsl(var(--surface-muted))] rounded-lg transition-colors"
+                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           >
-                            <Edit className="w-4 h-4 text-foreground/60" />
+                            <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                           </button>
                           <a
                             href={`/${link.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 hover:bg-[hsl(var(--surface-muted))] rounded-lg transition-colors"
+                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           >
-                            <ExternalLink className="w-4 h-4 text-foreground/60" />
+                            <ExternalLink className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                           </a>
                           <button
                             onClick={() => handleDelete(link.id)}
@@ -700,16 +700,16 @@ export default function LinksPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[hsl(var(--surface))] rounded-2xl p-16 text-center"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-16 text-center"
           >
             <div className="max-w-md mx-auto">
               <div className="w-24 h-24 bg-gradient-to-br from-brand-500/15 to-brand-500/5 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Link2 className="w-12 h-12 text-brand-600" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
                 {searchTerm || filterType !== 'all' ? 'Aucun lien trouvé' : 'Créez votre premier lien'}
               </h3>
-              <p className="text-foreground/60 mb-8 text-lg">
+              <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">
                 {searchTerm || filterType !== 'all' 
                   ? 'Essayez de modifier vos critères de recherche'
                   : 'Commencez à partager vos liens avec le monde entier'
@@ -724,7 +724,7 @@ export default function LinksPage() {
                     <Sparkles className="w-5 h-5" />
                     Créer mon premier lien
                   </button>
-                  <p className="text-sm text-foreground/55">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Ou importez vos liens depuis une autre plateforme
                   </p>
                 </div>

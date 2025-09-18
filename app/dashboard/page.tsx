@@ -243,10 +243,10 @@ export default function Dashboard() {
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 Bonjour {userProfile?.name || session?.user?.email?.split('@')[0]} ! 👋
               </h1>
-              <p className="text-lg text-foreground/60">
+              <p className="text-lg text-gray-600 dark:text-gray-400">
                 {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
@@ -277,19 +277,19 @@ export default function Dashboard() {
             >
               {action.href ? (
                 <FastLink href={action.href} prefetch={true}>
-                  <div className="relative h-full bg-[hsl(var(--surface))] rounded-2xl p-5 cursor-pointer group border border-border/70 hover:border-border transition-all duration-200">
+                  <div className="relative h-full bg-white dark:bg-gray-800 rounded-2xl p-5 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
                     {/* Content */}
                     <div className="relative z-10">
                       {/* Icon container minimal */}
-                      <div className="inline-flex p-2.5 rounded-xl bg-[hsl(var(--surface-muted))] mb-3 group-hover:bg-[hsl(var(--surface-muted))]/80 transition-colors duration-200">
-                        <action.icon className="w-5 h-5 text-foreground/60" strokeWidth={2} />
+                      <div className="inline-flex p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 mb-3 group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors duration-200">
+                        <action.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
                       </div>
                       
                       {/* Text content */}
-                      <h3 className="font-semibold text-base text-foreground mb-1">
+                      <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 mb-1">
                         {action.label}
                       </h3>
-                      <p className="text-xs text-foreground/55 leading-relaxed">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                         {action.description}
                       </p>
                       
@@ -307,20 +307,20 @@ export default function Dashboard() {
               ) : (
                 <button
                   onClick={action.onClick}
-                  className="relative h-full bg-[hsl(var(--surface))] rounded-2xl p-5 cursor-pointer group border border-border/70 hover:border-border transition-all duration-200 w-full text-left"
+                  className="relative h-full bg-white dark:bg-gray-800 rounded-2xl p-5 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 w-full text-left"
                 >
                   {/* Content */}
                   <div className="relative z-10">
                     {/* Icon container minimal */}
-                    <div className="inline-flex p-2.5 rounded-xl bg-[hsl(var(--surface-muted))] mb-3 group-hover:bg-[hsl(var(--surface-muted))]/80 transition-colors duration-200">
-                      <action.icon className="w-5 h-5 text-foreground/60" strokeWidth={2} />
+                    <div className="inline-flex p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 mb-3 group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors duration-200">
+                      <action.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
                     </div>
                     
                     {/* Text content */}
-                    <h3 className="font-semibold text-base text-foreground mb-1">
+                    <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 mb-1">
                       {action.label}
                     </h3>
-                    <p className="text-xs text-foreground/55 leading-relaxed">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                       {action.description}
                     </p>
                   </div>
@@ -338,7 +338,7 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-[hsl(var(--surface))] rounded-2xl p-6 shadow-lg border border-border/60"
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-brand-500/15 rounded-xl">
@@ -354,11 +354,11 @@ export default function Dashboard() {
                   </span>
                 )}
               </div>
-              <p className="text-3xl font-bold text-foreground">
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {console.log('🔍 dashboardStats:', dashboardStats) || ''}
                 {dashboardStats?.totalClicks || 0}
               </p>
-              <p className="text-sm text-foreground/60 mt-1">Total clics</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total clics</p>
             </motion.div>
 
 
@@ -366,34 +366,34 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-[hsl(var(--surface))] rounded-2xl p-6 shadow-lg border border-border/60"
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-emerald-500/15 rounded-xl">
                   <Users className="w-6 h-6 text-emerald-600" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-foreground">
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {dashboardStats?.uniqueVisitors || 0}
               </p>
-              <p className="text-sm text-foreground/60 mt-1">Visiteurs uniques</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Visiteurs uniques</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-[hsl(var(--surface))] rounded-2xl p-6 shadow-lg border border-border/60"
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-amber-500/15 rounded-xl">
                   <Activity className="w-6 h-6 text-amber-600" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-foreground">
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {links.filter(l => l.isActive).length}
               </p>
-              <p className="text-sm text-foreground/60 mt-1">Liens actifs</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens actifs</p>
             </motion.div>
           </div>
 
@@ -403,18 +403,18 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-[hsl(var(--surface))] rounded-2xl shadow-lg p-6 border border-border/60 mb-8"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 mb-8"
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     Répartition géographique des clics
                   </h2>
-                  <p className="text-sm text-foreground/60 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Carte mondiale interactive - Zoomez et déplacez pour explorer
                   </p>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-foreground/55">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <Globe className="w-4 h-4" />
                   <span>{dashboardStats?.topCountries?.length || 0} pays</span>
                 </div>
@@ -433,15 +433,15 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="bg-[hsl(var(--surface))] rounded-2xl shadow-lg p-6 border border-border/60"
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     Évolution sur 7 jours
                   </h2>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-brand-500/100 rounded-full" />
-                    <span className="text-sm text-foreground/60">Clics par jour</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Clics par jour</span>
                   </div>
                 </div>
                 <div className="h-64">
@@ -454,13 +454,13 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
-                className="bg-[hsl(var(--surface))] rounded-2xl shadow-lg p-6 border border-border/60"
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"
               >
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     Top 10 pays
                   </h2>
-                  <p className="text-sm text-foreground/60 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Détail des clics par pays
                   </p>
                 </div>
@@ -480,10 +480,10 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-[hsl(var(--surface))] rounded-2xl shadow-lg p-6 border border-border/60"
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-foreground">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Top liens
               </h2>
               <FastLink href="/dashboard/analytics" prefetch={true}>
@@ -502,7 +502,7 @@ export default function Dashboard() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 + index * 0.05 }}
-                    className="flex items-center justify-between p-3 bg-[hsl(var(--surface-muted))] rounded-xl hover:bg-[hsl(var(--surface-muted))] transition-all cursor-pointer group"
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-50 dark:bg-gray-700 transition-all cursor-pointer group"
                     onClick={() => handleEdit(link)}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -515,25 +515,25 @@ export default function Dashboard() {
                         {index + 1}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-foreground truncate group-hover:text-brand-600 transition-colors">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-brand-600 transition-colors">
                           {link.title}
                         </p>
-                        <p className="text-xs text-foreground/55">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           /{link.slug}
                         </p>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="font-semibold text-foreground">
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">
                         {link._count?.analyticsEvents || 0}
                       </p>
-                      <p className="text-xs text-foreground/55">clics</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">clics</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-foreground/55">
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 <Target className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Aucune donnée disponible</p>
                 <p className="text-xs mt-1">Créez des liens pour voir les statistiques</p>
@@ -546,10 +546,10 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65 }}
-            className="bg-[hsl(var(--surface))] rounded-2xl shadow-lg p-6 border border-border/60"
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-foreground">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Analyse dossiers
               </h2>
               <FastLink href="/dashboard/folders" prefetch={true}>
@@ -567,18 +567,18 @@ export default function Dashboard() {
                   <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Folder className="w-4 h-4 text-indigo-600" />
-                      <span className="text-xs text-foreground/60">Total dossiers</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Total dossiers</span>
                     </div>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                       {folderStats.totalFolders || 0}
                     </p>
                   </div>
                   <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Link2 className="w-4 h-4 text-secondary-600" />
-                      <span className="text-xs text-foreground/60">Liens organisés</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Liens organisés</span>
                     </div>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                       {folderStats.organizedLinks || 0}
                     </p>
                   </div>
@@ -587,7 +587,7 @@ export default function Dashboard() {
                 {/* Top dossiers par clics */}
                 {folderStats.topFolders && folderStats.topFolders.length > 0 ? (
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-foreground/60 mb-2">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                       Performance par dossier
                     </p>
                     {folderStats.topFolders.slice(0, 3).map((folder: any, index: number) => (
@@ -596,30 +596,30 @@ export default function Dashboard() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.65 + index * 0.05 }}
-                        className="flex items-center justify-between p-3 bg-[hsl(var(--surface-muted))] rounded-xl hover:bg-[hsl(var(--surface-muted))] transition-all"
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-50 dark:bg-gray-700 transition-all"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="text-lg">{folder.icon || '📁'}</div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium text-foreground truncate">
+                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                               {folder.name}
                             </p>
-                            <p className="text-xs text-foreground/55">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {folder._count?.links || 0} liens
                             </p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="font-semibold text-foreground">
+                          <p className="font-semibold text-gray-900 dark:text-gray-100">
                             {folder.totalClicks || 0}
                           </p>
-                          <p className="text-xs text-foreground/55">clics</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">clics</p>
                         </div>
                       </motion.div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-foreground/55">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     <FolderOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p className="text-sm">Aucun dossier créé</p>
                     <FastLink href="/dashboard/folders" prefetch={true}>
@@ -632,9 +632,9 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="animate-pulse space-y-3">
-                <div className="h-20 bg-[hsl(var(--surface-muted))]/80 rounded-xl"></div>
-                <div className="h-16 bg-[hsl(var(--surface-muted))]/80 rounded-xl"></div>
-                <div className="h-16 bg-[hsl(var(--surface-muted))]/80 rounded-xl"></div>
+                <div className="h-20 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"></div>
+                <div className="h-16 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"></div>
+                <div className="h-16 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"></div>
               </div>
             )}
           </motion.div>
@@ -647,18 +647,18 @@ export default function Dashboard() {
             className="grid grid-cols-1 gap-6"
           >
             {/* Insights */}
-            <div className="bg-[hsl(var(--surface))] rounded-2xl shadow-lg p-6 border border-border/60">
-              <h2 className="text-xl font-bold text-foreground mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                 Insights
               </h2>
               <div className="space-y-4">
                 <div className="flex items-center gap-4 p-4 bg-brand-500/10 rounded-xl">
                   <Globe className="w-10 h-10 text-brand-600 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       Portée globale
                     </p>
-                    <p className="text-sm text-foreground/60">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {dashboardStats?.topCountries?.length || 0} pays atteints
                     </p>
                   </div>
@@ -667,10 +667,10 @@ export default function Dashboard() {
                 <div className="flex items-center gap-4 p-4 bg-secondary/10 rounded-xl">
                   <Smartphone className="w-10 h-10 text-secondary-600 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       Mobile first
                     </p>
-                    <p className="text-sm text-foreground/60">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {dashboardStats?.deviceStats?.mobile || 65}% mobile
                     </p>
                   </div>
@@ -679,10 +679,10 @@ export default function Dashboard() {
                 <div className="flex items-center gap-4 p-4 bg-emerald-500/10 rounded-xl">
                   <Clock className="w-10 h-10 text-emerald-600 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       Pic d'activité
                     </p>
-                    <p className="text-sm text-foreground/60">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       18h - 20h
                     </p>
                   </div>
@@ -749,10 +749,10 @@ export default function Dashboard() {
                 <Link2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   Mes liens
                 </h2>
-                <p className="text-sm text-foreground/60">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   {links.length} {links.length > 1 ? 'liens créés' : 'lien créé'}
                 </p>
               </div>
@@ -761,12 +761,12 @@ export default function Dashboard() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--surface))] border border-border/70 rounded-xl hover:border-brand-500 transition-all group"
+                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-brand-500 transition-all group"
               >
-                <span className="text-sm font-medium text-foreground/70 group-hover:text-brand-600">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-brand-600">
                   Gérer tous les liens
                 </span>
-                <ArrowUpRight className="w-4 h-4 text-foreground/50 group-hover:text-brand-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <ArrowUpRight className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-brand-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </motion.button>
             </FastLink>
           </div>
@@ -782,7 +782,7 @@ export default function Dashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8 + index * 0.05 }}
                     onClick={() => handleEdit(link)}
-                    className="group relative bg-[hsl(var(--surface))] rounded-2xl p-5 border border-border/60 hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
+                    className="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
                   >
                     {/* Background pattern */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -816,19 +816,19 @@ export default function Dashboard() {
                             </div>
                           ) : (
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                              <Link2 className="w-6 h-6 text-foreground/55" />
+                              <Link2 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                             </div>
                           )}
                         </div>
 
                         {/* Titre et URL */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-foreground mb-1 truncate group-hover:text-brand-600 transition-colors">
+                          <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1 truncate group-hover:text-brand-600 transition-colors">
                             {link.title}
                           </h3>
                           <div className="flex items-center gap-2">
-                            <Link2 className="w-3 h-3 text-foreground/50" />
-                            <p className="text-sm text-foreground/55 truncate">
+                            <Link2 className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                               taplinkr.com/{link.slug}
                             </p>
                           </div>
@@ -836,12 +836,12 @@ export default function Dashboard() {
                       </div>
 
                       {/* Statistiques */}
-                      <div className="bg-[hsl(var(--surface))]/80 rounded-xl p-3 mb-4">
+                      <div className="bg-white dark:bg-gray-800/80 rounded-xl p-3 mb-4">
                         <div className="flex items-center gap-2 mb-1">
                           <MousePointer className="w-4 h-4 text-brand-600" />
-                          <span className="text-xs text-foreground/60">Clics totaux</span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">Clics totaux</span>
                         </div>
-                        <p className="text-2xl font-bold text-foreground">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                           {link.clicks || 0}
                         </p>
                       </div>
@@ -879,7 +879,7 @@ export default function Dashboard() {
                           className={`p-2 rounded-lg transition-all ${
                             link.isActive 
                               ? 'bg-emerald-500/15 text-emerald-600 hover:bg-green-200 
-                              : 'bg-[hsl(var(--surface-muted))] text-foreground/55 hover:bg-[hsl(var(--surface-muted))]/80
+                              : 'bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50/80 dark:bg-gray-700/80
                           }`}
                           title={link.isActive ? 'Désactiver' : 'Activer'}
                         >
@@ -904,10 +904,10 @@ export default function Dashboard() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-foreground mb-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                         Créez plus de liens pour développer votre présence
                       </h3>
-                      <p className="text-sm text-foreground/60">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Ajoutez tous vos réseaux sociaux, sites web et contenus importants
                       </p>
                     </div>
@@ -933,10 +933,10 @@ export default function Dashboard() {
                 <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/20">
                   <Link2 className="w-12 h-12 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
                   Créez votre premier lien
                 </h3>
-                <p className="text-foreground/60 mb-8">
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
                   Commencez à partager tous vos contenus importants en un seul endroit
                 </p>
                 <button
