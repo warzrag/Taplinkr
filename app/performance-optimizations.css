@@ -56,7 +56,7 @@ button::before {
   pointer-events: none;
 }
 
-/* 7. Loading skeleton optimisé */
+/* 7. Loading skeleton - DÉSACTIVÉ POUR ÉVITER LES BUGS
 @keyframes skeleton-loading {
   0% {
     background-position: -200% 0;
@@ -65,16 +65,11 @@ button::before {
     background-position: 200% 0;
   }
 }
+*/
 
 .skeleton {
-  animation: skeleton-loading 1.5s ease-in-out infinite;
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
-  background-size: 200% 100%;
+  /* animation: skeleton-loading 1.5s ease-in-out infinite; DÉSACTIVÉ */
+  background: #e0e0e0;
   border-radius: 4px;
 }
 
@@ -97,36 +92,7 @@ object {
   max-width: 100%;
 }
 
-/* 10. États de navigation instantanés */
-body.navigating {
-  cursor: progress;
-}
-
-body.navigating::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    transparent,
-    #6366f1 20%,
-    #6366f1 80%,
-    transparent
-  );
-  animation: loading-bar 0.5s ease-in-out infinite;
-  z-index: 9999;
-}
-
-@keyframes loading-bar {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
+/* 10. États de navigation - COMPLÈTEMENT SUPPRIMÉ */
 
 /* 11. Optimiser les interactions tactiles mobile */
 @media (hover: none) and (pointer: coarse) {

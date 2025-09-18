@@ -6,7 +6,6 @@ import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 import '../styles/theme-transitions.css'
 import './performance-optimizations.css'
-import PerformanceOptimizer from '@/components/PerformanceOptimizer'
 
 export const metadata = {
   title: 'TapLinkr - Tap Into Your Digital World',
@@ -60,7 +59,6 @@ export default function RootLayout({
         <ErrorBoundary>
           <ThemeProvider>
             <Providers>
-              <PerformanceOptimizer />
               {children}
               <Toaster 
               position="top-right"
