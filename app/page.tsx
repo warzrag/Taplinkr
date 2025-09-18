@@ -296,7 +296,7 @@ export default function Home() {
                         setUsername(item.name)
                         checkUsername(item.name)
                       }}
-                      className={}
+                      className={`group inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${item.accent} px-4 py-1.5 text-xs font-medium text-white transition-transform hover:-translate-y-0.5`}
                     >
                       taplinkr.com/{item.name}
                     </button>
