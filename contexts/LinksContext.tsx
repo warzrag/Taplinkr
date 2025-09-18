@@ -58,8 +58,16 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [isFetching, setIsFetching] = useState(false) // Nouveau flag pour éviter les appels multiples
 
   const fetchLinks = async (retryCount = 0) => {
+    // Éviter les appels multiples simultanés
+    if (isFetching && retryCount === 0) {
+      console.log('⏸️ Fetch déjà en cours, ignoré')
+      return false
+    }
+
+    setIsFetching(true)
     try {
       // Utiliser la nouvelle API qui retourne les liens personnels et d'équipe
       const response = await fetch('/api/links', {
@@ -94,15 +102,19 @@ export function LinksProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('taplinkr_links_cache', JSON.stringify(allLinks))
           console.log('💾 Cache mis à jour')
         }
-        return true // Succès
+
+        // IMPORTANT: Retourner true et SORTIR de la fonction après succès
+        setIsFetching(false) // Libérer le flag
+        setLoading(false) // Arrêter le loading
+        return true // Succès - Ne pas faire de retry!
       } else {
         console.error('❌ LinksContext - Erreur serveur:', response.status)
       }
     } catch (error) {
       console.error('❌ LinksContext - Erreur:', error)
     }
-    
-    // Réessayer jusqu'à 5 fois avec un délai croissant
+
+    // Réessayer SEULEMENT en cas d'échec
     if (retryCount < 5) {
       const delay = (retryCount + 1) * 500 // 0.5s, 1s, 1.5s...
       console.log(`🔄 Tentative ${retryCount + 1}/5 dans ${delay}ms...`)
@@ -123,7 +135,9 @@ export function LinksProvider({ children }: { children: ReactNode }) {
         console.error('❌ Même la route de secours a échoué:', e)
       }
     }
-    
+
+    setIsFetching(false) // Libérer le flag en cas d'échec final
+    setLoading(false) // Arrêter le loading
     return false
   }
 
@@ -178,9 +192,11 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Charger immédiatement au montage du composant
     console.log('🚀 LinksContext - Chargement initial, cache:', links.length, 'liens')
-    
-    // Toujours rafraîchir depuis le serveur pour avoir les dernières données
-    refreshAll()
+
+    // Charger les données une seule fois au démarrage
+    if (!initialLoadDone && !isFetching) {
+      refreshAll()
+    }
     
     // Rafraîchir quand on revient sur l'onglet (optionnel)
     const handleFocus = () => {
