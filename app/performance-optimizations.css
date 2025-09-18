@@ -1,0 +1,223 @@
+/* Optimisations de performance CSS globales */
+
+/* 1. Utiliser la propriété contain pour limiter les recalculs */
+.card,
+.link-item,
+.modal {
+  contain: layout style paint;
+}
+
+/* 2. Optimiser les animations avec will-change */
+.btn-primary,
+.btn-secondary,
+[class*="hover:scale"],
+[class*="transition"] {
+  will-change: transform;
+}
+
+/* Animation terminée, reset will-change */
+.btn-primary:not(:hover),
+.btn-secondary:not(:hover) {
+  will-change: auto;
+}
+
+/* 3. GPU acceleration pour les éléments fréquemment animés */
+.modal,
+.dropdown-menu,
+.slide-panel {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 4. Réduire les repaints avec transform au lieu de top/left */
+.floating-element {
+  position: fixed;
+  transform: translate(var(--x), var(--y));
+}
+
+/* 5. Optimiser le scrolling */
+.scrollable-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* 6. Précharger les états hover pour éviter le FOUC */
+a::before,
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+/* 7. Loading skeleton optimisé */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+}
+
+/* 8. Optimiser les fonts */
+body {
+  font-display: swap;
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 9. Réduire le CLS (Cumulative Layout Shift) */
+img,
+video,
+iframe,
+embed,
+object {
+  aspect-ratio: attr(width) / attr(height);
+  height: auto;
+  max-width: 100%;
+}
+
+/* 10. États de navigation instantanés */
+body.navigating {
+  cursor: progress;
+}
+
+body.navigating::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent,
+    #6366f1 20%,
+    #6366f1 80%,
+    transparent
+  );
+  animation: loading-bar 0.5s ease-in-out infinite;
+  z-index: 9999;
+}
+
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 11. Optimiser les interactions tactiles mobile */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  .clickable {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* 12. Réduire les animations si l'utilisateur le préfère */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 13. Optimisation des listes longues */
+.virtual-list {
+  contain: strict;
+  will-change: scroll-position;
+}
+
+.virtual-list-item {
+  contain: content;
+}
+
+/* 14. Lazy loading des images */
+img[loading="lazy"] {
+  background: #f0f0f0;
+}
+
+/* 15. Optimisation des modales et overlays */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  will-change: opacity;
+}
+
+/* 16. Cache les éléments non visibles pour économiser les ressources */
+.tab-panel:not(.active),
+.accordion-content:not(.expanded) {
+  display: none;
+}
+
+/* 17. Optimisation du focus pour l'accessibilité et la performance */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 18. Préchargement des transitions de page */
+[data-prefetch] {
+  cursor: pointer;
+  position: relative;
+}
+
+[data-prefetch]::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+
+/* 19. Optimisation spécifique pour le dashboard */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  contain: layout;
+}
+
+.dashboard-card {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+/* 20. Fast click feedback */
+.fast-click {
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.fast-click:active {
+  transform: scale(0.98);
+}

@@ -5,6 +5,8 @@ import DebugConsole from '@/components/DebugConsole'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 import '../styles/theme-transitions.css'
+import './performance-optimizations.css'
+import PerformanceOptimizer from '@/components/PerformanceOptimizer'
 
 export const metadata = {
   title: 'TapLinkr - Tap Into Your Digital World',
@@ -43,11 +45,22 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="TapLinkr" />
+
+        {/* Préconnexion aux domaines externes pour améliorer les performances */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+        {/* Préchargement des routes critiques */}
+        <link rel="prefetch" href="/dashboard" as="document" />
+        <link rel="prefetch" href="/dashboard/links" as="document" />
+        <link rel="prefetch" href="/dashboard/analytics" as="document" />
       </head>
       <body className="h-full bg-gray-50 dark:bg-gray-900 antialiased transition-colors duration-300">
         <ErrorBoundary>
           <ThemeProvider>
             <Providers>
+              <PerformanceOptimizer />
               {children}
               <Toaster 
               position="top-right"

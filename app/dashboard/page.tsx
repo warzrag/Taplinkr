@@ -31,10 +31,21 @@ import {
   Folder,
   FolderOpen
 } from 'lucide-react'
-import CreateLinkModal from '@/components/CreateLinkModal'
-import Link from 'next/link'
-import EditLinkModal from '@/components/EditLinkModal'
-import EditPhonePreview from '@/components/EditPhonePreview'
+// Lazy load des modales pour améliorer le temps de chargement initial
+const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
+  loading: () => <div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full" /></div>,
+  ssr: false
+})
+import dynamic from 'next/dynamic'
+import FastLink from '@/components/FastLink'
+const EditLinkModal = dynamic(() => import('@/components/EditLinkModal'), {
+  loading: () => <div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full" /></div>,
+  ssr: false
+})
+const EditPhonePreview = dynamic(() => import('@/components/EditPhonePreview'), {
+  loading: () => <div className="w-full h-full bg-gray-100 animate-pulse rounded-3xl" />,
+  ssr: false
+})
 import { useLinkUpdate } from '@/contexts/LinkUpdateContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import { useLinks } from '@/contexts/LinksContext'
@@ -265,7 +276,7 @@ export default function Dashboard() {
               transition={{ delay: index * 0.05 }}
             >
               {action.href ? (
-                <Link href={action.href}>
+                <FastLink href={action.href} prefetch={true}>
                   <div className="relative h-full bg-[hsl(var(--surface))] rounded-2xl p-5 cursor-pointer group border border-border/70 hover:border-border transition-all duration-200">
                     {/* Content */}
                     <div className="relative z-10">
@@ -292,7 +303,7 @@ export default function Dashboard() {
                       )}
                     </div>
                   </div>
-                </Link>
+                </FastLink>
               ) : (
                 <button
                   onClick={action.onClick}
@@ -475,7 +486,7 @@ export default function Dashboard() {
               <h2 className="text-xl font-bold text-foreground">
                 Top liens
               </h2>
-              <Link href="/dashboard/analytics">
+              <FastLink href="/dashboard/analytics" prefetch={true}>
                 <span className="text-sm text-brand-600 hover:underline flex items-center gap-1">
                   Voir tout
                   <ChevronRight className="w-4 h-4" />
@@ -541,7 +552,7 @@ export default function Dashboard() {
               <h2 className="text-xl font-bold text-foreground">
                 Analyse dossiers
               </h2>
-              <Link href="/dashboard/folders">
+              <FastLink href="/dashboard/folders" prefetch={true}>
                 <span className="text-sm text-brand-600 hover:underline flex items-center gap-1">
                   Gérer
                   <ChevronRight className="w-4 h-4" />
@@ -611,7 +622,7 @@ export default function Dashboard() {
                   <div className="text-center py-8 text-foreground/55">
                     <FolderOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p className="text-sm">Aucun dossier créé</p>
-                    <Link href="/dashboard/folders">
+                    <FastLink href="/dashboard/folders" prefetch={true}>
                       <button className="mt-2 text-xs text-brand-600 hover:underline">
                         Créer un dossier
                       </button>
@@ -746,7 +757,7 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <Link href="/dashboard/links">
+            <FastLink href="/dashboard/links" prefetch={true}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
