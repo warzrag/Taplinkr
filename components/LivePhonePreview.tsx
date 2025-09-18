@@ -224,10 +224,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
                   <path d="M15.67 4H14V2c0-1.1-.9-2-2-2s-2 .9-2 2v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/>
                 </svg>
+                </div>
               </div>
-            </div>
 
-            {/* Background Image */}
+              {/* Background Image */}
             <div className="absolute inset-0">
               {/* Afficher uniquement l'image de couverture du lien si elle existe */}
               {links[0]?.coverImage ? (
@@ -620,9 +620,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="w-2 h-2 bg-white rounded-full" />
           <span>LIVE</span>
         </motion.div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
