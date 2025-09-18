@@ -489,7 +489,7 @@ export default function Home() {
                   Commencer gratuitement
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-                <Link href="/pricing" className="btn-secondary border-white/40 bg-white/10 text-white hover:border-white hover:bg-white/20">
+                <Link href="/pricing" className="btn-secondary border-white/40 bg-black/10 text-white hover:border-white hover:bg-black/20 backdrop-blur-sm">
                   Découvrir les offres
                 </Link>
               </div>

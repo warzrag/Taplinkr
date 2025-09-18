@@ -238,7 +238,7 @@ export default function PublicLinkPreviewBeautiful({ link }: PublicLinkPreviewPr
                   className={`px-6 py-3 rounded-full backdrop-blur-md transition-all ${
                     liked 
                       ? 'bg-red-500/30 text-red-300 border border-red-400/50' 
-                      : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
+                      : 'bg-black/10 text-white border border-white/20 hover:bg-black/20'
                   }`}
                 >
                   <Heart className={`w-5 h-5 inline mr-2 ${liked ? 'fill-current' : ''}`} />
@@ -249,13 +249,13 @@ export default function PublicLinkPreviewBeautiful({ link }: PublicLinkPreviewPr
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleShare}
-                  className="px-6 py-3 bg-white/10 text-white rounded-full backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all"
+                  className="px-6 py-3 bg-black/10 text-white rounded-full backdrop-blur-md border border-white/20 hover:bg-black/20 transition-all"
                 >
                   {copied ? <Check className="w-5 h-5 inline mr-2" /> : <Share2 className="w-5 h-5 inline mr-2" />}
                   {copied ? 'Copié !' : 'Partager'}
                 </motion.button>
 
-                <div className="px-6 py-3 bg-white/10 text-white rounded-full backdrop-blur-md border border-white/20">
+                <div className="px-6 py-3 bg-black/10 text-white rounded-full backdrop-blur-md border border-white/20">
                   <Eye className="w-5 h-5 inline mr-2" />
                   {viewCount} vues
                 </div>

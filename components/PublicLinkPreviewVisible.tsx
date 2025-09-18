@@ -187,7 +187,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
                   className={`px-4 py-2 rounded-full text-sm transition-all transform hover:scale-105 ${
                     liked 
                       ? 'bg-red-500/80 text-white' 
-                      : 'bg-white/20 backdrop-blur text-white hover:bg-white/30'
+                      : 'bg-black/20 backdrop-blur text-white hover:bg-black/30'
                   }`}
                 >
                   <Heart className={`w-4 h-4 inline mr-1.5 ${liked ? 'fill-current' : ''}`} />
@@ -196,7 +196,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
 
                 <button
                   onClick={handleShare}
-                  className="px-4 py-2 bg-white/20 backdrop-blur text-white rounded-full text-sm hover:bg-white/30 transition-all transform hover:scale-105"
+                  className="px-4 py-2 bg-black/20 backdrop-blur text-white rounded-full text-sm hover:bg-black/30 transition-all transform hover:scale-105"
                 >
                   {copied ? <Check className="w-4 h-4 inline mr-1.5" /> : <Share2 className="w-4 h-4 inline mr-1.5" />}
                   {copied ? 'Copié!' : 'Partager'}
@@ -306,7 +306,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
             <div className="mt-12 text-center">
               <a 
                 href="https://www.taplinkr.com" 
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-all group text-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-black/10 backdrop-blur rounded-full text-white/70 hover:text-white hover:bg-black/20 transition-all group text-sm"
                 target="_blank"
                 rel="noopener noreferrer"
               >

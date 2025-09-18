@@ -15,7 +15,7 @@ const baseStyles = 'relative inline-flex items-center justify-center gap-2 round
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-brand hover:-translate-y-0.5 hover:from-brand-500 hover:to-brand-400 hover:shadow-brand-lg active:translate-y-0',
-  secondary: 'border border-border/80 bg-white text-foreground shadow-soft hover:-translate-y-0.5 hover:border-[hsl(var(--border-strong))] hover:shadow-md active:translate-y-0',
+  secondary: 'border border-border/80 bg-white dark:bg-gray-800 text-foreground shadow-soft hover:-translate-y-0.5 hover:border-[hsl(var(--border-strong))] hover:shadow-md active:translate-y-0',
   ghost: 'bg-transparent text-foreground/70 hover:bg-foreground/5 hover:text-foreground active:translate-y-0',
   subtle: 'bg-[hsl(var(--surface-muted))] text-foreground/80 hover:text-foreground hover:bg-[hsl(var(--surface-muted))]/80 active:translate-y-0',
   link: 'rounded-none bg-transparent px-0 py-0 h-auto text-sm font-semibold text-brand-600 shadow-none hover:text-brand-500 hover:underline focus-visible:outline-offset-4',

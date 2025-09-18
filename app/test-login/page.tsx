@@ -37,11 +37,11 @@ export default function TestLogin() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Test d'authentification</h1>
         
-        <div className="bg-white rounded-lg shadow p-6 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-4">
           <h2 className="text-lg font-semibold mb-4">Tester une connexion</h2>
           
           <div className="space-y-4">
@@ -86,15 +86,15 @@ export default function TestLogin() {
         </div>
         
         {result && (
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-2">Résultat :</h2>
-            <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm">
+            <pre className="bg-gray-100 dark:bg-gray-700 p-4 rounded overflow-x-auto text-sm">
               {JSON.stringify(result, null, 2)}
             </pre>
           </div>
         )}
         
-        <div className="mt-6 bg-blue-50 rounded-lg p-4">
+        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <p className="font-semibold mb-2">Comptes de test :</p>
           <ul className="text-sm space-y-1">
             <li>• admin@taplinkr.com / Admin123!</li>

@@ -191,7 +191,7 @@ export default function PublicLinkPreviewStunning({ link }: PublicLinkPreviewPro
                 className={`px-5 py-2.5 rounded-full transition-all transform hover:scale-105 active:scale-95 ${
                   liked 
                     ? 'bg-red-500/80 text-white' 
-                    : 'bg-white/10 backdrop-blur text-white border border-white/20 hover:bg-white/20'
+                    : 'bg-black/10 backdrop-blur text-white border border-white/20 hover:bg-black/20'
                 }`}
               >
                 <Heart className={`w-5 h-5 inline mr-2 ${liked ? 'fill-current' : ''}`} />
@@ -200,13 +200,13 @@ export default function PublicLinkPreviewStunning({ link }: PublicLinkPreviewPro
 
               <button
                 onClick={handleShare}
-                className="px-5 py-2.5 bg-white/10 backdrop-blur text-white rounded-full border border-white/20 hover:bg-white/20 transition-all transform hover:scale-105 active:scale-95"
+                className="px-5 py-2.5 bg-black/10 backdrop-blur text-white rounded-full border border-white/20 hover:bg-black/20 transition-all transform hover:scale-105 active:scale-95"
               >
                 {copied ? <Check className="w-5 h-5 inline mr-2" /> : <Share2 className="w-5 h-5 inline mr-2" />}
                 {copied ? 'Copié!' : 'Partager'}
               </button>
 
-              <div className="px-5 py-2.5 bg-white/10 backdrop-blur text-white rounded-full border border-white/20">
+              <div className="px-5 py-2.5 bg-black/10 backdrop-blur text-white rounded-full border border-white/20">
                 <Eye className="w-5 h-5 inline mr-2" />
                 {link.clicks} vues
               </div>

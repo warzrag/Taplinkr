@@ -158,7 +158,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   liked 
                     ? 'bg-red-500 text-white' 
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    : 'bg-black/20 text-white hover:bg-black/30 backdrop-blur-sm'
                 }`}
               >
                 <Heart className={`w-4 h-4 inline mr-1.5 ${liked ? 'fill-current' : ''}`} />
@@ -167,7 +167,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
 
               <button
                 onClick={handleShare}
-                className="px-4 py-2 bg-white/20 text-white rounded-full text-sm font-medium hover:bg-white/30 transition-all"
+                className="px-4 py-2 bg-black/20 text-white rounded-full text-sm font-medium hover:bg-black/30 backdrop-blur-sm transition-all"
               >
                 {copied ? (
                   <>
@@ -182,7 +182,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
                 )}
               </button>
 
-              <div className="px-4 py-2 bg-white/10 text-white rounded-full text-sm">
+              <div className="px-4 py-2 bg-black/10 text-white rounded-full text-sm backdrop-blur-sm">
                 <Eye className="w-4 h-4 inline mr-1.5" />
                 {link.clicks} vues
               </div>
@@ -260,7 +260,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
           <div className="mt-16 text-center">
             <a 
               href="https://www.taplinkr.com" 
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-all text-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-black/10 rounded-full text-white/70 hover:text-white hover:bg-black/20 backdrop-blur-sm transition-all text-sm"
               target="_blank"
               rel="noopener noreferrer"
             >

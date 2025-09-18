@@ -189,14 +189,14 @@ export default function ImageUpload({
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="p-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors"
+                className="p-2 bg-black/20 backdrop-blur-sm rounded-lg hover:bg-black/30 transition-colors"
               >
                 <Camera className="w-5 h-5 text-white" />
               </button>
               <button
                 onClick={handleRemove}
                 disabled={isUploading}
-                className="p-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors"
+                className="p-2 bg-black/20 backdrop-blur-sm rounded-lg hover:bg-black/30 transition-colors"
               >
                 <X className="w-5 h-5 text-white" />
               </button>

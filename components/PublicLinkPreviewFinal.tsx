@@ -190,7 +190,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                         <div className="flex gap-2">
                           <button
                             onClick={() => cancelConfirm()}
-                            className="flex-1 px-3 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg text-white text-sm font-medium transition-all"
+                            className="flex-1 px-3 py-2 bg-black bg-opacity-20 hover:bg-opacity-30 rounded-lg text-white text-sm font-medium transition-all"
                           >
                             Annuler
                           </button>

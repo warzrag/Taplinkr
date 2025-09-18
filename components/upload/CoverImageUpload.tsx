@@ -141,18 +141,18 @@ export default function CoverImageUpload({
                   whileTap={{ scale: 0.95 }}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="p-2 bg-white/90 backdrop-blur-md rounded-lg hover:bg-white transition-colors shadow-lg"
+                  className="p-2 bg-black/20 backdrop-blur-md rounded-lg hover:bg-black/30 transition-colors shadow-lg"
                 >
-                  <Upload className="w-4 h-4 text-gray-700" />
+                  <Upload className="w-4 h-4 text-white" />
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleRemove}
                   disabled={isUploading}
-                  className="p-2 bg-white/90 backdrop-blur-md rounded-lg hover:bg-white transition-colors shadow-lg"
+                  className="p-2 bg-black/20 backdrop-blur-md rounded-lg hover:bg-black/30 transition-colors shadow-lg"
                 >
-                  <X className="w-4 h-4 text-gray-700" />
+                  <X className="w-4 h-4 text-white" />
                 </motion.button>
               </div>
 

@@ -134,13 +134,13 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center"
+          className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 max-w-md w-full text-center"
         >
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-10 h-10 text-red-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Invitation invalide</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Invitation invalide</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
           <button
             onClick={() => router.push('/auth/signin')}
             className="px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors"
@@ -159,7 +159,7 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full"
+        className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 max-w-2xl w-full"
       >
         {/* Header */}
         <div className="text-center mb-8">
