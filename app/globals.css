@@ -154,7 +154,25 @@
 
   .input {
     @apply w-full rounded-xl border border-border bg-[hsl(var(--surface))] px-4 py-3 text-sm text-foreground caret-brand-500 shadow-sm transition-all duration-200 placeholder:text-foreground/40 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20;
-  }  .input:-webkit-autofill,\n  .input:-webkit-autofill:hover,\n  .input:-webkit-autofill:focus {\n    -webkit-text-fill-color: hsl(var(--foreground));\n    transition: background-color 600000ms ease-in-out, color 600000ms ease-in-out;\n  }\n\n  input,\n  textarea {\n    color: hsl(var(--foreground));\n    caret-color: hsl(var(--primary));\n  }\n\n  input::placeholder,\n  textarea::placeholder {\n    color: hsl(var(--foreground) / 0.4);\n  }\n
+  }
+
+  .input:-webkit-autofill,
+  .input:-webkit-autofill:hover,
+  .input:-webkit-autofill:focus {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    transition: background-color 600000ms ease-in-out, color 600000ms ease-in-out;
+  }
+
+  input,
+  textarea {
+    color: hsl(var(--foreground));
+    caret-color: hsl(var(--primary));
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--foreground) / 0.4);
+  }
 
   .surface-muted {
     @apply rounded-3xl border border-border bg-[hsl(var(--surface-muted))] text-foreground;
@@ -297,4 +315,3 @@
     background: linear-gradient(to bottom, #4f46e5, #2563eb);
   }
 }
-
