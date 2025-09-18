@@ -2,98 +2,93 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  ArrowRight, 
-  Check, 
-  X, 
-  Shield, 
-  Zap, 
+import { AnimatePresence, motion } from 'framer-motion'
+import {
+  ArrowRight,
   BarChart3,
-  Users,
+  Check,
   Globe,
   Palette,
-  Link2,
-  Instagram,
-  Youtube,
-  Twitter,
-  Github,
-  Linkedin,
-  Star,
-  TrendingUp,
-  Clock,
-  Heart
+  Shield,
+  Sparkles,
+  Users,
+  X,
+  Zap,
 } from 'lucide-react'
 import { debounce } from 'lodash'
-import Logo from '@/components/Logo'
 
-// TapLinkr - One tap, tout accessible
-// Connecté à Vercel - Déploiement automatique activé
+import { SiteHeader } from '@/components/marketing/SiteHeader'
+import { SiteFooter } from '@/components/marketing/SiteFooter'
+import { Container } from '@/components/ui/Container'
+import { Button } from '@/components/ui/button'
 
 const features = [
   {
-    icon: Link2,
-    title: "Tous vos liens en un seul endroit",
-    description: "Partagez facilement tous vos réseaux sociaux, sites web et contenus"
-  },
-  {
     icon: Palette,
-    title: "Personnalisation complète",
-    description: "Thèmes, couleurs, animations - créez une page qui vous ressemble"
+    title: 'Personnalisation avancée',
+    description: 'Couleurs, typographies, animations et blocs interactifs pour composer une page unique.'
   },
   {
     icon: BarChart3,
-    title: "Analytics en temps réel",
-    description: "Suivez vos visiteurs, clics et performances détaillées"
+    title: 'Analytics en temps réel',
+    description: 'Visualisez les clics par canal, géolocalisation, conversions et tendances sur un seul tableau.'
   },
   {
     icon: Shield,
-    title: "Protection et sécurité",
-    description: "Liens protégés par mot de passe et dates d'expiration"
+    title: 'Protection intelligente',
+    description: 'Liens privés, mots de passe, expiration programmée et double authentification pour vos accès sensibles.'
   },
   {
     icon: Users,
-    title: "Gestion d'équipe",
-    description: "Collaborez avec votre équipe sur des pages partagées"
+    title: 'Collaboration d’équipe',
+    description: 'Invitez votre équipe, attribuez des rôles et gérez les accès aux pages partagées en un clic.'
   },
   {
     icon: Zap,
-    title: "Ultra rapide",
-    description: "Pages optimisées pour une performance maximale"
+    title: 'Performances optimisées',
+    description: 'Chargements instantanés, SEO intégré et CDN mondial pour tous vos visiteurs.'
+  },
+  {
+    icon: Globe,
+    title: 'Intégrations globales',
+    description: 'Ajoutez vos réseaux, vidéos, formulaires, calendriers et playlists préférées en quelques secondes.'
   }
 ]
 
 const testimonials = [
   {
-    name: "Sophie Martin",
-    role: "Influenceuse",
-    avatar: "SM",
-    content: "TapLinkr a révolutionné ma présence en ligne. Je peux enfin partager tous mes projets en un seul lien !",
-    rating: 5
+    name: 'Sophie Martin',
+    role: 'Créatrice digitale',
+    quote: 'TapLinkr est devenu mon hub officiel : je peux lancer des campagnes et mesurer mes performances en direct.',
+    metric: '+38% de clics',
   },
   {
-    name: "Thomas Dubois",
-    role: "Entrepreneur",
-    avatar: "TD",
-    content: "Les analytics détaillés m'aident à comprendre mon audience et optimiser ma stratégie.",
-    rating: 5
+    name: 'Thomas Dubois',
+    role: 'Entrepreneur',
+    quote: 'L’onboarding est simple et le dashboard me permet de suivre tous nos liens stratégiques pour l’équipe.',
+    metric: '4,9/5 note clients',
   },
   {
-    name: "Emma Laurent",
-    role: "Artiste",
-    avatar: "EL",
-    content: "La personnalisation est incroyable ! Ma page reflète parfaitement mon univers créatif.",
-    rating: 5
-  }
+    name: 'Emma Laurent',
+    role: 'Artiste & coach',
+    quote: 'J’adore le niveau de personnalisation : ma page ressemble à mon univers, sur mobile comme sur desktop.',
+    metric: 'x2 sur les leads',
+  },
+]
+
+const stats = [
+  { value: '50K+', label: 'créateurs actifs' },
+  { value: '120M', label: 'clics suivis/an' },
+  { value: '4,9/5', label: 'satisfaction moyenne' },
 ]
 
 const popularUsers = [
-  { name: "influenceur", icon: Instagram, color: "from-blue-500 to-indigo-500" },
-  { name: "createur", icon: Youtube, color: "from-red-500 to-blue-500" },
-  { name: "artiste", icon: Heart, color: "from-indigo-500 to-indigo-500" },
-  { name: "entrepreneur", icon: TrendingUp, color: "from-blue-500 to-cyan-500" }
+  { name: 'studiozen', accent: 'from-brand-500 to-brand-300' },
+  { name: 'agenceflow', accent: 'from-emerald-400 to-teal-400' },
+  { name: 'creatrice', accent: 'from-rose-400 to-amber-300' },
+  { name: 'collectifpro', accent: 'from-indigo-400 to-cyan-400' },
 ]
 
 export default function Home() {
@@ -110,8 +105,8 @@ export default function Home() {
     }
   }, [status, router])
 
-  const checkUsername = useCallback(
-    debounce(async (value: string) => {
+  const checkUsername = useMemo(
+    () => debounce(async (value: string) => {
       if (!value || value.length < 3) {
         setAvailable(null)
         setError('')
@@ -124,7 +119,6 @@ export default function Home() {
       try {
         const response = await fetch(`/api/check-username?username=${encodeURIComponent(value)}`)
         const data = await response.json()
-        
         setAvailable(data.available)
         if (!data.available && data.error) {
           setError(data.error)
@@ -135,17 +129,20 @@ export default function Home() {
       } finally {
         setChecking(false)
       }
-    }, 500),
-    []
-  )
+    }, 500), [])
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '')
-    setUsername(value)
+  useEffect(() => {
+    return () => {
+      checkUsername.cancel()
+    }
+  }, [checkUsername])
+
+  const handleUsernameChange = (value: string) => {
+    const sanitized = value.toLowerCase().replace(/[^a-z0-9_-]/g, '')
+    setUsername(sanitized)
     setAvailable(null)
-    
-    if (value) {
-      checkUsername(value)
+    if (sanitized) {
+      checkUsername(sanitized)
     }
   }
 
@@ -157,8 +154,8 @@ export default function Home() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
       </div>
     )
   }
@@ -168,306 +165,341 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Logo size="sm" animated={false} />
-            
-            <nav className="hidden md:flex items-center gap-4 lg:gap-6">
-              <Link href="#features" className="text-sm lg:text-base text-gray-600 hover:text-gray-900 transition-colors">
-                Fonctionnalités
-              </Link>
-              <Link href="#testimonials" className="text-sm lg:text-base text-gray-600 hover:text-gray-900 transition-colors">
-                Témoignages
-              </Link>
-              <Link href="#pricing" className="text-sm lg:text-base text-gray-600 hover:text-gray-900 transition-colors">
-                Tarifs
-              </Link>
-            </nav>
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
 
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Link 
-                href="/auth/signin" 
-                className="text-sm sm:text-base text-gray-600 hover:text-gray-900 transition-colors font-medium"
-              >
-                <span className="hidden sm:inline">Se connecter</span>
-                <span className="sm:hidden">Connexion</span>
-              </Link>
-              <Link 
-                href="/auth/signup" 
-                className="px-3 sm:px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg text-sm sm:text-base font-medium hover:from-indigo-700 hover:to-blue-700 transition-all"
-              >
-                S'inscrire
-              </Link>
-            </div>
-          </div>
+      <main className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute inset-x-0 -top-32 h-[420px] bg-gradient-radial from-brand-500/20 via-transparent to-transparent blur-3xl" />
+          <div className="absolute right-1/2 top-64 h-72 w-72 rounded-full bg-brand-400/10 blur-[160px]" />
+          <div className="absolute left-1/2 top-32 h-80 w-80 rounded-full bg-secondary-300/20 blur-[140px]" />
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            {/* Badge */}
+        <section className="section-default pt-24 pb-20">
+          <Container className="grid items-center gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="space-y-8"
             >
-              <TrendingUp className="w-4 h-4" />
-              Plus de 50,000 créateurs nous font confiance
-            </motion.div>
-
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 px-4">
-              <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                Un seul lien
+              <span className="badge-pill bg-white/80 text-brand-600 shadow-sm">
+                <Sparkles className="h-4 w-4 text-brand-500" />
+                TapLinkr 2.0 est arrivé
               </span>
-              <br />
-              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl">pour tout partager</span>
-            </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
-              Créez votre page personnalisée et partagez tous vos liens importants en un seul endroit. 
-              Simple, élégant et puissant.
-            </p>
+              <div className="space-y-6">
+                <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+                  Centralisez et sublimez
+                  <br className="hidden sm:block" />
+                  votre présence en ligne
+                </h1>
+                <p className="max-w-xl text-base text-foreground/70 sm:text-lg">
+                  Offrez une expérience cohérente à votre audience. Créez une page élégante, suivez chaque clic et adaptez-vous en temps réel grâce à nos outils professionnels.
+                </p>
+              </div>
 
-            {/* Username Checker */}
-            <div className="max-w-xl mx-auto mb-8 sm:mb-12 px-4">
-              <div className="relative">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-gray-50 rounded-2xl p-2 border-2 border-gray-200 focus-within:border-indigo-500 transition-all">
-                  <div className="flex items-center flex-1 mb-2 sm:mb-0">
-                    <span className="text-gray-500 pl-2 sm:pl-4 pr-1 text-base sm:text-lg">taplinkr.com/</span>
+              <div className="grid gap-6 rounded-3xl border border-border/80 bg-white/90 p-6 shadow-card backdrop-blur">
+                <div>
+                  <p className="text-sm font-medium text-foreground/70">
+                    Réservez votre URL personnalisée
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex flex-1 items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 shadow-sm focus-within:border-brand-500">
+                    <span className="text-sm text-foreground/60">taplinkr.com/</span>
                     <input
                       type="text"
                       value={username}
-                      onChange={handleUsernameChange}
-                      placeholder="votreusername"
-                      className="flex-1 bg-transparent outline-none text-base sm:text-lg px-2 py-2 sm:py-3"
+                      onChange={(event) => handleUsernameChange(event.target.value)}
+                      placeholder="votre-nom"
                       maxLength={30}
+                      className="flex-1 bg-transparent text-sm outline-none sm:text-base"
                     />
-                    
                     <AnimatePresence mode="wait">
                       {checking && (
-                        <motion.div
+                        <motion.span
+                          key="checking"
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
-                          className="mr-2"
-                        >
-                          <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                        </motion.div>
+                          className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"
+                        />
                       )}
-                      
                       {!checking && available === true && (
-                        <motion.div
+                        <motion.span
+                          key="available"
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
-                          className="mr-2"
+                          className="text-emerald-500"
                         >
-                          <Check className="w-5 h-5 text-green-500" />
-                        </motion.div>
+                          <Check className="h-5 w-5" />
+                        </motion.span>
                       )}
-                      
                       {!checking && available === false && (
-                        <motion.div
+                        <motion.span
+                          key="taken"
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
-                          className="mr-2"
+                          className="text-rose-500"
                         >
-                          <X className="w-5 h-5 text-red-500" />
-                        </motion.div>
+                          <X className="h-5 w-5" />
+                        </motion.span>
                       )}
                     </AnimatePresence>
                   </div>
-
-                  <button
+                  <Button
                     onClick={handleGetStarted}
                     disabled={!available || checking}
-                    className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
-                      available
-                        ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
+                    className="sm:w-auto"
                   >
-                    C'est parti !
-                  </button>
+                    Commencer
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
                 </div>
-              </div>
-              
-              {/* Status Message */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mt-2 text-sm text-red-600"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-                
-                {available === true && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mt-2 text-sm text-green-600"
-                  >
-                    Parfait ! Ce nom d'utilisateur est disponible
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
 
-            {/* Popular Examples */}
-            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2 sm:gap-4 px-4">
-              <span className="text-sm text-gray-500 mb-2 sm:mb-0">Exemples populaires :</span>
-              <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
-                {popularUsers.map((user, index) => (
-                  <motion.button
-                    key={user.name}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    onClick={() => {
-                      setUsername(user.name)
-                      checkUsername(user.name)
-                    }}
-                    className="group flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all text-sm"
-                  >
-                    <div className={`w-5 h-5 bg-gradient-to-r ${user.color} rounded flex items-center justify-center flex-shrink-0`}>
-                      <user.icon className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="text-xs sm:text-sm font-medium text-gray-700 truncate">
-                      {user.name}
-                    </span>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+                <AnimatePresence>
+                  {error && (
+                    <motion.p
+                      key="error"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="text-sm text-rose-500"
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                  {available === true && (
+                    <motion.p
+                      key="available-text"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="text-sm text-emerald-500"
+                    >
+                      Ce nom est disponible, verrouillez-le maintenant !
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
-      {/* Features Section */}
-      <section id="features" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Tout ce dont vous avez besoin
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600 px-4">
-              Des fonctionnalités puissantes pour créer la page parfaite
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-              >
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                  <feature.icon className="w-6 h-6 text-indigo-600" />
-                </div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">{feature.title}</h3>
-                <p className="text-sm sm:text-base text-gray-600">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section id="testimonials" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Ils adorent TapLinkr
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600 px-4">
-              Découvrez ce que nos utilisateurs en pensent
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg"
-              >
-                <div className="flex items-center gap-1 mb-3 sm:mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 sm:w-5 h-4 sm:h-5 fill-yellow-400 text-yellow-400" />
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium uppercase tracking-wide text-foreground/50">
+                    Suggestions populaires
+                  </span>
+                  {popularUsers.map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setUsername(item.name)
+                        checkUsername(item.name)
+                      }}
+                      className={}
+                    >
+                      taplinkr.com/{item.name}
+                    </button>
                   ))}
                 </div>
-                
-                <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6">"{testimonial.content}"</p>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    {testimonial.avatar}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-6 pt-4">
+                {stats.map((stat) => (
+                  <div key={stat.label} className="flex flex-col">
+                    <span className="text-2xl font-semibold text-foreground">{stat.value}</span>
+                    <span className="text-sm text-foreground/60">{stat.label}</span>
                   </div>
-                  <div>
-                    <p className="font-semibold text-sm sm:text-base">{testimonial.name}</p>
-                    <p className="text-xs sm:text-sm text-gray-600">{testimonial.role}</p>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="relative"
+            >
+              <div className="relative overflow-hidden rounded-[32px] border border-white/40 bg-gradient-to-br from-brand-500/15 via-white to-blue-100 p-6 shadow-brand backdrop-blur">
+                <div className="space-y-4 rounded-3xl bg-white/80 p-6 shadow-card">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground/60">taplinkr.com/you</p>
+                      <h3 className="text-xl font-semibold">Votre hub créatif</h3>
+                    </div>
+                    <Sparkles className="h-6 w-6 text-brand-500" />
+                  </div>
+
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-2xl border border-border/70 bg-white px-4 py-3 shadow-sm"
+                      >
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">
+                            {index === 1 ? 'Nouvelle vidéo YouTube' : index === 2 ? 'Programme premium' : 'Newsletter exclusive'}
+                          </p>
+                          <p className="text-xs text-foreground/50">{index === 1 ? '3,6K clics' : index === 2 ? '1,2K abonnés' : 'Ouverture 62%'}</p>
+                        </div>
+                        <button className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-foreground/70">Voir</button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-2xl bg-gradient-to-r from-brand-500 to-brand-400 px-5 py-4 text-white shadow-brand">
+                    <p className="text-sm font-medium">Mode campagne</p>
+                    <p className="text-xs text-white/80">Analytiques détaillés sur les 24 dernières heures.</p>
+                    <div className="mt-3 flex items-center justify-between text-xs text-white/90">
+                      <span>+18% clics</span>
+                      <span>+9% abonnements</span>
+                      <span>+32% ventes</span>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-600 to-blue-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 sm:mb-6">
-            Prêt à commencer ?
-          </h2>
-          <p className="text-lg sm:text-xl text-white/90 mb-6 sm:mb-8 px-4">
-            Rejoignez des milliers de créateurs et commencez à partager vos liens dès aujourd'hui
-          </p>
-          <Link
-            href="/auth/signup"
-            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white text-indigo-600 rounded-xl font-semibold text-base sm:text-lg hover:bg-gray-100 transition-all transform hover:scale-105"
-          >
-            Créer mon TapLinkr gratuitement
-            <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5" />
-          </Link>
-        </div>
-      </section>
+                <div className="pointer-events-none absolute -right-6 bottom-12 hidden h-32 w-32 rounded-full bg-brand-500/20 blur-2xl md:block" />
+                <div className="pointer-events-none absolute -left-6 top-10 hidden h-28 w-28 rounded-full bg-secondary-400/20 blur-2xl md:block" />
+              </div>
+            </motion.div>
+          </Container>
+        </section>
 
-      {/* Footer */}
-      <footer className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
-            <Logo size="sm" showText={true} animated={false} />
-            
-            <p className="text-gray-400 text-xs sm:text-sm text-center">
-              © 2024 TapLinkr. Tous droits réservés.
-            </p>
-          </div>
-        </div>
-      </footer>
+        <section id="features" className="section-default bg-[hsl(var(--surface))]">
+          <Container className="space-y-12">
+            <div className="max-w-2xl space-y-4">
+              <span className="badge-pill">Fonctionnalités</span>
+              <h2 className="text-3xl font-semibold sm:text-4xl">Pensé pour les créateurs ambitieux</h2>
+              <p className="text-foreground/65">
+                TapLinkr simplifie la gestion de vos liens tout en vous offrant des outils d’analyse et de design à la hauteur de vos projets.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {features.map((feature, index) => (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  className="card p-6 sm:p-7"
+                >
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-600">
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">{feature.title}</h3>
+                  <p className="mt-2 text-sm text-foreground/65">{feature.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </Container>
+        </section>
+
+        <section className="section-default">
+          <Container className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)] lg:items-center">
+            <div className="space-y-5">
+              <span className="badge-pill">Workflow</span>
+              <h2 className="text-3xl font-semibold sm:text-4xl">Publiez, analysez, convertissez</h2>
+              <p className="text-foreground/65">
+                Une interface claire pour lancer vos campagnes, suivre vos statistiques et adapter votre page en direct. En quelques minutes, votre bio devient un véritable tunnel de conversion.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/pricing" className="btn-primary">
+                  Voir les formules
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/auth/signup" className="btn-secondary">
+                  Créer un compte gratuit
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-4 rounded-3xl border border-border bg-white/80 p-6 shadow-card">
+              {[1, 2, 3].map((step) => (
+                <div key={step} className="flex gap-4 rounded-2xl bg-[hsl(var(--surface-muted))] p-4">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500/10 text-sm font-semibold text-brand-600">
+                    0{step}
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {step === 1 ? 'Composez votre page en drag & drop' : step === 2 ? 'Activez le suivi intelligent des clics' : 'Optimisez grâce aux recommandations IA'}
+                    </h3>
+                    <p className="mt-1 text-sm text-foreground/60">
+                      {step === 1
+                        ? 'Ajoutez des liens, des blocs vidéo, des formulaires et personnalisez chaque section.'
+                        : step === 2
+                        ? 'Mesurez l’impact par canal et identifiez les sources de trafic les plus performantes.'
+                        : 'Recevez des suggestions automatiques pour améliorer vos conversions et la cohérence visuelle.'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+
+        <section id="temoignages" className="section-default bg-[hsl(var(--surface))]">
+          <Container className="space-y-12">
+            <div className="max-w-2xl space-y-4">
+              <span className="badge-pill">Ils nous font confiance</span>
+              <h2 className="text-3xl font-semibold sm:text-4xl">Des créateurs inspirants partagent déjà avec TapLinkr</h2>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {testimonials.map((testimonial, index) => (
+                <motion.div
+                  key={testimonial.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="card flex h-full flex-col gap-6 p-6"
+                >
+                  <div className="space-y-3">
+                    <p className="text-sm text-foreground/70">“{testimonial.quote}”</p>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{testimonial.name}</p>
+                      <p className="text-xs text-foreground/60">{testimonial.role}</p>
+                    </div>
+                    <span className="rounded-full bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-600">
+                      {testimonial.metric}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </Container>
+        </section>
+
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-600 via-brand-500 to-indigo-500" />
+          <Container className="relative z-10 py-20 text-white">
+            <div className="mx-auto flex max-w-3xl flex-col items-center text-center gap-6">
+              <h2 className="text-3xl font-semibold sm:text-4xl">
+                Prêt à transformer votre bio en expérience immersive ?
+              </h2>
+              <p className="text-white/75">
+                Créez gratuitement votre page, explorez nos templates et débloquez les fonctions avancées quand vous le souhaitez.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button onClick={handleGetStarted} disabled={!available || checking}>
+                  Commencer gratuitement
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Link href="/pricing" className="btn-secondary border-white/40 bg-white/10 text-white hover:border-white hover:bg-white/20">
+                  Découvrir les offres
+                </Link>
+              </div>
+            </div>
+          </Container>
+        </section>
+      </main>
+
+      <SiteFooter />
     </div>
   )
 }
+

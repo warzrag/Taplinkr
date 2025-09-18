@@ -1,40 +1,82 @@
-import * as React from "react"
+import * as React from 'react'
+import { cn } from '@/lib/utils'
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-  size?: 'default' | 'sm' | 'lg' | 'icon'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'subtle' | 'link'
+type ButtonSize = 'sm' | 'md' | 'lg' | 'xl'
+
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant
+  size?: ButtonSize
+  fullWidth?: boolean
+  loading?: boolean
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
-    const baseStyles = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-    
-    const variants = {
-      default: "bg-primary text-primary-foreground hover:bg-primary/90",
-      destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-      outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-      ghost: "hover:bg-accent hover:text-accent-foreground",
-      link: "text-primary underline-offset-4 hover:underline"
-    }
-    
-    const sizes = {
-      default: "h-10 px-4 py-2",
-      sm: "h-9 rounded-md px-3",
-      lg: "h-11 rounded-md px-8",
-      icon: "h-10 w-10"
-    }
-    
+const baseStyles = 'relative inline-flex items-center justify-center gap-2 rounded-2xl font-medium tracking-tight transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-60'
+
+const variantStyles: Record<ButtonVariant, string> = {
+  primary: 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-brand hover:-translate-y-0.5 hover:from-brand-500 hover:to-brand-400 hover:shadow-brand-lg active:translate-y-0',
+  secondary: 'border border-border/80 bg-white text-foreground shadow-soft hover:-translate-y-0.5 hover:border-[hsl(var(--border-strong))] hover:shadow-md active:translate-y-0',
+  ghost: 'bg-transparent text-foreground/70 hover:bg-foreground/5 hover:text-foreground active:translate-y-0',
+  subtle: 'bg-[hsl(var(--surface-muted))] text-foreground/80 hover:text-foreground hover:bg-[hsl(var(--surface-muted))]/80 active:translate-y-0',
+  link: 'rounded-none bg-transparent px-0 py-0 h-auto text-sm font-semibold text-brand-600 shadow-none hover:text-brand-500 hover:underline focus-visible:outline-offset-4',
+}
+
+const sizeStyles: Record<ButtonSize, string> = {
+  sm: 'h-9 px-4 text-xs',
+  md: 'h-11 px-5 text-sm',
+  lg: 'h-12 px-6 text-base',
+  xl: 'h-14 px-7 text-base',
+}
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      variant = 'primary',
+      size = 'md',
+      fullWidth = false,
+      loading = false,
+      className,
+      children,
+      type = 'button',
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
+    const resolvedDisabled = disabled || loading
+    const resolvedSizeClass = variant === 'link' ? '' : sizeStyles[size]
+
     return (
       <button
-        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className || ""}`}
         ref={ref}
+        type={type}
+        className={cn(
+          baseStyles,
+          resolvedSizeClass,
+          variantStyles[variant],
+          fullWidth && 'w-full',
+          className
+        )}
+        disabled={resolvedDisabled}
+        aria-busy={loading}
         {...props}
-      />
+      >
+        <span
+          className={cn(
+            'inline-flex items-center gap-2 transition-opacity duration-150',
+            loading && 'opacity-0'
+          )}
+        >
+          {children}
+        </span>
+        {loading && (
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          </span>
+        )}
+      </button>
     )
   }
 )
-Button.displayName = "Button"
 
-export { Button }
+Button.displayName = 'Button'
