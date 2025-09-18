@@ -183,25 +183,32 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   }).slice(0, 4) // Limiter à 4 liens max pour l'affichage
 
   return (
-    <div className="w-full xl:w-80 p-8 flex items-start justify-center h-full relative z-10 pt-0"
+    <div className="flex items-center justify-center p-4 transform scale-90 xl:scale-100 2xl:scale-110"
+         style={{ transformOrigin: 'center top' }}
     >
-      <div className="relative">
-        {/* iPhone Frame */}
-        <div className="w-[300px] h-[620px] bg-gradient-to-b from-gray-700 to-gray-800 rounded-[40px] p-2 shadow-2xl border border-gray-600">
-          {/* Camera Notch */}
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-gray-900 rounded-full z-30 flex items-center justify-center">
-            <div className="w-12 h-3 bg-gray-700 rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-gray-500 rounded-full mr-2"></div>
-              <div className="w-6 h-1 bg-gray-600 rounded-full"></div>
+      <div className="relative transform hover:scale-[1.02] transition-transform duration-500 ease-out">
+        {/* Reflet lumineux */}
+        <div className="absolute -inset-4 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-[44px] pointer-events-none" />
+
+        {/* iPhone Frame avec design moderne */}
+        <div className="w-[320px] h-[650px] bg-gradient-to-b from-gray-800 via-gray-900 to-black rounded-[44px] p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-gray-700/50 relative">
+          {/* Reflet métallique */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent rounded-[44px] pointer-events-none" />
+          {/* Dynamic Island moderne */}
+          <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-32 h-8 bg-black rounded-full z-30 flex items-center justify-center shadow-inner">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-gray-800 rounded-full animate-pulse" />
+              <div className="w-16 h-3 bg-gray-900 rounded-full" />
             </div>
           </div>
           
-          {/* Screen */}
-          <div className="w-full h-full bg-white rounded-[32px] overflow-hidden relative border border-gray-200">
-            {/* Status Bar */}
-            <div className="absolute top-8 left-0 right-0 h-8 flex items-center justify-between px-6 text-white text-xs z-20">
-              <div className="flex items-center space-x-1">
-                <span className="font-semibold" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>9:41</span>
+          {/* Screen avec bordure fine */}
+          <div className="w-full h-full bg-black rounded-[41px] overflow-hidden relative">
+            <div className="w-full h-full bg-white rounded-[40px] overflow-hidden relative">
+              {/* Status Bar moderne */}
+              <div className="absolute top-10 left-0 right-0 h-8 flex items-center justify-between px-6 text-white text-xs z-20">
+                <div className="flex items-center space-x-1">
+                  <span className="font-semibold" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>9:41</span>
                 <div className="flex items-center ml-2">
                   <div className="w-1 h-1 bg-white rounded-full"></div>
                   <div className="w-2 h-1 bg-white rounded-full ml-1"></div>
@@ -612,6 +619,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="w-2 h-2 bg-white rounded-full" />
           <span>LIVE</span>
         </motion.div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
