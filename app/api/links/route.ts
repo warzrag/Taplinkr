@@ -49,8 +49,8 @@ export async function GET() {
       teamLinks = await prisma.link.findMany({
         where: {
           teamId: user.teamId,
-          teamShared: true,
-          userId: { not: session.user.id } // Exclure ses propres liens
+          teamShared: true
+          // On récupère TOUS les liens partagés de l'équipe, y compris ceux du propriétaire
         },
         orderBy: { order: 'asc' },
         include: {
@@ -76,11 +76,14 @@ export async function GET() {
       })
     }
 
-    console.log(`✅ API Links: ${personalLinks.length} liens personnels et ${teamLinks.length} liens d'équipe trouvés pour l'utilisateur ${session.user.id}`)
+    // Filtrer les liens d'équipe pour exclure ses propres liens (déjà dans personalLinks)
+    const filteredTeamLinks = teamLinks.filter(link => link.userId !== session.user.id)
+
+    console.log(`✅ API Links: ${personalLinks.length} liens personnels et ${filteredTeamLinks.length} liens d'équipe trouvés pour l'utilisateur ${session.user.id}`)
     return NextResponse.json({
-      links: personalLinks,
+      links: [...personalLinks, ...filteredTeamLinks], // Combiner tous les liens
       personalLinks,
-      teamLinks,
+      teamLinks: filteredTeamLinks,
       hasTeam: !!user?.teamId
     })
   } catch (error) {
