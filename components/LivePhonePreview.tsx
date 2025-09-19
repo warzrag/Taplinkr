@@ -170,31 +170,39 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - IMAGE ENTIÈRE AU PREMIER PLAN */}
+            {/* Photo style Beacon/Immersif - PLEIN ÉCRAN COMME UN VRAI IPHONE */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="absolute inset-0 w-full h-full z-30">
-                {/* Image complète sans aucune zone cachée */}
+              <div className="absolute inset-0 w-full h-full z-30 rounded-[42px] overflow-hidden">
+                {/* Image en plein écran qui remplit tout l'iPhone */}
                 <img
                   src={displayImage}
                   alt={displayName}
                   className="w-full h-full"
                   style={{
-                    objectFit: 'contain',
-                    backgroundColor: 'transparent'
+                    objectFit: 'cover'
                   }}
                 />
 
-                {/* Texte overlay sur l'image */}
-                <div className="absolute bottom-4 left-0 right-0 text-center px-4 z-40">
-                  <h1 className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                {/* Texte overlay sur l'image en bas */}
+                <div className="absolute bottom-20 left-0 right-0 text-center px-6 z-40">
+                  <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                     {displayName}
                   </h1>
                   {displayBio && (
-                    <p className="text-xs text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                    <p className="text-base text-white/95 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
                       {displayBio}
                     </p>
                   )}
                 </div>
+
+                {/* Boutons/liens en bas comme sur Instagram */}
+                {firstLink?.instagramUrl && (
+                  <div className="absolute bottom-6 left-0 right-0 flex justify-center">
+                    <div className="bg-white/20 backdrop-blur-md rounded-full px-6 py-3">
+                      <Instagram className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
