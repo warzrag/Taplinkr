@@ -693,25 +693,28 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       transition={{ delay: 0.5 }}
                       className="mt-6 space-y-3"
                     >
-                      <p className="text-sm font-medium text-gray-700 text-center">Style d'affichage</p>
-                      <div className="flex gap-3 justify-center">
-                        {/* Style rond classique */}
+                      <p className="text-sm font-medium text-gray-700 text-center mb-1">Choisissez votre style d'affichage</p>
+                      <div className="flex gap-4 justify-center">
+                        {/* Style Minimal */}
                         <motion.button
                           type="button"
                           onClick={() => setProfileStyle('circle')}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className={`relative p-3 rounded-xl border-2 transition-all ${
+                          className={`relative p-4 rounded-xl border-2 transition-all ${
                             profileStyle === 'circle'
-                              ? 'border-indigo-500 bg-indigo-50'
+                              ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-lg'
                               : 'border-gray-200 bg-white hover:border-gray-300'
                           }`}
                         >
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                              <div className="w-12 h-12 rounded-full bg-white" />
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-inner">
+                              <div className="w-14 h-14 rounded-full bg-white shadow-md" />
                             </div>
-                            <span className="text-xs font-medium">Minimal</span>
+                            <div className="text-center">
+                              <span className="text-sm font-bold block">Minimal</span>
+                              <span className="text-[10px] text-gray-500">Photo ronde classique</span>
+                            </div>
                           </div>
                           {profileStyle === 'circle' && (
                             <motion.div
@@ -724,23 +727,26 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           )}
                         </motion.button>
 
-                        {/* Style Beacon */}
+                        {/* Style Immersif */}
                         <motion.button
                           type="button"
                           onClick={() => setProfileStyle('beacon')}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className={`relative p-3 rounded-xl border-2 transition-all ${
+                          className={`relative p-4 rounded-xl border-2 transition-all ${
                             profileStyle === 'beacon'
-                              ? 'border-indigo-500 bg-indigo-50'
+                              ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-lg'
                               : 'border-gray-200 bg-white hover:border-gray-300'
                           }`}
                         >
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-200 via-pink-200 to-blue-200 flex items-center justify-end flex-col overflow-hidden">
-                              <div className="w-10 h-10 rounded-full bg-white mb-1" />
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-purple-200 via-pink-200 to-blue-200 flex items-center justify-end flex-col overflow-hidden shadow-inner">
+                              <div className="w-12 h-12 rounded-full bg-white mb-2 shadow-md" />
                             </div>
-                            <span className="text-xs font-medium">Immersif</span>
+                            <div className="text-center">
+                              <span className="text-sm font-bold block">Immersif</span>
+                              <span className="text-[10px] text-gray-500">Grande image de fond</span>
+                            </div>
                           </div>
                           {profileStyle === 'beacon' && (
                             <motion.div
