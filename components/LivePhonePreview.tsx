@@ -148,7 +148,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-50" />
 
           {/* Écran */}
-          <div className="relative w-full h-full rounded-[42px] overflow-y-auto" style={{ backgroundColor }}>
+          <div className="relative w-full h-full rounded-[42px] overflow-y-auto" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? 'transparent' : backgroundColor }}>
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
                  style={{ color: textColor }}>
