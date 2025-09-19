@@ -173,7 +173,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             {/* Photo style Beacon/Immersif en plein écran */}
             {displayImage && profileStyle === 'beacon' && (
               <motion.div
-                className="absolute top-0 left-0 right-0 h-full z-10 rounded-[42px] overflow-hidden"
+                className="absolute top-0 left-0 right-0 h-full z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
