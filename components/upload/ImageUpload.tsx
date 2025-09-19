@@ -69,11 +69,40 @@ export default function ImageUpload({
       return
     }
 
-    // Lire le fichier et ouvrir le cropper
+    // Lire le fichier et l'uploader directement (sans cropper)
     const reader = new FileReader()
-    reader.onloadend = () => {
-      setTempImage(reader.result as string)
-      setShowCropper(true)
+    reader.onloadend = async () => {
+      const imageDataUrl = reader.result as string
+      setPreview(imageDataUrl)
+      setIsUploading(true)
+
+      try {
+        // Créer un FormData avec le fichier original
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('type', type)
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (!uploadResponse.ok) {
+          const error = await uploadResponse.json()
+          console.error('Upload API error:', error)
+          throw new Error(error.error || 'Erreur lors de l\'upload')
+        }
+
+        const data = await uploadResponse.json()
+        onChange(data.url)
+        toast.success('Image uploadée avec succès')
+      } catch (error) {
+        console.error('Erreur upload:', error)
+        toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
+        setPreview(value || null)
+      } finally {
+        setIsUploading(false)
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -255,18 +284,7 @@ export default function ImageUpload({
         )}
       </AnimatePresence>
 
-      {/* Image Cropper Modal */}
-      {showCropper && tempImage && (
-        <ImageCropper
-          imageSrc={tempImage}
-          onCropComplete={handleCropComplete}
-          onCancel={handleCropCancel}
-          aspectRatio={getAspectRatio()}
-          cropShape={type === 'avatar' || type === 'profile' ? 'round' : 'rect'}
-          minWidth={type === 'avatar' || type === 'profile' ? 200 : 300}
-          minHeight={type === 'avatar' || type === 'profile' ? 200 : 100}
-        />
-      )}
+      {/* Image Cropper désactivé - upload direct */}
     </div>
   )
 }
