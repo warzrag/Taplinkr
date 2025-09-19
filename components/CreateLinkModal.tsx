@@ -604,7 +604,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       {!profileImage ? (
                         <>
                           {/* Zone d'upload avec style selon le choix */}
-                          <div className="relative w-full h-64 rounded-lg overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors">
+                          <div className="relative w-full h-64 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors">
                             {/* Icône animée */}
                             <motion.div
                               animate={{ y: [0, -10, 0] }}

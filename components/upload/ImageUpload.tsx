@@ -248,7 +248,7 @@ export default function ImageUpload({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={`
-              ${getAspectRatioClass()} w-full
+              w-full
               border-2 border-dashed rounded-xl cursor-pointer
               transition-all duration-200
               ${isDragging 
