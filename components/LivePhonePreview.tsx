@@ -117,7 +117,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
   // Créer les liens à afficher
   const displayLinks = links.length > 0 && links[0].multiLinks && links[0].multiLinks.length > 0 ?
-    links[0].multiLinks.slice(0, 4).map(ml => ({
+    links[0].multiLinks.slice(0, profileStyle === 'beacon' ? 2 : 4).map(ml => ({
       title: ml.title,
       url: ml.url,
       icon: ml.icon,
@@ -148,7 +148,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-50" />
 
           {/* Écran */}
-          <div className="relative w-full h-full bg-white rounded-[42px] overflow-hidden" style={{ backgroundColor }}>
+          <div className="relative w-full h-full bg-white rounded-[42px] overflow-hidden" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? '#000000' : backgroundColor }}>
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
                  style={{ color: textColor }}>
@@ -173,83 +173,50 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             {/* Photo style Beacon/Immersif en plein écran */}
             {displayImage && profileStyle === 'beacon' && (
               <motion.div
-                className="absolute top-0 left-0 right-0 h-[85%] z-10 rounded-t-[42px] overflow-hidden"
+                className="absolute inset-0 z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
               >
+                {/* Image de fond qui remplit tout l'écran */}
                 <img
                   src={displayImage}
                   alt={displayName}
-                  className="w-full h-full object-cover rounded-t-[42px]"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                {/* Gradient overlay pour le texte en bas */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                {/* Nom et description sur l'image en bas */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8">
-                  <h1 className="text-3xl font-bold text-white mb-2">
+                {/* Gradient noir en bas pour la lisibilité du texte */}
+                <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+                {/* Nom et description centrés en bas de l'image */}
+                <div className="absolute bottom-[280px] left-0 right-0 text-center px-8 z-20">
+                  <h1 className="text-6xl font-bold text-white mb-2">
                     {displayName}
                   </h1>
                   {displayBio && (
-                    <p className="text-sm text-white/90">
+                    <p className="text-lg text-white mb-6">
                       {displayBio}
                     </p>
                   )}
-                  {displayLocation && (
-                    <div className="flex items-center gap-1 text-sm text-white/80 mt-2">
-                      <MapPin className="w-3 h-3" />
-                      <span>{displayLocation}</span>
-                    </div>
-                  )}
 
-                  {/* Icônes réseaux sociaux */}
-                  {(firstLink?.instagramUrl || firstLink?.twitterUrl || firstLink?.youtubeUrl || firstLink?.tiktokUrl) && (
-                    <div className="flex gap-3 mt-3">
-                      {firstLink.instagramUrl && (
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                        >
-                          <Instagram className="w-4 h-4 text-white" />
-                        </motion.div>
-                      )}
-                      {firstLink.twitterUrl && (
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                        >
-                          <Twitter className="w-4 h-4 text-white" />
-                        </motion.div>
-                      )}
-                      {firstLink.youtubeUrl && (
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                        >
-                          <Youtube className="w-4 h-4 text-white" />
-                        </motion.div>
-                      )}
-                      {firstLink.tiktokUrl && (
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                        >
-                          <Music className="w-4 h-4 text-white" />
-                        </motion.div>
-                      )}
-                    </div>
+                  {/* Icône Instagram seul, centré */}
+                  {firstLink?.instagramUrl && (
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-flex"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
+                        <Instagram className="w-7 h-7 text-black" />
+                      </div>
+                    </motion.div>
                   )}
                 </div>
               </motion.div>
             )}
 
             {/* Contenu principal */}
-            <div className={`relative h-full flex flex-col ${profileStyle === 'beacon' && displayImage ? 'pt-[85%]' : 'pt-[60px]'} pb-6`}>
+            <div className={`relative h-full flex flex-col ${profileStyle === 'beacon' && displayImage ? 'justify-end' : 'pt-[60px]'} pb-6`}>
               {/* Section Profil - Seulement en mode Minimal */}
               {profileStyle === 'circle' && (
                 <motion.div
@@ -363,40 +330,36 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Liens */}
-              <div className={`flex-1 px-6 space-y-2.5 overflow-y-auto ${profileStyle === 'beacon' && displayImage ? 'pt-4' : ''}`}>
+              <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-8 space-y-3 z-30' : 'flex-1 px-6 space-y-2.5 overflow-y-auto'}`}>
                 <AnimatePresence mode="sync">
                   {displayLinks.map((link, index) => (
                     <motion.div
                       key={index}
-                      initial={{ x: -50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: 50, opacity: 0 }}
+                      initial={{ y: 50, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: 50, opacity: 0 }}
                       transition={{ delay: 0.4 + index * 0.1 }}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="relative"
                     >
-                      {/* Carte de lien avec style adaptatif */}
+                      {/* Carte de lien style Beacons */}
                       <div className={`
-                        relative w-full p-3.5 rounded-xl
+                        relative w-full py-4 px-6 rounded-3xl
                         ${profileStyle === 'beacon' && displayImage
-                          ? 'bg-white/90 backdrop-blur-sm border border-white/50'
+                          ? 'bg-white'
                           : link.gradient
                             ? `bg-gradient-to-r ${link.gradient}`
                             : 'bg-gray-100'
                         }
-                        shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer
+                        shadow-2xl transition-all duration-300 cursor-pointer
                         overflow-hidden group
                       `}>
-                        {/* Effet de brillance au survol */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
-                                      -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-
                         {/* Contenu du lien */}
                         <div className="relative flex items-center justify-center">
-                          <span className={`text-sm font-semibold ${
+                          <span className={`text-base font-bold ${
                             profileStyle === 'beacon' && displayImage
-                              ? 'text-gray-800'
+                              ? 'text-gray-900'
                               : link.gradient
                                 ? 'text-white'
                                 : 'text-gray-800'
@@ -421,20 +384,41 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 )}
               </div>
 
-              {/* Footer avec branding TapLinkr */}
-              <motion.div
-                className="px-6 pt-3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
-                <div className="flex items-center justify-center gap-2 opacity-50">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
-                  <span className="text-xs font-medium" style={{ color: textColor }}>
-                    Powered by TapLinkr
-                  </span>
-                </div>
-              </motion.div>
+              {/* Footer avec branding */}
+              {profileStyle === 'beacon' && displayImage ? (
+                <motion.div
+                  className="absolute bottom-6 left-0 right-0 px-8 z-30"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                >
+                  <div className="bg-white/95 backdrop-blur rounded-3xl py-3 px-6 text-center shadow-xl">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+                      <span className="text-sm font-bold text-gray-900">
+                        TapLinkr
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        Try for free!
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="px-6 pt-3"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                >
+                  <div className="flex items-center justify-center gap-2 opacity-50">
+                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+                    <span className="text-xs font-medium" style={{ color: textColor }}>
+                      Powered by TapLinkr
+                    </span>
+                  </div>
+                </motion.div>
+              )}
             </div>
 
             {/* Barre de navigation iOS (home indicator) */}
