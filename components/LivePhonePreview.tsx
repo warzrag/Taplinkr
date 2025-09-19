@@ -129,11 +129,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   const textColor = firstLink?.textColor || '#1F2937'
 
   return (
-    <div className="flex items-center justify-center p-4" style={{ transformOrigin: 'center top' }}>
+    <div className="flex items-center justify-center" style={{ transformOrigin: 'center top' }}>
       <motion.div
-        className="relative"
+        className="relative scale-95"
         initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        animate={{ scale: 0.95, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {/* Effet de lueur derrière le téléphone */}

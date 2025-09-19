@@ -23,11 +23,16 @@ export default function EditPhonePreview({ isVisible, user, links }: EditPhonePr
   }, [])
 
   // Calculer la position optimale en fonction de la hauteur de l'écran
+  // Le modal est centré verticalement, on aligne le téléphone avec son haut
   const getTopPosition = () => {
-    if (screenHeight > 900) return 'top-8' // Grands écrans - plus haut
-    if (screenHeight > 800) return 'top-6' // Écrans moyens
-    if (screenHeight > 700) return 'top-4'  // Petits écrans
-    return 'top-2' // Très petits écrans
+    // Calcul pour aligner avec le haut du modal centré
+    // Modal height ~600px, screen center - half modal height
+    if (screenHeight > 900) {
+      return 'top-[calc(50vh-350px)]' // Centre - demi hauteur du modal
+    } else if (screenHeight > 700) {
+      return 'top-[calc(50vh-300px)]'
+    }
+    return 'top-20' // Petits écrans
   }
 
   // Ajuster la position horizontale selon la largeur
@@ -55,7 +60,7 @@ export default function EditPhonePreview({ isVisible, user, links }: EditPhonePr
             stiffness: 300,
             mass: 0.8
           }}
-          className={`hidden xl:flex fixed ${getTopPosition()} ${getRightPosition()} h-[calc(100vh-2rem)] items-start justify-center pointer-events-none`}
+          className={`hidden xl:flex fixed ${getTopPosition()} ${getRightPosition()} items-start justify-center pointer-events-none`}
           style={{ zIndex: 9999 }}
         >
           {/* Conteneur avec ombre et effet de profondeur */}
