@@ -198,28 +198,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   </div>
 
                 </div>
-
-                {/* Zone après l'image - zone blanche/normale */}
-                <div className="p-4">
-                  {/* Icône Instagram */}
-                  {firstLink?.instagramUrl && (
-                    <div className="flex justify-center mb-3">
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shadow-sm">
-                          <Instagram className="w-5 h-5 text-gray-800" />
-                        </div>
-                      </motion.div>
-                    </div>
-                  )}
-
-                  {/* Message */}
-                  <div className="text-center text-gray-400">
-                    <p className="text-xs">Aucun lien ajouté</p>
-                  </div>
-                </div>
               </div>
             )}
 
