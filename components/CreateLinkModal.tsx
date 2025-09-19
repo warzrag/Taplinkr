@@ -330,6 +330,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     className="text-2xl font-bold text-gray-900 mb-8 text-center"
                   >
                     Quel type de lien souhaitez-vous créer ?
+                  </motion.h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
                     {/* Multi-liens */}
@@ -554,11 +555,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       onClick={() => setStep(3)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                        profileImage 
-                          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700' 
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                      }`}
+                      className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700"
                     >
                       Continuer
                       <ArrowRight className="w-4 h-4" />
@@ -1475,7 +1472,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             </div>
           </form>
         </motion.div>
-        
       </div>
 
       {/* Live Phone Preview - similaire à EditLinkModal */}
