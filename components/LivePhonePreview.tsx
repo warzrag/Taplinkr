@@ -170,15 +170,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - IMAGE COMPLÈTE SANS ZONE NOIRE */}
+            {/* Photo style Beacon/Immersif - IMAGE SEULE */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="w-full h-full flex flex-col">
-                {/* Image exactement comme l'originale */}
-                <div className="relative">
+              <div className="w-full h-full">
+                {/* Image seule qui remplit l'espace disponible */}
+                <div className="relative w-full h-full">
                   <img
                     src={displayImage}
                     alt={displayName}
-                    className="w-full h-auto"
+                    className="w-full h-full object-cover"
                   />
 
                   {/* Texte overlay sur l'image */}
@@ -192,28 +192,20 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       </p>
                     )}
                   </div>
-                </div>
 
-                {/* Zone transparente sous l'image */}
-                <div className="flex-1 p-4 overflow-y-auto">
-                  {/* Icône Instagram */}
+                  {/* Icône Instagram sur l'image */}
                   {firstLink?.instagramUrl && (
-                    <div className="flex justify-center mb-3">
+                    <div className="absolute bottom-20 left-0 right-0 flex justify-center">
                       <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shadow-md">
-                          <Instagram className="w-5 h-5 text-gray-800" />
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <Instagram className="w-5 h-5 text-white" />
                         </div>
                       </motion.div>
                     </div>
                   )}
-
-                  {/* Message */}
-                  <div className="text-center text-gray-400">
-                    <p className="text-xs">Aucun lien ajouté</p>
-                  </div>
                 </div>
               </div>
             )}
