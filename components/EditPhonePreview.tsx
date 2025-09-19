@@ -25,14 +25,13 @@ export default function EditPhonePreview({ isVisible, user, links }: EditPhonePr
   // Calculer la position optimale en fonction de la hauteur de l'écran
   // Le modal est centré verticalement, on aligne le téléphone avec son haut
   const getTopPosition = () => {
-    // Calcul pour aligner avec le haut du modal centré
-    // Modal height ~600px, screen center - half modal height
+    // Position plus haute pour mieux aligner avec le modal
     if (screenHeight > 900) {
-      return 'top-[calc(50vh-350px)]' // Centre - demi hauteur du modal
+      return 'top-[calc(50vh-400px)]' // Plus haut de 50px
     } else if (screenHeight > 700) {
-      return 'top-[calc(50vh-300px)]'
+      return 'top-[calc(50vh-350px)]' // Plus haut de 50px
     }
-    return 'top-20' // Petits écrans
+    return 'top-10' // Petits écrans
   }
 
   // Ajuster la position horizontale selon la largeur
