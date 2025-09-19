@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Instagram, Twitter, MessageCircle, Globe, Youtube } from 'lucide-react'
+import {
+  Instagram, Twitter, MessageCircle, Youtube,
+  Music, ShoppingBag, Mail, Phone, MapPin,
+  Link, Calendar, Globe, Camera, Heart,
+  Star, Coffee, Book, Briefcase
+} from 'lucide-react'
 
 interface LivePhonePreviewProps {
   user?: {
@@ -54,103 +59,44 @@ interface LivePhonePreviewProps {
   }>
 }
 
+// Données de démonstration par défaut
+const defaultDemoData = {
+  name: "Sarah Anderson",
+  username: "@sarahanderson",
+  bio: "Digital Creator • Photographer • Travel Enthusiast",
+  profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop",
+  coverImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+  location: "Paris, France",
+  links: [
+    {
+      title: "📸 Mon Portfolio",
+      icon: "camera",
+      gradient: "from-purple-500 to-pink-500"
+    },
+    {
+      title: "🛍️ Ma Boutique",
+      icon: "shopping",
+      gradient: "from-blue-500 to-cyan-500"
+    },
+    {
+      title: "📧 Me Contacter",
+      icon: "mail",
+      gradient: "from-green-500 to-emerald-500"
+    },
+    {
+      title: "📅 Prendre RDV",
+      icon: "calendar",
+      gradient: "from-orange-500 to-red-500"
+    }
+  ]
+}
+
 export default function LivePhonePreview({ user, links = [], currentStep }: LivePhonePreviewProps) {
-  const getFontClass = (fontFamily?: string) => {
-    const fontMap: { [key: string]: string } = {
-      'system': 'font-sans',
-      'inter': 'font-inter',
-      'roboto': 'font-roboto',
-      'poppins': 'font-poppins',
-      'montserrat': 'font-montserrat',
-      'playfair': 'font-playfair',
-      'mono': 'font-mono'
-    }
-    return fontMap[fontFamily || 'system'] || 'font-sans'
-  }
-
-  const getBorderRadiusClass = (borderRadius?: string) => {
-    return borderRadius || 'rounded-2xl'
-  }
-
-  const displayableLinks = links || []
-
-  const getAnimationVariants = (animationType?: string) => {
-    switch (animationType) {
-      case 'pulse':
-        return {
-          animate: {
-            scale: [0.9, 1.05, 0.9],
-            transition: {
-              duration: 1.2,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'rotate':
-        return {
-          animate: {
-            rotate: [0, 5, -5, 0],
-            scale: [1, 1.02, 1.02, 1],
-            transition: {
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'shake':
-        return {
-          animate: {
-            x: [0, -4, 4, -4, 4, 0],
-            transition: {
-              duration: 0.6,
-              repeat: Infinity,
-              repeatDelay: 2,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'bounce':
-        return {
-          animate: {
-            y: [0, -10, 0],
-            transition: {
-              duration: 0.8,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      case 'glow':
-        return {
-          animate: {
-            boxShadow: [
-              '0 0 20px rgba(59, 130, 246, 0.0)',
-              '0 0 20px rgba(59, 130, 246, 0.8)',
-              '0 0 20px rgba(59, 130, 246, 0.0)'
-            ],
-            transition: {
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }
-          }
-        }
-      default:
-        return {}
-    }
-  }
-
-  const firstLink = displayableLinks[0]
-  const backgroundColor = firstLink?.backgroundColor || '#ffffff'
-  const textColor = firstLink?.textColor || '#1F2937'
-  const fontClass = getFontClass(firstLink?.fontFamily)
-  const borderRadiusClass = getBorderRadiusClass(firstLink?.borderRadius)
-
   const [time, setTime] = useState(new Date())
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
+    setIsLoaded(true)
     const interval = setInterval(() => {
       setTime(new Date())
     }, 1000)
@@ -159,177 +105,255 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
   const timeString = time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 
-  const multiLinks = displayableLinks.flatMap(link => {
-    if (link.multiLinks && link.multiLinks.length > 0) {
-      return link.multiLinks.map(ml => ({
-        title: ml.title,
-        url: ml.url,
-        animation: ml.animation || link.animation,
-        parentTitle: link.title
-      }))
-    } else if (link.isDirect && link.directUrl) {
-      return [{
-        title: link.title,
-        url: link.directUrl,
-        animation: link.animation
-      }]
-    }
-    return []
-  }).slice(0, 4)
+  // Utiliser les données du premier lien ou les données par défaut
+  const firstLink = links[0]
+  const displayName = firstLink?.title || user?.name || defaultDemoData.name
+  const displayBio = firstLink?.description || user?.bio || defaultDemoData.bio
+  const displayImage = firstLink?.profileImage || user?.image || defaultDemoData.profileImage
+  const displayCover = firstLink?.coverImage || defaultDemoData.coverImage
+  const displayLocation = firstLink?.city || firstLink?.country ?
+    `${firstLink.city || ''}${firstLink.city && firstLink.country ? ', ' : ''}${firstLink.country || ''}` :
+    defaultDemoData.location
+
+  // Créer les liens à afficher
+  const displayLinks = links.length > 0 && links[0].multiLinks && links[0].multiLinks.length > 0 ?
+    links[0].multiLinks.slice(0, 4).map(ml => ({
+      title: ml.title,
+      url: ml.url,
+      icon: ml.icon,
+      gradient: null
+    })) :
+    defaultDemoData.links
+
+  const backgroundColor = firstLink?.backgroundColor || '#ffffff'
+  const textColor = firstLink?.textColor || '#1F2937'
 
   return (
-    <div className="flex items-center justify-center p-4 transform scale-90 xl:scale-100 2xl:scale-110" style={{ transformOrigin: 'center top' }}>
-      <div className="relative transform hover:scale-[1.02] transition-transform duration-500 ease-out">
-        {/* Reflet lumineux */}
-        <div className="absolute -inset-4 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-[44px] pointer-events-none" />
+    <div className="flex items-center justify-center p-4" style={{ transformOrigin: 'center top' }}>
+      <motion.div
+        className="relative"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        {/* Effet de lueur derrière le téléphone */}
+        <div className="absolute -inset-8 bg-gradient-to-br from-purple-400/20 via-pink-400/20 to-blue-400/20 blur-3xl" />
 
-        {/* iPhone Frame avec design moderne */}
-        <div className="w-[320px] h-[650px] bg-gradient-to-b from-gray-800 via-gray-900 to-black rounded-[44px] p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-gray-700/50 relative">
-          {/* Reflet métallique */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent rounded-[44px] pointer-events-none" />
+        {/* Cadre iPhone réaliste */}
+        <div className="relative w-[320px] h-[692px] bg-black rounded-[50px] p-2.5 shadow-2xl">
+          {/* Reflet sur le cadre */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-[50px] pointer-events-none" />
 
-          {/* Dynamic Island moderne */}
-          <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-32 h-8 bg-black rounded-full z-30 flex items-center justify-center shadow-inner">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2" />
-            <div className="text-[10px] text-gray-400 font-medium tracking-wider">LIVE PREVIEW</div>
-          </div>
+          {/* Encoche Dynamic Island */}
+          <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-50" />
 
-          {/* Screen */}
-          <div className="w-full h-full bg-white rounded-[40px] overflow-hidden relative" style={{ backgroundColor }}>
-            {/* Cover Image */}
-            {firstLink?.coverImage && (
-              <div
-                className="absolute top-0 left-0 right-0 h-48 bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${firstLink.coverImage})`,
-                  backgroundPosition: firstLink.coverImagePosition || 'center'
-                }}
+          {/* Écran */}
+          <div className="relative w-full h-full bg-white rounded-[42px] overflow-hidden" style={{ backgroundColor }}>
+            {/* Image de couverture avec overlay gradient */}
+            {displayCover && (
+              <motion.div
+                className="absolute top-0 left-0 right-0 h-[160px] overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
-              </div>
+                <img
+                  src={displayCover}
+                  alt="Cover"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50" />
+              </motion.div>
             )}
 
-            {/* Status Bar */}
-            <div className="absolute top-1 left-0 right-0 z-20 flex justify-between items-center px-6 py-1 text-xs" style={{ color: firstLink?.coverImage ? '#ffffff' : textColor }}>
-              <span className="font-medium">{timeString}</span>
+            {/* Barre de statut iOS */}
+            <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
+                 style={{ color: displayCover ? '#ffffff' : textColor }}>
+              <span>{timeString}</span>
               <div className="flex items-center gap-1">
+                {/* Signal bars */}
                 <div className="flex gap-[2px]">
-                  <div className="w-[3px] h-[10px] bg-current rounded-[1px] opacity-40"></div>
-                  <div className="w-[3px] h-[10px] bg-current rounded-[1px] opacity-60"></div>
-                  <div className="w-[3px] h-[10px] bg-current rounded-[1px] opacity-80"></div>
-                  <div className="w-[3px] h-[10px] bg-current rounded-[1px]"></div>
+                  <div className="w-[3px] h-[8px] bg-current rounded-[1px] opacity-40" />
+                  <div className="w-[3px] h-[10px] bg-current rounded-[1px] opacity-60" />
+                  <div className="w-[3px] h-[12px] bg-current rounded-[1px] opacity-80" />
+                  <div className="w-[3px] h-[14px] bg-current rounded-[1px]" />
                 </div>
-                <span className="ml-1 text-current">5G</span>
-                <div className="ml-1 w-5 h-3 border border-current rounded-sm relative">
-                  <div className="absolute inset-0.5 bg-current rounded-[1px]"></div>
-                  <div className="absolute -right-0.5 top-1 w-[1px] h-1 bg-current"></div>
+                <span className="ml-1">5G</span>
+                {/* Battery */}
+                <div className="ml-1 w-6 h-3.5 border border-current rounded-sm relative">
+                  <div className="absolute inset-[1px] right-[30%] bg-current rounded-[1px]" />
+                  <div className="absolute -right-[1.5px] top-1 w-[1.5px] h-1.5 bg-current rounded-r-[1px]" />
                 </div>
               </div>
             </div>
 
-            {/* Content */}
-            <div className={`relative z-10 h-full flex flex-col ${firstLink?.coverImage ? 'pt-32' : 'pt-20'} pb-20 px-6 ${fontClass}`}>
-              {/* Profile */}
-              <div className="flex flex-col items-center mb-6">
-                {(firstLink?.profileImage || user?.image) && (
-                  <div className="relative mb-4">
+            {/* Contenu principal */}
+            <div className={`relative h-full flex flex-col ${displayCover ? 'pt-[120px]' : 'pt-[60px]'} pb-6`}>
+              {/* Section Profil */}
+              <motion.div
+                className="flex flex-col items-center px-6 mb-6"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {/* Photo de profil avec animation */}
+                <motion.div
+                  className="relative mb-4"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 p-1">
                     <img
-                      src={firstLink?.profileImage || user?.image}
-                      alt={firstLink?.title || user?.name || 'Profile'}
-                      className="w-20 h-20 rounded-full object-cover ring-4 ring-white shadow-xl"
+                      src={displayImage}
+                      alt={displayName}
+                      className="w-full h-full rounded-full object-cover bg-white"
                     />
-                    {firstLink?.isOnline && (
-                      <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 rounded-full ring-2 ring-white"></div>
-                    )}
                   </div>
-                )}
+                  {/* Badge online */}
+                  {firstLink?.isOnline && (
+                    <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white" />
+                  )}
+                </motion.div>
 
-                <h1 className="text-2xl font-bold mb-1" style={{ color: textColor }}>
-                  {firstLink?.title || user?.name || 'Nom'}
+                {/* Nom et bio */}
+                <h1 className="text-xl font-bold mb-1" style={{ color: textColor }}>
+                  {displayName}
                 </h1>
 
-                {(firstLink?.city || firstLink?.country) && (
-                  <p className="text-sm opacity-70 mb-2" style={{ color: textColor }}>
-                    📍 {[firstLink?.city, firstLink?.country].filter(Boolean).join(', ')}
-                  </p>
+                {displayLocation && (
+                  <div className="flex items-center gap-1 text-sm mb-2 opacity-70" style={{ color: textColor }}>
+                    <MapPin className="w-3 h-3" />
+                    <span>{displayLocation}</span>
+                  </div>
                 )}
 
-                {(firstLink?.description || user?.bio) && (
-                  <p className="text-sm text-center opacity-80" style={{ color: textColor }}>
-                    {firstLink?.description || user?.bio}
-                  </p>
-                )}
+                <p className="text-sm text-center opacity-80 px-4" style={{ color: textColor }}>
+                  {displayBio}
+                </p>
 
-                {/* Social Icons */}
-                {(firstLink?.instagramUrl || firstLink?.tiktokUrl || firstLink?.twitterUrl || firstLink?.youtubeUrl) && (
-                  <div className="flex gap-4 mt-4">
-                    {firstLink?.instagramUrl && (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                        <Instagram className="w-4 h-4 text-white" />
-                      </div>
+                {/* Icônes réseaux sociaux */}
+                {(firstLink?.instagramUrl || firstLink?.twitterUrl || firstLink?.youtubeUrl || firstLink?.tiktokUrl) && (
+                  <div className="flex gap-3 mt-4">
+                    {firstLink.instagramUrl && (
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center"
+                      >
+                        <Instagram className="w-5 h-5 text-white" />
+                      </motion.div>
                     )}
-                    {firstLink?.tiktokUrl && (
-                      <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
-                        <MessageCircle className="w-4 h-4 text-white" />
-                      </div>
+                    {firstLink.twitterUrl && (
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center"
+                      >
+                        <Twitter className="w-5 h-5 text-white" />
+                      </motion.div>
                     )}
-                    {firstLink?.twitterUrl && (
-                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                        <Twitter className="w-4 h-4 text-white" />
-                      </div>
+                    {firstLink.youtubeUrl && (
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center"
+                      >
+                        <Youtube className="w-5 h-5 text-white" />
+                      </motion.div>
                     )}
-                    {firstLink?.youtubeUrl && (
-                      <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
-                        <Youtube className="w-4 h-4 text-white" />
-                      </div>
+                    {firstLink.tiktokUrl && (
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-10 h-10 rounded-full bg-black flex items-center justify-center"
+                      >
+                        <Music className="w-5 h-5 text-white" />
+                      </motion.div>
                     )}
                   </div>
                 )}
-              </div>
+              </motion.div>
 
-              {/* Links */}
-              <div className="flex-1 space-y-3 overflow-y-auto scrollbar-hide">
+              {/* Liens */}
+              <div className="flex-1 px-6 space-y-2.5 overflow-y-auto">
                 <AnimatePresence mode="sync">
-                  {multiLinks.map((link, index) => (
+                  {displayLinks.map((link, index) => (
                     <motion.div
-                      key={`${link.title}-${index}`}
-                      className={`w-full py-4 px-4 ${borderRadiusClass} transition-all duration-200 hover:scale-[1.02] cursor-pointer relative overflow-hidden`}
-                      style={{
-                        backgroundColor: textColor + '10',
-                        color: textColor,
-                        border: `1px solid ${textColor}20`
-                      }}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.1 }}
-                      {...getAnimationVariants(link.animation)}
+                      key={index}
+                      initial={{ x: -50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: 50, opacity: 0 }}
+                      transition={{ delay: 0.4 + index * 0.1 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="relative"
                     >
-                      <p className="text-sm font-medium text-center">{link.title}</p>
+                      {/* Carte de lien avec gradient ou couleur unie */}
+                      <div className={`
+                        relative w-full p-3.5 rounded-xl
+                        ${link.gradient ? `bg-gradient-to-r ${link.gradient}` : 'bg-gray-100'}
+                        shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer
+                        overflow-hidden group
+                      `}>
+                        {/* Effet de brillance au survol */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
+                                      -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+
+                        {/* Contenu du lien */}
+                        <div className="relative flex items-center justify-center">
+                          <span className={`text-sm font-semibold ${link.gradient ? 'text-white' : 'text-gray-800'}`}>
+                            {link.title}
+                          </span>
+                        </div>
+                      </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
+
+                {/* Message si pas de liens */}
+                {displayLinks.length === 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-8"
+                  >
+                    <p className="text-gray-400 text-sm">Aucun lien ajouté</p>
+                  </motion.div>
+                )}
               </div>
+
+              {/* Footer avec branding TapLinkr */}
+              <motion.div
+                className="px-6 pt-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                <div className="flex items-center justify-center gap-2 opacity-50">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+                  <span className="text-xs font-medium" style={{ color: textColor }}>
+                    Powered by TapLinkr
+                  </span>
+                </div>
+              </motion.div>
             </div>
 
-            {/* Home indicator */}
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-400 rounded-full" />
+            {/* Barre de navigation iOS (home indicator) */}
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-800 rounded-full opacity-30" />
           </div>
 
-          {/* Side Buttons */}
-          <div className="absolute left-0 top-20 w-1 h-8 bg-gray-600 rounded-r-full"></div>
-          <div className="absolute left-0 top-32 w-1 h-12 bg-gray-600 rounded-r-full"></div>
-          <div className="absolute left-0 top-48 w-1 h-12 bg-gray-600 rounded-r-full"></div>
-
-          {/* Right side button */}
-          <div className="absolute right-0 top-28 w-1 h-16 bg-gray-600 rounded-l-full"></div>
+          {/* Boutons physiques iPhone */}
+          <div className="absolute -left-1 top-24 w-1 h-6 bg-gray-700 rounded-l-full" />
+          <div className="absolute -left-1 top-36 w-1 h-10 bg-gray-700 rounded-l-full" />
+          <div className="absolute -left-1 top-48 w-1 h-10 bg-gray-700 rounded-l-full" />
+          <div className="absolute -right-1 top-32 w-1 h-16 bg-gray-700 rounded-r-full" />
         </div>
 
-        {/* Live indicator */}
+        {/* Badge LIVE animé */}
         <motion.div
-          className="absolute -top-2 -right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center space-x-1 z-10"
+          className="absolute -top-3 -right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg z-50"
           animate={{
-            scale: [1, 1.1, 1],
+            scale: [1, 1.05, 1],
           }}
           transition={{
             duration: 2,
@@ -337,10 +361,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             ease: 'easeInOut'
           }}
         >
-          <div className="w-2 h-2 bg-white rounded-full" />
-          <span>LIVE</span>
+          <motion.div
+            className="w-2 h-2 bg-white rounded-full"
+            animate={{ opacity: [1, 0.5, 1] }}
+            transition={{ duration: 1, repeat: Infinity }}
+          />
+          <span>APERÇU LIVE</span>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   )
 }

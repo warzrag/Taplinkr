@@ -24,22 +24,22 @@ export default function EditPhonePreview({ isVisible, user, links }: EditPhonePr
 
   // Calculer la position optimale en fonction de la hauteur de l'écran
   const getTopPosition = () => {
-    if (screenHeight > 900) return 'top-20' // Grands écrans
-    if (screenHeight > 800) return 'top-12' // Écrans moyens
-    if (screenHeight > 700) return 'top-8'  // Petits écrans
-    return 'top-4' // Très petits écrans
+    if (screenHeight > 900) return 'top-8' // Grands écrans - plus haut
+    if (screenHeight > 800) return 'top-6' // Écrans moyens
+    if (screenHeight > 700) return 'top-4'  // Petits écrans
+    return 'top-2' // Très petits écrans
   }
 
   // Ajuster la position horizontale selon la largeur
   const getRightPosition = () => {
     if (typeof window !== 'undefined') {
       const width = window.innerWidth
-      if (width > 1920) return 'right-32' // Très grands écrans
-      if (width > 1536) return 'right-24' // Grands écrans
-      if (width > 1280) return 'right-16' // Écrans moyens
+      if (width > 1920) return 'right-20' // Très grands écrans - plus proche
+      if (width > 1536) return 'right-16' // Grands écrans
+      if (width > 1280) return 'right-12' // Écrans moyens
       return 'right-8' // Petits écrans larges
     }
-    return 'right-24'
+    return 'right-16'
   }
 
   return (
