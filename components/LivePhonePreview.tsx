@@ -65,7 +65,6 @@ const defaultDemoData = {
   username: "@sarahanderson",
   bio: "Digital Creator • Photographer • Travel Enthusiast",
   profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop",
-  coverImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
   location: "Paris, France",
   links: [
     {
@@ -110,7 +109,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   const displayName = firstLink?.title || user?.name || defaultDemoData.name
   const displayBio = firstLink?.description || user?.bio || defaultDemoData.bio
   const displayImage = firstLink?.profileImage || user?.image || (links.length === 0 ? defaultDemoData.profileImage : null)
-  const displayCover = firstLink?.coverImage || defaultDemoData.coverImage
   const displayLocation = firstLink?.city || firstLink?.country ?
     `${firstLink.city || ''}${firstLink.city && firstLink.country ? ', ' : ''}${firstLink.country || ''}` :
     defaultDemoData.location
@@ -149,26 +147,30 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
           {/* Écran */}
           <div className="relative w-full h-full bg-white rounded-[42px] overflow-hidden" style={{ backgroundColor }}>
-            {/* Image de couverture avec overlay gradient */}
-            {displayCover && (
-              <motion.div
-                className="absolute top-0 left-0 right-0 h-[160px] overflow-hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <img
-                  src={displayCover}
-                  alt="Cover"
-                  className="w-full h-full object-cover"
+            {/* Fond avec dégradé flou style Beacon si photo de profil */}
+            {displayImage && (
+              <div className="absolute inset-0">
+                {/* Image floue en arrière-plan */}
+                <div
+                  className="absolute inset-0 scale-150"
+                  style={{
+                    backgroundImage: `url(${displayImage})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    filter: 'blur(100px) saturate(2)',
+                    opacity: 0.3
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50" />
-              </motion.div>
+                {/* Gradient overlay pour un effet doux */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-white" />
+                {/* Second gradient pour plus de douceur */}
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-90" />
+              </div>
             )}
 
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
-                 style={{ color: displayCover ? '#ffffff' : textColor }}>
+                 style={{ color: textColor }}>
               <span>{timeString}</span>
               <div className="flex items-center gap-1">
                 {/* Signal bars */}
@@ -188,7 +190,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             </div>
 
             {/* Contenu principal */}
-            <div className={`relative h-full flex flex-col ${displayCover ? 'pt-[120px]' : 'pt-[60px]'} pb-6`}>
+            <div className="relative h-full flex flex-col pt-[60px] pb-6">
               {/* Section Profil */}
               <motion.div
                 className="flex flex-col items-center px-6 mb-6"
@@ -196,24 +198,47 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                {/* Photo de profil avec animation */}
+                {/* Photo de profil avec animation style Beacon */}
                 {displayImage && (
                   <motion.div
                     className="relative mb-4"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 20,
+                      delay: 0.2
+                    }}
                   >
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 p-1">
-                      <img
-                        src={displayImage}
-                        alt={displayName}
-                        className="w-full h-full rounded-full object-cover bg-white"
-                      />
+                    {/* Conteneur avec effet de glow */}
+                    <div className="relative">
+                      {/* Glow effect */}
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400/30 to-pink-400/30 blur-xl scale-110" />
+
+                      {/* Photo principale */}
+                      <div className="relative w-24 h-24 rounded-full overflow-hidden ring-2 ring-white/50 shadow-xl">
+                        <img
+                          src={displayImage}
+                          alt={displayName}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Overlay subtle */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                      </div>
+
+                      {/* Badge online */}
+                      {firstLink?.isOnline && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.5 }}
+                          className="absolute -bottom-1 -right-1 w-7 h-7 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center"
+                        >
+                          <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                        </motion.div>
+                      )}
                     </div>
-                    {/* Badge online */}
-                    {firstLink?.isOnline && (
-                      <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white" />
-                    )}
                   </motion.div>
                 )}
 
