@@ -170,15 +170,19 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - IMAGE COMPLÈTE AVEC ZONE BLANCHE */}
+            {/* Photo style Beacon/Immersif - SANS AUCUN ZOOM */}
             {displayImage && profileStyle === 'beacon' && (
               <div className="w-full h-full overflow-y-auto">
-                {/* Image complète affichée */}
+                {/* Image avec ses proportions naturelles SANS ZOOM */}
                 <div className="relative">
                   <img
                     src={displayImage}
                     alt={displayName}
-                    className="w-full h-auto"
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block'
+                    }}
                   />
 
                   {/* Texte overlay sur l'image */}
