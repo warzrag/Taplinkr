@@ -600,7 +600,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     className="relative w-full max-w-md"
                   >
                     {/* Zone d'upload et affichage */}
-                    <div className="relative w-full">
+                    <div className="relative w-full flex justify-center">
                       {!profileImage ? (
                         <>
                           {/* Zone d'upload avec style selon le choix */}
@@ -632,17 +632,18 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         </>
                       ) : (
                         <>
-                          {/* Image uploadée - affichage COMPLET sans hauteur fixe */}
+                          {/* Image uploadée - s'adapte au format de la photo */}
                           <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="relative w-full rounded-lg overflow-hidden shadow-xl"
+                            className="relative inline-block rounded-lg shadow-xl"
                           >
-                            {/* Affichage de l'image ENTIÈRE avec hauteur automatique */}
+                            {/* Image COMPLÈTE qui définit la taille du conteneur */}
                             <img
                               src={profileImage}
                               alt="Photo de profil"
-                              className="w-full h-auto"
+                              className="max-w-full h-auto rounded-lg"
+                              style={{ display: 'block', maxHeight: '500px' }}
                             />
 
                             {/* Bouton pour changer la photo */}
