@@ -178,11 +178,12 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
               >
-                {/* Image de fond qui commence tout en haut */}
+                {/* Image de fond qui commence tout en haut sans zoom */}
                 <img
                   src={displayImage}
                   alt={displayName}
-                  className="absolute top-0 left-0 w-full h-full object-cover rounded-[42px]"
+                  className="absolute top-0 left-0 w-full object-contain object-top rounded-[42px]"
+                  style={{ height: 'auto', maxHeight: '100%' }}
                 />
 
                 {/* Gradient noir en bas pour la lisibilité du texte */}
