@@ -54,6 +54,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       : [{ title: '', url: '' }]
   )
   const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
+  const [profileStyle, setProfileStyle] = useState<'circle' | 'beacon'>(editingLink?.profileStyle || 'circle')
   const [coverImage, setCoverImage] = useState(editingLink?.coverImage || '')
   const [showPreview, setShowPreview] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
@@ -217,6 +218,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         isUltraLink: linkType === 'direct' ? isUltraLink : false,
         multiLinks: linkType === 'multi' ? multiLinks.filter(link => link.title || link.url) : [],
         profileImage: profileImage || null,
+        profileStyle: profileStyle || 'circle',
         coverImage: coverImage || null,
         description: data.description || null,
         instagramUrl: data.instagramUrl || null,
@@ -682,6 +684,77 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       ? "Parfait ! Votre photo est superbe 🎉" 
                       : "Les profils avec photo reçoivent 3x plus de clics"}
                   </motion.p>
+
+                  {/* Sélecteur de style de photo */}
+                  {profileImage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      className="mt-6 space-y-3"
+                    >
+                      <p className="text-sm font-medium text-gray-700 text-center">Style d'affichage</p>
+                      <div className="flex gap-3 justify-center">
+                        {/* Style rond classique */}
+                        <motion.button
+                          type="button"
+                          onClick={() => setProfileStyle('circle')}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`relative p-3 rounded-xl border-2 transition-all ${
+                            profileStyle === 'circle'
+                              ? 'border-indigo-500 bg-indigo-50'
+                              : 'border-gray-200 bg-white hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                              <div className="w-12 h-12 rounded-full bg-white" />
+                            </div>
+                            <span className="text-xs font-medium">Classique</span>
+                          </div>
+                          {profileStyle === 'circle' && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center"
+                            >
+                              <Check className="w-3 h-3 text-white" />
+                            </motion.div>
+                          )}
+                        </motion.button>
+
+                        {/* Style Beacon */}
+                        <motion.button
+                          type="button"
+                          onClick={() => setProfileStyle('beacon')}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`relative p-3 rounded-xl border-2 transition-all ${
+                            profileStyle === 'beacon'
+                              ? 'border-indigo-500 bg-indigo-50'
+                              : 'border-gray-200 bg-white hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-200 via-pink-200 to-blue-200 flex items-center justify-end flex-col overflow-hidden">
+                              <div className="w-10 h-10 rounded-full bg-white mb-1" />
+                            </div>
+                            <span className="text-xs font-medium">Style Beacon</span>
+                          </div>
+                          {profileStyle === 'beacon' && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center"
+                            >
+                              <Check className="w-3 h-3 text-white" />
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  )}
 
                   {/* Option pour passer sans photo */}
                   {!profileImage && (
@@ -1669,6 +1742,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
                     description: step >= 4 ? (watchedDescription || '') : '',
                     profileImage: profileImage || '',
+                    profileStyle: profileStyle || 'circle',
                     coverImage: step >= 4 ? coverImage : '',
                     isDirect: false,
                     isActive: true,
@@ -1752,6 +1826,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 title: step >= 4 ? (watchedTitle || 'Mon lien') : 'Mon lien',
                 description: step >= 4 ? (watchedDescription || '') : '',
                 profileImage: profileImage || '',
+                profileStyle: profileStyle || 'circle',
                 coverImage: step >= 4 ? coverImage : '',
                 isDirect: false,
                 isActive: true,

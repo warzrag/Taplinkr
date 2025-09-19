@@ -28,6 +28,7 @@ interface LivePhonePreviewProps {
     coverImage?: string
     coverImagePosition?: string
     profileImage?: string
+    profileStyle?: 'circle' | 'beacon'
     fontFamily?: string
     borderRadius?: string
     backgroundColor?: string
@@ -109,6 +110,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   const displayName = firstLink?.title || user?.name || defaultDemoData.name
   const displayBio = firstLink?.description || user?.bio || defaultDemoData.bio
   const displayImage = firstLink?.profileImage || user?.image || (links.length === 0 ? defaultDemoData.profileImage : null)
+  const profileStyle = firstLink?.profileStyle || 'circle'
   const displayLocation = firstLink?.city || firstLink?.country ?
     `${firstLink.city || ''}${firstLink.city && firstLink.country ? ', ' : ''}${firstLink.country || ''}` :
     defaultDemoData.location
@@ -147,27 +149,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
           {/* Écran */}
           <div className="relative w-full h-full bg-white rounded-[42px] overflow-hidden" style={{ backgroundColor }}>
-            {/* Fond avec dégradé flou style Beacon si photo de profil */}
-            {displayImage && (
-              <div className="absolute inset-0">
-                {/* Image floue en arrière-plan */}
-                <div
-                  className="absolute inset-0 scale-150"
-                  style={{
-                    backgroundImage: `url(${displayImage})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    filter: 'blur(100px) saturate(2)',
-                    opacity: 0.3
-                  }}
-                />
-                {/* Gradient overlay pour un effet doux */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-white" />
-                {/* Second gradient pour plus de douceur */}
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-90" />
-              </div>
-            )}
-
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
                  style={{ color: textColor }}>
@@ -189,17 +170,37 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
+            {/* Photo style Beacon en haut si sélectionné */}
+            {displayImage && profileStyle === 'beacon' && (
+              <motion.div
+                className="absolute top-0 left-0 right-0 h-[480px] z-10 rounded-t-[42px] overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <img
+                  src={displayImage}
+                  alt={displayName}
+                  className="w-full h-full object-cover"
+                />
+                {/* Gradient overlay pour transition douce */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/80" />
+                {/* Second gradient pour assombrir le bas */}
+                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent" />
+              </motion.div>
+            )}
+
             {/* Contenu principal */}
-            <div className="relative h-full flex flex-col pt-[60px] pb-6">
+            <div className={`relative h-full flex flex-col ${profileStyle === 'beacon' && displayImage ? 'pt-[120px]' : 'pt-[60px]'} pb-6`}>
               {/* Section Profil */}
               <motion.div
-                className="flex flex-col items-center px-6 mb-6"
+                className="flex flex-col items-center px-6 mb-6 z-20"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                {/* Photo de profil avec animation style Beacon */}
-                {displayImage && (
+                {/* Photo de profil - Style selon le choix */}
+                {displayImage && profileStyle === 'circle' && (
                   <motion.div
                     className="relative mb-4"
                     initial={{ scale: 0.8, opacity: 0 }}
@@ -211,7 +212,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       delay: 0.2
                     }}
                   >
-                    {/* Conteneur avec effet de glow */}
+                    {/* Style cercle classique */}
                     <div className="relative">
                       {/* Glow effect */}
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400/30 to-pink-400/30 blur-xl scale-110" />
@@ -242,19 +243,56 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   </motion.div>
                 )}
 
+                {/* Photo style Beacon - Photo ronde avec arrière-plan */}
+                {displayImage && profileStyle === 'beacon' && (
+                  <motion.div
+                    className="relative mb-4"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 20,
+                      delay: 0.2
+                    }}
+                  >
+                    {/* Photo de profil ronde */}
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-full overflow-hidden ring-3 ring-white shadow-2xl bg-white">
+                        <img
+                          src={displayImage}
+                          alt={displayName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      {/* Badge online */}
+                      {firstLink?.isOnline && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.5 }}
+                          className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"
+                        >
+                          <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Nom et bio */}
-                <h1 className="text-xl font-bold mb-1" style={{ color: textColor }}>
+                <h1 className="text-xl font-bold mb-1" style={{ color: profileStyle === 'beacon' && displayImage ? '#ffffff' : textColor }}>
                   {displayName}
                 </h1>
 
                 {displayLocation && (
-                  <div className="flex items-center gap-1 text-sm mb-2 opacity-70" style={{ color: textColor }}>
+                  <div className="flex items-center gap-1 text-sm mb-2 opacity-70" style={{ color: profileStyle === 'beacon' && displayImage ? '#ffffff' : textColor }}>
                     <MapPin className="w-3 h-3" />
                     <span>{displayLocation}</span>
                   </div>
                 )}
 
-                <p className="text-sm text-center opacity-80 px-4" style={{ color: textColor }}>
+                <p className="text-sm text-center opacity-80 px-4" style={{ color: profileStyle === 'beacon' && displayImage ? '#ffffff' : textColor }}>
                   {displayBio}
                 </p>
 
