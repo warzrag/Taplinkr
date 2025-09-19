@@ -625,8 +625,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                               value={profileImage}
                               onChange={setProfileImage}
                               type="profile"
-                              aspectRatio="square"
-                              className="w-full h-full [&_svg]:hidden [&_p]:hidden [&_div]:bg-transparent"
+                              className="absolute inset-0 [&_svg]:hidden [&_p]:hidden [&_div]:bg-transparent"
                             />
                           </div>
                         </>

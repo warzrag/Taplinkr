@@ -210,7 +210,7 @@ export default function ImageUpload({
               src={preview}
               alt="Preview"
               fill
-              className="object-cover"
+              className="object-contain"
             />
             
             {/* Overlay au survol */}
