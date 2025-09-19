@@ -81,11 +81,11 @@ export async function POST(request: NextRequest) {
           break
           
         case 'profile':
-          // Photo de profil de lien : carré 300x300
+          // Photo de profil de lien : garde les proportions originales
           optimizedBuffer = await image
-            .resize(300, 300, { 
-              fit: 'cover',
-              position: 'center'
+            .resize(1200, 1200, {
+              fit: 'inside',
+              withoutEnlargement: true
             })
             .jpeg({ quality: 85 })
             .toBuffer()
