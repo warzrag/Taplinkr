@@ -568,7 +568,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center min-h-[400px] py-8"
+                  className="flex flex-col items-center justify-start min-h-[400px] pt-4 pb-8"
                 >
                   <motion.h3
                     initial={{ opacity: 0, y: -20 }}
@@ -582,7 +582,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="text-gray-600 mb-8 text-center"
+                    className="text-gray-600 mb-4 text-center"
                   >
                     Une photo de profil rend votre page plus personnelle et professionnelle
                   </motion.p>
