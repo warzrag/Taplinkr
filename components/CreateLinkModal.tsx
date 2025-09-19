@@ -11,6 +11,7 @@ import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
 import IconUpload from './upload/IconUpload'
 import LivePhonePreview from './LivePhonePreview'
+import EditPhonePreview from './EditPhonePreview'
 
 interface CreateLinkModalProps {
   isOpen: boolean
@@ -1717,87 +1718,63 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         )}
       </AnimatePresence>
 
-      {/* Preview desktop fixe à droite */}
-      <AnimatePresence>
-        {showPreview && linkType === 'multi' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="hidden xl:block fixed right-8 top-24 bottom-8 w-[375px] z-20"
-          >
-            <LivePhonePreview
-              currentStep={step}
-              links={[{
-                id: Date.now().toString(),
-                slug: watch('slug') || 'preview',
-                title: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
-                description: step >= 5 ? (watchedDescription || '') : '',
-                profileImage: profileImage || '',
-                profileStyle: profileStyle || 'circle',
-                coverImage: step >= 5 ? coverImage : '',
-                isDirect: false,
-                isActive: true,
-                instagramUrl: step >= 4 ? watch('instagramUrl') : '',
-                tiktokUrl: step >= 4 ? watch('tiktokUrl') : '',
-                twitterUrl: step >= 4 ? watch('twitterUrl') : '',
-                youtubeUrl: step >= 4 ? watch('youtubeUrl') : '',
-                animation: step >= 6 ? linkAnimation : 'none',
-                borderRadius: step >= 6 ? borderRadius : 'rounded-xl',
-                fontFamily: step >= 6 ? fontFamily : 'system',
-                backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
-                textColor: step >= 6 ? textColor : '#1f2937',
-                multiLinks: step >= 5 ? (
-                  multiLinks.length > 0
-                    ? multiLinks.map((ml, index) => ({
-                        id: index.toString(),
-                        parentLinkId: '',
-                        title: ml.title || `Lien ${index + 1}`,
-                        url: ml.url || '#',
-                        description: '',
-                        icon: '',
-                        iconImage: ml.icon || '',
-                        animation: '',
-                        order: index,
-                        clicks: 0,
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                      }))
-                    : [
-                        { title: 'Mon Instagram', url: 'https://instagram.com' },
-                        { title: 'Mon Portfolio', url: 'https://example.com' },
-                        { title: 'Contactez-moi', url: 'mailto:contact@example.com' }
-                      ].map((ml, index) => ({
-                        id: index.toString(),
-                        parentLinkId: '',
-                        title: ml.title,
-                        url: ml.url,
-                        description: '',
-                        icon: '',
-                        iconImage: ml.icon || '',
-                        animation: '',
-                        order: index,
-                        clicks: 0,
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                      }))
-                ) : [],
-                // Valeurs par défaut
-                userId: '',
-                directUrl: '',
-                shieldEnabled: false,
-                isUltraLink: false,
-                isOnline: false,
-                order: 0,
-                clicks: 0,
-                views: 0,
-                createdAt: new Date(),
-                updatedAt: new Date()
-              }]}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Preview avec EditPhonePreview pour affichage automatique sur grand écran */}
+      <EditPhonePreview
+        isVisible={showPreview && linkType === 'multi'}
+        user={{
+          name: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+          bio: step >= 5 ? (watchedDescription || '') : '',
+          image: profileImage || ''
+        }}
+        links={[{
+          id: Date.now().toString(),
+          slug: watch('slug') || 'preview',
+          title: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+          description: step >= 5 ? (watchedDescription || '') : '',
+          profileImage: profileImage || '',
+          profileStyle: profileStyle || 'circle',
+          coverImage: step >= 5 ? coverImage : '',
+          isDirect: false,
+          isActive: true,
+          instagramUrl: step >= 4 ? watch('instagramUrl') : '',
+          tiktokUrl: step >= 4 ? watch('tiktokUrl') : '',
+          twitterUrl: step >= 4 ? watch('twitterUrl') : '',
+          youtubeUrl: step >= 4 ? watch('youtubeUrl') : '',
+          animation: step >= 6 ? linkAnimation : 'none',
+          borderRadius: step >= 6 ? borderRadius : 'rounded-xl',
+          fontFamily: step >= 6 ? fontFamily : 'system',
+          backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
+          textColor: step >= 6 ? textColor : '#1f2937',
+          multiLinks: step >= 5 ? (
+            multiLinks.length > 0
+              ? multiLinks.map((ml, index) => ({
+                  id: index.toString(),
+                  parentLinkId: '',
+                  title: ml.title || `Lien ${index + 1}`,
+                  url: ml.url || '#',
+                  description: '',
+                  icon: '',
+                  iconImage: ml.icon || '',
+                  animation: '',
+                  order: index,
+                  clicks: 0,
+                  createdAt: new Date(),
+                  updatedAt: new Date()
+                }))
+              : []
+          ) : [],
+          userId: '',
+          directUrl: '',
+          shieldEnabled: false,
+          isUltraLink: false,
+          isOnline: false,
+          order: 0,
+          clicks: 0,
+          views: 0,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }]}
+      />
     </div>
   )
 }
