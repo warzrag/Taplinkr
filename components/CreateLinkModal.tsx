@@ -603,29 +603,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <div className="relative w-full flex justify-center">
                       {!profileImage ? (
                         <>
-                          {/* Zone d'upload avec style selon le choix */}
-                          <div className="relative w-full h-64 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors">
-                            {/* Icône animée */}
-                            <motion.div
-                              animate={{ y: [0, -10, 0] }}
-                              transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                repeatType: "reverse"
-                              }}
-                              className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
-                            >
-                              <Camera className="w-12 h-12 text-indigo-600 mb-2" />
-                              <span className="text-sm font-medium text-gray-700">Cliquez pour ajouter</span>
-                              <span className="text-xs text-gray-500 mt-1">JPG, PNG • Max 5MB</span>
-                            </motion.div>
-
-                            {/* Composant ImageUpload */}
+                          {/* Zone d'upload SANS contrainte de taille */}
+                          <div className="w-full">
                             <ImageUpload
                               value={profileImage}
                               onChange={setProfileImage}
                               type="profile"
-                              className="absolute inset-0 [&_svg]:hidden [&_p]:hidden [&_div]:bg-transparent"
+                              className="w-full"
                             />
                           </div>
                         </>
