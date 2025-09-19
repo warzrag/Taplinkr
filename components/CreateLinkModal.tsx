@@ -1661,7 +1661,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     description: step >= 5 ? (watchedDescription || '') : '',
                     profileImage: profileImage || '',
                     profileStyle: profileStyle || 'circle',
-                    coverImage: step >= 5 ? coverImage : '',',
+                    coverImage: step >= 5 ? coverImage : '',
                     isDirect: false,
                     isActive: true,
                     instagramUrl: step >= 4 ? watch('instagramUrl') : '',
