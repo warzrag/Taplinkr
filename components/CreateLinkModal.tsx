@@ -642,11 +642,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             animate={{ scale: 1, opacity: 1 }}
                             className="relative w-full h-full rounded-lg overflow-hidden shadow-xl"
                           >
-                            {/* Affichage direct de l'image */}
+                            {/* Affichage direct de l'image COMPLÈTE sans coupure */}
                             <img
                               src={profileImage}
                               alt="Photo de profil"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                             />
 
                             {/* Bouton pour changer la photo */}
