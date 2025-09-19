@@ -1078,7 +1078,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           type="text"
                           value={backgroundColor}
                           onChange={(e) => setBackgroundColor(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           placeholder="#ffffff"
                         />
                       </div>
@@ -1111,7 +1111,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           type="text"
                           value={textColor}
                           onChange={(e) => setTextColor(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           placeholder="#1f2937"
                         />
                       </div>
@@ -1204,7 +1204,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         <input
                           type="text"
                           {...register('title', { required: true })}
-                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base font-medium"
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base font-medium"
                           placeholder="Ex: Mes liens favoris ✨"
                           autoFocus
                         />
@@ -1246,11 +1246,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                 message: 'Seuls les lettres, chiffres et tirets sont autorisés'
                               }
                             })}
-                            className={`flex-1 px-4 py-3 pr-12 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all text-base ${
-                              slugAvailable === false 
-                                ? 'border-red-400 focus:border-red-500' 
-                                : slugAvailable === true 
-                                ? 'border-green-400 focus:border-green-500' 
+                            className={`flex-1 px-4 py-3 pr-12 border-2 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all text-base ${
+                              slugAvailable === false
+                                ? 'border-red-400 focus:border-red-500'
+                                : slugAvailable === true
+                                ? 'border-green-400 focus:border-green-500'
                                 : 'border-gray-300 focus:border-indigo-500'
                             }`}
                             placeholder="mon-lien-unique"
@@ -1379,7 +1379,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     >
                       <textarea
                         {...register('description')}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base resize-none"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base resize-none"
                         placeholder="Décrivez votre page en quelques mots..."
                         rows={3}
                       />
@@ -1405,7 +1405,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         type="url"
                         value={directUrl}
                         onChange={(e) => setDirectUrl(e.target.value)}
-                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
+                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
                         placeholder="https://example.com"
                         required
                       />
@@ -1550,14 +1550,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                 type="text"
                                 value={link.title}
                                 onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
-                                className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
+                                className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
                                 placeholder="Titre du lien"
                               />
                               <input
                                 type="url"
                                 value={link.url}
                                 onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
-                                className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
+                                className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
                                 placeholder="https://example.com"
                               />
                             </div>
