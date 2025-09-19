@@ -248,17 +248,17 @@ export default function ImageUpload({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={`
-              w-full
+              w-full h-auto
               border-2 border-dashed rounded-xl cursor-pointer
               transition-all duration-200
-              ${isDragging 
-                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
+              ${isDragging
+                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
                 : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-800'
               }
               ${isUploading ? 'pointer-events-none opacity-50' : ''}
             `}
           >
-            <div className="flex flex-col items-center justify-center h-full p-4">
+            <div className="flex flex-col items-center justify-center p-8">
               {isUploading ? (
                 <Loader2 className="w-10 h-10 text-gray-400 animate-spin mb-3" />
               ) : (
