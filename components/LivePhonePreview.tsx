@@ -170,10 +170,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon en haut si sélectionné */}
+            {/* Photo style Beacon/Immersif en plein écran */}
             {displayImage && profileStyle === 'beacon' && (
               <motion.div
-                className="absolute top-0 left-0 right-0 h-[480px] z-10 rounded-t-[42px] overflow-hidden"
+                className="absolute top-0 left-0 right-0 h-[85%] z-10 rounded-t-[42px] overflow-hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -181,131 +181,189 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 <img
                   src={displayImage}
                   alt={displayName}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-t-[42px]"
                 />
-                {/* Gradient overlay pour transition douce */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/80" />
-                {/* Second gradient pour assombrir le bas */}
-                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent" />
+                {/* Gradient overlay pour le texte en bas */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+
+                {/* Nom et description sur l'image en bas */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8">
+                  <h1 className="text-3xl font-bold text-white mb-2">
+                    {displayName}
+                  </h1>
+                  {displayBio && (
+                    <p className="text-sm text-white/90">
+                      {displayBio}
+                    </p>
+                  )}
+                  {displayLocation && (
+                    <div className="flex items-center gap-1 text-sm text-white/80 mt-2">
+                      <MapPin className="w-3 h-3" />
+                      <span>{displayLocation}</span>
+                    </div>
+                  )}
+
+                  {/* Icônes réseaux sociaux */}
+                  {(firstLink?.instagramUrl || firstLink?.twitterUrl || firstLink?.youtubeUrl || firstLink?.tiktokUrl) && (
+                    <div className="flex gap-3 mt-3">
+                      {firstLink.instagramUrl && (
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                        >
+                          <Instagram className="w-4 h-4 text-white" />
+                        </motion.div>
+                      )}
+                      {firstLink.twitterUrl && (
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                        >
+                          <Twitter className="w-4 h-4 text-white" />
+                        </motion.div>
+                      )}
+                      {firstLink.youtubeUrl && (
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                        >
+                          <Youtube className="w-4 h-4 text-white" />
+                        </motion.div>
+                      )}
+                      {firstLink.tiktokUrl && (
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                        >
+                          <Music className="w-4 h-4 text-white" />
+                        </motion.div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </motion.div>
             )}
 
             {/* Contenu principal */}
-            <div className={`relative h-full flex flex-col ${profileStyle === 'beacon' && displayImage ? 'pt-[380px]' : 'pt-[60px]'} pb-6`}>
-              {/* Section Profil */}
-              <motion.div
-                className="flex flex-col items-center px-6 mb-6 z-20"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                {/* Photo de profil - Style selon le choix */}
-                {displayImage && profileStyle === 'circle' && (
-                  <motion.div
-                    className="relative mb-4"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 20,
-                      delay: 0.2
-                    }}
-                  >
-                    {/* Style cercle classique */}
-                    <div className="relative">
-                      {/* Glow effect */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400/30 to-pink-400/30 blur-xl scale-110" />
+            <div className={`relative h-full flex flex-col ${profileStyle === 'beacon' && displayImage ? 'pt-[85%]' : 'pt-[60px]'} pb-6`}>
+              {/* Section Profil - Seulement en mode Minimal */}
+              {profileStyle === 'circle' && (
+                <motion.div
+                  className="flex flex-col items-center px-6 mb-6 z-20"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  {/* Photo de profil - Style cercle */}
+                  {displayImage && (
+                    <motion.div
+                      className="relative mb-4"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20,
+                        delay: 0.2
+                      }}
+                    >
+                      {/* Style cercle classique */}
+                      <div className="relative">
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400/30 to-pink-400/30 blur-xl scale-110" />
 
-                      {/* Photo principale */}
-                      <div className="relative w-24 h-24 rounded-full overflow-hidden ring-2 ring-white/50 shadow-xl">
-                        <img
-                          src={displayImage}
-                          alt={displayName}
-                          className="w-full h-full object-cover"
-                        />
-                        {/* Overlay subtle */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                        {/* Photo principale */}
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden ring-2 ring-white/50 shadow-xl">
+                          <img
+                            src={displayImage}
+                            alt={displayName}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Overlay subtle */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                        </div>
+
+                        {/* Badge online */}
+                        {firstLink?.isOnline && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="absolute -bottom-1 -right-1 w-7 h-7 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center"
+                          >
+                            <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                          </motion.div>
+                        )}
                       </div>
+                    </motion.div>
+                  )}
 
-                      {/* Badge online */}
-                      {firstLink?.isOnline && (
+                  {/* Nom et bio */}
+                  <h1 className="text-xl font-bold mb-1" style={{ color: textColor }}>
+                    {displayName}
+                  </h1>
+
+                  {displayLocation && (
+                    <div className="flex items-center gap-1 text-sm mb-2 opacity-70" style={{ color: textColor }}>
+                      <MapPin className="w-3 h-3" />
+                      <span>{displayLocation}</span>
+                    </div>
+                  )}
+
+                  <p className="text-sm text-center opacity-80 px-4" style={{ color: textColor }}>
+                    {displayBio}
+                  </p>
+
+                  {/* Icônes réseaux sociaux */}
+                  {(firstLink?.instagramUrl || firstLink?.twitterUrl || firstLink?.youtubeUrl || firstLink?.tiktokUrl) && (
+                    <div className="flex gap-3 mt-4">
+                      {firstLink.instagramUrl && (
                         <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.5 }}
-                          className="absolute -bottom-1 -right-1 w-7 h-7 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center"
                         >
-                          <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                          <Instagram className="w-5 h-5 text-white" />
+                        </motion.div>
+                      )}
+                      {firstLink.twitterUrl && (
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center"
+                        >
+                          <Twitter className="w-5 h-5 text-white" />
+                        </motion.div>
+                      )}
+                      {firstLink.youtubeUrl && (
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center"
+                        >
+                          <Youtube className="w-5 h-5 text-white" />
+                        </motion.div>
+                      )}
+                      {firstLink.tiktokUrl && (
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-10 h-10 rounded-full bg-black flex items-center justify-center"
+                        >
+                          <Music className="w-5 h-5 text-white" />
                         </motion.div>
                       )}
                     </div>
-                  </motion.div>
-                )}
-
-
-                {/* Nom et bio */}
-                <h1 className="text-xl font-bold mb-1"
-                    style={{ color: profileStyle === 'beacon' && displayImage ? '#ffffff' : textColor }}>
-                  {displayName}
-                </h1>
-
-                {displayLocation && (
-                  <div className="flex items-center gap-1 text-sm mb-2 opacity-70" style={{ color: profileStyle === 'beacon' && displayImage ? '#ffffff' : textColor }}>
-                    <MapPin className="w-3 h-3" />
-                    <span>{displayLocation}</span>
-                  </div>
-                )}
-
-                <p className="text-sm text-center opacity-80 px-4" style={{ color: profileStyle === 'beacon' && displayImage ? '#ffffff' : textColor }}>
-                  {displayBio}
-                </p>
-
-                {/* Icônes réseaux sociaux */}
-                {(firstLink?.instagramUrl || firstLink?.twitterUrl || firstLink?.youtubeUrl || firstLink?.tiktokUrl) && (
-                  <div className="flex gap-3 mt-4">
-                    {firstLink.instagramUrl && (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center"
-                      >
-                        <Instagram className="w-5 h-5 text-white" />
-                      </motion.div>
-                    )}
-                    {firstLink.twitterUrl && (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center"
-                      >
-                        <Twitter className="w-5 h-5 text-white" />
-                      </motion.div>
-                    )}
-                    {firstLink.youtubeUrl && (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center"
-                      >
-                        <Youtube className="w-5 h-5 text-white" />
-                      </motion.div>
-                    )}
-                    {firstLink.tiktokUrl && (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-10 h-10 rounded-full bg-black flex items-center justify-center"
-                      >
-                        <Music className="w-5 h-5 text-white" />
-                      </motion.div>
-                    )}
-                  </div>
-                )}
-              </motion.div>
+                  )}
+                </motion.div>
+              )}
 
               {/* Liens */}
-              <div className="flex-1 px-6 space-y-2.5 overflow-y-auto">
+              <div className={`flex-1 px-6 space-y-2.5 overflow-y-auto ${profileStyle === 'beacon' && displayImage ? 'pt-4' : ''}`}>
                 <AnimatePresence mode="sync">
                   {displayLinks.map((link, index) => (
                     <motion.div
@@ -318,10 +376,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       whileTap={{ scale: 0.98 }}
                       className="relative"
                     >
-                      {/* Carte de lien avec gradient ou couleur unie */}
+                      {/* Carte de lien avec style adaptatif */}
                       <div className={`
                         relative w-full p-3.5 rounded-xl
-                        ${link.gradient ? `bg-gradient-to-r ${link.gradient}` : 'bg-gray-100'}
+                        ${profileStyle === 'beacon' && displayImage
+                          ? 'bg-white/90 backdrop-blur-sm border border-white/50'
+                          : link.gradient
+                            ? `bg-gradient-to-r ${link.gradient}`
+                            : 'bg-gray-100'
+                        }
                         shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer
                         overflow-hidden group
                       `}>
@@ -331,7 +394,13 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
                         {/* Contenu du lien */}
                         <div className="relative flex items-center justify-center">
-                          <span className={`text-sm font-semibold ${link.gradient ? 'text-white' : 'text-gray-800'}`}>
+                          <span className={`text-sm font-semibold ${
+                            profileStyle === 'beacon' && displayImage
+                              ? 'text-gray-800'
+                              : link.gradient
+                                ? 'text-white'
+                                : 'text-gray-800'
+                          }`}>
                             {link.title}
                           </span>
                         </div>
