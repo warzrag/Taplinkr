@@ -140,7 +140,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
         <div className="absolute -inset-8 bg-gradient-to-br from-purple-400/20 via-pink-400/20 to-blue-400/20 blur-3xl" />
 
         {/* Cadre iPhone réaliste */}
-        <div className="relative w-[320px] h-[692px] bg-black rounded-[50px] p-2.5 shadow-2xl">
+        <div className="relative w-[320px] h-[692px] bg-black rounded-[50px] p-2.5 shadow-2xl overflow-hidden">
           {/* Reflet sur le cadre */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-[50px] pointer-events-none" />
 
@@ -148,10 +148,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-50" />
 
           {/* Écran */}
-          <div className="relative w-full h-full rounded-[42px] overflow-y-auto bg-white" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? 'white' : backgroundColor }}>
+          <div className="relative w-full h-full rounded-[42px] overflow-hidden" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? 'transparent' : backgroundColor }}>
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
-                 style={{ color: textColor }}>
+                 style={{ color: profileStyle === 'beacon' && displayImage ? 'white' : textColor }}>
               <span>{timeString}</span>
               <div className="flex items-center gap-1">
                 {/* Signal bars */}
@@ -170,33 +170,30 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - SANS AUCUN ZOOM */}
+            {/* Photo style Beacon/Immersif - IMAGE ENTIÈRE AU PREMIER PLAN */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="w-full h-full overflow-y-auto">
-                {/* Image avec ses proportions naturelles SANS ZOOM */}
-                <div className="relative">
-                  <img
-                    src={displayImage}
-                    alt={displayName}
-                    style={{
-                      width: '100%',
-                      height: 'auto',
-                      display: 'block'
-                    }}
-                  />
+              <div className="absolute inset-0 w-full h-full z-30">
+                {/* Image complète sans aucune zone cachée */}
+                <img
+                  src={displayImage}
+                  alt={displayName}
+                  className="w-full h-full"
+                  style={{
+                    objectFit: 'contain',
+                    backgroundColor: 'transparent'
+                  }}
+                />
 
-                  {/* Texte overlay sur l'image */}
-                  <div className="absolute bottom-4 left-0 right-0 text-center px-4">
-                    <h1 className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                      {displayName}
-                    </h1>
-                    {displayBio && (
-                      <p className="text-xs text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                        {displayBio}
-                      </p>
-                    )}
-                  </div>
-
+                {/* Texte overlay sur l'image */}
+                <div className="absolute bottom-4 left-0 right-0 text-center px-4 z-40">
+                  <h1 className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    {displayName}
+                  </h1>
+                  {displayBio && (
+                    <p className="text-xs text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                      {displayBio}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
