@@ -148,7 +148,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-50" />
 
           {/* Écran */}
-          <div className="relative w-full h-full bg-white rounded-[42px] overflow-hidden" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? '#000000' : backgroundColor }}>
+          <div className="relative w-full h-full rounded-[42px] overflow-hidden" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? 'transparent' : backgroundColor }}>
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
                  style={{ color: textColor }}>
@@ -170,50 +170,54 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif en plein écran */}
+            {/* Photo style Beacon/Immersif - affichée en haut sans coupure */}
             {displayImage && profileStyle === 'beacon' && (
-              <motion.div
-                className="absolute top-0 left-0 right-0 h-full z-10"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                {/* Image affichée complètement depuis le haut */}
-                <img
-                  src={displayImage}
-                  alt={displayName}
-                  className="absolute top-0 left-0 w-full h-full object-contain"
-                  style={{ objectPosition: 'top center' }}
-                />
+              <div className="absolute top-0 left-0 right-0">
+                <motion.div
+                  className="relative w-full"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {/* Image complète sans aucune coupure */}
+                  <img
+                    src={displayImage}
+                    alt={displayName}
+                    className="w-full"
+                    style={{ display: 'block' }}
+                  />
 
-                {/* Gradient noir en bas pour la lisibilité du texte */}
-                <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                  {/* Overlay dégradé pour lisibilité du texte */}
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
 
-                {/* Nom et description centrés en bas de l'image */}
-                <div className="absolute bottom-[280px] left-0 right-0 text-center px-8 z-20">
-                  <h1 className="text-6xl font-bold text-white mb-2">
-                    {displayName}
-                  </h1>
-                  {displayBio && (
-                    <p className="text-lg text-white mb-6">
-                      {displayBio}
-                    </p>
-                  )}
+                  {/* Texte positionné en bas de l'image */}
+                  <div className="absolute bottom-2 left-0 right-0 text-center px-4">
+                    <h1 className="text-xl font-bold text-white mb-1 drop-shadow-md">
+                      {displayName}
+                    </h1>
+                    {displayBio && (
+                      <p className="text-xs text-white/90 drop-shadow-md">
+                        {displayBio}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
 
-                  {/* Icône Instagram seul, centré */}
-                  {firstLink?.instagramUrl && (
+                {/* Icônes sociales sous l'image */}
+                {firstLink?.instagramUrl && (
+                  <div className="flex justify-center mt-3">
                     <motion.div
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                       className="inline-flex"
                     >
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-                        <Instagram className="w-7 h-7 text-black" />
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shadow-sm">
+                        <Instagram className="w-5 h-5 text-gray-800" />
                       </div>
                     </motion.div>
-                  )}
-                </div>
-              </motion.div>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Contenu principal */}
