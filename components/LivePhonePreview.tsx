@@ -109,7 +109,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   const firstLink = links[0]
   const displayName = firstLink?.title || user?.name || defaultDemoData.name
   const displayBio = firstLink?.description || user?.bio || defaultDemoData.bio
-  const displayImage = firstLink?.profileImage || user?.image || defaultDemoData.profileImage
+  const displayImage = firstLink?.profileImage || user?.image || (links.length === 0 ? defaultDemoData.profileImage : null)
   const displayCover = firstLink?.coverImage || defaultDemoData.coverImage
   const displayLocation = firstLink?.city || firstLink?.country ?
     `${firstLink.city || ''}${firstLink.city && firstLink.country ? ', ' : ''}${firstLink.country || ''}` :
@@ -197,23 +197,25 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 transition={{ delay: 0.3 }}
               >
                 {/* Photo de profil avec animation */}
-                <motion.div
-                  className="relative mb-4"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 p-1">
-                    <img
-                      src={displayImage}
-                      alt={displayName}
-                      className="w-full h-full rounded-full object-cover bg-white"
-                    />
-                  </div>
-                  {/* Badge online */}
-                  {firstLink?.isOnline && (
-                    <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white" />
-                  )}
-                </motion.div>
+                {displayImage && (
+                  <motion.div
+                    className="relative mb-4"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 p-1">
+                      <img
+                        src={displayImage}
+                        alt={displayName}
+                        className="w-full h-full rounded-full object-cover bg-white"
+                      />
+                    </div>
+                    {/* Badge online */}
+                    {firstLink?.isOnline && (
+                      <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white" />
+                    )}
+                  </motion.div>
+                )}
 
                 {/* Nom et bio */}
                 <h1 className="text-xl font-bold mb-1" style={{ color: textColor }}>
