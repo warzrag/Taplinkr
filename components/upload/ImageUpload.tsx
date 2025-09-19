@@ -204,13 +204,12 @@ export default function ImageUpload({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`relative ${getAspectRatioClass()} w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800`}
+            className="relative w-full rounded-xl bg-gray-100 dark:bg-gray-800"
           >
-            <Image
+            <img
               src={preview}
               alt="Preview"
-              fill
-              className="object-contain"
+              className="w-full h-auto rounded-xl"
             />
             
             {/* Overlay au survol */}
