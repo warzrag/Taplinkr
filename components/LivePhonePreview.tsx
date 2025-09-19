@@ -191,7 +191,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             )}
 
             {/* Contenu principal */}
-            <div className={`relative h-full flex flex-col ${profileStyle === 'beacon' && displayImage ? 'pt-[120px]' : 'pt-[60px]'} pb-6`}>
+            <div className={`relative h-full flex flex-col ${profileStyle === 'beacon' && displayImage ? 'pt-[380px]' : 'pt-[60px]'} pb-6`}>
               {/* Section Profil */}
               <motion.div
                 className="flex flex-col items-center px-6 mb-6 z-20"
@@ -243,45 +243,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   </motion.div>
                 )}
 
-                {/* Photo style Beacon - Photo ronde avec arrière-plan */}
-                {displayImage && profileStyle === 'beacon' && (
-                  <motion.div
-                    className="relative mb-4"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 20,
-                      delay: 0.2
-                    }}
-                  >
-                    {/* Photo de profil ronde */}
-                    <div className="relative">
-                      <div className="w-20 h-20 rounded-full overflow-hidden ring-3 ring-white shadow-2xl bg-white">
-                        <img
-                          src={displayImage}
-                          alt={displayName}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      {/* Badge online */}
-                      {firstLink?.isOnline && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.5 }}
-                          className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"
-                        >
-                          <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
-                        </motion.div>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
 
                 {/* Nom et bio */}
-                <h1 className="text-xl font-bold mb-1" style={{ color: profileStyle === 'beacon' && displayImage ? '#ffffff' : textColor }}>
+                <h1 className="text-xl font-bold mb-1"
+                    style={{ color: profileStyle === 'beacon' && displayImage ? '#ffffff' : textColor }}>
                   {displayName}
                 </h1>
 
