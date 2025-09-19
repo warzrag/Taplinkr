@@ -911,7 +911,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                               }
                               setLinkData({ ...linkData, instagramUrl: value })
                             }}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="@votre_username"
                           />
                         </div>
@@ -939,7 +939,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                               }
                               setLinkData({ ...linkData, tiktokUrl: value })
                             }}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="@votre_username"
                           />
                         </div>
@@ -965,7 +965,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                               }
                               setLinkData({ ...linkData, twitterUrl: value })
                             }}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="@votre_username"
                           />
                         </div>
@@ -991,7 +991,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                               }
                               setLinkData({ ...linkData, youtubeUrl: value })
                             }}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="@votre_chaine"
                           />
                         </div>

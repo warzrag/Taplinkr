@@ -779,7 +779,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         type="text"
                         {...register('instagramUrl')}
                         placeholder="@votrecompte"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
                       />
                     </motion.div>
 
@@ -807,7 +807,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         type="text"
                         {...register('tiktokUrl')}
                         placeholder="@votrecompte"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-500/20 focus:border-gray-700 transition-all"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-500/20 focus:border-gray-700 transition-all"
                       />
                     </motion.div>
 
@@ -833,7 +833,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         type="text"
                         {...register('twitterUrl')}
                         placeholder="@votrecompte"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                       />
                     </motion.div>
 
@@ -859,7 +859,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         type="text"
                         {...register('youtubeUrl')}
                         placeholder="@votrecompte"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all"
                       />
                     </motion.div>
                   </div>
