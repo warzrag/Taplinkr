@@ -615,18 +615,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         </>
                       ) : (
                         <>
-                          {/* Image uploadée - s'adapte au format de la photo */}
+                          {/* Image uploadée - SANS AUCUNE CONTRAINTE */}
                           <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="relative inline-block rounded-lg shadow-xl"
+                            className="relative"
                           >
-                            {/* Image COMPLÈTE qui définit la taille du conteneur */}
+                            {/* Image COMPLÈTE sans limitation */}
                             <img
                               src={profileImage}
                               alt="Photo de profil"
-                              className="max-w-full h-auto rounded-lg"
-                              style={{ display: 'block', maxHeight: '500px' }}
+                              className="w-auto h-auto max-w-full"
                             />
 
                             {/* Bouton pour changer la photo */}
