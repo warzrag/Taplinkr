@@ -228,11 +228,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400/30 to-pink-400/30 blur-xl scale-110" />
 
                         {/* Photo principale */}
-                        <div className="relative w-24 h-24 rounded-full overflow-hidden ring-2 ring-white/50 shadow-xl">
+                        <div className="relative inline-block rounded-lg shadow-xl">
                           <img
                             src={displayImage}
                             alt={displayName}
-                            className="w-full h-full object-cover"
+                            className="max-w-[200px] h-auto rounded-lg"
                           />
                           {/* Overlay subtle */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
