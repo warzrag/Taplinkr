@@ -148,7 +148,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-50" />
 
           {/* Écran */}
-          <div className="relative w-full h-full rounded-[42px] overflow-y-auto" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? 'black' : backgroundColor }}>
+          <div className="relative w-full h-full rounded-[42px] overflow-y-auto" style={{ backgroundColor }}>
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
                  style={{ color: textColor }}>
@@ -170,11 +170,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - IMAGE COMPLÈTE COMME L'ORIGINALE */}
+            {/* Photo style Beacon/Immersif - IMAGE COMPLÈTE SANS ZONE NOIRE */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="w-full h-full bg-black flex flex-col">
-                {/* Image exactement comme l'originale - PAS DE ZOOM, PAS DE CROP */}
-                <div className="relative flex-shrink-0">
+              <div className="w-full h-full flex flex-col">
+                {/* Image exactement comme l'originale */}
+                <div className="relative">
                   <img
                     src={displayImage}
                     alt={displayName}
@@ -194,8 +194,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   </div>
                 </div>
 
-                {/* Zone noire flexible qui prend le reste de l'espace */}
-                <div className="flex-1 bg-black p-4 overflow-y-auto">
+                {/* Zone transparente sous l'image */}
+                <div className="flex-1 p-4 overflow-y-auto">
                   {/* Icône Instagram */}
                   {firstLink?.instagramUrl && (
                     <div className="flex justify-center mb-3">
@@ -203,15 +203,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center">
-                          <Instagram className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shadow-md">
+                          <Instagram className="w-5 h-5 text-gray-800" />
                         </div>
                       </motion.div>
                     </div>
                   )}
 
-                  {/* Message centré */}
-                  <div className="text-center text-gray-500">
+                  {/* Message */}
+                  <div className="text-center text-gray-400">
                     <p className="text-xs">Aucun lien ajouté</p>
                   </div>
                 </div>
