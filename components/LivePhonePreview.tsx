@@ -148,7 +148,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-50" />
 
           {/* Écran */}
-          <div className="relative w-full h-full rounded-[42px] overflow-hidden" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? 'transparent' : backgroundColor }}>
+          <div className="relative w-full h-full rounded-[42px] overflow-y-auto" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? 'black' : backgroundColor }}>
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
                  style={{ color: textColor }}>
@@ -170,66 +170,54 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - Image complète avec ses proportions */}
+            {/* Photo style Beacon/Immersif - IMAGE COMPLÈTE SANS AUCUNE COUPURE */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="absolute inset-0 w-full h-full bg-black flex flex-col">
-                {/* Image complète avec ses proportions naturelles */}
-                <div className="relative">
-                  <img
-                    src={displayImage}
-                    alt={displayName}
-                    className="w-full h-auto"
-                  />
+              <div className="w-full h-full bg-black">
+                {/* Conteneur scrollable pour l'image complète */}
+                <div className="w-full h-full overflow-y-auto">
+                  {/* Image ENTIÈRE avec toute sa hauteur */}
+                  <div className="relative">
+                    <img
+                      src={displayImage}
+                      alt={displayName}
+                      className="w-full"
+                      style={{ height: 'auto', display: 'block' }}
+                    />
 
-                  {/* Texte overlay sur l'image */}
-                  <div className="absolute bottom-4 left-0 right-0 text-center px-4">
-                    <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                      {displayName}
-                    </h1>
-                    {displayBio && (
-                      <p className="text-sm text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                        {displayBio}
-                      </p>
+                    {/* Texte overlay sur l'image */}
+                    <div className="absolute bottom-6 left-0 right-0 text-center px-4">
+                      <h1 className="text-2xl font-bold text-white mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
+                        {displayName}
+                      </h1>
+                      {displayBio && (
+                        <p className="text-xs text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">
+                          {displayBio}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Zone noire après l'image */}
+                  <div className="bg-black p-6 min-h-[200px]">
+                    {/* Icône Instagram */}
+                    {firstLink?.instagramUrl && (
+                      <div className="flex justify-center mb-4">
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center">
+                            <Instagram className="w-5 h-5 text-white" />
+                          </div>
+                        </motion.div>
+                      </div>
                     )}
-                  </div>
-                </div>
 
-                {/* Zone noire en dessous de l'image */}
-                <div className="flex-1 bg-black flex flex-col justify-end p-6">
-                  {/* Icône Instagram */}
-                  {firstLink?.instagramUrl && (
-                    <div className="flex justify-center mb-4">
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="inline-flex"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center">
-                          <Instagram className="w-6 h-6 text-white" />
-                        </div>
-                      </motion.div>
+                    {/* Message */}
+                    <div className="text-center text-gray-400 py-4">
+                      <p className="text-xs">Aucun lien ajouté</p>
                     </div>
-                  )}
-
-                  {/* Message "Aucun lien ajouté" si pas de liens */}
-                  <div className="text-center text-gray-500 py-8">
-                    <p className="text-sm">Aucun lien ajouté</p>
                   </div>
-
-                  {/* Footer TapLinkr */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-auto"
-                  >
-                    <div className="flex items-center justify-center gap-2 opacity-50">
-                      <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
-                      <span className="text-xs font-medium text-white">
-                        Powered by TapLinkr
-                      </span>
-                    </div>
-                  </motion.div>
                 </div>
               </div>
             )}
