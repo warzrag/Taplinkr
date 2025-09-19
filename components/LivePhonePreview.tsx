@@ -170,58 +170,60 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - affichée en haut sans coupure */}
+            {/* Photo style Beacon/Immersif - Image COMPLÈTE sans AUCUNE coupure */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="absolute top-0 left-0 right-0">
+              <div className="relative w-full h-full flex flex-col">
                 <motion.div
-                  className="relative w-full"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  className="relative flex-shrink-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  {/* Image complète sans aucune coupure */}
+                  {/* Image complète affichée intégralement */}
                   <img
                     src={displayImage}
                     alt={displayName}
-                    className="w-full"
-                    style={{ display: 'block' }}
+                    className="w-full h-auto object-contain"
                   />
 
                   {/* Overlay dégradé pour lisibilité du texte */}
-                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/70 to-transparent" />
 
                   {/* Texte positionné en bas de l'image */}
-                  <div className="absolute bottom-2 left-0 right-0 text-center px-4">
-                    <h1 className="text-xl font-bold text-white mb-1 drop-shadow-md">
+                  <div className="absolute bottom-3 left-0 right-0 text-center px-4">
+                    <h1 className="text-2xl font-bold text-white mb-1 drop-shadow-lg">
                       {displayName}
                     </h1>
                     {displayBio && (
-                      <p className="text-xs text-white/90 drop-shadow-md">
+                      <p className="text-sm text-white/90 drop-shadow-lg">
                         {displayBio}
                       </p>
                     )}
                   </div>
                 </motion.div>
 
-                {/* Icônes sociales sous l'image */}
-                {firstLink?.instagramUrl && (
-                  <div className="flex justify-center mt-3">
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="inline-flex"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shadow-sm">
-                        <Instagram className="w-5 h-5 text-gray-800" />
-                      </div>
-                    </motion.div>
-                  </div>
-                )}
+                {/* Icônes sociales et liens en dessous de l'image */}
+                <div className="flex-1 p-4 overflow-y-auto">
+                  {firstLink?.instagramUrl && (
+                    <div className="flex justify-center mb-4">
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="inline-flex"
+                      >
+                        <div className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center">
+                          <Instagram className="w-6 h-6 text-gray-800" />
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Contenu principal */}
-            <div className={`relative h-full flex flex-col ${profileStyle === 'beacon' && displayImage ? 'justify-end' : 'pt-[60px]'} pb-6`}>
+            {/* Contenu principal - Caché en mode Immersif avec image */}
+            {!(profileStyle === 'beacon' && displayImage) && (
+              <div className="relative h-full flex flex-col pt-[60px] pb-6">
               {/* Section Profil - Seulement en mode Minimal */}
               {profileStyle === 'circle' && (
                 <motion.div
@@ -425,6 +427,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
             </div>
+            )}
 
             {/* Barre de navigation iOS (home indicator) */}
             <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-800 rounded-full opacity-30" />
