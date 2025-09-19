@@ -170,53 +170,57 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - Image COMPLÈTE sans AUCUNE coupure */}
+            {/* Photo style Beacon/Immersif - Exactement comme la référence */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="relative w-full h-full flex flex-col">
-                <motion.div
-                  className="relative flex-shrink-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {/* Image complète affichée intégralement */}
-                  <img
-                    src={displayImage}
-                    alt={displayName}
-                    className="w-full h-auto object-contain"
-                  />
+              <div className="absolute inset-0 w-full h-full">
+                {/* Image en arrière-plan couvrant tout l'écran */}
+                <img
+                  src={displayImage}
+                  alt={displayName}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
 
-                  {/* Overlay dégradé pour lisibilité du texte */}
-                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/70 to-transparent" />
+                {/* Overlay dégradé pour lisibilité */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
 
-                  {/* Texte positionné en bas de l'image */}
-                  <div className="absolute bottom-3 left-0 right-0 text-center px-4">
-                    <h1 className="text-2xl font-bold text-white mb-1 drop-shadow-lg">
+                {/* Contenu positionné en bas */}
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  {/* Nom et bio */}
+                  <div className="text-center mb-6">
+                    <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
                       {displayName}
                     </h1>
                     {displayBio && (
-                      <p className="text-sm text-white/90 drop-shadow-lg">
+                      <p className="text-base text-white/90 drop-shadow-lg">
                         {displayBio}
                       </p>
                     )}
                   </div>
-                </motion.div>
 
-                {/* Icônes sociales et liens en dessous de l'image */}
-                <div className="flex-1 p-4 overflow-y-auto">
+                  {/* Icône Instagram */}
                   {firstLink?.instagramUrl && (
-                    <div className="flex justify-center mb-4">
+                    <div className="flex justify-center mb-6">
                       <motion.div
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         className="inline-flex"
                       >
-                        <div className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center">
-                          <Instagram className="w-6 h-6 text-gray-800" />
+                        <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
+                          <Instagram className="w-6 h-6 text-gray-900" />
                         </div>
                       </motion.div>
                     </div>
                   )}
+
+                  {/* Premier lien comme sur la référence */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full bg-white rounded-2xl p-4 flex items-center justify-center gap-3 shadow-lg"
+                  >
+                    <span className="text-lg font-semibold text-gray-900">MON ONLY FANS GRATUIT</span>
+                    <span className="text-xl">🍑😍</span>
+                  </motion.div>
                 </div>
               </div>
             )}
