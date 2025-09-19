@@ -170,53 +170,55 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - IMAGE COMPLÈTE SANS AUCUNE COUPURE */}
+            {/* Photo style Beacon/Immersif - SANS ZOOM */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="w-full h-full bg-black">
-                {/* Conteneur scrollable pour l'image complète */}
-                <div className="w-full h-full overflow-y-auto">
-                  {/* Image ENTIÈRE avec toute sa hauteur */}
-                  <div className="relative">
-                    <img
-                      src={displayImage}
-                      alt={displayName}
-                      className="w-full"
-                      style={{ height: 'auto', display: 'block' }}
-                    />
+              <div className="w-full h-full bg-black overflow-y-auto">
+                {/* Image à sa taille réelle sans zoom */}
+                <div className="relative w-full">
+                  <img
+                    src={displayImage}
+                    alt={displayName}
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      maxWidth: '100%',
+                      display: 'block',
+                      objectFit: 'contain'
+                    }}
+                  />
 
-                    {/* Texte overlay sur l'image */}
-                    <div className="absolute bottom-6 left-0 right-0 text-center px-4">
-                      <h1 className="text-2xl font-bold text-white mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
-                        {displayName}
-                      </h1>
-                      {displayBio && (
-                        <p className="text-xs text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">
-                          {displayBio}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Zone noire après l'image */}
-                  <div className="bg-black p-6 min-h-[200px]">
-                    {/* Icône Instagram */}
-                    {firstLink?.instagramUrl && (
-                      <div className="flex justify-center mb-4">
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center">
-                            <Instagram className="w-5 h-5 text-white" />
-                          </div>
-                        </motion.div>
-                      </div>
+                  {/* Texte overlay sur l'image */}
+                  <div className="absolute bottom-6 left-0 right-0 text-center px-4">
+                    <h1 className="text-2xl font-bold text-white mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
+                      {displayName}
+                    </h1>
+                    {displayBio && (
+                      <p className="text-xs text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">
+                        {displayBio}
+                      </p>
                     )}
+                  </div>
+                </div>
 
-                    {/* Message */}
-                    <div className="text-center text-gray-400 py-4">
-                      <p className="text-xs">Aucun lien ajouté</p>
+                {/* Zone noire après l'image */}
+                <div className="bg-black p-6 min-h-[300px]">
+                  {/* Icône Instagram */}
+                  {firstLink?.instagramUrl && (
+                    <div className="flex justify-center mb-4">
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center">
+                          <Instagram className="w-5 h-5 text-white" />
+                        </div>
+                      </motion.div>
                     </div>
+                  )}
+
+                  {/* Message */}
+                  <div className="text-center text-gray-400 py-4">
+                    <p className="text-xs">Aucun lien ajouté</p>
                   </div>
                 </div>
               </div>
