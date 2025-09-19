@@ -598,31 +598,32 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     }}
                     className="relative w-48 h-48"
                   >
-                    {/* Style spécifique selon le choix */}
-                    <div className={`relative w-full h-full ${
-                      profileStyle === 'beacon'
-                        ? 'rounded-lg overflow-hidden'
-                        : 'rounded-full overflow-hidden'
-                    }`}>
+                    {/* Zone d'upload et affichage */}
+                    <div className="relative w-full h-full">
                       {!profileImage ? (
                         <>
-                          {/* Icône animée */}
-                          <motion.div
-                            animate={{ y: [0, -10, 0] }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              repeatType: "reverse"
-                            }}
-                            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
-                          >
-                            <Camera className="w-12 h-12 text-indigo-600 mb-2" />
-                            <span className="text-sm font-medium text-gray-700">Cliquez pour ajouter</span>
-                            <span className="text-xs text-gray-500 mt-1">JPG, PNG • Max 5MB</span>
-                          </motion.div>
+                          {/* Zone d'upload avec style selon le choix */}
+                          <div className={`relative w-full h-full ${
+                            profileStyle === 'beacon'
+                              ? 'rounded-lg overflow-hidden'
+                              : 'rounded-full overflow-hidden'
+                          } bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors`}>
+                            {/* Icône animée */}
+                            <motion.div
+                              animate={{ y: [0, -10, 0] }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                repeatType: "reverse"
+                              }}
+                              className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
+                            >
+                              <Camera className="w-12 h-12 text-indigo-600 mb-2" />
+                              <span className="text-sm font-medium text-gray-700">Cliquez pour ajouter</span>
+                              <span className="text-xs text-gray-500 mt-1">JPG, PNG • Max 5MB</span>
+                            </motion.div>
 
-                          {/* Composant ImageUpload */}
-                          <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors">
+                            {/* Composant ImageUpload */}
                             <ImageUpload
                               value={profileImage}
                               onChange={setProfileImage}
@@ -634,19 +635,27 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         </>
                       ) : (
                         <>
-                          {/* Image uploadée */}
+                          {/* Image uploadée - affichage simple sans recadrage */}
                           <motion.div
-                            initial={{ scale: 0.8 }}
-                            animate={{ scale: 1 }}
-                            className="relative w-full h-full"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="relative w-full h-full rounded-lg overflow-hidden shadow-xl"
                           >
-                            <ImageUpload
-                              value={profileImage}
-                              onChange={setProfileImage}
-                              type="profile"
-                              aspectRatio="square"
-                              className="w-full h-full"
+                            {/* Affichage direct de l'image */}
+                            <img
+                              src={profileImage}
+                              alt="Photo de profil"
+                              className="w-full h-full object-cover"
                             />
+
+                            {/* Bouton pour changer la photo */}
+                            <button
+                              type="button"
+                              onClick={() => setProfileImage('')}
+                              className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur rounded-full shadow-lg hover:bg-white transition-colors"
+                            >
+                              <Camera className="w-4 h-4 text-gray-700" />
+                            </button>
 
                             {/* Badge de succès */}
                             <motion.div
