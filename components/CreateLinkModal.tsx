@@ -1756,39 +1756,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 4 ? (
-                      step === 4 
-                        ? multiLinks.map((ml, index) => ({
-                            id: index.toString(),
-                            parentLinkId: '',
-                            title: ml.title || `Lien ${index + 1}`,
-                            url: ml.url || '#',
-                            description: '',
-                            icon: '',
-                            iconImage: '',
-                            animation: '',
-                            order: index,
-                            clicks: 0,
-                            createdAt: new Date(),
-                            updatedAt: new Date()
-                          }))
-                        : [
-                            { title: 'Mon Instagram', url: 'https://instagram.com' },
-                            { title: 'Mon Portfolio', url: 'https://example.com' },
-                            { title: 'Contactez-moi', url: 'mailto:contact@example.com' }
-                          ].map((ml, index) => ({
-                            id: index.toString(),
-                            parentLinkId: '',
-                            title: ml.title,
-                            url: ml.url,
-                            description: '',
-                            icon: '',
-                            iconImage: '',
-                            animation: '',
-                            order: index,
-                            clicks: 0,
-                            createdAt: new Date(),
-                            updatedAt: new Date()
-                          }))
+                      multiLinks.map((ml, index) => ({
+                        id: index.toString(),
+                        parentLinkId: '',
+                        title: ml.title || `Lien ${index + 1}`,
+                        url: ml.url || '#',
+                        description: '',
+                        icon: '',
+                        iconImage: '',
+                        animation: '',
+                        order: index,
+                        clicks: 0,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                      }))
                     ) : [],
                     // Valeurs par défaut
                     userId: '',

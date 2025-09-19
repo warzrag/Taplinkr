@@ -123,7 +123,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       icon: ml.icon,
       gradient: null
     })) :
-    defaultDemoData.links
+    (links.length === 0 ? defaultDemoData.links : [])
 
   const backgroundColor = firstLink?.backgroundColor || '#ffffff'
   const textColor = firstLink?.textColor || '#1F2937'
