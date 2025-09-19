@@ -170,15 +170,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - IMAGE SEULE */}
+            {/* Photo style Beacon/Immersif - IMAGE COMPLÈTE AVEC ZONE BLANCHE */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="w-full h-full">
-                {/* Image seule qui remplit l'espace disponible */}
-                <div className="relative w-full h-full">
+              <div className="w-full h-full overflow-y-auto">
+                {/* Image complète affichée */}
+                <div className="relative">
                   <img
                     src={displayImage}
                     alt={displayName}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto"
                   />
 
                   {/* Texte overlay sur l'image */}
@@ -193,19 +193,28 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     )}
                   </div>
 
-                  {/* Icône Instagram sur l'image */}
+                </div>
+
+                {/* Zone après l'image - zone blanche/normale */}
+                <div className="p-4">
+                  {/* Icône Instagram */}
                   {firstLink?.instagramUrl && (
-                    <div className="absolute bottom-20 left-0 right-0 flex justify-center">
+                    <div className="flex justify-center mb-3">
                       <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <Instagram className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shadow-sm">
+                          <Instagram className="w-5 h-5 text-gray-800" />
                         </div>
                       </motion.div>
                     </div>
                   )}
+
+                  {/* Message */}
+                  <div className="text-center text-gray-400">
+                    <p className="text-xs">Aucun lien ajouté</p>
+                  </div>
                 </div>
               </div>
             )}
