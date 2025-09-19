@@ -711,7 +711,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                               <div className="w-12 h-12 rounded-full bg-white" />
                             </div>
-                            <span className="text-xs font-medium">Classique</span>
+                            <span className="text-xs font-medium">Minimal</span>
                           </div>
                           {profileStyle === 'circle' && (
                             <motion.div
@@ -740,7 +740,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-200 via-pink-200 to-blue-200 flex items-center justify-end flex-col overflow-hidden">
                               <div className="w-10 h-10 rounded-full bg-white mb-1" />
                             </div>
-                            <span className="text-xs font-medium">Style Beacon</span>
+                            <span className="text-xs font-medium">Immersif</span>
                           </div>
                           {profileStyle === 'beacon' && (
                             <motion.div
