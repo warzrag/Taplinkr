@@ -563,7 +563,164 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   </motion.div>
                 </motion.div>
               ) : step === 3 && linkType === 'multi' ? (
-                /* Étape 3: Liens sociaux */
+                /* Étape 3: Upload de photo de profil */
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center min-h-[400px] py-8"
+                >
+                  <motion.h3
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-2xl font-bold text-gray-900 mb-2 text-center"
+                  >
+                    Ajoutez votre photo de profil
+                  </motion.h3>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-gray-600 mb-8 text-center"
+                  >
+                    Une photo de profil rend votre page plus personnelle et professionnelle
+                  </motion.p>
+
+                  {/* Zone d'upload centrale avec animations */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      delay: 0.3,
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 15
+                    }}
+                    className="relative w-48 h-48"
+                  >
+                    {/* Style spécifique selon le choix */}
+                    <div className={`relative w-full h-full ${
+                      profileStyle === 'beacon'
+                        ? 'rounded-lg overflow-hidden'
+                        : 'rounded-full overflow-hidden'
+                    }`}>
+                      {!profileImage ? (
+                        <>
+                          {/* Icône animée */}
+                          <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              repeatType: "reverse"
+                            }}
+                            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
+                          >
+                            <Camera className="w-12 h-12 text-indigo-600 mb-2" />
+                            <span className="text-sm font-medium text-gray-700">Cliquez pour ajouter</span>
+                            <span className="text-xs text-gray-500 mt-1">JPG, PNG • Max 5MB</span>
+                          </motion.div>
+
+                          {/* Composant ImageUpload */}
+                          <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors">
+                            <ImageUpload
+                              value={profileImage}
+                              onChange={setProfileImage}
+                              type="profile"
+                              aspectRatio="square"
+                              className="w-full h-full [&_svg]:hidden [&_p]:hidden [&_div]:bg-transparent"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Image uploadée */}
+                          <motion.div
+                            initial={{ scale: 0.8 }}
+                            animate={{ scale: 1 }}
+                            className="relative w-full h-full"
+                          >
+                            <ImageUpload
+                              value={profileImage}
+                              onChange={setProfileImage}
+                              type="profile"
+                              aspectRatio="square"
+                              className="w-full h-full"
+                            />
+
+                            {/* Badge de succès */}
+                            <motion.div
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              transition={{ delay: 0.3, type: "spring" }}
+                              className="absolute -bottom-2 -right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg z-20"
+                            >
+                              <Sparkles className="w-6 h-6 text-white" />
+                            </motion.div>
+                          </motion.div>
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+
+                  {/* Message d'encouragement */}
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="text-sm text-gray-500 mt-6 text-center max-w-sm"
+                  >
+                    {profileImage
+                      ? "Parfait ! Votre photo est superbe 🎉"
+                      : "Les profils avec photo reçoivent 3x plus de clics"}
+                  </motion.p>
+
+                  {/* Option pour passer sans photo */}
+                  {!profileImage && (
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 }}
+                      onClick={() => setStep(4)}
+                      className="text-sm text-gray-500 hover:text-gray-700 underline mt-4"
+                    >
+                      Continuer sans photo
+                    </motion.button>
+                  )}
+
+                  {/* Boutons d'action */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                    className="flex gap-3 mt-8"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
+                    >
+                      Retour
+                    </button>
+                    <motion.button
+                      type="button"
+                      onClick={() => setStep(4)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                        profileImage
+                          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700'
+                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}
+                    >
+                      Continuer
+                      <ArrowRight className="w-4 h-4" />
+                    </motion.button>
+                  </motion.div>
+                </motion.div>
+              ) : step === 4 && linkType === 'multi' ? (
+                /* Étape 4: Liens sociaux */
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -574,7 +731,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center mb-8"
                   >
-                    <motion.h3 
+                    <motion.h3
                       initial={{ opacity: 0, y: -20 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="text-2xl font-bold text-gray-900 mb-2"
@@ -726,7 +883,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   </motion.div>
 
                   {/* Boutons d'action */}
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
@@ -734,14 +891,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   >
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
+                      onClick={() => setStep(3)}
                       className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
                     >
                       Retour
                     </button>
                     <motion.button
                       type="button"
-                      onClick={() => setStep(4)}
+                      onClick={() => setStep(5)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center gap-2"
@@ -751,8 +908,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </motion.button>
                   </motion.div>
                 </motion.div>
-              ) : step === 5 && linkType === 'multi' ? (
-                /* Étape 5: Personnalisation des liens (dernière étape) */
+              ) : step === 6 && linkType === 'multi' ? (
+                /* Étape 6: Personnalisation des liens (dernière étape) */
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -973,7 +1130,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   >
                     <button
                       type="button"
-                      onClick={() => setStep(4)}
+                      onClick={() => setStep(5)}
                       className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
                     >
                       Retour
@@ -1003,8 +1160,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </motion.button>
                   </motion.div>
                 </motion.div>
-              ) : step === 4 && linkType === 'multi' ? (
-                /* Étape 4: Détails du lien */
+              ) : step === 5 && linkType === 'multi' ? (
+                /* Étape 5: Détails du lien */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1450,14 +1607,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   <div className="flex gap-2 sm:gap-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(linkType === 'multi' ? 3 : 1)}
+                      onClick={() => setStep(linkType === 'multi' ? 4 : 1)}
                       className="flex-1 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 text-base"
                     >
                       Retour
                     </button>
                     <button
                       type="button"
-                      onClick={() => setStep(5)}
+                      onClick={() => setStep(6)}
                       className="flex-1 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg sm:rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg text-base"
                     >
                       <ArrowRight className="w-5 h-5" />
