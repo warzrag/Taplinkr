@@ -170,56 +170,65 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo style Beacon/Immersif - Exactement comme la référence */}
+            {/* Photo style Beacon/Immersif - Image complète avec ses proportions */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="absolute inset-0 w-full h-full">
-                {/* Image en arrière-plan couvrant tout l'écran */}
-                <img
-                  src={displayImage}
-                  alt={displayName}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+              <div className="absolute inset-0 w-full h-full bg-black flex flex-col">
+                {/* Image complète avec ses proportions naturelles */}
+                <div className="relative">
+                  <img
+                    src={displayImage}
+                    alt={displayName}
+                    className="w-full h-auto"
+                  />
 
-                {/* Overlay dégradé pour lisibilité */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
-
-                {/* Contenu positionné en bas */}
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  {/* Nom et bio */}
-                  <div className="text-center mb-6">
-                    <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                  {/* Texte overlay sur l'image */}
+                  <div className="absolute bottom-4 left-0 right-0 text-center px-4">
+                    <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                       {displayName}
                     </h1>
                     {displayBio && (
-                      <p className="text-base text-white/90 drop-shadow-lg">
+                      <p className="text-sm text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                         {displayBio}
                       </p>
                     )}
                   </div>
+                </div>
 
+                {/* Zone noire en dessous de l'image */}
+                <div className="flex-1 bg-black flex flex-col justify-end p-6">
                   {/* Icône Instagram */}
                   {firstLink?.instagramUrl && (
-                    <div className="flex justify-center mb-6">
+                    <div className="flex justify-center mb-4">
                       <motion.div
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         className="inline-flex"
                       >
-                        <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
-                          <Instagram className="w-6 h-6 text-gray-900" />
+                        <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center">
+                          <Instagram className="w-6 h-6 text-white" />
                         </div>
                       </motion.div>
                     </div>
                   )}
 
-                  {/* Premier lien comme sur la référence */}
+                  {/* Message "Aucun lien ajouté" si pas de liens */}
+                  <div className="text-center text-gray-500 py-8">
+                    <p className="text-sm">Aucun lien ajouté</p>
+                  </div>
+
+                  {/* Footer TapLinkr */}
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full bg-white rounded-2xl p-4 flex items-center justify-center gap-3 shadow-lg"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="mt-auto"
                   >
-                    <span className="text-lg font-semibold text-gray-900">MON ONLY FANS GRATUIT</span>
-                    <span className="text-xl">🍑😍</span>
+                    <div className="flex items-center justify-center gap-2 opacity-50">
+                      <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+                      <span className="text-xs font-medium text-white">
+                        Powered by TapLinkr
+                      </span>
+                    </div>
                   </motion.div>
                 </div>
               </div>
