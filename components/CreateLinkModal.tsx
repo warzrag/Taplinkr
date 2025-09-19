@@ -597,14 +597,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       stiffness: 100,
                       damping: 15
                     }}
-                    className="relative w-full max-w-md h-96"
+                    className="relative w-full max-w-md"
                   >
                     {/* Zone d'upload et affichage */}
-                    <div className="relative w-full h-full">
+                    <div className="relative w-full">
                       {!profileImage ? (
                         <>
                           {/* Zone d'upload avec style selon le choix */}
-                          <div className="relative w-full h-full rounded-lg overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors">
+                          <div className="relative w-full h-64 rounded-lg overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors">
                             {/* Icône animée */}
                             <motion.div
                               animate={{ y: [0, -10, 0] }}
@@ -632,17 +632,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         </>
                       ) : (
                         <>
-                          {/* Image uploadée - affichage simple sans recadrage */}
+                          {/* Image uploadée - affichage COMPLET sans hauteur fixe */}
                           <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="relative w-full h-full rounded-lg overflow-hidden shadow-xl"
+                            className="relative w-full rounded-lg overflow-hidden shadow-xl"
                           >
-                            {/* Affichage direct de l'image COMPLÈTE sans coupure */}
+                            {/* Affichage de l'image ENTIÈRE avec hauteur automatique */}
                             <img
                               src={profileImage}
                               alt="Photo de profil"
-                              className="w-full h-full object-contain"
+                              className="w-full h-auto"
                             />
 
                             {/* Bouton pour changer la photo */}
