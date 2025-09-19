@@ -597,7 +597,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       stiffness: 100,
                       damping: 15
                     }}
-                    className="relative w-full max-w-md"
+                    className="relative w-full"
                   >
                     {/* Zone d'upload et affichage */}
                     <div className="relative w-full flex justify-center">
