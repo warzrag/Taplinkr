@@ -182,7 +182,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 <img
                   src={displayImage}
                   alt={displayName}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain bg-black"
                 />
 
                 {/* Gradient noir en bas pour la lisibilité du texte */}
