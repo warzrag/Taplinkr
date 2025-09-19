@@ -597,18 +597,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       stiffness: 100,
                       damping: 15
                     }}
-                    className="relative w-48 h-48"
+                    className="relative w-full max-w-md h-96"
                   >
                     {/* Zone d'upload et affichage */}
                     <div className="relative w-full h-full">
                       {!profileImage ? (
                         <>
                           {/* Zone d'upload avec style selon le choix */}
-                          <div className={`relative w-full h-full ${
-                            profileStyle === 'beacon'
-                              ? 'rounded-lg overflow-hidden'
-                              : 'rounded-full overflow-hidden'
-                          } bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors`}>
+                          <div className="relative w-full h-full rounded-lg overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors">
                             {/* Icône animée */}
                             <motion.div
                               animate={{ y: [0, -10, 0] }}
