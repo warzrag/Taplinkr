@@ -183,6 +183,12 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   }}
                 />
 
+                {/* Dégradé flou style Beacon en bas */}
+                <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/60 to-transparent" />
+
+                {/* Effet de flou supplémentaire */}
+                <div className="absolute bottom-0 left-0 right-0 h-[40%] backdrop-blur-sm bg-gradient-to-t from-black/50 to-transparent" />
+
                 {/* Texte overlay sur l'image en bas */}
                 <div className="absolute bottom-20 left-0 right-0 text-center px-6 z-40">
                   <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
