@@ -346,9 +346,9 @@ export default function Dashboard() {
                 </div>
                 {dashboardStats?.growthRate !== undefined && (
                   <span className={`text-sm font-medium ${
-                    dashboardStats.growthRate > 0 
-                      ? 'text-emerald-600 
-                      : 'text-red-600
+                    dashboardStats.growthRate > 0
+                      ? 'text-emerald-600'
+                      : 'text-red-600'
                   }`}>
                     {dashboardStats.growthRate > 0 ? '+' : ''}{dashboardStats.growthRate}%
                   </span>
@@ -877,9 +877,9 @@ export default function Dashboard() {
                             handleToggle(link.id, link.isActive)
                           }}
                           className={`p-2 rounded-lg transition-all ${
-                            link.isActive 
-                              ? 'bg-emerald-500/15 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/15 
-                              : 'bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50/80 dark:bg-gray-700/80
+                            link.isActive
+                              ? 'bg-emerald-500/15 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/15'
+                              : 'bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50/80 dark:bg-gray-700/80'
                           }`}
                           title={link.isActive ? 'Désactiver' : 'Activer'}
                         >

@@ -453,9 +453,9 @@ export default function LinksPage() {
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                              link.isActive 
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 
-                                : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                              link.isActive
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                             }`}>
                               <div className={`w-1.5 h-1.5 rounded-full ${
                                 link.isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-50 dark:bg-gray-700/800'
@@ -649,9 +649,9 @@ export default function LinksPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                          link.isActive 
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 
-                            : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                          link.isActive
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                            : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                         }`}>
                           <div className={`w-1.5 h-1.5 rounded-full ${
                             link.isActive ? 'bg-green-500' : 'bg-gray-50 dark:bg-gray-700/800'
