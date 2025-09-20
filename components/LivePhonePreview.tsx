@@ -64,7 +64,7 @@ interface LivePhonePreviewProps {
 const defaultDemoData = {
   name: "Sarah Anderson",
   username: "@sarahanderson",
-  bio: "Digital Creator • Photographer • Travel Enthusiast",
+  bio: "",
   profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop",
   location: "Paris, France",
   links: [
