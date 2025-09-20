@@ -143,6 +143,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       title: ml.title,
       url: ml.url,
       icon: ml.icon,
+      iconImage: ml.iconImage,
       gradient: null
     })) :
     (links.length === 0 ? defaultDemoData.links : [])
@@ -225,8 +226,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
                 {/* Liens affichés juste sous le titre */}
                 <div className="absolute bottom-40 left-0 right-0 px-6 space-y-3 z-40">
-                  {firstLink?.multiLinks && firstLink.multiLinks.length > 0 && (
-                    firstLink.multiLinks.map((link, index) => (
+                  {displayLinks.length > 0 && (
+                    displayLinks.map((link, index) => (
                       <motion.div
                         key={link.id || index}
                         initial={{ y: 50, opacity: 0 }}
