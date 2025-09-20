@@ -1669,8 +1669,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     fontFamily: step >= 5 ? fontFamily : 'system',
                     backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                     textColor: step >= 5 ? textColor : '#1f2937',
-                    multiLinks: step >= 5 && multiLinks.filter(ml => ml.title || ml.url).length > 0 ? (
-                      multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => {
+                    multiLinks: step >= 5 ? (
+                      multiLinks.map((ml, index) => {
                         console.log(`Mapping link ${index}:`, { icon: ml.icon, iconImage: ml.iconImage })
                         return {
                           id: index.toString(),
@@ -1734,8 +1734,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           fontFamily: step >= 5 ? fontFamily : 'system',
           backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
           textColor: step >= 5 ? textColor : '#1f2937',
-          multiLinks: step >= 5 && multiLinks.filter(ml => ml.title || ml.url).length > 0 ? (
-            multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+          multiLinks: step >= 5 ? (
+            multiLinks.map((ml, index) => ({
               id: index.toString(),
               parentLinkId: '',
               title: ml.title || '',
