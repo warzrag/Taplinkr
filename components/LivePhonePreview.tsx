@@ -212,8 +212,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         transition={{ delay: index * 0.1 }}
                         className="w-full bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
                       >
-                        <div className="flex items-center justify-center">
-                          <span className="text-gray-900 font-semibold text-center truncate w-full">
+                        <div className="flex items-center justify-center gap-3">
+                          {link.iconImage && (
+                            <img
+                              src={link.iconImage}
+                              alt=""
+                              className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
+                            />
+                          )}
+                          <span className="text-gray-900 font-semibold text-center truncate">
                             {link.title || 'Lien'}
                           </span>
                         </div>
@@ -375,8 +382,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         overflow-hidden group
                       `}>
                         {/* Contenu du lien */}
-                        <div className="relative flex items-center justify-center w-full">
-                          <span className={`text-base font-bold text-center truncate w-full px-2 ${
+                        <div className="relative flex items-center justify-center w-full gap-3">
+                          {link.iconImage && (
+                            <img
+                              src={link.iconImage}
+                              alt=""
+                              className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
+                            />
+                          )}
+                          <span className={`text-base font-bold text-center truncate ${
                             profileStyle === 'beacon' && displayImage
                               ? 'text-gray-900'
                               : link.gradient
