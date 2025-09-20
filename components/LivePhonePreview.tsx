@@ -380,11 +380,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         {/* Contenu du lien */}
                         <div className="relative flex items-center justify-center w-full gap-3">
                           {(link.iconImage || link.icon) && (
-                            <img
-                              src={link.iconImage || link.icon}
-                              alt=""
-                              className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
-                            />
+                            <>
+                              {console.log('Affichage icône:', { icon: link.icon, iconImage: link.iconImage, src: link.iconImage || link.icon })}
+                              <img
+                                src={link.iconImage || link.icon}
+                                alt=""
+                                className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
+                              />
+                            </>
                           )}
                           <span className={`text-base font-bold text-center truncate ${
                             profileStyle === 'beacon' && displayImage
