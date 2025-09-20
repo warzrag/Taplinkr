@@ -148,6 +148,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
     })) :
     (links.length === 0 ? defaultDemoData.links : [])
 
+  console.log('DisplayLinks final:', displayLinks)
+
   const backgroundColor = firstLink?.backgroundColor || '#ffffff'
   const textColor = firstLink?.textColor || '#1F2937'
 
@@ -381,11 +383,22 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         <div className="relative flex items-center justify-center w-full gap-3">
                           {(link.iconImage || link.icon) && (
                             <>
-                              {console.log('Affichage icône:', { icon: link.icon, iconImage: link.iconImage, src: link.iconImage || link.icon })}
+                              {console.log('Tentative affichage icône:', {
+                                icon: link.icon,
+                                iconImage: link.iconImage,
+                                src: link.iconImage || link.icon,
+                                hasIcon: !!link.icon,
+                                hasIconImage: !!link.iconImage
+                              })}
                               <img
                                 src={link.iconImage || link.icon}
-                                alt=""
+                                alt="icon"
                                 className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
+                                onError={(e) => {
+                                  console.error('Erreur chargement icône:', e)
+                                  e.currentTarget.style.display = 'none'
+                                }}
+                                onLoad={() => console.log('Icône chargée avec succès')}
                               />
                             </>
                           )}
