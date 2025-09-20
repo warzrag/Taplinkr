@@ -1638,11 +1638,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 5 ? (
                       (() => {
-                        const filtered = multiLinks.filter(ml => ml.title || ml.url);
-                        console.log('🔍 Étape', step, '- Liens filtrés:', filtered.length, 'sur', multiLinks.length);
-                        if (filtered.length > 0) {
-                          console.log('✅ Envoi des liens:', filtered);
-                        }
+                        // NE PAS FILTRER - ENVOYER TOUS LES LIENS
+                        console.log('🔍 Étape', step, '- multiLinks bruts:', multiLinks);
+                        const filtered = multiLinks; // PAS DE FILTRE !
+                        console.log('✅ Envoi de', filtered.length, 'liens (SANS FILTRE)');
                         return filtered.map((ml, index) => ({
                           id: index.toString(),
                           parentLinkId: '',
