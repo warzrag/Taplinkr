@@ -201,7 +201,28 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   )}
                 </div>
 
-                {/* Boutons/liens en bas comme sur Instagram */}
+                {/* Liens affichés juste sous le titre */}
+                <div className="absolute bottom-40 left-0 right-0 px-6 space-y-3 z-40">
+                  {firstLink?.multiLinks && firstLink.multiLinks.length > 0 && (
+                    firstLink.multiLinks.map((link, index) => (
+                      <motion.div
+                        key={link.id || index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="w-full bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
+                      >
+                        <div className="flex items-center justify-center">
+                          <span className="text-gray-900 font-semibold">
+                            {link.title || 'Lien'}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+
+                {/* Boutons réseaux sociaux */}
                 {firstLink?.instagramUrl && (
                   <div className="absolute bottom-6 left-0 right-0 flex justify-center">
                     <div className="bg-white/20 backdrop-blur-md rounded-full px-6 py-3">
