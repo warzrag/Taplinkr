@@ -44,9 +44,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
   // Wrapper pour tracer les changements d'étape
   const setStep = (newStep: number) => {
-    console.log('⚡⚡⚡ CHANGEMENT D\'ÉTAPE ⚡⚡⚡')
-    console.log('De l\'étape', step, 'vers l\'étape', newStep)
-    console.trace('Appelé depuis:')
     setStepOriginal(newStep)
   }
 
@@ -105,18 +102,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const watchedTitle = watch('title')
   const watchedDescription = watch('description')
 
-  // DEBUG COMPLET - Après toutes les déclarations
+  // DEBUG SIMPLIFIÉ - Juste pour l'étape 5
   useEffect(() => {
-    console.log('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴')
-    console.log('📍 ÉTAPE ACTUELLE:', step)
-    console.log('📍 Type de lien:', linkType)
-    console.log('📍 Nombre de liens:', multiLinks.length)
-    console.log('📍 Détail des liens:', multiLinks)
-    console.log('📍 Titre tapé:', watchedTitle)
-    console.log('📍 Description:', watchedDescription)
-    console.log('📍 Slug:', watchedSlug)
-    console.log('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴')
-  }, [step, linkType, multiLinks, watchedTitle, watchedDescription, watchedSlug])
+    if (step === 5 && linkType === 'multi') {
+      const validLinks = multiLinks.filter(ml => ml.title || ml.url);
+      console.log('🔍 Étape 5 - Liens:', validLinks.length > 0 ? validLinks : 'Aucun lien rempli');
+    }
+  }, [step, linkType, multiLinks])
 
   // Vérifier la disponibilité du slug
   useEffect(() => {
@@ -1653,13 +1645,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: (() => {
                       const filtered = multiLinks.filter(ml => ml.title || ml.url);
-                      console.log('🟠 Preview multiLinks:', {
-                        step,
-                        shouldShow: step >= 5,
-                        multiLinksRaw: multiLinks,
-                        multiLinksFiltered: filtered,
-                        multiLinksCount: filtered.length
-                      });
+                      if (step === 5 && filtered.length > 0) {
+                        console.log('✅ Liens envoyés à la preview:', filtered.length);
+                      }
                       return step >= 5 ? (
                         filtered.map((ml, index) => ({
                           id: index.toString(),

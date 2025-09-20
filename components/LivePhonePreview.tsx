@@ -326,14 +326,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-6 space-y-3 z-30' : 'flex-1 px-6 space-y-3 overflow-y-auto'}`}>
                 {/* Affichage des multiLinks à partir de l'étape 5 (intégrée) */}
                 {(() => {
-                  console.log('🔵 LivePhonePreview Debug:', {
-                    currentStep,
-                    hasFirstLink: !!firstLink,
-                    multiLinks: firstLink?.multiLinks,
-                    multiLinksLength: firstLink?.multiLinks?.length,
-                    condition: currentStep && currentStep >= 5 && firstLink?.multiLinks,
-                    stepCheck: currentStep >= 5
-                  });
+                  if (currentStep === 5 && firstLink?.multiLinks?.length > 0) {
+                    console.log('📱 Preview reçoit', firstLink.multiLinks.length, 'liens');
+                  }
                   return null;
                 })()}
                 {currentStep && currentStep >= 5 && firstLink?.multiLinks ? (
