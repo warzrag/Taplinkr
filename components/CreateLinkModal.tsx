@@ -1733,10 +1733,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
                     textColor: step >= 6 ? textColor : '#1f2937',
                     multiLinks: step >= 6 ? (
-                      multiLinks.map((ml, index) => ({
+                      multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
                         id: index.toString(),
                         parentLinkId: '',
-                        title: ml.title || `Lien ${index + 1}`,
+                        title: ml.title || '',
                         url: ml.url || '#',
                         description: '',
                         icon: '',
@@ -1794,22 +1794,22 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           fontFamily: step >= 6 ? fontFamily : 'system',
           backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
           textColor: step >= 6 ? textColor : '#1f2937',
-          multiLinks: step >= 5 ?
-            [{
-              id: '1',
+          multiLinks: step >= 6 ? (
+            multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
+              id: index.toString(),
               parentLinkId: '',
-              title: watchedTitle || '',
-              url: '#',
-              description: watchedDescription || '',
+              title: ml.title || '',
+              url: ml.url || '#',
+              description: '',
               icon: '',
               iconImage: '',
               animation: '',
-              order: 0,
+              order: index,
               clicks: 0,
               createdAt: new Date(),
               updatedAt: new Date()
-            }]
-           : [],
+            }))
+          ) : [],
           userId: '',
           directUrl: '',
           shieldEnabled: false,
