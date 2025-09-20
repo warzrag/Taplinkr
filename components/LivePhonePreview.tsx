@@ -224,45 +224,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   )}
                 </div>
 
-                {/* Liens affichés juste sous le titre */}
-                <div className="absolute bottom-40 left-0 right-0 px-6 space-y-3 z-40">
-                  {displayLinks.length > 0 && (
-                    displayLinks.map((link, index) => (
-                      <motion.div
-                        key={link.id || index}
-                        initial={{ y: 50, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 50, opacity: 0 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="relative"
-                      >
-                        {/* Carte de lien style complet */}
-                        <div className={`
-                          relative w-full py-4 px-6 ${borderRadius}
-                          bg-white
-                          shadow-2xl transition-all duration-300 cursor-pointer
-                          overflow-hidden group
-                        `}>
-                          {/* Contenu du lien */}
-                          <div className="relative flex items-center justify-center w-full gap-3">
-                            {(link.iconImage || link.icon) && (
-                              <img
-                                src={link.iconImage || link.icon}
-                                alt=""
-                                className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
-                              />
-                            )}
-                            <span className="text-base font-bold text-center truncate text-gray-900">
-                              {link.title || 'Lien'}
-                            </span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))
-                  )}
-                </div>
 
                 {/* Boutons réseaux sociaux */}
                 {firstLink?.instagramUrl && (
