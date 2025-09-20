@@ -95,6 +95,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   const [time, setTime] = useState(new Date())
   const [isLoaded, setIsLoaded] = useState(false)
 
+  // Debug
+  useEffect(() => {
+    if (links[0]?.multiLinks) {
+      console.log('LivePhonePreview - MultiLinks reçus:', links[0].multiLinks)
+      console.log('LivePhonePreview - Icons:', links[0].multiLinks.map(ml => ({ title: ml.title, icon: ml.icon, iconImage: ml.iconImage })))
+    }
+  }, [links])
+
   useEffect(() => {
     setIsLoaded(true)
     const interval = setInterval(() => {
@@ -213,9 +221,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         className="w-full bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
                       >
                         <div className="flex items-center justify-center gap-3">
-                          {link.iconImage && (
+                          {(link.iconImage || link.icon) && (
                             <img
-                              src={link.iconImage}
+                              src={link.iconImage || link.icon}
                               alt=""
                               className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
                             />
@@ -383,9 +391,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       `}>
                         {/* Contenu du lien */}
                         <div className="relative flex items-center justify-center w-full gap-3">
-                          {link.iconImage && (
+                          {(link.iconImage || link.icon) && (
                             <img
-                              src={link.iconImage}
+                              src={link.iconImage || link.icon}
                               alt=""
                               className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
                             />

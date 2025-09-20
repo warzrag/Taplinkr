@@ -98,6 +98,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     console.log('Titre surveillé:', watchedTitle)
     console.log('Étape actuelle:', step)
     console.log('MultiLinks:', multiLinks)
+    console.log('MultiLinks avec icônes:', multiLinks.map(ml => ({ title: ml.title, icon: ml.icon })))
     console.log('Nombre de multiLinks:', multiLinks.length)
     console.log('MultiLinks filtrés:', multiLinks.filter(ml => ml.title || ml.url))
   }, [watchedTitle, step, multiLinks])
