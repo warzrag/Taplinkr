@@ -34,6 +34,7 @@ interface MultiLinkData {
   title: string
   url: string
   icon?: string
+  iconImage?: string
 }
 
 export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
@@ -50,9 +51,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     editingLink?.multiLinks && editingLink.multiLinks.length > 0
       ? editingLink.multiLinks.map(ml => ({
           title: ml.title,
-          url: ml.url
+          url: ml.url,
+          icon: ml.icon,
+          iconImage: ml.iconImage
         }))
-      : [{ title: '', url: '' }]
+      : [{ title: '', url: '', icon: '', iconImage: '' }]
   )
   const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
   const [profileStyle, setProfileStyle] = useState<'circle' | 'beacon'>(editingLink?.profileStyle || 'circle')
@@ -98,7 +101,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     console.log('Titre surveillé:', watchedTitle)
     console.log('Étape actuelle:', step)
     console.log('MultiLinks:', multiLinks)
-    console.log('MultiLinks avec icônes:', multiLinks.map(ml => ({ title: ml.title, icon: ml.icon })))
+    console.log('MultiLinks avec icônes:', multiLinks.map(ml => ({ title: ml.title, icon: ml.icon, iconImage: ml.iconImage })))
     console.log('Nombre de multiLinks:', multiLinks.length)
     console.log('MultiLinks filtrés:', multiLinks.filter(ml => ml.title || ml.url))
   }, [watchedTitle, step, multiLinks])
@@ -161,7 +164,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }
 
   const addMultiLink = () => {
-    const newLinks = [...multiLinks, { title: '', url: '' }]
+    const newLinks = [...multiLinks, { title: '', url: '', icon: '', iconImage: '' }]
     console.log('Ajout d\'un nouveau lien. Total:', newLinks.length)
     setMultiLinks(newLinks)
   }
@@ -172,7 +175,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     }
   }
 
-  const updateMultiLink = (index: number, field: 'title' | 'url', value: string) => {
+  const updateMultiLink = (index: number, field: 'title' | 'url' | 'icon' | 'iconImage', value: string) => {
     const updated = [...multiLinks]
     updated[index][field] = value
     setMultiLinks(updated)
@@ -1525,8 +1528,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           >
                           <div className="flex gap-3">
                             <IconUpload
-                              value={link.icon}
-                              onChange={(iconUrl) => updateMultiLink(index, 'icon', iconUrl)}
+                              value={link.iconImage || link.icon}
+                              onChange={(iconUrl) => updateMultiLink(index, 'iconImage', iconUrl)}
                             />
                             <div className="flex-1 space-y-3">
                               <input
@@ -1671,8 +1674,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         title: ml.title || '',
                         url: ml.url || '#',
                         description: '',
-                        icon: ml.icon || '',
-                        iconImage: ml.icon || '',
+                        icon: ml.icon || ml.iconImage || '',
+                        iconImage: ml.iconImage || ml.icon || '',
                         animation: '',
                         order: index,
                         clicks: 0,

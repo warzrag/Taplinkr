@@ -113,19 +113,20 @@ export async function createLinkDB(linkData: any) {
 export async function createMultiLinksDB(linkId: string, multiLinks: any[]) {
   try {
     const createdLinks = []
-    
+
     for (const ml of multiLinks) {
       const result = await query(
         `INSERT INTO multi_links (
-          id, "linkId", title, url, icon, "order", clicks,
+          id, "linkId", title, url, icon, "iconImage", "order", clicks,
           "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
         [
           `${linkId}_${ml.order || 0}_${Date.now()}`,
           linkId,
           ml.title,
           ml.url,
           ml.icon || '',
+          ml.iconImage || ml.icon || '',  // Sauvegarder dans les deux champs
           ml.order || 0,
           0,
           new Date(),
@@ -134,7 +135,7 @@ export async function createMultiLinksDB(linkId: string, multiLinks: any[]) {
       )
       createdLinks.push(result.rows[0])
     }
-    
+
     return createdLinks
   } catch (error) {
     console.error('Erreur création multilinks:', error)
