@@ -189,8 +189,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 {/* Couche supplémentaire pour intensifier le noir en bas */}
                 <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-black to-transparent" />
 
-                {/* Texte overlay sur l'image en bas */}
-                <div className="absolute bottom-20 left-0 right-0 text-center px-6 z-40">
+                {/* Texte overlay sur l'image - remonté */}
+                <div className="absolute bottom-32 left-0 right-0 text-center px-6 z-40">
                   <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                     {displayName}
                   </h1>
