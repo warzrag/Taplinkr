@@ -1647,7 +1647,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   links={[{
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
-                    title: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+                    title: step >= 5 ? (watchedTitle || 'Mon lien') : '',
                     description: step >= 5 ? (watchedDescription || '') : '',
                     profileImage: profileImage || '',
                     profileStyle: profileStyle || 'circle',
@@ -1702,14 +1702,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       <EditPhonePreview
         isVisible={showPreview && linkType === 'multi'}
         user={{
-          name: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+          name: step >= 5 ? (watchedTitle || 'Mon lien') : '',
           bio: step >= 5 ? (watchedDescription || '') : '',
           image: profileImage || ''
         }}
         links={[{
           id: Date.now().toString(),
           slug: watch('slug') || 'preview',
-          title: step >= 5 ? (watchedTitle || 'Mon lien') : 'Mon lien',
+          title: step >= 5 ? (watchedTitle || 'Mon lien') : '',
           description: step >= 5 ? (watchedDescription || '') : '',
           profileImage: profileImage || '',
           profileStyle: profileStyle || 'circle',
