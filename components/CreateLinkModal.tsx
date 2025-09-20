@@ -40,7 +40,28 @@ interface MultiLinkData {
 export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
   const { hasPermission, requirePermission } = usePermissions()
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState(editingLink ? 6 : 1) // Si on édite, on passe directement à l'étape finale
+  const [step, setStepOriginal] = useState(editingLink ? 6 : 1) // Si on édite, on passe directement à l'étape finale
+
+  // Wrapper pour tracer les changements d'étape
+  const setStep = (newStep: number) => {
+    console.log('⚡⚡⚡ CHANGEMENT D\'ÉTAPE ⚡⚡⚡')
+    console.log('De l\'étape', step, 'vers l\'étape', newStep)
+    console.trace('Appelé depuis:')
+    setStepOriginal(newStep)
+  }
+
+  // DEBUG COMPLET
+  useEffect(() => {
+    console.log('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴')
+    console.log('📍 ÉTAPE ACTUELLE:', step)
+    console.log('📍 Type de lien:', linkType)
+    console.log('📍 Nombre de liens:', multiLinks.length)
+    console.log('📍 Détail des liens:', multiLinks)
+    console.log('📍 Titre tapé:', watchedTitle)
+    console.log('📍 Description:', watchedDescription)
+    console.log('📍 Slug:', watchedSlug)
+    console.log('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴')
+  }, [step, linkType, multiLinks, watchedTitle, watchedDescription, watchedSlug])
   const [linkType, setLinkType] = useState<'direct' | 'multi' | null>(
     editingLink?.isDirect ? 'direct' : editingLink ? 'multi' : null
   )
@@ -297,7 +318,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   {editingLink ? 'Modifier le lien' : 'Créer un nouveau lien'}
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-500">
-                  Étape {step} sur {linkType === 'multi' ? '5' : '2'}
+                  Étape {step} sur {linkType === 'multi' ? '6' : '2'}
                 </p>
               </div>
             </div>
@@ -312,7 +333,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           {/* Form - Scrollable */}
           <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
             <div className="space-y-6">
-              {step === 1 ? (
+              {console.log('🎯 RENDU - Étape:', step, 'Type de lien:', linkType)}
+            {step === 1 ? (
                 /* Étape 1: Choix du type de lien */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -895,6 +917,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 </motion.div>
               ) : step === 6 && linkType === 'multi' ? (
                 /* Étape 6: Personnalisation des liens (dernière étape) */
+                console.log('🔥🔥🔥 ON EST À L\'ÉTAPE 6 - PERSONNALISATION 🔥🔥🔥') ||
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1107,7 +1130,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   </motion.div>
 
                   {/* Boutons d'action */}
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
@@ -1147,6 +1170,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 </motion.div>
               ) : step === 5 && linkType === 'multi' ? (
                 /* Étape 5: Détails du lien */
+                console.log('💚💚💚 ON EST À L\'ÉTAPE 5 - DÉTAILS DU LIEN 💚💚💚') ||
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1187,13 +1211,19 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         />
                       </motion.div>
                       {errors.title && (
-                        <motion.p 
+                        <motion.p
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           className="text-red-500 text-sm mt-1"
                         >
                           Le titre est requis
                         </motion.p>
+                      )}
+                      {/* Suppression de tout aperçu potentiel */}
+                      {false && watchedTitle && (
+                        <div style={{ display: 'none' }}>
+                          {/* Aperçu supprimé */}
+                        </div>
                       )}
                     </div>
                   </motion.div>
@@ -1303,7 +1333,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             transition={{ type: "spring", stiffness: 150 }}
                             className="mt-2 bg-green-50 border border-green-200 rounded-lg p-2"
                           >
-                            <p className="text-sm text-green-700 flex items-center gap-2 font-medium">
+                            <div className="text-sm text-green-700 flex items-center gap-2 font-medium">
                               <motion.div
                                 animate={{ scale: [1, 1.2, 1] }}
                                 transition={{ duration: 0.5 }}
@@ -1311,7 +1341,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                 <Check className="w-4 h-4" />
                               </motion.div>
                               Super ! Cette URL est disponible
-                            </p>
+                            </div>
                           </motion.div>
                         )}
                         {slugAvailable === false && (
@@ -1323,7 +1353,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             transition={{ type: "spring", stiffness: 150 }}
                             className="mt-2 bg-red-50 border border-red-200 rounded-lg p-2"
                           >
-                            <p className="text-sm text-red-700 flex items-center gap-2 font-medium">
+                            <div className="text-sm text-red-700 flex items-center gap-2 font-medium">
                               <motion.div
                                 animate={{ rotate: [0, -10, 10, -10, 0] }}
                                 transition={{ duration: 0.5 }}
@@ -1331,7 +1361,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                 <AlertCircle className="w-4 h-4" />
                               </motion.div>
                               Oops ! Cette URL est déjà prise
-                            </p>
+                            </div>
                             <p className="text-xs text-red-600 mt-1 ml-6">
                               Essayez d'ajouter des chiffres ou des tirets
                             </p>
@@ -1485,97 +1515,60 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         )}
                       </div>
                     </div>
-                  ) : (
-                    /* Multi-liens */
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-800">Vos liens</h3>
-                        <motion.div
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className="text-sm text-indigo-600 font-medium"
-                        >
-                          {multiLinks.filter(l => l.title && l.url).length} / ∞
-                        </motion.div>
-                      </div>
-                      
-                      <div className="max-h-64 overflow-y-auto space-y-3 pr-2">
-                        {multiLinks.map((link, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ 
-                              delay: 0.3 + index * 0.1,
-                              type: "spring",
-                              stiffness: 100
-                            }}
-                            whileHover={{ scale: 1.02, x: 5 }}
-                            className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 space-y-3 border-2 border-transparent hover:border-indigo-300 transition-all"
-                          >
-                          <div className="flex gap-3">
-                            <IconUpload
-                              value={link.iconImage || link.icon}
-                              onChange={(iconUrl) => updateMultiLink(index, 'iconImage', iconUrl)}
-                            />
-                            <div className="flex-1 space-y-3">
-                              <input
-                                type="text"
-                                value={link.title}
-                                onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
-                                className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
-                                placeholder="Titre du lien"
-                              />
-                              <input
-                                type="url"
-                                value={link.url}
-                                onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
-                                className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
-                                placeholder="https://example.com"
-                              />
-                            </div>
-                          </div>
-                          {multiLinks.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeMultiLink(index)}
-                              className="text-red-500 text-sm hover:text-red-700 transition-colors"
-                            >
-                              Supprimer
-                            </button>
-                          )}
-                        </motion.div>
-                      ))}
-                      </div>
-                    </motion.div>
-                  )}
+                  ) : null}
 
+                  {/* Ajout des liens directement dans l'étape 5 */}
                   {linkType === 'multi' && (
                     <>
-                      <motion.button
-                        type="button"
-                        onClick={addMultiLink}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full py-3 border-2 border-dashed border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl text-indigo-600 hover:border-indigo-500 hover:from-indigo-100 hover:to-purple-100 transition-all duration-200 flex items-center justify-center gap-2 font-medium"
-                      >
-                        <motion.div
-                          animate={{ rotate: [0, 180, 360] }}
-                          transition={{ duration: 2, repeat: Infinity }}
+                      <div className="pt-4 border-t">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Vos liens</h3>
+                        <div className="space-y-3">
+                          {multiLinks.map((link, index) => (
+                            <div key={index} className="bg-gray-50 rounded-xl p-4 space-y-3">
+                              <div className="flex gap-3">
+                                <IconUpload
+                                  value={link.iconImage || link.icon}
+                                  onChange={(iconUrl) => updateMultiLink(index, 'iconImage', iconUrl)}
+                                />
+                                <div className="flex-1 space-y-3">
+                                  <input
+                                    type="text"
+                                    value={link.title}
+                                    onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-base"
+                                    placeholder="Titre du lien"
+                                  />
+                                  <input
+                                    type="url"
+                                    value={link.url}
+                                    onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-base"
+                                    placeholder="https://example.com"
+                                  />
+                                </div>
+                              </div>
+                              {multiLinks.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeMultiLink(index)}
+                                  className="text-red-500 text-sm hover:text-red-700"
+                                >
+                                  Supprimer
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={addMultiLink}
+                          className="w-full mt-4 py-3 border-2 border-dashed border-indigo-300 bg-indigo-50 rounded-xl text-indigo-600 hover:bg-indigo-100 transition-all flex items-center justify-center gap-2 font-medium"
                         >
                           <Plus className="w-5 h-5" />
-                        </motion.div>
-                        Ajouter un nouveau lien magique
-                      </motion.button>
+                          Ajouter un lien
+                        </button>
+                      </div>
 
-                      {/* Photo de couverture */}
                       <div className="pt-4 border-t">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Photo de couverture (optionnel)
@@ -1642,8 +1635,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   links={[{
                     id: Date.now().toString(),
                     slug: watch('slug') || 'preview',
-                    title: step >= 5 ? (watchedTitle || 'Mon lien') : '',
-                    description: step >= 5 ? (watchedDescription || '') : '',
+                    title: watchedTitle || (step >= 5 ? 'Mon lien' : ''),
+                    description: watchedDescription || '',
                     profileImage: profileImage || '',
                     profileStyle: profileStyle || 'circle',
                     coverImage: step >= 5 ? coverImage : '',
@@ -1704,7 +1697,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         links={[{
           id: Date.now().toString(),
           slug: watch('slug') || 'preview',
-          title: step >= 5 ? (watchedTitle || 'Mon lien') : '',
+          title: watchedTitle || (step >= 5 ? 'Mon lien' : ''),
           description: step >= 5 ? (watchedDescription || '') : '',
           profileImage: profileImage || '',
           profileStyle: profileStyle || 'circle',
@@ -1720,7 +1713,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           fontFamily: step >= 5 ? fontFamily : 'system',
           backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
           textColor: step >= 5 ? textColor : '#1f2937',
-          multiLinks: step >= 5 ? (
+          multiLinks: step >= 6 ? (
             multiLinks.map((ml, index) => ({
               id: index.toString(),
               parentLinkId: '',
