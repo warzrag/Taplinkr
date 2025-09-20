@@ -1637,9 +1637,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 5 ? (
-                      multiLinks
-                        .filter(ml => ml.title || ml.url)
-                        .map((ml, index) => ({
+                      (() => {
+                        const filtered = multiLinks.filter(ml => ml.title || ml.url);
+                        console.log('🔍 Étape', step, '- Liens filtrés:', filtered.length, 'sur', multiLinks.length);
+                        if (filtered.length > 0) {
+                          console.log('✅ Envoi des liens:', filtered);
+                        }
+                        return filtered.map((ml, index) => ({
                           id: index.toString(),
                           parentLinkId: '',
                           title: ml.title || '',
@@ -1652,7 +1656,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           clicks: 0,
                           createdAt: new Date(),
                           updatedAt: new Date()
-                        }))
+                        }));
+                      })()
                     ) : [],
                     // Valeurs par défaut
                     userId: '',

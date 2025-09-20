@@ -364,15 +364,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       </motion.div>
                     ))}
                   </AnimatePresence>
-                ) : currentStep && currentStep < 6 ? (
-                  /* Message avant l'étape 6 */
+                ) : currentStep && currentStep < 5 ? (
+                  /* Message avant l'étape 5 */
                   <div className="flex items-center justify-center h-full">
                     <p className="text-sm text-gray-400 text-center px-4">
                       Vos liens apparaîtront ici
                     </p>
                   </div>
-                ) : currentStep && currentStep >= 6 ? (
-                  /* Message si aucun lien n'est ajouté à l'étape 6 */
+                ) : currentStep && currentStep >= 5 ? (
+                  /* Message si aucun lien n'est ajouté à l'étape 5 */
                   <div className="flex items-center justify-center h-full">
                     <p className="text-sm text-gray-400 text-center px-4">
                       Ajoutez des liens pour les voir apparaître ici
