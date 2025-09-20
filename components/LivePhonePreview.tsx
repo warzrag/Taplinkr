@@ -322,7 +322,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className="flex-1 px-6 py-4 space-y-3 overflow-y-auto min-h-[200px]">
+              <div className="flex-1 px-6 py-4 space-y-3 overflow-y-auto min-h-[200px] bg-yellow-300">
+                {/* DEBUG ZONE - JAUNE POUR VOIR OÙ C'EST */}
+                <div className="p-4 bg-green-500 text-white font-bold text-center">
+                  🔴 ZONE DES LIENS - ÉTAPE {currentStep} 🔴
+                </div>
                 {/* Affichage des multiLinks à partir de l'étape 5 (intégrée) */}
                 {(() => {
                   console.log('🔍 LivePhonePreview - Step:', currentStep, 'FirstLink:', firstLink);
