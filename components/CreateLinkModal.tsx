@@ -102,13 +102,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const watchedTitle = watch('title')
   const watchedDescription = watch('description')
 
-  // DEBUG SIMPLIFIÉ - Juste pour l'étape 5
-  useEffect(() => {
-    if (step === 5 && linkType === 'multi') {
-      const validLinks = multiLinks.filter(ml => ml.title || ml.url);
-      console.log('🔍 Étape 5 - Liens:', validLinks.length > 0 ? validLinks : 'Aucun lien rempli');
-    }
-  }, [step, linkType, multiLinks])
 
   // Vérifier la disponibilité du slug
   useEffect(() => {
@@ -1643,13 +1636,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     fontFamily: step >= 5 ? fontFamily : 'system',
                     backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                     textColor: step >= 5 ? textColor : '#1f2937',
-                    multiLinks: (() => {
-                      const filtered = multiLinks.filter(ml => ml.title || ml.url);
-                      if (step === 5 && filtered.length > 0) {
-                        console.log('✅ Liens envoyés à la preview:', filtered.length);
-                      }
-                      return step >= 5 ? (
-                        filtered.map((ml, index) => ({
+                    multiLinks: step >= 5 ? (
+                      multiLinks
+                        .filter(ml => ml.title || ml.url)
+                        .map((ml, index) => ({
                           id: index.toString(),
                           parentLinkId: '',
                           title: ml.title || '',
@@ -1663,8 +1653,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           createdAt: new Date(),
                           updatedAt: new Date()
                         }))
-                      ) : [];
-                    })(),
+                    ) : [],
                     // Valeurs par défaut
                     userId: '',
                     directUrl: '',
