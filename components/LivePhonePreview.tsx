@@ -231,7 +231,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="w-full bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
+                        className="w-full bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg"
                       >
                         <div className="flex items-center justify-center gap-3">
                           {(link.iconImage || link.icon) && (
@@ -392,7 +392,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     >
                       {/* Carte de lien style Beacons */}
                       <div className={`
-                        relative w-full py-4 px-6 rounded-3xl
+                        relative w-full py-4 px-6 rounded-lg
                         ${profileStyle === 'beacon' && displayImage
                           ? 'bg-white'
                           : link.gradient
