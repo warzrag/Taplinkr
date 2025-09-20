@@ -1651,10 +1651,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     fontFamily: step >= 5 ? fontFamily : 'system',
                     backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                     textColor: step >= 5 ? textColor : '#1f2937',
-                    multiLinks: step >= 5 ? (
-                      multiLinks
-                        .filter(ml => ml.title || ml.url)  // Filtrer les liens vides
-                        .map((ml, index) => ({
+                    multiLinks: (() => {
+                      const filtered = multiLinks.filter(ml => ml.title || ml.url);
+                      console.log('🟠 Preview multiLinks:', {
+                        step,
+                        shouldShow: step >= 5,
+                        multiLinksRaw: multiLinks,
+                        multiLinksFiltered: filtered,
+                        multiLinksCount: filtered.length
+                      });
+                      return step >= 5 ? (
+                        filtered.map((ml, index) => ({
                           id: index.toString(),
                           parentLinkId: '',
                           title: ml.title || '',
@@ -1668,7 +1675,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           createdAt: new Date(),
                           updatedAt: new Date()
                         }))
-                    ) : [],
+                      ) : [];
+                    })(),
                     // Valeurs par défaut
                     userId: '',
                     directUrl: '',
