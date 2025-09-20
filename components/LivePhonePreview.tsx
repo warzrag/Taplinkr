@@ -62,7 +62,7 @@ interface LivePhonePreviewProps {
 
 // Données de démonstration par défaut
 const defaultDemoData = {
-  name: "Sarah Anderson",
+  name: "",
   username: "@sarahanderson",
   bio: "",
   profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop",
