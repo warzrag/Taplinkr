@@ -39,7 +39,6 @@ export default function IconUpload({ value, onChange, className = '' }: IconUplo
       }
 
       const data = await response.json()
-      console.log('IconUpload - URL reçue:', data.url)
       onChange(data.url)
     } catch (error) {
       console.error('Erreur upload:', error)

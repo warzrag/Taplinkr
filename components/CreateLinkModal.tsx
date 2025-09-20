@@ -96,15 +96,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const watchedTitle = watch('title')
   const watchedDescription = watch('description')
   
-  // Debug
-  useEffect(() => {
-    console.log('Titre surveillé:', watchedTitle)
-    console.log('Étape actuelle:', step)
-    console.log('MultiLinks:', multiLinks)
-    console.log('MultiLinks avec icônes:', multiLinks.map(ml => ({ title: ml.title, icon: ml.icon, iconImage: ml.iconImage })))
-    console.log('Nombre de multiLinks:', multiLinks.length)
-    console.log('MultiLinks filtrés:', multiLinks.filter(ml => ml.title || ml.url))
-  }, [watchedTitle, step, multiLinks])
 
   // Vérifier la disponibilité du slug
   useEffect(() => {
@@ -176,10 +167,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }
 
   const updateMultiLink = (index: number, field: 'title' | 'url' | 'icon' | 'iconImage', value: string) => {
-    console.log(`UpdateMultiLink - Index: ${index}, Field: ${field}, Value: ${value}`)
     const updated = [...multiLinks]
     updated[index][field] = value
-    console.log('MultiLinks après update:', updated)
     setMultiLinks(updated)
   }
 
@@ -1670,15 +1659,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 5 ? (
-                      multiLinks.map((ml, index) => {
-                        console.log(`Mapping link ${index}:`, {
-                          title: ml.title,
-                          url: ml.url,
-                          icon: ml.icon,
-                          iconImage: ml.iconImage,
-                          fullObject: ml
-                        })
-                        return {
+                      multiLinks.map((ml, index) => ({
                           id: index.toString(),
                           parentLinkId: '',
                           title: ml.title || '',
@@ -1691,8 +1672,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           clicks: 0,
                           createdAt: new Date(),
                           updatedAt: new Date()
-                        }
-                      })
+                        }))
                     ) : [],
                     // Valeurs par défaut
                     userId: '',

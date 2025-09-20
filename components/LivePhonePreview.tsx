@@ -95,26 +95,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   const [time, setTime] = useState(new Date())
   const [isLoaded, setIsLoaded] = useState(false)
 
-  // Debug
-  useEffect(() => {
-    console.log('===== DEBUT DEBUG LIVEPHONE =====')
-    console.log('Links complet:', links)
-    if (links[0]) {
-      console.log('FirstLink:', links[0])
-      if (links[0].multiLinks) {
-        console.log('MultiLinks:', links[0].multiLinks)
-        links[0].multiLinks.forEach((ml, idx) => {
-          console.log(`Link ${idx}:`, {
-            title: ml.title,
-            icon: ml.icon,
-            iconImage: ml.iconImage,
-            url: ml.url
-          })
-        })
-      }
-    }
-    console.log('===== FIN DEBUG LIVEPHONE =====')
-  }, [links])
 
   useEffect(() => {
     setIsLoaded(true)
@@ -147,8 +127,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
       gradient: null
     })) :
     (links.length === 0 ? defaultDemoData.links : [])
-
-  console.log('DisplayLinks final:', displayLinks)
 
   const backgroundColor = firstLink?.backgroundColor || '#ffffff'
   const textColor = firstLink?.textColor || '#1F2937'
@@ -356,7 +334,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               {/* Liens */}
               <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-8 space-y-3 z-30' : 'flex-1 px-6 space-y-2.5 overflow-y-auto'}`}>
                 <AnimatePresence mode="sync">
-                  {console.log('Affichage des liens, displayLinks:', displayLinks, 'Nombre:', displayLinks.length)}
                   {displayLinks.map((link, index) => (
                     <motion.div
                       key={index}
@@ -382,25 +359,13 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       `}>
                         {/* Contenu du lien */}
                         <div className="relative flex items-center justify-center w-full gap-3">
-                          {(() => {
-                            const iconSrc = link.iconImage || link.icon
-                            console.log('Icon source:', iconSrc ? iconSrc.substring(0, 50) + '...' : 'Pas d\'icône')
-                            if (iconSrc) {
-                              return (
-                                <img
-                                  src={iconSrc}
-                                  alt="icon"
-                                  className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
-                                  onError={(e) => {
-                                    console.error('Erreur icône, masquage')
-                                    const target = e.target as HTMLImageElement
-                                    target.style.display = 'none'
-                                  }}
-                                />
-                              )
-                            }
-                            return null
-                          })()}
+                          {(link.iconImage || link.icon) && (
+                            <img
+                              src={link.iconImage || link.icon}
+                              alt=""
+                              className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
+                            />
+                          )}
                           <span className={`text-base font-bold text-center truncate ${
                             profileStyle === 'beacon' && displayImage
                               ? 'text-gray-900'
