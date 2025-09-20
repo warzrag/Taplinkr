@@ -1652,7 +1652,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 5 ? (
-                      multiLinks.map((ml, index) => ({
+                      multiLinks
+                        .filter(ml => ml.title || ml.url)  // Filtrer les liens vides
+                        .map((ml, index) => ({
                           id: index.toString(),
                           parentLinkId: '',
                           title: ml.title || '',
