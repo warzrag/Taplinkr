@@ -183,11 +183,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   }}
                 />
 
-                {/* Dégradé progressif jusqu'à 0% d'opacité */}
-                <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-black/90 via-black/50 via-black/20 to-transparent" />
+                {/* Dégradé noir professionnel style premium */}
+                <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
 
-                {/* Effet de flou léger sur la partie basse uniquement */}
-                <div className="absolute bottom-0 left-0 right-0 h-[30%] backdrop-blur-[2px] bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                {/* Couche supplémentaire pour intensifier le noir en bas */}
+                <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-black to-transparent" />
 
                 {/* Texte overlay sur l'image en bas */}
                 <div className="absolute bottom-20 left-0 right-0 text-center px-6 z-40">
