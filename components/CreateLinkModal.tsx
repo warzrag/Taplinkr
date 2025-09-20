@@ -176,8 +176,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }
 
   const updateMultiLink = (index: number, field: 'title' | 'url' | 'icon' | 'iconImage', value: string) => {
+    console.log(`UpdateMultiLink - Index: ${index}, Field: ${field}, Value: ${value}`)
     const updated = [...multiLinks]
     updated[index][field] = value
+    console.log('MultiLinks après update:', updated)
     setMultiLinks(updated)
   }
 

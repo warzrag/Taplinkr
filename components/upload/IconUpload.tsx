@@ -27,6 +27,7 @@ export default function IconUpload({ value, onChange, className = '' }: IconUplo
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('type', 'icon')
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -38,6 +39,7 @@ export default function IconUpload({ value, onChange, className = '' }: IconUplo
       }
 
       const data = await response.json()
+      console.log('IconUpload - URL reçue:', data.url)
       onChange(data.url)
     } catch (error) {
       console.error('Erreur upload:', error)

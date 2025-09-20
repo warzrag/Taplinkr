@@ -72,11 +72,22 @@ export async function POST(request: NextRequest) {
         case 'cover':
           // Couverture de lien : 800x600
           optimizedBuffer = await image
-            .resize(800, 600, { 
+            .resize(800, 600, {
               fit: 'cover',
               position: 'center'
             })
             .jpeg({ quality: 85 })
+            .toBuffer()
+          break
+
+        case 'icon':
+          // Icône de lien : 64x64
+          optimizedBuffer = await image
+            .resize(64, 64, {
+              fit: 'cover',
+              position: 'center'
+            })
+            .jpeg({ quality: 90 })
             .toBuffer()
           break
           

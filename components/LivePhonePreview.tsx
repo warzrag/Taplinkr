@@ -97,10 +97,23 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
   // Debug
   useEffect(() => {
-    if (links[0]?.multiLinks) {
-      console.log('LivePhonePreview - MultiLinks reçus:', links[0].multiLinks)
-      console.log('LivePhonePreview - Icons:', links[0].multiLinks.map(ml => ({ title: ml.title, icon: ml.icon, iconImage: ml.iconImage })))
+    console.log('===== DEBUT DEBUG LIVEPHONE =====')
+    console.log('Links complet:', links)
+    if (links[0]) {
+      console.log('FirstLink:', links[0])
+      if (links[0].multiLinks) {
+        console.log('MultiLinks:', links[0].multiLinks)
+        links[0].multiLinks.forEach((ml, idx) => {
+          console.log(`Link ${idx}:`, {
+            title: ml.title,
+            icon: ml.icon,
+            iconImage: ml.iconImage,
+            url: ml.url
+          })
+        })
+      }
     }
+    console.log('===== FIN DEBUG LIVEPHONE =====')
   }, [links])
 
   useEffect(() => {
