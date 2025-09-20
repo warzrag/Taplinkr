@@ -1729,9 +1729,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             [{
               id: '1',
               parentLinkId: '',
-              title: 'Mon premier lien',
+              title: watchedTitle || '',
               url: '#',
-              description: '',
+              description: watchedDescription || '',
               icon: '',
               iconImage: '',
               animation: '',
