@@ -322,9 +322,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
 
-              {/* Zone pour les liens - À REFAIRE COMPLÈTEMENT */}
+              {/* Zone pour les liens - REFONTE EN COURS */}
               <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-6 space-y-3 z-30' : 'flex-1 px-6 space-y-3'}`}>
-                {/* TODO: Nouveau système de liens à implémenter */}
+                {/* Nouveau système de liens - En développement */}
               </div>
 
               {/* Footer avec branding */}
