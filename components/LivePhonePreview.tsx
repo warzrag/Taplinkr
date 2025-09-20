@@ -322,9 +322,66 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
 
-              {/* Zone pour les liens - REFONTE EN COURS */}
-              <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-6 space-y-3 z-30' : 'flex-1 px-6 space-y-3'}`}>
-                {/* Nouveau système de liens - En développement */}
+              {/* Zone pour les liens */}
+              <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-6 space-y-3 z-30' : 'flex-1 px-6 space-y-3 overflow-y-auto'}`}>
+                {/* Affichage des multiLinks uniquement à partir de l'étape 6 */}
+                {(() => {
+                  console.log('LivePhonePreview Debug:', {
+                    currentStep,
+                    hasFirstLink: !!firstLink,
+                    multiLinks: firstLink?.multiLinks,
+                    multiLinksLength: firstLink?.multiLinks?.length
+                  });
+                  return null;
+                })()}
+                {currentStep && currentStep >= 6 && firstLink?.multiLinks ? (
+                  <AnimatePresence>
+                    {firstLink.multiLinks.map((link, index) => (
+                      <motion.div
+                        key={link.id || index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: index * 0.1 }}
+                        className={`w-full p-4 ${borderRadius} transition-all duration-200 hover:scale-[1.02] cursor-pointer`}
+                        style={{
+                          backgroundColor: backgroundColor || '#ffffff',
+                          color: textColor || '#1f2937'
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          {/* Icône */}
+                          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            {link.iconImage || link.icon ? (
+                              <img src={link.iconImage || link.icon} className="w-6 h-6" alt="" />
+                            ) : (
+                              <Link className="w-5 h-5 text-white" />
+                            )}
+                          </div>
+                          {/* Texte */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold truncate">{link.title || 'Titre du lien'}</p>
+                            <p className="text-xs opacity-70 truncate">{link.url || 'https://example.com'}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                ) : currentStep && currentStep < 6 ? (
+                  /* Message avant l'étape 6 */
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-sm text-gray-400 text-center px-4">
+                      Vos liens apparaîtront ici
+                    </p>
+                  </div>
+                ) : currentStep && currentStep >= 6 ? (
+                  /* Message si aucun lien n'est ajouté à l'étape 6 */
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-sm text-gray-400 text-center px-4">
+                      Ajoutez des liens pour les voir apparaître ici
+                    </p>
+                  </div>
+                ) : null}
               </div>
 
               {/* Footer avec branding */}
