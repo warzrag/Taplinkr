@@ -207,9 +207,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             )}
 
-            {/* Contenu principal - Caché en mode Immersif avec image */}
-            {!(profileStyle === 'beacon' && displayImage) && (
-              <div className="relative h-full flex flex-col pt-[60px] pb-6">
+            {/* Contenu principal - Toujours visible */}
+            <div className="relative h-full flex flex-col pt-[60px] pb-6">
               {/* Section Profil - Seulement en mode Minimal */}
               {profileStyle === 'circle' && (
                 <motion.div
@@ -323,7 +322,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className="flex-1 px-6 space-y-3 overflow-y-auto">
+              <div className="flex-1 px-6 py-4 space-y-3 overflow-y-auto min-h-[200px]">
                 {/* Affichage des multiLinks à partir de l'étape 5 (intégrée) */}
                 {(() => {
                   console.log('🔍 LivePhonePreview - Step:', currentStep, 'FirstLink:', firstLink);
@@ -337,7 +336,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   }
                   return null;
                 })()}
-                {currentStep && currentStep >= 5 && firstLink?.multiLinks ? (
+                {currentStep && currentStep >= 5 && firstLink?.multiLinks && firstLink.multiLinks.length > 0 ? (
                   <AnimatePresence>
                     {firstLink.multiLinks.map((link, index) => (
                       <motion.div
@@ -346,9 +345,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`w-full p-4 ${borderRadius} transition-all duration-200 hover:scale-[1.02] cursor-pointer`}
+                        className={`w-full p-4 ${borderRadius} transition-all duration-200 hover:scale-[1.02] cursor-pointer bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg`}
                         style={{
-                          backgroundColor: backgroundColor || '#ffffff',
                           color: textColor || '#1f2937'
                         }}
                       >
@@ -423,7 +421,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
             </div>
-            )}
 
             {/* Barre de navigation iOS (home indicator) */}
             <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-800 rounded-full opacity-30" />
