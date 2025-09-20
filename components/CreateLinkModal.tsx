@@ -50,18 +50,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     setStepOriginal(newStep)
   }
 
-  // DEBUG COMPLET
-  useEffect(() => {
-    console.log('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴')
-    console.log('📍 ÉTAPE ACTUELLE:', step)
-    console.log('📍 Type de lien:', linkType)
-    console.log('📍 Nombre de liens:', multiLinks.length)
-    console.log('📍 Détail des liens:', multiLinks)
-    console.log('📍 Titre tapé:', watchedTitle)
-    console.log('📍 Description:', watchedDescription)
-    console.log('📍 Slug:', watchedSlug)
-    console.log('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴')
-  }, [step, linkType, multiLinks, watchedTitle, watchedDescription, watchedSlug])
   const [linkType, setLinkType] = useState<'direct' | 'multi' | null>(
     editingLink?.isDirect ? 'direct' : editingLink ? 'multi' : null
   )
@@ -116,7 +104,19 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const watchedSlug = watch('slug')
   const watchedTitle = watch('title')
   const watchedDescription = watch('description')
-  
+
+  // DEBUG COMPLET - Après toutes les déclarations
+  useEffect(() => {
+    console.log('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴')
+    console.log('📍 ÉTAPE ACTUELLE:', step)
+    console.log('📍 Type de lien:', linkType)
+    console.log('📍 Nombre de liens:', multiLinks.length)
+    console.log('📍 Détail des liens:', multiLinks)
+    console.log('📍 Titre tapé:', watchedTitle)
+    console.log('📍 Description:', watchedDescription)
+    console.log('📍 Slug:', watchedSlug)
+    console.log('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴')
+  }, [step, linkType, multiLinks, watchedTitle, watchedDescription, watchedSlug])
 
   // Vérifier la disponibilité du slug
   useEffect(() => {
