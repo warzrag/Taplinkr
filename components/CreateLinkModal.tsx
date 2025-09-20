@@ -899,76 +899,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   </motion.div>
                 </motion.div>
               ) : step === 6 && linkType === 'multi' ? (
-                /* Étape 6: Ajouter des liens */
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="space-y-4"
-                >
-                  <div className="text-center mb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Ajoutez vos liens</h3>
-                    <p className="text-gray-600 mt-1">Créez vos premiers liens</p>
-                  </div>
-
-                  {/* Premier lien */}
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Titre du lien
-                      </label>
-                      <input
-                        type="text"
-                        value={multiLinks[0]?.title || ''}
-                        onChange={(e) => {
-                          const updated = [...multiLinks];
-                          if (!updated[0]) updated[0] = { title: '', url: '', icon: '' };
-                          updated[0].title = e.target.value;
-                          setMultiLinks(updated);
-                        }}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                        placeholder="Mon lien"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        URL du lien
-                      </label>
-                      <input
-                        type="url"
-                        value={multiLinks[0]?.url || ''}
-                        onChange={(e) => {
-                          const updated = [...multiLinks];
-                          if (!updated[0]) updated[0] = { title: '', url: '', icon: '' };
-                          updated[0].url = e.target.value;
-                          setMultiLinks(updated);
-                        }}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                        placeholder="https://example.com"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Navigation */}
-                  <div className="flex justify-between gap-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setStep(5)}
-                      className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all"
-                    >
-                      Retour
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setStep(7)}
-                      className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-                    >
-                      Suivant
-                    </button>
-                  </div>
-                </motion.div>
-              ) : step === 7 && linkType === 'multi' ? (
-                /* Étape 7: Personnalisation des liens (dernière étape) */
+                /* Étape 6: Personnalisation des liens (dernière étape) */
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1727,12 +1658,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     tiktokUrl: step >= 4 ? watch('tiktokUrl') : '',
                     twitterUrl: step >= 4 ? watch('twitterUrl') : '',
                     youtubeUrl: step >= 4 ? watch('youtubeUrl') : '',
-                    animation: step >= 6 ? linkAnimation : 'none',
-                    borderRadius: step >= 6 ? borderRadius : 'rounded-xl',
-                    fontFamily: step >= 6 ? fontFamily : 'system',
-                    backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
-                    textColor: step >= 6 ? textColor : '#1f2937',
-                    multiLinks: step >= 6 ? (
+                    animation: step >= 5 ? linkAnimation : 'none',
+                    borderRadius: step >= 5 ? borderRadius : 'rounded-xl',
+                    fontFamily: step >= 5 ? fontFamily : 'system',
+                    backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
+                    textColor: step >= 5 ? textColor : '#1f2937',
+                    multiLinks: step >= 5 && multiLinks.filter(ml => ml.title || ml.url).length > 0 ? (
                       multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
                         id: index.toString(),
                         parentLinkId: '',
@@ -1789,12 +1720,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           tiktokUrl: step >= 4 ? watch('tiktokUrl') : '',
           twitterUrl: step >= 4 ? watch('twitterUrl') : '',
           youtubeUrl: step >= 4 ? watch('youtubeUrl') : '',
-          animation: step >= 6 ? linkAnimation : 'none',
-          borderRadius: step >= 6 ? borderRadius : 'rounded-xl',
-          fontFamily: step >= 6 ? fontFamily : 'system',
-          backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
-          textColor: step >= 6 ? textColor : '#1f2937',
-          multiLinks: step >= 6 ? (
+          animation: step >= 5 ? linkAnimation : 'none',
+          borderRadius: step >= 5 ? borderRadius : 'rounded-xl',
+          fontFamily: step >= 5 ? fontFamily : 'system',
+          backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
+          textColor: step >= 5 ? textColor : '#1f2937',
+          multiLinks: step >= 5 && multiLinks.filter(ml => ml.title || ml.url).length > 0 ? (
             multiLinks.filter(ml => ml.title || ml.url).map((ml, index) => ({
               id: index.toString(),
               parentLinkId: '',
