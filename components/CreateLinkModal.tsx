@@ -1671,7 +1671,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     textColor: step >= 5 ? textColor : '#1f2937',
                     multiLinks: step >= 5 ? (
                       multiLinks.map((ml, index) => {
-                        console.log(`Mapping link ${index}:`, { icon: ml.icon, iconImage: ml.iconImage })
+                        console.log(`Mapping link ${index}:`, {
+                          title: ml.title,
+                          url: ml.url,
+                          icon: ml.icon,
+                          iconImage: ml.iconImage,
+                          fullObject: ml
+                        })
                         return {
                           id: index.toString(),
                           parentLinkId: '',

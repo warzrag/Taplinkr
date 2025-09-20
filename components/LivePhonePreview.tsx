@@ -356,6 +356,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               {/* Liens */}
               <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-8 space-y-3 z-30' : 'flex-1 px-6 space-y-2.5 overflow-y-auto'}`}>
                 <AnimatePresence mode="sync">
+                  {console.log('Affichage des liens, displayLinks:', displayLinks, 'Nombre:', displayLinks.length)}
                   {displayLinks.map((link, index) => (
                     <motion.div
                       key={index}
@@ -381,27 +382,25 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       `}>
                         {/* Contenu du lien */}
                         <div className="relative flex items-center justify-center w-full gap-3">
-                          {(link.iconImage || link.icon) && (
-                            <>
-                              {console.log('Tentative affichage icône:', {
-                                icon: link.icon,
-                                iconImage: link.iconImage,
-                                src: link.iconImage || link.icon,
-                                hasIcon: !!link.icon,
-                                hasIconImage: !!link.iconImage
-                              })}
-                              <img
-                                src={link.iconImage || link.icon}
-                                alt="icon"
-                                className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
-                                onError={(e) => {
-                                  console.error('Erreur chargement icône:', e)
-                                  e.currentTarget.style.display = 'none'
-                                }}
-                                onLoad={() => console.log('Icône chargée avec succès')}
-                              />
-                            </>
-                          )}
+                          {(() => {
+                            const iconSrc = link.iconImage || link.icon
+                            console.log('Icon source:', iconSrc ? iconSrc.substring(0, 50) + '...' : 'Pas d\'icône')
+                            if (iconSrc) {
+                              return (
+                                <img
+                                  src={iconSrc}
+                                  alt="icon"
+                                  className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
+                                  onError={(e) => {
+                                    console.error('Erreur icône, masquage')
+                                    const target = e.target as HTMLImageElement
+                                    target.style.display = 'none'
+                                  }}
+                                />
+                              )
+                            }
+                            return null
+                          })()}
                           <span className={`text-base font-bold text-center truncate ${
                             profileStyle === 'beacon' && displayImage
                               ? 'text-gray-900'
