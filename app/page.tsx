@@ -1,4 +1,5 @@
 'use client'
+// Vercel Deploy Trigger - 2025-09-20
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
