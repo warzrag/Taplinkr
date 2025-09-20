@@ -117,16 +117,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
     `${firstLink.city || ''}${firstLink.city && firstLink.country ? ', ' : ''}${firstLink.country || ''}` :
     defaultDemoData.location
 
-  // Créer les liens à afficher
-  const displayLinks = links.length > 0 && links[0].multiLinks && links[0].multiLinks.length > 0 ?
-    links[0].multiLinks.slice(0, profileStyle === 'beacon' ? 2 : 4).map(ml => ({
-      title: ml.title,
-      url: ml.url,
-      icon: ml.icon,
-      iconImage: ml.iconImage,
-      gradient: null
-    })) :
-    (links.length === 0 ? defaultDemoData.links : [])
+  // TODO: Nouveau système de liens à créer
 
   const backgroundColor = firstLink?.backgroundColor || '#ffffff'
   const textColor = firstLink?.textColor || '#1F2937'
@@ -331,66 +322,9 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
 
-              {/* Liens */}
-              <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-8 space-y-3 z-30' : 'flex-1 px-6 space-y-2.5 overflow-y-auto'}`}>
-                <AnimatePresence mode="sync">
-                  {displayLinks.map((link, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ y: 50, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: 50, opacity: 0 }}
-                      transition={{ delay: 0.4 + index * 0.1 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="relative"
-                    >
-                      {/* Carte de lien style Beacons */}
-                      <div className={`
-                        relative w-full py-4 px-6 ${borderRadius}
-                        ${profileStyle === 'beacon' && displayImage
-                          ? 'bg-white'
-                          : link.gradient
-                            ? `bg-gradient-to-r ${link.gradient}`
-                            : 'bg-gray-100'
-                        }
-                        shadow-2xl transition-all duration-300 cursor-pointer
-                        overflow-hidden group
-                      `}>
-                        {/* Contenu du lien */}
-                        <div className="relative flex items-center justify-center w-full gap-3">
-                          {(link.iconImage || link.icon) && (
-                            <img
-                              src={link.iconImage || link.icon}
-                              alt=""
-                              className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
-                            />
-                          )}
-                          <span className={`text-base font-bold text-center truncate ${
-                            profileStyle === 'beacon' && displayImage
-                              ? 'text-gray-900'
-                              : link.gradient
-                                ? 'text-white'
-                                : 'text-gray-800'
-                          }`}>
-                            {link.title}
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-
-                {/* Message si pas de liens */}
-                {displayLinks.length === 0 && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-center py-8"
-                  >
-                    <p className="text-gray-400 text-sm">Aucun lien ajouté</p>
-                  </motion.div>
-                )}
+              {/* Zone pour les liens - À REFAIRE COMPLÈTEMENT */}
+              <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-6 space-y-3 z-30' : 'flex-1 px-6 space-y-3'}`}>
+                {/* TODO: Nouveau système de liens à implémenter */}
               </div>
 
               {/* Footer avec branding */}
