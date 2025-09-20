@@ -323,7 +323,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className={`${profileStyle === 'beacon' && displayImage ? 'absolute bottom-24 left-0 right-0 px-6 space-y-3 z-30' : 'flex-1 px-6 space-y-3 overflow-y-auto'}`}>
+              <div className="flex-1 px-6 space-y-3 overflow-y-auto">
                 {/* Affichage des multiLinks à partir de l'étape 5 (intégrée) */}
                 {(() => {
                   console.log('🔍 LivePhonePreview - Step:', currentStep, 'FirstLink:', firstLink);
