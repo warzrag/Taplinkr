@@ -1725,24 +1725,22 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           fontFamily: step >= 6 ? fontFamily : 'system',
           backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
           textColor: step >= 6 ? textColor : '#1f2937',
-          multiLinks: step >= 5 ? (
-            multiLinks.length > 0
-              ? multiLinks.map((ml, index) => ({
-                  id: index.toString(),
-                  parentLinkId: '',
-                  title: ml.title || `Lien ${index + 1}`,
-                  url: ml.url || '#',
-                  description: '',
-                  icon: '',
-                  iconImage: ml.icon || '',
-                  animation: '',
-                  order: index,
-                  clicks: 0,
-                  createdAt: new Date(),
-                  updatedAt: new Date()
-                }))
-              : []
-          ) : [],
+          multiLinks: step >= 5 ?
+            [{
+              id: '1',
+              parentLinkId: '',
+              title: 'Mon premier lien',
+              url: '#',
+              description: '',
+              icon: '',
+              iconImage: '',
+              animation: '',
+              order: 0,
+              clicks: 0,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }]
+           : [],
           userId: '',
           directUrl: '',
           shieldEnabled: false,
