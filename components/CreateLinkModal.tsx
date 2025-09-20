@@ -1157,7 +1157,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   }}
                   className="space-y-6"
                 >
-                  {/* Titre avec animation */}
+                  {/* Titre avec animation et prévisualisation */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1187,7 +1187,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         />
                       </motion.div>
                       {errors.title && (
-                        <motion.p 
+                        <motion.p
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           className="text-red-500 text-sm mt-1"
@@ -1195,6 +1195,45 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           Le titre est requis
                         </motion.p>
                       )}
+
+                      {/* Prévisualisation du lien */}
+                      <AnimatePresence>
+                        {watchedTitle && watchedTitle.length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            transition={{ duration: 0.3, type: "spring" }}
+                            className="mt-4 p-1 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl"
+                          >
+                            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                              <p className="text-xs text-gray-500 mb-2 font-medium">Aperçu de votre lien :</p>
+                              <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-indigo-300 transition-all cursor-pointer"
+                              >
+                                {/* Favicon/Icon */}
+                                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <Link2 className="w-5 h-5 text-white" />
+                                </div>
+
+                                {/* Texte du lien */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-gray-900 truncate">
+                                    {watchedTitle}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    taplinkr.com/{watchedSlug || 'votre-lien'}
+                                  </p>
+                                </div>
+
+                                {/* Icône de flèche */}
+                                <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                              </motion.div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </motion.div>
 
@@ -1389,6 +1428,54 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       <p className="text-xs text-gray-500">
                         Les visiteurs seront redirigés directement vers cette URL
                       </p>
+
+                      {/* Prévisualisation du lien direct */}
+                      <AnimatePresence>
+                        {watchedTitle && directUrl && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            transition={{ duration: 0.3, type: "spring" }}
+                            className="mt-4 p-1 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl"
+                          >
+                            <div className="bg-white rounded-xl p-4 shadow-sm border border-purple-100">
+                              <p className="text-xs text-purple-600 mb-2 font-medium">Aperçu de votre lien direct :</p>
+                              <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl border border-purple-200 hover:border-purple-300 transition-all cursor-pointer"
+                              >
+                                {/* Favicon/Icon avec animation de redirection */}
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <Zap className="w-5 h-5 text-white" />
+                                </div>
+
+                                {/* Texte du lien */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-gray-900 truncate">
+                                    {watchedTitle}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    → {(() => {
+                                      try {
+                                        return new URL(directUrl).hostname
+                                      } catch {
+                                        return 'URL invalide'
+                                      }
+                                    })()}
+                                  </p>
+                                </div>
+
+                                {/* Badge de redirection */}
+                                <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 rounded-full">
+                                  <ArrowRight className="w-3 h-3 text-purple-600" />
+                                  <span className="text-xs font-medium text-purple-600">Direct</span>
+                                </div>
+                              </motion.div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
                       {/* Options de protection */}
                       <div className="space-y-3 pt-4 border-t">
