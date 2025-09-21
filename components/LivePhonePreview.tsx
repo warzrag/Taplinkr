@@ -346,7 +346,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   }
                   return null;
                 })()}
-                {currentStep && currentStep >= 5 && firstLink?.multiLinks && firstLink.multiLinks.length > 0 ? (
+                {((!currentStep || currentStep >= 5) && firstLink?.multiLinks && firstLink.multiLinks.length > 0) ? (
                   <AnimatePresence>
                     {firstLink.multiLinks.map((link, index) => (
                       <motion.div
@@ -387,8 +387,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       Vos liens apparaîtront ici
                     </p>
                   </div>
-                ) : currentStep && currentStep >= 5 ? (
-                  /* Message si aucun lien n'est ajouté à l'étape 5 */
+                ) : (!currentStep || currentStep >= 5) ? (
+                  /* Message si aucun lien n'est ajouté */
                   <div className="flex items-center justify-center h-full">
                     <p className="text-sm text-gray-400 text-center px-4">
                       Ajoutez des liens pour les voir apparaître ici
