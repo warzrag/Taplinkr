@@ -61,12 +61,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           icon: ml.icon,
           iconImage: ml.iconImage
         }))
-      : [{ title: '', url: '', icon: '', iconImage: '' }]
+      : [{ title: 'Mon Instagram', url: 'https://instagram.com/moncompte', icon: '', iconImage: '' }]
   )
   const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
   const [profileStyle, setProfileStyle] = useState<'circle' | 'beacon'>(editingLink?.profileStyle || 'circle')
   const [coverImage, setCoverImage] = useState(editingLink?.coverImage || '')
-  const [showPreview, setShowPreview] = useState(false)
+  const [showPreview, setShowPreview] = useState(editingLink ? true : false)
   const [checkingSlug, setCheckingSlug] = useState(false)
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
   const [slugTimer, setSlugTimer] = useState<NodeJS.Timeout | null>(null)
@@ -1679,7 +1679,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
       {/* Preview avec EditPhonePreview pour affichage automatique sur grand écran */}
       <EditPhonePreview
-        isVisible={showPreview && linkType === 'multi'}
+        isVisible={(showPreview || step >= 5) && linkType === 'multi'}
         user={{
           name: step >= 5 ? (watchedTitle || 'Mon lien') : '',
           bio: step >= 5 ? (watchedDescription || '') : '',
