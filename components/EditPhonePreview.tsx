@@ -59,7 +59,7 @@ export default function EditPhonePreview({ isVisible, user, links }: EditPhonePr
             stiffness: 300,
             mass: 0.8
           }}
-          className={`hidden xl:flex fixed ${getTopPosition()} ${getRightPosition()} items-start justify-center pointer-events-none`}
+          className={`hidden lg:flex fixed ${getTopPosition()} ${getRightPosition()} items-start justify-center pointer-events-none`}
           style={{ zIndex: 9999 }}
         >
           {/* Conteneur avec ombre et effet de profondeur */}
