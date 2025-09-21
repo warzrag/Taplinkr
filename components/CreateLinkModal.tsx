@@ -10,7 +10,6 @@ import { usePermissions } from '@/hooks/usePermissions'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
 import IconUpload from './upload/IconUpload'
-import LivePhonePreview from './LivePhonePreview'
 import EditPhonePreview from './EditPhonePreview'
 
 interface CreateLinkModalProps {
@@ -1594,88 +1593,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         </motion.div>
       </div>
 
-      {/* Live Phone Preview - similaire à EditLinkModal */}
-      <AnimatePresence>
-        {showPreview && linkType === 'multi' && (
-          <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 25 }}
-            className="xl:hidden fixed inset-y-0 right-0 w-full md:w-96 bg-gray-100 z-60 overflow-y-auto shadow-2xl"
-          >
-            <div className="p-4">
-              <motion.button
-                onClick={() => setShowPreview(false)}
-                className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <X className="w-5 h-5 text-gray-700" />
-              </motion.button>
-              
-              <div className="mt-16">
-                <LivePhonePreview
-                  currentStep={step}
-                  links={[{
-                    id: Date.now().toString(),
-                    slug: watch('slug') || 'preview',
-                    title: watchedTitle || (step >= 5 ? 'Mon lien' : ''),
-                    description: watchedDescription || '',
-                    profileImage: profileImage || '',
-                    profileStyle: profileStyle || 'circle',
-                    coverImage: step >= 5 ? coverImage : '',
-                    isDirect: false,
-                    isActive: true,
-                    instagramUrl: step >= 4 ? watch('instagramUrl') : '',
-                    tiktokUrl: step >= 4 ? watch('tiktokUrl') : '',
-                    twitterUrl: step >= 4 ? watch('twitterUrl') : '',
-                    youtubeUrl: step >= 4 ? watch('youtubeUrl') : '',
-                    animation: step >= 5 ? linkAnimation : 'none',
-                    borderRadius: step >= 5 ? borderRadius : 'rounded-xl',
-                    fontFamily: step >= 5 ? fontFamily : 'system',
-                    backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
-                    textColor: step >= 5 ? textColor : '#1f2937',
-                    multiLinks: step >= 5 ? (
-                      (() => {
-                        // NE PAS FILTRER - ENVOYER TOUS LES LIENS
-                        console.log('🔍 Étape', step, '- multiLinks bruts:', multiLinks);
-                        const filtered = multiLinks; // PAS DE FILTRE !
-                        console.log('✅ Envoi de', filtered.length, 'liens (SANS FILTRE)');
-                        return filtered.map((ml, index) => ({
-                          id: index.toString(),
-                          parentLinkId: '',
-                          title: ml.title || '',
-                          url: ml.url || '#',
-                          description: '',
-                          icon: ml.icon || ml.iconImage || '',
-                          iconImage: ml.iconImage || ml.icon || '',
-                          animation: '',
-                          order: index,
-                          clicks: 0,
-                          createdAt: new Date(),
-                          updatedAt: new Date()
-                        }));
-                      })()
-                    ) : [],
-                    // Valeurs par défaut
-                    userId: '',
-                    directUrl: '',
-                    shieldEnabled: false,
-                    isUltraLink: false,
-                    isOnline: false,
-                    order: 0,
-                    clicks: 0,
-                    views: 0,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                  }]}
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Preview avec EditPhonePreview pour affichage automatique sur grand écran */}
       <EditPhonePreview
