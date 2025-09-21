@@ -322,13 +322,17 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className="flex-1 px-6 py-4 space-y-3 overflow-y-auto min-h-[200px] bg-yellow-300">
-                {/* DEBUG ZONE - JAUNE POUR VOIR OÙ C'EST */}
-                <div className="p-4 bg-green-500 text-white font-bold text-center text-xl">
-                  🔴 ZONE DES LIENS - ÉTAPE {currentStep} 🔴
+              <div className="flex-1 px-6 py-4 space-y-3 overflow-y-auto min-h-[200px]">
+                {/* Zone de debug supprimée - on affiche directement les liens */}
+                {false && (
+                <div className="p-4 bg-red-600 text-white font-bold text-center text-xl border-4 border-black">
+                  🔥 DEBUG v2 - ÉTAPE {currentStep} 🔥
                   <br/>
-                  {currentStep >= 5 ? '✅ LIENS DEVRAIENT ÊTRE ICI' : '⏳ PAS ENCORE'}
+                  {currentStep >= 5 ? '⚠️ LIENS MANQUANTS ICI ⚠️' : '⏳ PAS ENCORE'}
+                  <br/>
+                  {new Date().toLocaleTimeString()}
                 </div>
+                )}
                 {/* Affichage des multiLinks à partir de l'étape 5 (intégrée) */}
                 {(() => {
                   console.log('🔍 LivePhonePreview - Step:', currentStep, 'FirstLink:', firstLink);
@@ -351,14 +355,16 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`w-full p-4 ${borderRadius} transition-all duration-200 hover:scale-[1.02] cursor-pointer bg-red-500 shadow-lg border-4 border-red-600`}
+                        className={`w-full p-4 ${borderRadius} transition-all duration-200 hover:scale-[1.02] cursor-pointer shadow-lg`}
                         style={{
-                          color: '#ffffff'
+                          backgroundColor: backgroundColor || '#6366f1',
+                          color: textColor || '#ffffff',
+                          border: '2px solid rgba(0,0,0,0.1)'
                         }}
                       >
                         <div className="flex items-center gap-3">
                           {/* Icône */}
-                          <div className="w-10 h-10 bg-red-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
                             {link.iconImage || link.icon ? (
                               <img src={link.iconImage || link.icon} className="w-6 h-6" alt="" />
                             ) : (
@@ -367,8 +373,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           </div>
                           {/* Texte */}
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-white text-lg truncate">{link.title || 'Titre du lien'}</p>
-                            <p className="text-sm text-red-100 truncate">{link.url || 'https://example.com'}</p>
+                            <p className="font-bold text-lg truncate" style={{ color: textColor || '#ffffff' }}>{link.title || 'Titre du lien'}</p>
+                            <p className="text-sm truncate" style={{ color: textColor || '#ffffff', opacity: 0.8 }}>{link.url || 'https://example.com'}</p>
                           </div>
                         </div>
                       </motion.div>
