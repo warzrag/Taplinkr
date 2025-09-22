@@ -189,11 +189,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   }}
                 />
 
-                {/* Dégradé noir professionnel style premium */}
-                <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
+                {/* Dégradé noir professionnel style premium - remonté */}
+                <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
 
-                {/* Couche supplémentaire pour intensifier le noir en bas */}
-                <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-black to-transparent" />
+                {/* Couche supplémentaire pour intensifier le noir */}
+                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black via-black/90 to-transparent" />
+
+                {/* Dégradé du haut pour la lisibilité de la barre de statut */}
+                <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/50 to-transparent" />
 
                 {/* Texte overlay sur l'image - position haute */}
                 <div className="absolute bottom-64 left-0 right-0 text-center px-6 z-40">
