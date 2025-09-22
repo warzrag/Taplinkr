@@ -358,13 +358,13 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className="flex-1 px-2 pt-80 pb-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
-                {/* Icônes réseaux sociaux - Position fixe en haut de la zone des liens */}
+              <div className="absolute inset-0 overflow-y-auto z-20">
+                {/* Icônes réseaux sociaux - Position absolue fixe */}
                 {((firstLink?.instagramUrl && firstLink.instagramUrl.trim() !== '') ||
                   (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
                   (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
                   (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
-                  <div className="absolute top-[calc(20rem-60px)] left-0 right-0 flex justify-center gap-4 px-4 z-30">
+                  <div className="absolute flex justify-center gap-4 px-4 z-30" style={{ top: '260px', left: '0', right: '0' }}>
                   {firstLink.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -441,16 +441,18 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   }
                   return null;
                 })()}
+                {/* Conteneur des liens avec position fixe */}
                 {((!currentStep || currentStep >= 5) && firstLink?.multiLinks && firstLink.multiLinks.length > 0) ? (
-                  <AnimatePresence>
-                    {firstLink.multiLinks.map((link, index) => (
+                  <div className="absolute px-2" style={{ top: '320px', left: '0', right: '0' }}>
+                    <AnimatePresence>
+                      {firstLink.multiLinks.map((link, index) => (
                       <motion.div
                         key={link.id || index}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`w-full py-2 px-2 rounded-lg transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
+                        className={`w-full py-2 px-2 mb-3 rounded-lg transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
                         style={{
                           backgroundColor: '#f3f4f6',
                           color: textColor || '#1f2937',
@@ -473,7 +475,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         </div>
                       </motion.div>
                     ))}
-                  </AnimatePresence>
+                    </AnimatePresence>
+                  </div>
                 ) : currentStep && currentStep < 5 ? (
                   /* Message avant l'étape 5 */
                   <div className="flex items-center justify-center h-full">
