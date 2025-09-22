@@ -197,7 +197,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
 
                 {/* Boutons réseaux sociaux */}
-                {firstLink?.instagramUrl && (
+                {firstLink?.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
                   <div className="absolute bottom-6 left-0 right-0 flex justify-center">
                     <div className="bg-white/20 backdrop-blur-md rounded-full px-6 py-3">
                       <Instagram className="w-6 h-6 text-white" />
@@ -278,9 +278,12 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   </p>
 
                   {/* Icônes réseaux sociaux */}
-                  {(firstLink?.instagramUrl || firstLink?.twitterUrl || firstLink?.youtubeUrl || firstLink?.tiktokUrl) && (
+                  {((firstLink?.instagramUrl && firstLink.instagramUrl.trim() !== '') ||
+                    (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
+                    (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
+                    (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
                     <div className="flex gap-3 mt-4">
-                      {firstLink.instagramUrl && (
+                      {firstLink.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
                         <motion.div
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
@@ -289,7 +292,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           <Instagram className="w-5 h-5 text-white" />
                         </motion.div>
                       )}
-                      {firstLink.twitterUrl && (
+                      {firstLink.twitterUrl && firstLink.twitterUrl.trim() !== '' && (
                         <motion.div
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
@@ -298,7 +301,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           <Twitter className="w-5 h-5 text-white" />
                         </motion.div>
                       )}
-                      {firstLink.youtubeUrl && (
+                      {firstLink.youtubeUrl && firstLink.youtubeUrl.trim() !== '' && (
                         <motion.div
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
@@ -307,7 +310,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           <Youtube className="w-5 h-5 text-white" />
                         </motion.div>
                       )}
-                      {firstLink.tiktokUrl && (
+                      {firstLink.tiktokUrl && firstLink.tiktokUrl.trim() !== '' && (
                         <motion.div
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
