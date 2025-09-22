@@ -1602,14 +1602,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       <EditPhonePreview
         isVisible={(showPreview || step >= 5) && linkType === 'multi'}
         user={{
-          name: step >= 5 ? (watchedTitle || 'Mon lien') : '',
+          name: step >= 5 ? (watchedTitle || '') : '',
           bio: step >= 5 ? (watchedDescription || '') : '',
           image: profileImage || ''
         }}
         links={[{
           id: Date.now().toString(),
           slug: watch('slug') || 'preview',
-          title: watchedTitle || (step >= 5 ? 'Mon lien' : ''),
+          title: watchedTitle || '',
           description: step >= 5 ? (watchedDescription || '') : '',
           profileImage: profileImage || '',
           profileStyle: profileStyle || 'circle',
