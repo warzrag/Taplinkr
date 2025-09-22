@@ -166,7 +166,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
             {/* Photo style Beacon/Immersif - PLEIN ÉCRAN COMME UN VRAI IPHONE */}
             {displayImage && profileStyle === 'beacon' && (
-              <div className="absolute inset-0 w-full h-full z-30 rounded-[42px] overflow-hidden">
+              <div className="absolute inset-0 w-full h-full z-10 rounded-[42px] overflow-hidden">
                 {/* Image en plein écran qui remplit tout l'iPhone */}
                 <img
                   src={displayImage}
@@ -322,7 +322,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className="flex-1 px-6 py-4 space-y-3 overflow-y-auto min-h-[200px]">
+              <div className="flex-1 px-6 py-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
                 {/* Zone de debug supprimée - on affiche directement les liens */}
                 {false && (
                 <div className="p-4 bg-red-600 text-white font-bold text-center text-xl border-4 border-black">
