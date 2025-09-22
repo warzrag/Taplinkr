@@ -100,6 +100,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const watchedSlug = watch('slug')
   const watchedTitle = watch('title')
   const watchedDescription = watch('description')
+  const watchedInstagram = watch('instagramUrl')
+  const watchedTwitter = watch('twitterUrl')
+  const watchedYoutube = watch('youtubeUrl')
+  const watchedTiktok = watch('tiktokUrl')
 
 
   // Vérifier la disponibilité du slug
@@ -1612,10 +1616,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           coverImage: step >= 5 ? coverImage : '',
           isDirect: false,
           isActive: true,
-          instagramUrl: step >= 4 ? watch('instagramUrl') : '',
-          tiktokUrl: step >= 4 ? watch('tiktokUrl') : '',
-          twitterUrl: step >= 4 ? watch('twitterUrl') : '',
-          youtubeUrl: step >= 4 ? watch('youtubeUrl') : '',
+          instagramUrl: step >= 4 ? (watchedInstagram || '') : '',
+          tiktokUrl: step >= 4 ? (watchedTiktok || '') : '',
+          twitterUrl: step >= 4 ? (watchedTwitter || '') : '',
+          youtubeUrl: step >= 4 ? (watchedYoutube || '') : '',
           animation: step >= 5 ? linkAnimation : 'none',
           borderRadius: step >= 5 ? borderRadius : 'rounded-xl',
           fontFamily: step >= 5 ? fontFamily : 'system',
