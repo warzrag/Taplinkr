@@ -364,7 +364,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
                   (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
                   (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
-                  <div className="absolute flex justify-center gap-4 px-4 z-30" style={{ top: '260px', left: '0', right: '0' }}>
+                  <div className="absolute flex justify-center gap-4 px-4 z-30" style={{ top: '380px', left: '0', right: '0' }}>
                   {firstLink.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -443,7 +443,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 })()}
                 {/* Conteneur des liens avec position fixe */}
                 {((!currentStep || currentStep >= 5) && firstLink?.multiLinks && firstLink.multiLinks.length > 0) ? (
-                  <div className="absolute px-2" style={{ top: '320px', left: '0', right: '0' }}>
+                  <div className="absolute px-2" style={{ top: '440px', left: '0', right: '0' }}>
                     <AnimatePresence>
                       {firstLink.multiLinks.map((link, index) => (
                       <motion.div
