@@ -468,7 +468,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                             )}
                           </div>
                           {/* Texte */}
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 text-center">
                             <p className="font-medium text-sm" style={{ color: '#1f2937', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{link.title || 'Titre du lien'}</p>
                           </div>
                         </div>
