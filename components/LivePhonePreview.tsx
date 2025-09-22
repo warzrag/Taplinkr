@@ -460,11 +460,11 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                       >
                         <div className="flex items-center gap-2">
                           {/* Icône */}
-                          <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#ffffff' }}>
+                          <div className="w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#ffffff' }}>
                             {link.iconImage || link.icon ? (
-                              <img src={link.iconImage || link.icon} className="w-7 h-7" alt="" />
+                              <img src={link.iconImage || link.icon} className="w-9 h-9" alt="" />
                             ) : (
-                              <Link className="w-5 h-5 text-gray-500" />
+                              <Link className="w-6 h-6 text-gray-500" />
                             )}
                           </div>
                           {/* Texte */}
