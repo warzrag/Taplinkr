@@ -341,7 +341,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
                 (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
                 (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
-                <div className="flex justify-center gap-3 px-6 mb-4">
+                <div className="flex justify-center gap-3 px-6 mb-4 relative z-30">
                   {firstLink.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
                     <motion.div
                       whileHover={{ scale: 1.1 }}
