@@ -223,7 +223,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             )}
 
             {/* Contenu principal - Toujours visible */}
-            <div className="relative h-full flex flex-col pt-[60px] pb-6">
+            <div className="relative h-full flex flex-col pt-[40px] pb-6">
               {/* Section Profil - Seulement en mode Minimal */}
               {profileStyle === 'circle' && (
                 <motion.div
