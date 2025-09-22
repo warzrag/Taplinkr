@@ -418,7 +418,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className="flex-1 px-6 pt-12 pb-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
+              <div className="flex-1 px-6 pt-32 pb-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
                 {/* Zone de debug supprimée - on affiche directement les liens */}
                 {false && (
                 <div className="p-4 bg-red-600 text-white font-bold text-center text-xl border-4 border-black">
