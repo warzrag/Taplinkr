@@ -297,39 +297,43 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
                     (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
                     (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
-                    <div className="flex gap-3 mt-4">
+                    <div className="flex gap-4 mt-4">
                       {firstLink.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
                         <motion.div
-                          whileHover={{ scale: 1.1 }}
+                          whileHover={{ scale: 1.15, rotate: 5 }}
                           whileTap={{ scale: 0.95 }}
-                          className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center"
+                          className="w-11 h-11 rounded-2xl bg-black/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl"
+                          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                         >
                           <Instagram className="w-5 h-5 text-white" />
                         </motion.div>
                       )}
                       {firstLink.twitterUrl && firstLink.twitterUrl.trim() !== '' && (
                         <motion.div
-                          whileHover={{ scale: 1.1 }}
+                          whileHover={{ scale: 1.15, rotate: -5 }}
                           whileTap={{ scale: 0.95 }}
-                          className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center"
+                          className="w-11 h-11 rounded-2xl bg-black/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl"
+                          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                         >
                           <Twitter className="w-5 h-5 text-white" />
                         </motion.div>
                       )}
                       {firstLink.youtubeUrl && firstLink.youtubeUrl.trim() !== '' && (
                         <motion.div
-                          whileHover={{ scale: 1.1 }}
+                          whileHover={{ scale: 1.15, rotate: 5 }}
                           whileTap={{ scale: 0.95 }}
-                          className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center"
+                          className="w-11 h-11 rounded-2xl bg-black/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl"
+                          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                         >
                           <Youtube className="w-5 h-5 text-white" />
                         </motion.div>
                       )}
                       {firstLink.tiktokUrl && firstLink.tiktokUrl.trim() !== '' && (
                         <motion.div
-                          whileHover={{ scale: 1.1 }}
+                          whileHover={{ scale: 1.15, rotate: -5 }}
                           whileTap={{ scale: 0.95 }}
-                          className="w-10 h-10 rounded-full bg-black flex items-center justify-center"
+                          className="w-11 h-11 rounded-2xl bg-black/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl"
+                          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                         >
                           <Music className="w-5 h-5 text-white" />
                         </motion.div>
@@ -344,39 +348,54 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
                 (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
                 (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
-                <div className="flex justify-center gap-3 px-6 mb-4 relative z-30">
+                <div className="flex justify-center gap-4 px-6 mb-4 relative z-30">
                   {firstLink.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
                     <motion.div
-                      whileHover={{ scale: 1.1 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileHover={{ scale: 1.15, rotate: 5 }}
                       whileTap={{ scale: 0.95 }}
-                      className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center"
+                      className="w-11 h-11 rounded-2xl bg-black/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl"
+                      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                     >
                       <Instagram className="w-5 h-5 text-white" />
                     </motion.div>
                   )}
                   {firstLink.twitterUrl && firstLink.twitterUrl.trim() !== '' && (
                     <motion.div
-                      whileHover={{ scale: 1.1 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      whileHover={{ scale: 1.15, rotate: -5 }}
                       whileTap={{ scale: 0.95 }}
-                      className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center"
+                      className="w-11 h-11 rounded-2xl bg-black/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl"
+                      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                     >
                       <Twitter className="w-5 h-5 text-white" />
                     </motion.div>
                   )}
                   {firstLink.youtubeUrl && firstLink.youtubeUrl.trim() !== '' && (
                     <motion.div
-                      whileHover={{ scale: 1.1 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      whileHover={{ scale: 1.15, rotate: 5 }}
                       whileTap={{ scale: 0.95 }}
-                      className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center"
+                      className="w-11 h-11 rounded-2xl bg-black/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl"
+                      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                     >
                       <Youtube className="w-5 h-5 text-white" />
                     </motion.div>
                   )}
                   {firstLink.tiktokUrl && firstLink.tiktokUrl.trim() !== '' && (
                     <motion.div
-                      whileHover={{ scale: 1.1 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      whileHover={{ scale: 1.15, rotate: -5 }}
                       whileTap={{ scale: 0.95 }}
-                      className="w-10 h-10 rounded-full bg-black flex items-center justify-center"
+                      className="w-11 h-11 rounded-2xl bg-black/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl"
+                      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                     >
                       <Music className="w-5 h-5 text-white" />
                     </motion.div>
