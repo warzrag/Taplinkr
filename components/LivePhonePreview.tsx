@@ -357,12 +357,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </div>
               )}
 
-              {/* Icônes réseaux sociaux - Toujours visibles peu importe le style */}
-              {((firstLink?.instagramUrl && firstLink.instagramUrl.trim() !== '') ||
-                (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
-                (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
-                (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
-                <div className="flex justify-center gap-4 px-6 mb-4 relative z-30">
+              {/* Zone pour les liens */}
+              <div className="flex-1 px-2 pt-80 pb-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
+                {/* Icônes réseaux sociaux - Position fixe en haut de la zone des liens */}
+                {((firstLink?.instagramUrl && firstLink.instagramUrl.trim() !== '') ||
+                  (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
+                  (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
+                  (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
+                  <div className="absolute top-[calc(20rem-60px)] left-0 right-0 flex justify-center gap-4 px-4 z-30">
                   {firstLink.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -416,9 +418,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   )}
                 </div>
               )}
-
-              {/* Zone pour les liens */}
-              <div className="flex-1 px-2 pt-80 pb-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
                 {/* Zone de debug supprimée - on affiche directement les liens */}
                 {false && (
                 <div className="p-4 bg-red-600 text-white font-bold text-center text-xl border-4 border-black">
