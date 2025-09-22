@@ -453,14 +453,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         transition={{ delay: index * 0.1 }}
                         className={`w-full p-3 rounded-lg transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
                         style={{
-                          backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                          backgroundColor: '#f3f4f6',
                           color: textColor || '#1f2937',
-                          border: '1px solid rgba(0, 0, 0, 0.08)'
+                          border: '1px solid #e5e7eb'
                         }}
                       >
                         <div className="flex items-center gap-3">
                           {/* Icône */}
-                          <div className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
+                          <div className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#ffffff' }}>
                             {link.iconImage || link.icon ? (
                               <img src={link.iconImage || link.icon} className="w-5 h-5" alt="" />
                             ) : (
