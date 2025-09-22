@@ -451,26 +451,26 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`w-full p-4 ${borderRadius} transition-all duration-200 hover:scale-[1.02] cursor-pointer shadow-lg`}
+                        className={`w-full p-3 rounded-lg transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
                         style={{
-                          backgroundColor: backgroundColor || '#6366f1',
-                          color: textColor || '#ffffff',
-                          border: '2px solid rgba(0,0,0,0.1)'
+                          backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                          color: textColor || '#1f2937',
+                          border: '1px solid rgba(0, 0, 0, 0.08)'
                         }}
                       >
                         <div className="flex items-center gap-3">
                           {/* Icône */}
-                          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                          <div className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
                             {link.iconImage || link.icon ? (
-                              <img src={link.iconImage || link.icon} className="w-6 h-6" alt="" />
+                              <img src={link.iconImage || link.icon} className="w-5 h-5" alt="" />
                             ) : (
-                              <Link className="w-5 h-5 text-white" />
+                              <Link className="w-4 h-4 text-gray-500" />
                             )}
                           </div>
                           {/* Texte */}
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-lg truncate" style={{ color: textColor || '#ffffff' }}>{link.title || 'Titre du lien'}</p>
-                            <p className="text-sm truncate" style={{ color: textColor || '#ffffff', opacity: 0.8 }}>{link.url || 'https://example.com'}</p>
+                            <p className="font-medium text-base truncate" style={{ color: '#1f2937' }}>{link.title || 'Titre du lien'}</p>
+                            <p className="text-xs truncate" style={{ color: '#6b7280' }}>{link.url || 'https://example.com'}</p>
                           </div>
                         </div>
                       </motion.div>
