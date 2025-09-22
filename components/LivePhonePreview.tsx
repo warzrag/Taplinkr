@@ -470,7 +470,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           {/* Texte */}
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-base truncate" style={{ color: '#1f2937' }}>{link.title || 'Titre du lien'}</p>
-                            <p className="text-xs truncate" style={{ color: '#6b7280' }}>{link.url || 'https://example.com'}</p>
                           </div>
                         </div>
                       </motion.div>
