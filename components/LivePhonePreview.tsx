@@ -418,7 +418,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className="flex-1 px-3 pt-80 pb-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
+              <div className="flex-1 px-2 pt-80 pb-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
                 {/* Zone de debug supprimée - on affiche directement les liens */}
                 {false && (
                 <div className="p-4 bg-red-600 text-white font-bold text-center text-xl border-4 border-black">
@@ -451,20 +451,20 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`w-full py-2 px-3 rounded-lg transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
+                        className={`w-full py-2 px-2 rounded-lg transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
                         style={{
                           backgroundColor: '#f3f4f6',
                           color: textColor || '#1f2937',
                           border: '1px solid #e5e7eb'
                         }}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           {/* Icône */}
-                          <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#ffffff' }}>
+                          <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#ffffff' }}>
                             {link.iconImage || link.icon ? (
-                              <img src={link.iconImage || link.icon} className="w-5 h-5" alt="" />
+                              <img src={link.iconImage || link.icon} className="w-4 h-4" alt="" />
                             ) : (
-                              <Link className="w-4 h-4 text-gray-500" />
+                              <Link className="w-3.5 h-3.5 text-gray-500" />
                             )}
                           </div>
                           {/* Texte */}
