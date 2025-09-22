@@ -277,7 +277,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   )}
 
                   {/* Nom et bio */}
-                  <h1 className="text-xl font-bold mb-1" style={{ color: textColor }}>
+                  <h1 className="text-xl font-bold mb-3" style={{ color: textColor }}>
                     {displayName}
                   </h1>
 
@@ -288,7 +288,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     </div>
                   )}
 
-                  <p className="text-sm text-center opacity-80 px-4" style={{ color: textColor }}>
+                  <p className="text-sm text-center opacity-80 px-4 mb-4" style={{ color: textColor }}>
                     {displayBio}
                   </p>
 
@@ -341,6 +341,20 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                     </div>
                   )}
                 </motion.div>
+              )}
+
+              {/* Titre et description - Toujours visibles */}
+              {profileStyle === 'beacon' && (
+                <div className="text-center px-6 mb-4">
+                  <h1 className="text-xl font-bold mb-2" style={{ color: textColor }}>
+                    {displayName}
+                  </h1>
+                  {displayBio && (
+                    <p className="text-sm opacity-80" style={{ color: textColor }}>
+                      {displayBio}
+                    </p>
+                  )}
+                </div>
               )}
 
               {/* Icônes réseaux sociaux - Toujours visibles peu importe le style */}
