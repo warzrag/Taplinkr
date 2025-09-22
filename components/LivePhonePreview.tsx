@@ -343,15 +343,15 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
 
-              {/* Titre et description - Toujours visibles */}
-              {profileStyle === 'beacon' && (
+              {/* Titre et description - Visibles seulement si remplis */}
+              {profileStyle === 'beacon' && (firstLink?.title && firstLink.title.trim() !== '') && (
                 <div className="text-center px-6 mb-4">
                   <h1 className="text-xl font-bold mb-2" style={{ color: textColor }}>
-                    {displayName}
+                    {firstLink.title}
                   </h1>
-                  {displayBio && (
+                  {firstLink?.description && firstLink.description.trim() !== '' && (
                     <p className="text-sm opacity-80" style={{ color: textColor }}>
-                      {displayBio}
+                      {firstLink.description}
                     </p>
                   )}
                 </div>
