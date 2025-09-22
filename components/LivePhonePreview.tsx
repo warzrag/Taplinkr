@@ -336,6 +336,51 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
 
+              {/* Icônes réseaux sociaux - Toujours visibles peu importe le style */}
+              {((firstLink?.instagramUrl && firstLink.instagramUrl.trim() !== '') ||
+                (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
+                (firstLink?.youtubeUrl && firstLink.youtubeUrl.trim() !== '') ||
+                (firstLink?.tiktokUrl && firstLink.tiktokUrl.trim() !== '')) && (
+                <div className="flex justify-center gap-3 px-6 mb-4">
+                  {firstLink.instagramUrl && firstLink.instagramUrl.trim() !== '' && (
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center"
+                    >
+                      <Instagram className="w-5 h-5 text-white" />
+                    </motion.div>
+                  )}
+                  {firstLink.twitterUrl && firstLink.twitterUrl.trim() !== '' && (
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center"
+                    >
+                      <Twitter className="w-5 h-5 text-white" />
+                    </motion.div>
+                  )}
+                  {firstLink.youtubeUrl && firstLink.youtubeUrl.trim() !== '' && (
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center"
+                    >
+                      <Youtube className="w-5 h-5 text-white" />
+                    </motion.div>
+                  )}
+                  {firstLink.tiktokUrl && firstLink.tiktokUrl.trim() !== '' && (
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-10 h-10 rounded-full bg-black flex items-center justify-center"
+                    >
+                      <Music className="w-5 h-5 text-white" />
+                    </motion.div>
+                  )}
+                </div>
+              )}
+
               {/* Zone pour les liens */}
               <div className="flex-1 px-6 py-4 space-y-3 overflow-y-auto min-h-[200px] relative z-20">
                 {/* Zone de debug supprimée - on affiche directement les liens */}
