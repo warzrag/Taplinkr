@@ -154,10 +154,10 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-50" />
 
           {/* Écran */}
-          <div className="relative w-full h-full rounded-[42px] overflow-hidden" style={{ backgroundColor }}>
+          <div className="relative w-full h-full rounded-[42px] overflow-hidden" style={{ backgroundColor: profileStyle === 'beacon' && displayImage ? 'transparent' : backgroundColor }}>
             {/* Barre de statut iOS */}
             <div className="absolute top-2 left-0 right-0 z-40 flex justify-between items-center px-6 text-[10px] font-medium"
-                 style={{ color: textColor }}>
+                 style={{ color: profileStyle === 'beacon' && displayImage ? 'white' : textColor }}>
               <span>{timeString}</span>
               <div className="flex items-center gap-1">
                 {/* Signal bars */}
@@ -176,8 +176,8 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
             </div>
 
-            {/* Photo supprimée en mode Beacon/Immersif */}
-            {false && displayImage && profileStyle === 'beacon' && (
+            {/* Photo style Beacon/Immersif - PLEIN ÉCRAN COMME UN VRAI IPHONE */}
+            {displayImage && profileStyle === 'beacon' && (
               <div className="absolute inset-0 w-full h-full z-10 rounded-[42px] overflow-hidden">
                 {/* Image en plein écran qui remplit tout l'iPhone */}
                 <img
@@ -337,14 +337,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 <>
                   {/* Titre toujours affiché à position fixe (vide si pas de texte) */}
                   <div className="absolute text-center px-6 z-40" style={{ top: '280px', left: '0', right: '0' }}>
-                    <h1 className="text-2xl font-bold" style={{ color: textColor, minHeight: '32px' }}>
+                    <h1 className="text-2xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ minHeight: '32px' }}>
                       {(firstLink?.title && firstLink.title.trim() !== '') ? firstLink.title : ''}
                     </h1>
                   </div>
 
                   {/* Description toujours affichée à position fixe (vide si pas de texte) */}
                   <div className="absolute text-center px-6 z-40" style={{ top: '320px', left: '0', right: '0' }}>
-                    <p className="text-base" style={{ color: textColor, minHeight: '24px' }}>
+                    <p className="text-base text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ minHeight: '24px' }}>
                       {(firstLink?.description && firstLink.description.trim() !== '') ? firstLink.description : ''}
                     </p>
                   </div>
@@ -482,7 +482,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               </div>
 
               {/* Footer avec branding */}
-              {profileStyle === 'beacon' ? (
+              {profileStyle === 'beacon' && displayImage ? (
                 <motion.div
                   className="absolute bottom-6 left-0 right-0 px-8 z-30"
                   initial={{ opacity: 0 }}
