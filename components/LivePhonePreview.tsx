@@ -343,17 +343,21 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
 
-              {/* Titre et description - Position absolue fixe */}
+              {/* Titre - Position absolue fixe */}
               {profileStyle === 'beacon' && (firstLink?.title && firstLink.title.trim() !== '') && (
                 <div className="absolute text-center px-6" style={{ top: '280px', left: '0', right: '0' }}>
-                  <h1 className="text-xl font-bold mb-2" style={{ color: textColor }}>
+                  <h1 className="text-xl font-bold" style={{ color: textColor }}>
                     {firstLink.title}
                   </h1>
-                  {firstLink?.description && firstLink.description.trim() !== '' && (
-                    <p className="text-sm opacity-80" style={{ color: textColor }}>
-                      {firstLink.description}
-                    </p>
-                  )}
+                </div>
+              )}
+
+              {/* Description - Position absolue fixe séparée */}
+              {profileStyle === 'beacon' && (firstLink?.description && firstLink.description.trim() !== '') && (
+                <div className="absolute text-center px-6" style={{ top: '310px', left: '0', right: '0' }}>
+                  <p className="text-sm opacity-80" style={{ color: textColor }}>
+                    {firstLink.description}
+                  </p>
                 </div>
               )}
 
