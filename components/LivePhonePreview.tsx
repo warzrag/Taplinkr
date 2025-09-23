@@ -345,7 +345,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
               {/* Titre - Position absolue fixe */}
               {profileStyle === 'beacon' && (firstLink?.title && firstLink.title.trim() !== '') && (
-                <div className="absolute text-center px-6" style={{ top: '280px', left: '0', right: '0' }}>
+                <div className="absolute text-center px-6 z-40" style={{ top: '280px', left: '0', right: '0' }}>
                   <h1 className="text-xl font-bold" style={{ color: textColor }}>
                     {firstLink.title}
                   </h1>
@@ -354,7 +354,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
               {/* Description - Position absolue fixe séparée */}
               {profileStyle === 'beacon' && (firstLink?.description && firstLink.description.trim() !== '') && (
-                <div className="absolute text-center px-6" style={{ top: '310px', left: '0', right: '0' }}>
+                <div className="absolute text-center px-6 z-40" style={{ top: '310px', left: '0', right: '0' }}>
                   <p className="text-sm opacity-80" style={{ color: textColor }}>
                     {firstLink.description}
                   </p>
@@ -362,7 +362,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
               )}
 
               {/* Zone pour les liens */}
-              <div className="absolute inset-0 overflow-y-auto z-20">
+              <div className="absolute inset-x-0 bottom-0 top-0 overflow-y-auto z-20">
                 {/* Icônes réseaux sociaux - Position absolue fixe */}
                 {((firstLink?.instagramUrl && firstLink.instagramUrl.trim() !== '') ||
                   (firstLink?.twitterUrl && firstLink.twitterUrl.trim() !== '') ||
