@@ -224,7 +224,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         multiLinks: linkType === 'multi' ? multiLinks.filter(link => link.title || link.url) : [],
         profileImage: profileImage || null,
         profileStyle: profileStyle || 'circle',
-        coverImage: coverImage || null,
+        coverImage: profileStyle === 'beacon' ? (profileImage || null) : (coverImage || null),
         description: data.description || null,
         instagramUrl: data.instagramUrl || null,
         tiktokUrl: data.tiktokUrl || null,
