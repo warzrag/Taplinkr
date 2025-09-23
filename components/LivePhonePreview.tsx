@@ -345,7 +345,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
 
               {/* Titre et description - Position absolue fixe */}
               {profileStyle === 'beacon' && (firstLink?.title && firstLink.title.trim() !== '') && (
-                <div className="absolute text-center px-6" style={{ top: '320px', left: '0', right: '0' }}>
+                <div className="absolute text-center px-6" style={{ top: '280px', left: '0', right: '0' }}>
                   <h1 className="text-xl font-bold mb-2" style={{ color: textColor }}>
                     {firstLink.title}
                   </h1>
