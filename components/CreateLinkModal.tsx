@@ -1557,15 +1557,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         </button>
                       </div>
 
-                      <div className="pt-4 border-t">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Photo de couverture (optionnel)
-                        </label>
-                        <CoverImageUpload
-                          value={coverImage}
-                          onChange={setCoverImage}
-                        />
-                      </div>
+                      {profileStyle !== 'beacon' && (
+                        <div className="pt-4 border-t">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Photo de couverture (optionnel)
+                          </label>
+                          <CoverImageUpload
+                            value={coverImage}
+                            onChange={setCoverImage}
+                          />
+                        </div>
+                      )}
                     </>
                   )}
 
