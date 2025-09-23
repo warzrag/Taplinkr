@@ -337,14 +337,14 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 <>
                   {/* Titre toujours affiché à position fixe (vide si pas de texte) */}
                   <div className="absolute text-center px-6 z-40" style={{ top: '280px', left: '0', right: '0' }}>
-                    <h1 className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ minHeight: '28px' }}>
+                    <h1 className="text-2xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ minHeight: '32px' }}>
                       {(firstLink?.title && firstLink.title.trim() !== '') ? firstLink.title : ''}
                     </h1>
                   </div>
 
                   {/* Description toujours affichée à position fixe (vide si pas de texte) */}
-                  <div className="absolute text-center px-6 z-40" style={{ top: '310px', left: '0', right: '0' }}>
-                    <p className="text-sm text-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ minHeight: '20px' }}>
+                  <div className="absolute text-center px-6 z-40" style={{ top: '320px', left: '0', right: '0' }}>
+                    <p className="text-base text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ minHeight: '24px' }}>
                       {(firstLink?.description && firstLink.description.trim() !== '') ? firstLink.description : ''}
                     </p>
                   </div>
