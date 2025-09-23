@@ -504,7 +504,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     {/* Style Immersif */}
                     <motion.button
                       type="button"
-                      onClick={() => setProfileStyle('beacon')}
+                      onClick={() => {
+                        console.log('🎯 Clic sur Beacon/Immersif')
+                        setProfileStyle('beacon')
+                      }}
                       initial={{ opacity: 0, y: 50, scale: 0.9 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       transition={{
@@ -1508,6 +1511,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   {/* Ajout des liens directement dans l'étape 5 */}
                   {linkType === 'multi' && (
                     <>
+                      {console.log('🔍 ÉTAPE 5 - profileStyle actuel:', profileStyle)}
                       <div className="pt-4 border-t">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Vos liens</h3>
                         <div className="space-y-3">
