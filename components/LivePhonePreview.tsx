@@ -198,17 +198,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 {/* Dégradé du haut pour la lisibilité de la barre de statut */}
                 <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/50 to-transparent" />
 
-                {/* Texte overlay sur l'image - position haute */}
-                <div className="absolute bottom-64 left-0 right-0 text-center px-6 z-40">
-                  <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-                    {displayName}
-                  </h1>
-                  {displayBio && (
-                    <p className="text-base text-white/95 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-                      {displayBio}
-                    </p>
-                  )}
-                </div>
 
 
                 {/* Boutons réseaux sociaux */}
