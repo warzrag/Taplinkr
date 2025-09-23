@@ -332,22 +332,23 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 </motion.div>
               )}
 
-              {/* Titre - Position absolue fixe */}
-              {profileStyle === 'beacon' && (firstLink?.title && firstLink.title.trim() !== '') && (
-                <div className="absolute text-center px-6 z-40" style={{ top: '280px', left: '0', right: '0' }}>
-                  <h1 className="text-xl font-bold" style={{ color: textColor }}>
-                    {firstLink.title}
-                  </h1>
-                </div>
-              )}
+              {/* Conteneur pour titre et description avec position fixe */}
+              {profileStyle === 'beacon' && (
+                <>
+                  {/* Titre toujours affiché à position fixe (vide si pas de texte) */}
+                  <div className="absolute text-center px-6 z-40" style={{ top: '280px', left: '0', right: '0' }}>
+                    <h1 className="text-xl font-bold" style={{ color: textColor, minHeight: '28px' }}>
+                      {(firstLink?.title && firstLink.title.trim() !== '') ? firstLink.title : ''}
+                    </h1>
+                  </div>
 
-              {/* Description - Position absolue fixe séparée */}
-              {profileStyle === 'beacon' && (firstLink?.description && firstLink.description.trim() !== '') && (
-                <div className="absolute text-center px-6 z-40" style={{ top: '310px', left: '0', right: '0' }}>
-                  <p className="text-sm opacity-80" style={{ color: textColor }}>
-                    {firstLink.description}
-                  </p>
-                </div>
+                  {/* Description toujours affichée à position fixe (vide si pas de texte) */}
+                  <div className="absolute text-center px-6 z-40" style={{ top: '310px', left: '0', right: '0' }}>
+                    <p className="text-sm opacity-80" style={{ color: textColor, minHeight: '20px' }}>
+                      {(firstLink?.description && firstLink.description.trim() !== '') ? firstLink.description : ''}
+                    </p>
+                  </div>
+                </>
               )}
 
               {/* Zone pour les liens */}
