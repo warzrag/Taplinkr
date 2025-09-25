@@ -11,10 +11,13 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [clickId, setClickId] = useState<string | null>(null)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
+  const [hasTracked, setHasTracked] = useState(false)
   
   // Tracker la vue de la page au chargement
   useEffect(() => {
-    if (link?.id) {
+    // Éviter le double tracking
+    if (link?.id && !hasTracked) {
+      setHasTracked(true)
       // Collecter des informations supplémentaires
       const trackingData = {
         linkId: link.id,
@@ -42,27 +45,9 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         })
         .catch(console.error)
 
-      // Tracker la durée de visite
-      const startTime = Date.now()
-      
-      // Envoyer la durée quand l'utilisateur quitte la page
-      const handleBeforeUnload = () => {
-        if (clickId) {
-          const duration = Math.floor((Date.now() - startTime) / 1000) // en secondes
-          navigator.sendBeacon('/api/track-duration', JSON.stringify({
-            clickId: clickId,
-            duration
-          }))
-        }
-      }
-      
-      window.addEventListener('beforeunload', handleBeforeUnload)
-      
-      return () => {
-        window.removeEventListener('beforeunload', handleBeforeUnload)
-      }
+      // Ne pas gérer la durée pour l'instant, ça cause des problèmes
     }
-  }, [link?.id]) // Ne pas dépendre de clickId pour éviter la boucle
+  }, [link?.id, hasTracked]) // Dépendre de hasTracked pour éviter le re-tracking
 
   if (!link) {
     return <div className="min-h-screen bg-gray-900" />
