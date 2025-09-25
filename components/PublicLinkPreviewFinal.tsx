@@ -12,46 +12,49 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   
-  // TRACKING TEMPORAIREMENT DÉSACTIVÉ POUR DIAGNOSTIC
+  // Tracker la vue avec protection contre les multiples appels
   useEffect(() => {
-    console.log('PublicLinkPreviewFinal: Tracking désactivé temporairement')
-    // Le tracking est désactivé pour diagnostiquer le problème des clics multiples
-    return
+    if (!link?.id) return
 
-    // Code de tracking commenté temporairement
-    /*
-    const sessionKey = `tracked_${link?.id}`
-    const alreadyTracked = sessionStorage.getItem(sessionKey)
-
-    if (link?.id && !alreadyTracked) {
-      sessionStorage.setItem(sessionKey, 'true')
-
-      const trackingData = {
-        linkId: link.id,
-        referrer: document.referrer,
-        userAgent: navigator.userAgent,
-        screenResolution: `${window.screen.width}x${window.screen.height}`,
-        language: navigator.language || 'en',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        timestamp: new Date().toISOString()
-      }
-
-      fetch('/api/track-link-view', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(trackingData)
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.clickId) {
-            setClickId(data.clickId)
-          }
-        })
-        .catch(console.error)
+    // Protection: une seule fois par session navigateur
+    const tracked = sessionStorage.getItem(`tracked_session_${link.id}`)
+    if (tracked) {
+      console.log('Déjà tracké dans cette session')
+      return
     }
-    */
+
+    // Marquer comme tracké AVANT l'appel API
+    sessionStorage.setItem(`tracked_session_${link.id}`, 'true')
+
+    const trackingData = {
+      linkId: link.id,
+      referrer: document.referrer,
+      userAgent: navigator.userAgent,
+      screenResolution: `${window.screen.width}x${window.screen.height}`,
+      language: navigator.language || 'en',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timestamp: new Date().toISOString()
+    }
+
+    fetch('/api/track-link-view', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(trackingData)
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Tracking enregistré:', data)
+        if (data.clickId) {
+          setClickId(data.clickId)
+        }
+      })
+      .catch(error => {
+        console.error('Erreur tracking:', error)
+        // En cas d'erreur, permettre un nouveau tracking
+        sessionStorage.removeItem(`tracked_session_${link.id}`)
+      })
   }, [link?.id])
 
   if (!link) {
