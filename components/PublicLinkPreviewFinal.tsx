@@ -11,13 +11,17 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [clickId, setClickId] = useState<string | null>(null)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
-  const [hasTracked, setHasTracked] = useState(false)
   
   // Tracker la vue de la page au chargement
   useEffect(() => {
-    // Éviter le double tracking
-    if (link?.id && !hasTracked) {
-      setHasTracked(true)
+    // Utiliser sessionStorage pour garantir un seul tracking par session
+    const sessionKey = `tracked_${link?.id}`
+    const alreadyTracked = sessionStorage.getItem(sessionKey)
+
+    if (link?.id && !alreadyTracked) {
+      // Marquer comme tracké immédiatement
+      sessionStorage.setItem(sessionKey, 'true')
+
       // Collecter des informations supplémentaires
       const trackingData = {
         linkId: link.id,
@@ -44,10 +48,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           }
         })
         .catch(console.error)
-
-      // Ne pas gérer la durée pour l'instant, ça cause des problèmes
     }
-  }, [link?.id, hasTracked]) // Dépendre de hasTracked pour éviter le re-tracking
+  }, [link?.id]) // Dépendre uniquement de link.id
 
   if (!link) {
     return <div className="min-h-screen bg-gray-900" />
