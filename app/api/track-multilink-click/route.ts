@@ -79,15 +79,8 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Incrémenter aussi le compteur du lien principal
-    await prisma.link.update({
-      where: { id: multiLink.linkId },
-      data: {
-        clicks: {
-          increment: 1
-        }
-      }
-    })
+    // Ne pas incrémenter le compteur du lien principal
+    // Les clics sont comptés uniquement lors des visites de page
 
     return NextResponse.json({ success: true })
   } catch (error) {

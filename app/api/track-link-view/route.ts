@@ -41,11 +41,12 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Incrémenter uniquement le compteur de vues (pas les clics!)
+    // Incrémenter les compteurs de clics et de vues
     const updatedLink = await prisma.link.update({
       where: { id: linkId },
       data: {
-        views: { increment: 1 }     // Incrémenter seulement les vues
+        clicks: { increment: 1 },   // Un clic = une visite de la page
+        views: { increment: 1 }      // Les vues aussi
       },
       select: { views: true, clicks: true }
     })
