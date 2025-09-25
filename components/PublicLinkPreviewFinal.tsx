@@ -120,30 +120,36 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const clicks = link?.clicks || 0
 
   return (
-    <div className="min-h-screen relative bg-black">
-      {/* Background avec couverture */}
+    <div className="min-h-screen relative bg-gray-900">
+      {/* Background flou pour PC */}
       <div className="fixed inset-0 z-0">
         {coverImage ? (
-          <div 
-            className="w-full h-full"
+          <div
+            className="w-full h-full blur-2xl scale-110"
             style={{
               backgroundImage: `url(${coverImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
           >
-            <div className="absolute inset-0 bg-black bg-opacity-60" />
+            <div className="absolute inset-0 bg-black bg-opacity-70" />
           </div>
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-purple-800 to-pink-700">
-            <div className="absolute inset-0 bg-black bg-opacity-40" />
+          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900">
+            <div className="absolute inset-0 bg-black bg-opacity-50" />
           </div>
         )}
       </div>
 
-      {/* Contenu principal */}
-      <div className="relative z-10 min-h-screen py-8 px-4">
-        <div className="max-w-lg mx-auto">
+      {/* Conteneur format téléphone */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center py-8 px-4">
+        <div className="w-full max-w-[390px] mx-auto">
+          {/* Simulation cadre téléphone sur desktop */}
+          <div className="hidden md:block absolute inset-0 -inset-x-8 -inset-y-8 bg-black/20 backdrop-blur-xl rounded-[3rem] shadow-2xl" />
+
+          {/* Contenu scrollable style téléphone */}
+          <div className="relative bg-white/10 backdrop-blur-md rounded-[2.5rem] md:rounded-[2rem] min-h-[600px] max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
           
           {/* Header avec profil */}
           <div className="text-center mb-8">
@@ -152,17 +158,17 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                 <img
                   src={profileImage}
                   alt="Profile"
-                  className="w-32 h-32 mx-auto rounded-full border-4 border-white border-opacity-50 shadow-2xl object-cover"
+                  className="w-24 h-24 mx-auto rounded-full border-4 border-white/30 shadow-2xl object-cover"
                 />
               </div>
             )}
-            
-            <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+
+            <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
               {title}
             </h1>
-            
+
             {bio && (
-              <p className="text-white text-opacity-90 max-w-md mx-auto mb-4">
+              <p className="text-white/80 text-sm max-w-md mx-auto mb-4 px-4">
                 {bio}
               </p>
             )}
@@ -231,7 +237,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   <button
                     key={linkId}
                     onClick={() => handleLinkClick(linkId, linkUrl)}
-                    className="w-full bg-white bg-opacity-95 hover:bg-opacity-100 rounded-xl p-4 shadow-lg transition-all transform hover:scale-105 flex items-center gap-3 group"
+                    className="w-full bg-white/90 hover:bg-white/95 backdrop-blur-sm rounded-2xl py-3 px-4 shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-3 group"
                   >
                     {linkIcon && (
                       <img
@@ -284,7 +290,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           </div>
 
           {/* Footer */}
-          <div className="mt-12 text-center">
+          <div className="mt-12 text-center pb-6">
             <a
               href="https://www.taplinkr.com"
               target="_blank"
@@ -293,6 +299,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
             >
               Créé avec TapLinkr
             </a>
+          </div>
+            </div>
           </div>
         </div>
       </div>
