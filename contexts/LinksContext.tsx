@@ -53,20 +53,36 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     console.log('🔄 Chargement des liens...')
 
     try {
-      // Utiliser l'API rapide pour le dashboard
+      // D'abord essayer l'API rapide
       const response = await fetch('/api/links/fast')
 
       if (response.ok) {
         const data = await response.json()
 
-        // Format simplifié de l'API rapide
-        const allLinks = data.links || []
+        let allLinks = []
 
-        // Tous les liens sont personnels dans l'API rapide
-        setPersonalLinks(allLinks)
-        setTeamLinks([])
-        setHasTeam(false)
-        setLinks(allLinks)
+        if (data.links) {
+          // Format de l'API rapide
+          allLinks = data.links || []
+          setPersonalLinks(allLinks)
+          setTeamLinks([])
+          setHasTeam(false)
+          setLinks(allLinks)
+        } else if (data.personalLinks !== undefined) {
+          // Format de l'API classique (fallback)
+          setPersonalLinks(data.personalLinks || [])
+          setTeamLinks(data.teamLinks || [])
+          setHasTeam(data.hasTeam || false)
+          allLinks = [...(data.personalLinks || []), ...(data.teamLinks || [])]
+          setLinks(allLinks)
+        } else {
+          // Format simple avec juste un tableau
+          allLinks = Array.isArray(data) ? data : []
+          setLinks(allLinks)
+          setPersonalLinks(allLinks)
+          setTeamLinks([])
+          setHasTeam(false)
+        }
 
         console.log('✅ Liens chargés:', allLinks.length)
       } else {
