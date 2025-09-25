@@ -4,6 +4,14 @@ import { analyticsService } from '@/lib/analytics-service'
 import { getLocationFromIP } from '@/lib/geo-location-helper'
 
 export async function POST(request: NextRequest) {
+  // TRACKING DÉSACTIVÉ TEMPORAIREMENT
+  return NextResponse.json({
+    success: false,
+    message: 'Tracking désactivé pour maintenance',
+    clicks: 0,
+    views: 0
+  })
+
   try {
     const { linkId, referrer, userAgent, screenResolution, language, timezone } = await request.json()
     
