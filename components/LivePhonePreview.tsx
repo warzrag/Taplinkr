@@ -446,7 +446,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`w-full py-2 px-2 mb-3 rounded-lg transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
+                        className={`w-full py-2 px-2 mb-3 ${borderRadius || 'rounded-lg'} transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
                         style={{
                           backgroundColor: '#f3f4f6',
                           color: textColor || '#1f2937',

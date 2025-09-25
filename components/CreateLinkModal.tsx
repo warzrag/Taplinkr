@@ -1627,7 +1627,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           twitterUrl: watchedTwitter || '',
           youtubeUrl: watchedYoutube || '',
           animation: step >= 5 ? linkAnimation : 'none',
-          borderRadius: step >= 5 ? borderRadius : 'rounded-xl',
+          borderRadius: step >= 6 ? borderRadius : 'rounded-xl',
           fontFamily: step >= 5 ? fontFamily : 'system',
           backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
           textColor: step >= 5 ? textColor : '#1f2937',
