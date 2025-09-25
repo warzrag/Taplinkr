@@ -7,6 +7,8 @@ interface PageProps {
 }
 
 export default async function LinkPage({ params }: PageProps) {
+  console.log('🔍 Loading link:', params.slug, 'at', new Date().toISOString())
+
   try {
     const link = await prisma.link.findUnique({
       where: { slug: params.slug },
