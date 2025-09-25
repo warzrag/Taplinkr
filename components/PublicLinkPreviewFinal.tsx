@@ -12,17 +12,20 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   
-  // Tracker la vue de la page au chargement
+  // TRACKING TEMPORAIREMENT DÉSACTIVÉ POUR DIAGNOSTIC
   useEffect(() => {
-    // Utiliser sessionStorage pour garantir un seul tracking par session
+    console.log('PublicLinkPreviewFinal: Tracking désactivé temporairement')
+    // Le tracking est désactivé pour diagnostiquer le problème des clics multiples
+    return
+
+    // Code de tracking commenté temporairement
+    /*
     const sessionKey = `tracked_${link?.id}`
     const alreadyTracked = sessionStorage.getItem(sessionKey)
 
     if (link?.id && !alreadyTracked) {
-      // Marquer comme tracké immédiatement
       sessionStorage.setItem(sessionKey, 'true')
 
-      // Collecter des informations supplémentaires
       const trackingData = {
         linkId: link.id,
         referrer: document.referrer,
@@ -42,14 +45,14 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
       })
         .then(response => response.json())
         .then(data => {
-          // L'API retourne le clickId créé
           if (data.clickId) {
             setClickId(data.clickId)
           }
         })
         .catch(console.error)
     }
-  }, [link?.id]) // Dépendre uniquement de link.id
+    */
+  }, [link?.id])
 
   if (!link) {
     return <div className="min-h-screen bg-gray-900" />
