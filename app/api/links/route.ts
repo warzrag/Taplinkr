@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { nanoid } from 'nanoid'
 import { getUpgradeMessage } from '@/lib/permissions'
 import { getTeamAwareUserPermissions, checkTeamLimit } from '@/lib/team-permissions'
 
 export async function GET() {
-  // Créer une nouvelle instance pour éviter les problèmes de connexion
-  const prisma = new PrismaClient()
   
   try {
     const session = await getServerSession(authOptions)
@@ -91,13 +89,10 @@ export async function GET() {
     // IMPORTANT: Retourner une erreur 500 avec un message d'erreur
     // Pour que le contexte sache qu'il y a eu une erreur et ne vide pas les liens
     return NextResponse.json({ error: 'Database connection error' }, { status: 500 })
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
 export async function POST(request: NextRequest) {
-  const prisma = new PrismaClient()
   
   try {
     const session = await getServerSession(authOptions)
@@ -313,6 +308,5 @@ export async function POST(request: NextRequest) {
     console.error('Erreur lors de la création du lien:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   } finally {
-    await prisma.$disconnect()
   }
 }

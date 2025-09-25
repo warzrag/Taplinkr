@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-  const prisma = new PrismaClient()
-  
   try {
     // Récupérer tous les utilisateurs (sans les mots de passe)
     const users = await prisma.user.findMany({
@@ -36,6 +34,5 @@ export async function GET() {
       databaseConnected: false
     }, { status: 500 })
   } finally {
-    await prisma.$disconnect()
   }
 }
