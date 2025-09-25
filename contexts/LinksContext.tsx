@@ -53,26 +53,19 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     console.log('🔄 Chargement des liens...')
 
     try {
-      const response = await fetch('/api/links')
+      // Utiliser l'API rapide pour le dashboard
+      const response = await fetch('/api/links/fast')
 
       if (response.ok) {
         const data = await response.json()
 
-        // Gérer les liens personnels
-        if (data.personalLinks) {
-          setPersonalLinks(data.personalLinks || [])
-        }
+        // Format simplifié de l'API rapide
+        const allLinks = data.links || []
 
-        // Gérer les liens d'équipe
-        if (data.teamLinks) {
-          setTeamLinks(data.teamLinks || [])
-        }
-
-        // Définir si l'utilisateur a une équipe
-        setHasTeam(data.hasTeam || false)
-
-        // Combiner tous les liens
-        const allLinks = [...(data.personalLinks || []), ...(data.teamLinks || [])]
+        // Tous les liens sont personnels dans l'API rapide
+        setPersonalLinks(allLinks)
+        setTeamLinks([])
+        setHasTeam(false)
         setLinks(allLinks)
 
         console.log('✅ Liens chargés:', allLinks.length)
