@@ -63,6 +63,5 @@ export async function generateMetadata({ params }: PageProps) {
   }
 }
 
-// Configuration optimisée
-export const dynamic = 'force-static'
-export const revalidate = 60 // Revalider toutes les 60 secondes
+// Configuration pour ISR (Incremental Static Regeneration)
+export const revalidate = 3600 // 1 heure de cache
