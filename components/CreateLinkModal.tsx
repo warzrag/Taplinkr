@@ -1626,11 +1626,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           tiktokUrl: watchedTiktok || '',
           twitterUrl: watchedTwitter || '',
           youtubeUrl: watchedYoutube || '',
-          animation: step >= 5 ? linkAnimation : 'none',
+          animation: step >= 6 ? linkAnimation : 'none',
           borderRadius: step >= 6 ? borderRadius : 'rounded-xl',
-          fontFamily: step >= 5 ? fontFamily : 'system',
-          backgroundColor: step >= 5 ? backgroundColor : '#ffffff',
-          textColor: step >= 5 ? textColor : '#1f2937',
+          fontFamily: step >= 6 ? fontFamily : 'system',
+          backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
+          textColor: step >= 6 ? textColor : '#1f2937',
           multiLinks: step >= 5 ? (
             multiLinks.map((ml, index) => ({
               id: index.toString(),

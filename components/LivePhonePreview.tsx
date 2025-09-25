@@ -125,6 +125,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   const displayImage = firstLink?.profileImage || user?.image || (links.length === 0 ? defaultDemoData.profileImage : null)
   const profileStyle = firstLink?.profileStyle || 'circle'
   const borderRadius = firstLink?.borderRadius || 'rounded-xl'
+  const linkAnimation = firstLink?.animation || 'none'
   const displayLocation = firstLink?.city || firstLink?.country ?
     `${firstLink.city || ''}${firstLink.city && firstLink.country ? ', ' : ''}${firstLink.country || ''}` :
     defaultDemoData.location
@@ -446,11 +447,12 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`w-full py-2 px-2 mb-3 ${borderRadius || 'rounded-lg'} transition-all duration-200 hover:scale-[1.01] cursor-pointer`}
+                        whileHover={linkAnimation === 'bounce' ? { scale: 1.05, y: -5 } : linkAnimation === 'scale' ? { scale: 1.05 } : {}}
+                        whileTap={linkAnimation !== 'none' ? { scale: 0.95 } : {}}
+                        className={`w-full py-2 px-2 mb-3 ${borderRadius || 'rounded-lg'} transition-all duration-200 ${linkAnimation === 'none' ? '' : 'hover:shadow-lg'} cursor-pointer`}
                         style={{
-                          backgroundColor: '#f3f4f6',
-                          color: textColor || '#1f2937',
-                          border: '1px solid #e5e7eb'
+                          backgroundColor: backgroundColor || '#f3f4f6',
+                          border: `1px solid ${backgroundColor ? 'rgba(0,0,0,0.1)' : '#e5e7eb'}`
                         }}
                       >
                         <div className="flex items-center gap-2">
@@ -464,7 +466,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           </div>
                           {/* Texte */}
                           <div className="flex-1 min-w-0 text-center">
-                            <p className="font-medium text-sm" style={{ color: '#1f2937', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{link.title || 'Titre du lien'}</p>
+                            <p className="font-medium text-sm" style={{ color: textColor || '#1f2937', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{link.title || 'Titre du lien'}</p>
                           </div>
                         </div>
                       </motion.div>
