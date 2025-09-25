@@ -1,10 +1,10 @@
 'use client'
-// Vercel Deploy Trigger - 2025-09-20
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowRight,
@@ -20,8 +20,16 @@ import {
 } from 'lucide-react'
 import { debounce } from 'lodash'
 
-import { SiteHeader } from '@/components/marketing/SiteHeader'
-import { SiteFooter } from '@/components/marketing/SiteFooter'
+// Lazy loading des composants lourds
+const SiteHeader = dynamic(() => import('@/components/marketing/SiteHeader').then(mod => ({ default: mod.SiteHeader })), {
+  loading: () => <div className="h-16 bg-white dark:bg-gray-900" />,
+  ssr: false
+})
+const SiteFooter = dynamic(() => import('@/components/marketing/SiteFooter').then(mod => ({ default: mod.SiteFooter })), {
+  loading: () => <div className="h-32" />,
+  ssr: false
+})
+
 import { Container } from '@/components/ui/Container'
 import { Button } from '@/components/ui/button'
 
