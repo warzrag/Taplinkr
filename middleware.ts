@@ -4,19 +4,10 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // BLOQUER COMPLÈTEMENT LE TRACKING - URGENT
-  if (pathname.startsWith('/api/track')) {
-    console.log('🚫 TRACKING BLOQUÉ:', pathname)
-    return NextResponse.json(
-      {
-        blocked: true,
-        message: 'Tracking désactivé - Maintenance en cours',
-        clicks: 0,
-        views: 0
-      },
-      { status: 503 }
-    )
-  }
+  // Laisser passer le tracking - protections dans l'API et le composant
+  // if (pathname.startsWith('/api/track')) {
+  //   // Tracking réactivé avec protections
+  // }
 
   // Ignorer les routes API, static files et les routes Next.js
   if (
