@@ -115,9 +115,12 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const profileImage = link?.profileImage || null
   const coverImage = link?.coverImage || null
   const title = link?.title || 'Mes liens'
-  const bio = link?.bio || null
+  const bio = link?.description || null
   const multiLinks = link?.multiLinks || []
   const clicks = link?.clicks || 0
+
+  console.log('🔍 PublicLinkPreviewFinal - link:', link)
+  console.log('🔍 PublicLinkPreviewFinal - multiLinks:', multiLinks)
 
   return (
     <div className="min-h-screen relative bg-gray-900">
