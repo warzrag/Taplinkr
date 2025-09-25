@@ -62,7 +62,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         window.removeEventListener('beforeunload', handleBeforeUnload)
       }
     }
-  }, [link?.id, clickId])
+  }, [link?.id]) // Ne pas dépendre de clickId pour éviter la boucle
 
   if (!link) {
     return <div className="min-h-screen bg-gray-900" />
