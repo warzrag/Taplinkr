@@ -117,8 +117,28 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
 
   return (
     <div className="min-h-screen relative bg-gray-900">
-      {/* Background image en plein écran */}
-      <div className="fixed inset-0 z-0">
+      {/* Background flouté pour desktop */}
+      <div className="hidden md:block fixed inset-0 z-0">
+        {coverImage ? (
+          <div
+            className="w-full h-full blur-3xl scale-110"
+            style={{
+              backgroundImage: `url(${coverImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            <div className="absolute inset-0 bg-black/60" />
+          </div>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900">
+            <div className="absolute inset-0 bg-black/50" />
+          </div>
+        )}
+      </div>
+
+      {/* Background pour mobile */}
+      <div className="md:hidden fixed inset-0 z-0">
         {coverImage ? (
           <div
             className="w-full h-full"
@@ -128,18 +148,37 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
               backgroundPosition: 'center'
             }}
           >
-            <div className="absolute inset-0 bg-black bg-opacity-40" />
+            <div className="absolute inset-0 bg-black/40" />
           </div>
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900">
-            <div className="absolute inset-0 bg-black bg-opacity-50" />
-          </div>
+          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900" />
         )}
       </div>
 
-      {/* Contenu en plein écran */}
-      <div className="relative z-10 min-h-screen flex flex-col justify-end">
-        <div className="w-full max-w-md mx-auto px-6 pb-20 pt-12">
+      {/* Conteneur format téléphone centré sur desktop */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center md:py-8 md:px-4">
+        <div className="w-full md:w-[390px] md:max-h-[844px] md:rounded-[3rem] md:shadow-2xl md:overflow-hidden md:bg-black/10 md:backdrop-blur-xl">
+          {/* Background image pour desktop (dans le cadre) */}
+          <div className="hidden md:block absolute inset-0 z-0 rounded-[3rem] overflow-hidden">
+            {coverImage ? (
+              <div
+                className="w-full h-full"
+                style={{
+                  backgroundImage: `url(${coverImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
+                <div className="absolute inset-0 bg-black/40" />
+              </div>
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900" />
+            )}
+          </div>
+
+          {/* Contenu */}
+          <div className="relative z-10 min-h-screen md:min-h-0 md:h-[844px] flex flex-col justify-end overflow-y-auto">
+            <div className="w-full px-6 pb-20 pt-12">
           
           {/* Header avec profil */}
           <div className="text-center mb-8">
@@ -289,6 +328,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
             >
               Créé avec TapLinkr
             </a>
+          </div>
+            </div>
           </div>
         </div>
       </div>
