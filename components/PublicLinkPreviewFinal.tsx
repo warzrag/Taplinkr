@@ -117,18 +117,18 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
 
   return (
     <div className="min-h-screen relative bg-gray-900">
-      {/* Background flou pour PC */}
+      {/* Background image en plein écran */}
       <div className="fixed inset-0 z-0">
         {coverImage ? (
           <div
-            className="w-full h-full blur-2xl scale-110"
+            className="w-full h-full"
             style={{
               backgroundImage: `url(${coverImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
           >
-            <div className="absolute inset-0 bg-black bg-opacity-70" />
+            <div className="absolute inset-0 bg-black bg-opacity-40" />
           </div>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900">
@@ -137,15 +137,9 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         )}
       </div>
 
-      {/* Conteneur format téléphone */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center py-8 px-4">
-        <div className="w-full max-w-[390px] mx-auto">
-          {/* Simulation cadre téléphone sur desktop */}
-          <div className="hidden md:block absolute inset-0 -inset-x-8 -inset-y-8 bg-black/20 backdrop-blur-xl rounded-[3rem] shadow-2xl" />
-
-          {/* Contenu scrollable style téléphone */}
-          <div className="relative bg-white/10 backdrop-blur-md rounded-[2.5rem] md:rounded-[2rem] min-h-[600px] max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+      {/* Contenu en plein écran */}
+      <div className="relative z-10 min-h-screen flex flex-col justify-end">
+        <div className="w-full max-w-md mx-auto px-6 pb-20 pt-12">
           
           {/* Header avec profil */}
           <div className="text-center mb-8">
@@ -296,11 +290,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
               Créé avec TapLinkr
             </a>
           </div>
-            </div>
-          </div>
         </div>
       </div>
-
     </div>
   )
 }
