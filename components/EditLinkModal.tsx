@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Link2, Settings, Palette, Share2 } from 'lucide-react'
+import { X, Save, Link2, Settings, Palette, Share2, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link } from '@/types'
@@ -24,6 +24,27 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
     slug: '',
     isActive: true
   })
+  const [multiLinks, setMultiLinks] = useState<Array<{
+    id?: string
+    title: string
+    url: string
+    icon?: string
+    description?: string
+  }>>([])
+
+  const addMultiLink = () => {
+    setMultiLinks([...multiLinks, { title: '', url: '', icon: '🔗' }])
+  }
+
+  const removeMultiLink = (index: number) => {
+    setMultiLinks(multiLinks.filter((_, i) => i !== index))
+  }
+
+  const updateMultiLink = (index: number, field: string, value: string) => {
+    const updated = [...multiLinks]
+    updated[index] = { ...updated[index], [field]: value }
+    setMultiLinks(updated)
+  }
 
   useEffect(() => {
     if (editingLink) {
@@ -33,6 +54,10 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
         slug: editingLink.slug || '',
         isActive: editingLink.isActive ?? true
       })
+      // Charger les multiLinks
+      if (editingLink.multiLinks && editingLink.multiLinks.length > 0) {
+        setMultiLinks(editingLink.multiLinks)
+      }
     }
   }, [editingLink])
 
@@ -44,7 +69,10 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
       const response = await fetch(`/api/links/${editingLink.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(linkData)
+        body: JSON.stringify({
+          ...linkData,
+          multiLinks: multiLinks
+        })
       })
 
       if (!response.ok) {
@@ -67,6 +95,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
   const tabs = [
     { id: 'general', label: 'Général', icon: Settings },
+    { id: 'links', label: 'Liens', icon: Link2 },
     { id: 'design', label: 'Design', icon: Palette },
     { id: 'social', label: 'Réseaux', icon: Share2 }
   ]
@@ -197,6 +226,101 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
                         placeholder="Une courte description..."
                       />
                     </div>
+                  </>
+                )}
+
+                {activeTab === 'links' && (
+                  <>
+                    {multiLinks.map((link, index) => (
+                      <div key={index} className="p-4 border border-gray-200 rounded-xl space-y-3">
+                        {/* Titre et URL */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Titre
+                            </label>
+                            <input
+                              type="text"
+                              value={link.title}
+                              onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              placeholder="Mon lien"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              URL
+                            </label>
+                            <input
+                              type="url"
+                              value={link.url}
+                              onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              placeholder="https://..."
+                            />
+                          </div>
+                        </div>
+
+                        {/* Icon et Description */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Icône
+                            </label>
+                            <input
+                              type="text"
+                              value={link.icon || ''}
+                              onChange={(e) => updateMultiLink(index, 'icon', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              placeholder="🔗"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Description
+                            </label>
+                            <input
+                              type="text"
+                              value={link.description || ''}
+                              onChange={(e) => updateMultiLink(index, 'description', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              placeholder="Courte description"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Bouton supprimer */}
+                        <button
+                          onClick={() => removeMultiLink(index)}
+                          className="w-full py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Supprimer ce lien
+                        </button>
+                      </div>
+                    ))}
+
+                    {/* Bouton ajouter */}
+                    <button
+                      onClick={addMultiLink}
+                      className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-colors font-medium flex items-center justify-center gap-2"
+                    >
+                      <Plus className="w-5 h-5" />
+                      Ajouter un lien
+                    </button>
+
+                    {multiLinks.length === 0 && (
+                      <div className="text-center py-12">
+                        <Link2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500 mb-4">Aucun lien pour le moment</p>
+                        <button
+                          onClick={addMultiLink}
+                          className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all"
+                        >
+                          Créer le premier lien
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
 
