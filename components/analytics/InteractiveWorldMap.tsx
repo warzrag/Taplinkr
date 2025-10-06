@@ -172,27 +172,17 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
   // Récupérer les données des pays
   const countryData = data?.topCountries || data?.stats?.topCountries || []
 
-  console.log('🗺️ InteractiveWorldMap - données reçues:', {
-    topCountries: data?.topCountries,
-    countryData: countryData,
-    dataKeys: Object.keys(data || {})
-  })
-
   // Créer un objet pour un accès rapide
   const clicksByCountry: Record<string, number> = {}
   let totalClicks = 0
 
   countryData.forEach(([code, clicks]) => {
     const iso3Code = countryCodeMapping[code]
-    console.log(`🔄 Conversion: ${code} → ${iso3Code} (${clicks} clics)`)
     if (iso3Code) {
       clicksByCountry[iso3Code] = clicks
       totalClicks += clicks
     }
   })
-
-  console.log('📊 clicksByCountry:', clicksByCountry)
-  console.log('📊 totalClicks:', totalClicks)
   
   // Calculer l'échelle de couleurs avec les nouvelles plages
   const colorScale = scaleLinear<string>()
@@ -203,9 +193,6 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
     setPosition(position)
   }
 
-  // Compteur pour logger seulement les premiers pays
-  let countryCounter = 0
-
   const getCountryColor = (geo: any) => {
     // world-atlas@2 utilise geo.id pour le code ISO numérique
     // geo.properties.name contient le nom en anglais (ex: "France")
@@ -213,28 +200,6 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
     // Convertir le nom en code ISO-3 pour matcher avec clicksByCountry
     const countryCodeISO3 = countryName ? countryNameToISO3[countryName] : null
     const clicks = countryCodeISO3 ? (clicksByCountry[countryCodeISO3] || 0) : 0
-
-    // Logger les 10 premiers pays pour debug
-    if (countryCounter < 10) {
-      console.log(`🗺️ Pays #${countryCounter + 1}:`, {
-        id: geo.id,
-        name: countryName,
-        iso3: countryCodeISO3,
-        clicks: clicks,
-        hasClicksInMap: countryCodeISO3 ? (clicksByCountry[countryCodeISO3] !== undefined) : false
-      })
-      countryCounter++
-    }
-
-    // Logger spécifiquement si on trouve la France (id 250 dans world-atlas)
-    if (geo.id === '250') {
-      console.log('🇫🇷 FRANCE DÉTECTÉE:', {
-        name: countryName,
-        iso3: countryCodeISO3,
-        clicks: clicks,
-        clicksByCountry: clicksByCountry
-      })
-    }
 
     if (clicks === 0) return '#f3f4f6'
     return colorScale(clicks)
