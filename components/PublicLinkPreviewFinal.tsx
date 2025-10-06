@@ -272,48 +272,50 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   <button
                     key={linkId}
                     onClick={() => handleLinkClick(linkId, linkUrl)}
-                    className={`w-full bg-white/90 hover:bg-white/95 backdrop-blur-sm ${borderRadius} py-3 px-4 shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-3 group`}
+                    className={`w-full bg-white/90 hover:bg-white/95 backdrop-blur-sm ${borderRadius} py-3 px-4 shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-2 group`}
                   >
                     {linkIcon && (
                       <img
                         src={linkIcon}
                         alt=""
-                        className="w-10 h-10 rounded-lg object-cover"
+                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                         onError={(e: any) => {
                           e.target.style.display = 'none'
                         }}
                       />
                     )}
-                    
-                    <span className="flex-1 text-center text-gray-900 font-semibold text-base leading-tight">
+
+                    <span className="flex-1 text-center text-gray-900 font-semibold text-xs whitespace-nowrap px-1" style={{ minWidth: 0 }}>
                       {linkTitle}
                     </span>
-                    
-                    {!confirmedLinks.includes(linkId) && (
-                      <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded mr-2">
-                        18+
-                      </span>
-                    )}
-                    
-                    {isClicked && (
-                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
-                        Visité
-                      </span>
-                    )}
-                    
-                    <svg 
-                      className="w-5 h-5 text-gray-400 ml-2"
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {!confirmedLinks.includes(linkId) && (
+                        <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded whitespace-nowrap">
+                          18+
+                        </span>
+                      )}
+
+                      {isClicked && (
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded whitespace-nowrap">
+                          Visité
+                        </span>
+                      )}
+
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
                   </button>
                 )
               })
