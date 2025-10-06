@@ -21,6 +21,8 @@ interface Folder {
   order: number
   parentId?: string | null
   children?: Folder[]
+  teamShared?: boolean
+  teamId?: string | null
 }
 
 export default function FoldersPage() {
@@ -180,6 +182,46 @@ export default function FoldersPage() {
     }))
   }
 
+  const handleShareFolder = async (folderId: string, folderName: string) => {
+    try {
+      const response = await fetch('/api/folders/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folderId })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(`"${folderName}" partagé avec l'équipe`)
+        fetchData()
+      } else {
+        toast.error(data.error || 'Erreur lors du partage')
+      }
+    } catch (error) {
+      toast.error('Erreur lors du partage')
+    }
+  }
+
+  const handleUnshareFolder = async (folderId: string, folderName: string) => {
+    try {
+      const response = await fetch(`/api/folders/share?folderId=${folderId}`, {
+        method: 'DELETE'
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(`"${folderName}" retiré du partage`)
+        fetchData()
+      } else {
+        toast.error(data.error || 'Erreur')
+      }
+    } catch (error) {
+      toast.error('Erreur lors du retrait')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-7xl mx-auto p-4 lg:p-8">
@@ -225,7 +267,7 @@ export default function FoldersPage() {
         </motion.div>
 
         {/* DragDropDashboard Component */}
-        <DragDropDashboard 
+        <DragDropDashboard
           folders={folders}
           unorganizedLinks={unorganizedLinks}
           onFoldersChange={setFolders}
@@ -238,6 +280,8 @@ export default function FoldersPage() {
           onEditFolder={handleEditFolder}
           onDeleteFolder={handleDeleteFolder}
           onToggleFolder={handleToggleFolder}
+          onShareFolder={handleShareFolder}
+          onUnshareFolder={handleUnshareFolder}
           onCreateLinkInFolder={(folderId) => {
             setSelectedFolderId(folderId)
             setShowCreateModal(true)

@@ -23,15 +23,16 @@ import {
 } from '@dnd-kit/sortable'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { 
-  Folder as FolderIcon, 
-  Plus, 
-  ChevronDown, 
+import {
+  Folder as FolderIcon,
+  Plus,
+  ChevronDown,
   ChevronRight,
   Edit2,
   Trash2,
   Link2,
-  FolderPlus
+  FolderPlus,
+  Share2
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import LinkCard from './LinkCard'
@@ -50,6 +51,8 @@ interface Folder {
   order: number
   parentId?: string | null
   children?: Folder[]
+  teamShared?: boolean
+  teamId?: string | null
 }
 
 interface DragDropDashboardProps {
@@ -65,17 +68,21 @@ interface DragDropDashboardProps {
   onEditFolder: (folder: Folder) => void
   onDeleteFolder: (folderId: string) => void
   onToggleFolder: (folderId: string) => void
+  onShareFolder?: (folderId: string, folderName: string) => void
+  onUnshareFolder?: (folderId: string, folderName: string) => void
   onCreateLinkInFolder?: (folderId: string) => void
 }
 
-function SortableFolder({ 
-  folder, 
-  children, 
-  onEdit, 
-  onDelete, 
+function SortableFolder({
+  folder,
+  children,
+  onEdit,
+  onDelete,
   onToggle,
   onCreateSubfolder,
   onCreateLink,
+  onShare,
+  onUnshare,
   onMouseEnter,
   onMouseLeave,
   isOver,
@@ -88,6 +95,8 @@ function SortableFolder({
   onToggle: () => void
   onCreateSubfolder: () => void
   onCreateLink?: () => void
+  onShare?: () => void
+  onUnshare?: () => void
   onMouseEnter?: (event: React.MouseEvent) => void
   onMouseLeave?: () => void
   isOver?: boolean
@@ -200,6 +209,31 @@ function SortableFolder({
           >
             <FolderPlus className="w-4 h-4" />
           </motion.button>
+          {(folder as any).teamShared ? (
+            onUnshare && (
+              <motion.button
+                onClick={onUnshare}
+                className="p-2 hover:bg-orange-100 rounded-lg transition-colors text-orange-600 hover:text-orange-700"
+                title="Retirer du partage"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Share2 className="w-4 h-4" />
+              </motion.button>
+            )
+          ) : (
+            onShare && (
+              <motion.button
+                onClick={onShare}
+                className="p-2 hover:bg-indigo-100 rounded-lg transition-colors text-indigo-600 hover:text-indigo-700"
+                title="Partager avec la team"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Share2 className="w-4 h-4" />
+              </motion.button>
+            )
+          )}
           <motion.button
             onClick={onEdit}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-700"
@@ -303,6 +337,8 @@ export default function DragDropDashboard({
   onEditFolder,
   onDeleteFolder,
   onToggleFolder,
+  onShareFolder,
+  onUnshareFolder,
   onCreateLinkInFolder,
 }: DragDropDashboardProps) {
   const { refreshAll: refreshLinksContext } = useLinks()
@@ -761,6 +797,8 @@ export default function DragDropDashboard({
             setShowCreateForm(true)
           }}
           onCreateLink={onCreateLinkInFolder ? () => onCreateLinkInFolder(folder.id) : undefined}
+          onShare={onShareFolder ? () => onShareFolder(folder.id, folder.name) : undefined}
+          onUnshare={onUnshareFolder ? () => onUnshareFolder(folder.id, folder.name) : undefined}
           onMouseEnter={(event) => handleFolderMouseEnter(event, folder.id, folder.name)}
           onMouseLeave={handleFolderMouseLeave}
           isOver={overId === `folder-${folder.id}`}
