@@ -76,16 +76,31 @@ export default function Dashboard() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
   const [liveEditingLink, setLiveEditingLink] = useState<LinkType | null>(null)
-  const [dashboardStats, setDashboardStats] = useState<any>(null)
+  const [dashboardStats, setDashboardStats] = useState<any>({
+    totalLinks: 0,
+    totalClicks: 0,
+    totalViews: 0,
+    uniqueVisitors: 0,
+    topLinks: [],
+    topCountries: [],
+    summary: []
+  })
   const [analyticsLoading, setAnalyticsLoading] = useState(true)
+  const [folderStatsLoading, setFolderStatsLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('7')
-  const [folderStats, setFolderStats] = useState<any>(null)
+  const [folderStats, setFolderStats] = useState<any>({
+    totalFolders: 0,
+    organizedLinks: 0,
+    topFolders: []
+  })
 
   useEffect(() => {
     if (status === 'authenticated') {
-      // refreshLinks() // Pas besoin, le contexte charge déjà automatiquement
-      fetchDashboardStats()
-      fetchFolderStats()
+      // Charger les données en parallèle pour gagner du temps
+      Promise.all([
+        fetchDashboardStats(),
+        fetchFolderStats()
+      ]).catch(err => console.error('Erreur chargement dashboard:', err))
     }
   }, [status])
 
@@ -94,27 +109,17 @@ export default function Dashboard() {
   const fetchDashboardStats = async () => {
     try {
       setAnalyticsLoading(true)
-      
-      // Récupérer les vraies données analytics - utiliser la version qui affiche TOUT
-      const response = await fetch('/api/analytics/dashboard-all')
+
+      // Récupérer les vraies données analytics
+      const response = await fetch('/api/analytics/dashboard-all', {
+        // Ajouter un cache court pour éviter les requêtes répétées
+        next: { revalidate: 30 }
+      })
       if (response.ok) {
         const data = await response.json()
-        console.log('📊 Dashboard stats reçues:', data)
-        console.log('📊 Total clics:', data.totalClicks)
         setDashboardStats(data)
       } else {
         console.error('Erreur API dashboard-all:', response.status)
-        // Fallback sur dashboard-simple
-        try {
-          const fallbackResponse = await fetch('/api/analytics/dashboard-simple')
-          if (fallbackResponse.ok) {
-            const fallbackData = await fallbackResponse.json()
-            console.log('📊 Fallback stats:', fallbackData)
-            setDashboardStats(fallbackData)
-          }
-        } catch (e) {
-          console.error('Erreur fallback:', e)
-        }
       }
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error)
@@ -125,6 +130,7 @@ export default function Dashboard() {
 
   const fetchFolderStats = async () => {
     try {
+      setFolderStatsLoading(true)
       const response = await fetch('/api/analytics/folders')
       if (response.ok) {
         const data = await response.json()
@@ -138,6 +144,8 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Erreur lors du chargement des stats dossiers:', error)
+    } finally {
+      setFolderStatsLoading(false)
     }
   }
 
@@ -219,18 +227,6 @@ export default function Dashboard() {
       description: userProfile?.plan === 'free' ? 'Débloquez la puissance Pro 🚀' : 'Gérez votre plan Premium ⚡'
     }
   ]
-
-  if (contextLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-3 border-blue-600 border-t-transparent rounded-full"
-        />
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">

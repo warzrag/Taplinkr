@@ -38,8 +38,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   const [teamLinks, setTeamLinks] = useState<LinkType[]>([])
   const [hasTeam, setHasTeam] = useState(false)
   const [folders, setFolders] = useState<Folder[]>([])
-  const [loading, setLoading] = useState(false) // Commencer à false
-  const [hasLoaded, setHasLoaded] = useState(false) // Pour savoir si on a déjà chargé
+  const [loading, setLoading] = useState(false)
+  const [hasLoaded, setHasLoaded] = useState(false)
 
   // Fonction simplifiée sans retry automatique
   const fetchLinks = async () => {
