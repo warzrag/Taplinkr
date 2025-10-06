@@ -130,7 +130,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           return
         }
         const data = await response.json()
-        console.log('Vérification slug:', watchedSlug, 'Disponible:', data.available)
         setSlugAvailable(data.available)
       } catch (error) {
         console.error('Erreur vérification slug:', error)
@@ -165,7 +164,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
   const addMultiLink = () => {
     const newLinks = [...multiLinks, { title: '', url: '', icon: '', iconImage: '' }]
-    console.log('Ajout d\'un nouveau lien. Total:', newLinks.length)
     setMultiLinks(newLinks)
   }
 
@@ -215,11 +213,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       const url = editingLink ? `/api/links/${editingLink.id}` : '/api/links-create-final'
       const method = editingLink ? 'PUT' : 'POST'
       
-      console.log('🔍 AVANT ENVOI - multiLinks:', multiLinks)
-      console.log('🔍 AVANT ENVOI - linkType:', linkType)
-
       const filteredMultiLinks = linkType === 'multi' ? multiLinks.filter(link => link.title || link.url) : []
-      console.log('🔍 APRÈS FILTRE - filteredMultiLinks:', filteredMultiLinks)
+      console.log('🔍 MultiLinks à envoyer:', filteredMultiLinks)
 
       const requestBody = {
         ...data,
@@ -243,11 +238,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         textColor: textColor || '#1f2937'
       }
       
-      console.log('🚀 ENVOI DE LA REQUÊTE')
-      console.log('📤 URL:', url)
-      console.log('📤 METHOD:', method)
-      console.log('📤 REQUEST BODY:', JSON.stringify(requestBody, null, 2))
-      console.log('📤 multiLinks dans body:', requestBody.multiLinks)
+      console.log('📤 Requête:', method, url, '| MultiLinks:', requestBody.multiLinks?.length || 0)
 
       const response = await fetch(url, {
         method,
@@ -262,6 +253,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       }
 
       const newLink = await response.json()
+      console.log('✅ Réponse API - MultiLinks créés:', newLink.multiLinks?.length || 0)
       toast.success(editingLink ? 'Lien modifié avec succès' : 'Lien créé avec succès')
       onSuccess(newLink)
       handleClose()
@@ -331,7 +323,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           {/* Form - Scrollable */}
           <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
             <div className="space-y-6">
-              {console.log('🎯 RENDU - Étape:', step, 'Type de lien:', linkType)}
             {step === 1 ? (
                 /* Étape 1: Choix du type de lien */
                 <motion.div
@@ -515,7 +506,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <motion.button
                       type="button"
                       onClick={() => {
-                        console.log('🎯 Clic sur Beacon/Immersif')
                         setProfileStyle('beacon')
                       }}
                       initial={{ opacity: 0, y: 50, scale: 0.9 }}
@@ -918,7 +908,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 </motion.div>
               ) : step === 6 && linkType === 'multi' ? (
                 /* Étape 6: Personnalisation des liens (dernière étape) */
-                console.log('🔥🔥🔥 ON EST À L\'ÉTAPE 6 - PERSONNALISATION 🔥🔥🔥') ||
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1171,7 +1160,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 </motion.div>
               ) : step === 5 && linkType === 'multi' ? (
                 /* Étape 5: Détails du lien */
-                console.log('💚💚💚 ON EST À L\'ÉTAPE 5 - DÉTAILS DU LIEN 💚💚💚') ||
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1521,7 +1509,6 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   {/* Ajout des liens directement dans l'étape 5 */}
                   {linkType === 'multi' && (
                     <>
-                      {console.log('🔍 ÉTAPE 5 - profileStyle actuel:', profileStyle)}
                       <div className="pt-4 border-t">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Vos liens</h3>
                         <div className="space-y-3">
