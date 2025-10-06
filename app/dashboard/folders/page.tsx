@@ -26,7 +26,7 @@ interface Folder {
 export default function FoldersPage() {
   const [folders, setFolders] = useState<Folder[]>([])
   const [unorganizedLinks, setUnorganizedLinks] = useState<LinkType[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Commencer à false pour affichage immédiat
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
@@ -39,11 +39,17 @@ export default function FoldersPage() {
 
   const fetchData = async () => {
     try {
-      // Récupérer les dossiers (utiliser folders-direct pour éviter les erreurs)
-      const foldersResponse = await fetch('/api/folders-direct')
+      setLoading(true)
+
+      // ⚡ Charger les deux APIs en parallèle pour gagner du temps
+      const [foldersResponse, linksResponse] = await Promise.all([
+        fetch('/api/folders-direct'),
+        fetch('/api/links-direct')
+      ])
+
+      // Traiter les dossiers
       if (foldersResponse.ok) {
         const foldersData = await foldersResponse.json()
-        // L'API retourne directement un tableau, ajouter isExpanded
         const foldersWithExpanded = (foldersData || []).map((folder: any) => ({
           ...folder,
           isExpanded: false,
@@ -53,11 +59,9 @@ export default function FoldersPage() {
           })) || []
         }))
         setFolders(foldersWithExpanded)
-        console.log('Dossiers chargés:', foldersWithExpanded)
       }
 
-      // Récupérer les liens non organisés (utiliser links-direct pour éviter les erreurs)
-      const linksResponse = await fetch('/api/links-direct')
+      // Traiter les liens non organisés
       if (linksResponse.ok) {
         const linksData = await linksResponse.json()
         const unorganized = linksData.filter((link: LinkType) => !link.folderId)
@@ -174,18 +178,6 @@ export default function FoldersPage() {
       }
       return folder
     }))
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-3 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full"
-        />
-      </div>
-    )
   }
 
   return (

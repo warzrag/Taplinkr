@@ -12,30 +12,67 @@ export async function GET() {
       return NextResponse.json([])
     }
 
-    // Récupérer les dossiers avec Prisma
+    // ⚡ Optimisation: charger seulement les champs nécessaires
     const folders = await prisma.folder.findMany({
-      where: { userId: session.user.id },
+      where: {
+        userId: session.user.id,
+        parentId: null // Charger directement les dossiers racine
+      },
       orderBy: { order: 'asc' },
       include: {
         links: {
-          orderBy: { order: 'asc' }
+          orderBy: { order: 'asc' },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            icon: true,
+            color: true,
+            clicks: true,
+            views: true,
+            isActive: true,
+            isDirect: true,
+            order: true,
+            folderId: true,
+            // Ne pas charger les multiLinks ici
+            _count: {
+              select: { multiLinks: true }
+            }
+          }
         },
         children: {
           orderBy: { order: 'asc' },
           include: {
             links: {
-              orderBy: { order: 'asc' }
+              orderBy: { order: 'asc' },
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+                icon: true,
+                color: true,
+                clicks: true,
+                views: true,
+                isActive: true,
+                isDirect: true,
+                order: true,
+                folderId: true,
+                _count: {
+                  select: { multiLinks: true }
+                }
+              }
             }
           }
         }
       }
     })
 
-    // Filtrer pour ne garder que les dossiers racine
-    const rootFolders = folders.filter(f => !f.parentId)
+    const response = NextResponse.json(folders)
 
-    console.log(`✅ API Folders Direct: ${rootFolders.length} dossiers trouvés`)
-    return NextResponse.json(rootFolders)
+    // Cache de 30 secondes
+    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+
+    return response
 
   } catch (error) {
     console.error('❌ Erreur API Folders Direct:', error)
