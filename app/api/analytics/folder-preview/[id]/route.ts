@@ -6,8 +6,8 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.email) {
+
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -17,12 +17,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const folder = await prisma.folder.findFirst({
       where: {
         id: folderId,
-        user: { email: session.user.email }
+        userId: session.user.id
       },
       include: {
         links: true
       }
     })
+
+    console.log(`📊 Folder Analytics: ${folder?.name || 'introuvable'} - ${folder?.links.length || 0} liens - ${folder?.links.reduce((sum, link) => sum + (link.clicks || 0), 0) || 0} clics`)
 
     if (!folder) {
       return NextResponse.json({ error: 'Dossier non trouvé' }, { status: 404 })
