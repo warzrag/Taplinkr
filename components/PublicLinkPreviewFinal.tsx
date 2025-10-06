@@ -285,7 +285,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                       />
                     )}
                     
-                    <span className="flex-1 text-center text-gray-900 font-semibold text-lg truncate">
+                    <span className="flex-1 text-center text-gray-900 font-semibold text-base leading-tight">
                       {linkTitle}
                     </span>
                     

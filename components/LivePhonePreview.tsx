@@ -443,7 +443,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                           </div>
                           {/* Texte */}
                           <div className="flex-1 min-w-0 text-center">
-                            <p className="font-medium text-sm" style={{ color: textColor || '#1f2937', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{link.title || 'Titre du lien'}</p>
+                            <p className="font-medium text-sm leading-tight" style={{ color: textColor || '#1f2937' }}>{link.title || 'Titre du lien'}</p>
                           </div>
                         </div>
                       </motion.div>
