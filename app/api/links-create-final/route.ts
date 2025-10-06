@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       primaryColor: body.primaryColor || '#3b82f6',
       icon: body.icon || '',
       profileImage: body.profileImage || null,
+      profileStyle: body.profileStyle || 'circle',
       coverImage: body.coverImage || null,
       instagramUrl: body.instagramUrl || null,
       tiktokUrl: body.tiktokUrl || null,
