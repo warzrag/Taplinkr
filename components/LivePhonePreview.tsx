@@ -413,19 +413,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   {new Date().toLocaleTimeString()}
                 </div>
                 )}
-                {/* Affichage des multiLinks à partir de l'étape 5 (intégrée) */}
-                {(() => {
-                  console.log('🔍 LivePhonePreview - Step:', currentStep, 'FirstLink:', firstLink);
-                  if (currentStep === 5) {
-                    console.log('📱 Preview à l\'étape 5 - multiLinks:', firstLink?.multiLinks);
-                    if (firstLink?.multiLinks?.length > 0) {
-                      console.log('✅ Preview affiche', firstLink.multiLinks.length, 'liens');
-                    } else {
-                      console.log('❌ Pas de multiLinks dans firstLink');
-                    }
-                  }
-                  return null;
-                })()}
                 {/* Conteneur des liens avec position fixe */}
                 {((!currentStep || currentStep >= 5) && firstLink?.multiLinks && firstLink.multiLinks.length > 0) ? (
                   <div className="absolute px-2" style={{ top: '440px', left: '0', right: '0' }}>
