@@ -49,10 +49,14 @@ export async function POST(request: NextRequest) {
     const newLink = await createLinkDB(linkData)
 
     // Si c'est un multi-lien, créer les sous-liens
+    console.log('🔍 API Check - isDirect:', body.isDirect, 'multiLinks count:', body.multiLinks?.length)
     if (!body.isDirect && body.multiLinks && body.multiLinks.length > 0) {
+      console.log('✅ Appel createMultiLinksDB')
       const createdMultiLinks = await createMultiLinksDB(newLink.id, body.multiLinks)
+      console.log('✅ createMultiLinksDB terminé, retour:', createdMultiLinks.length)
       newLink.multiLinks = createdMultiLinks
     } else {
+      console.log('❌ Condition non remplie - pas de création de multiLinks')
       newLink.multiLinks = []
     }
     
