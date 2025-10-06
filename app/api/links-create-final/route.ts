@@ -45,21 +45,16 @@ export async function POST(request: NextRequest) {
       textColor: body.textColor || '#1f2937'
     }
 
-    console.log('📝 Création du lien FINAL:', linkData.slug)
-    
     // Créer le lien dans PostgreSQL
     const newLink = await createLinkDB(linkData)
-    
+
     // Si c'est un multi-lien, créer les sous-liens
     if (!body.isDirect && body.multiLinks && body.multiLinks.length > 0) {
-      console.log('📎 Création de', body.multiLinks.length, 'multilinks')
       const createdMultiLinks = await createMultiLinksDB(newLink.id, body.multiLinks)
       newLink.multiLinks = createdMultiLinks
     } else {
       newLink.multiLinks = []
     }
-    
-    console.log('✅ Lien créé avec succès FINAL:', newLink.slug)
     
     return NextResponse.json(newLink)
     

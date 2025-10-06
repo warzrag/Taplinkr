@@ -196,7 +196,6 @@ export async function updateLinkDB(linkId: string, updates: any) {
 export async function testConnection() {
   try {
     const result = await query('SELECT NOW()')
-    console.log('✅ Connexion DB réussie:', result.rows[0].now)
     return true
   } catch (error) {
     console.error('❌ Erreur connexion DB:', error)
