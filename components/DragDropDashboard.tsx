@@ -875,8 +875,8 @@ export default function DragDropDashboard({
                 <FolderIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Dossiers</h2>
-                <p className="text-sm text-gray-500">Organisez vos liens</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Dossiers</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Organisez vos liens</p>
               </div>
             </div>
             <motion.button
