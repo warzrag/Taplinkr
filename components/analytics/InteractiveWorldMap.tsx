@@ -126,18 +126,28 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
 
   // Récupérer les données des pays
   const countryData = data?.topCountries || data?.stats?.topCountries || []
-  
+
+  console.log('🗺️ InteractiveWorldMap - données reçues:', {
+    topCountries: data?.topCountries,
+    countryData: countryData,
+    dataKeys: Object.keys(data || {})
+  })
+
   // Créer un objet pour un accès rapide
   const clicksByCountry: Record<string, number> = {}
   let totalClicks = 0
-  
+
   countryData.forEach(([code, clicks]) => {
     const iso3Code = countryCodeMapping[code]
+    console.log(`🔄 Conversion: ${code} → ${iso3Code} (${clicks} clics)`)
     if (iso3Code) {
       clicksByCountry[iso3Code] = clicks
       totalClicks += clicks
     }
   })
+
+  console.log('📊 clicksByCountry:', clicksByCountry)
+  console.log('📊 totalClicks:', totalClicks)
   
   // Calculer l'échelle de couleurs avec les nouvelles plages
   const colorScale = scaleLinear<string>()
