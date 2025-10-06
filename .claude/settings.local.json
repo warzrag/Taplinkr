@@ -1,11 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node check-views.js)",
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node sync-clicks.js)",
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node reset-clicks.js)",
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node check-folder-hugo.js)",
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node -e \"\nconst { Pool } = require(''pg'');\nconst pool = new Pool({ connectionString: process.env.DATABASE_URL });\npool.query(''DELETE FROM folders WHERE id = $1'', [''cmgf9xvzh0001pnqgkjah5uby''])\n  .then(() => {\n    console.log(''✅ Dossier en double supprimé'');\n    return pool.end();\n  })\n  .catch(e => { console.error(e); pool.end(); });\n\")"
+      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node check-folder-hugo.js)"
     ],
     "deny": [],
     "ask": []
