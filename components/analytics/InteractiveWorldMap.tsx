@@ -161,7 +161,17 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
   const getCountryColor = (geo: any) => {
     const countryCode = geo.properties.ISO_A3
     const clicks = clicksByCountry[countryCode] || 0
-    
+
+    // Debug pour la France
+    if (geo.properties.NAME === 'France' || countryCode === 'FRA') {
+      console.log('🇫🇷 France trouvée:', {
+        NAME: geo.properties.NAME,
+        ISO_A3: countryCode,
+        clicks: clicks,
+        clicksByCountry: clicksByCountry
+      })
+    }
+
     if (clicks === 0) return '#f3f4f6'
     return colorScale(clicks)
   }
