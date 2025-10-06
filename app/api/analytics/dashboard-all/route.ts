@@ -3,6 +3,51 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+// Mapping des noms de pays vers les codes ISO-2
+const countryNameToCode: Record<string, string> = {
+  'France': 'FR',
+  'United States': 'US',
+  'United Kingdom': 'GB',
+  'Germany': 'DE',
+  'Spain': 'ES',
+  'Italy': 'IT',
+  'Canada': 'CA',
+  'Brazil': 'BR',
+  'Japan': 'JP',
+  'China': 'CN',
+  'India': 'IN',
+  'Australia': 'AU',
+  'Mexico': 'MX',
+  'Russia': 'RU',
+  'South Africa': 'ZA',
+  'Belgium': 'BE',
+  'Netherlands': 'NL',
+  'Switzerland': 'CH',
+  'Sweden': 'SE',
+  'Norway': 'NO',
+  'Portugal': 'PT',
+  'Austria': 'AT',
+  'Denmark': 'DK',
+  'Finland': 'FI',
+  'Greece': 'GR',
+  'Poland': 'PL',
+  'Romania': 'RO',
+  'Czech Republic': 'CZ',
+  'Czechia': 'CZ',
+  'Hungary': 'HU',
+  'Slovakia': 'SK',
+  'Bulgaria': 'BG',
+  'Croatia': 'HR',
+  'Slovenia': 'SI',
+  'Lithuania': 'LT',
+  'Latvia': 'LV',
+  'Estonia': 'EE',
+  'Ireland': 'IE',
+  'Luxembourg': 'LU',
+  'Malta': 'MT',
+  'Cyprus': 'CY'
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -113,9 +158,13 @@ export async function GET() {
       topCountries = countryCounts
         .sort((a, b) => b._count.country - a._count.country)
         .slice(0, 10)
-        .map(item => [item.country, item._count.country])
+        .map(item => {
+          // Convertir le nom du pays en code ISO-2
+          const countryCode = countryNameToCode[item.country] || item.country
+          return [countryCode, item._count.country]
+        })
 
-      console.log('📊 Top 10 pays:', topCountries)
+      console.log('📊 Top 10 pays (avec codes):', topCountries)
     } catch (e) {
       console.error('Erreur top countries:', e)
     }
