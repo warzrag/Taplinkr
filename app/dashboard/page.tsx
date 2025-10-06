@@ -50,11 +50,21 @@ import { useLinkUpdate } from '@/contexts/LinkUpdateContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
-import DashboardChart from '@/components/analytics/DashboardChart'
-import InteractiveWorldMap from '@/components/analytics/InteractiveWorldMap'
-import CountryBarsChart from '@/components/analytics/CountryBarsChart'
-import { fetchAnalyticsData } from '@/lib/analytics/api-wrapper'
 import { usePermissions } from '@/hooks/usePermissions'
+
+// Lazy load des composants analytics lourds
+const DashboardChart = dynamic(() => import('@/components/analytics/DashboardChart'), {
+  loading: () => <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-xl" />,
+  ssr: false
+})
+const InteractiveWorldMap = dynamic(() => import('@/components/analytics/InteractiveWorldMap'), {
+  loading: () => <div className="w-full h-96 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-xl" />,
+  ssr: false
+})
+const CountryBarsChart = dynamic(() => import('@/components/analytics/CountryBarsChart'), {
+  loading: () => <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-xl" />,
+  ssr: false
+})
 
 interface QuickAction {
   label: string
@@ -131,16 +141,11 @@ export default function Dashboard() {
   const fetchFolderStats = async () => {
     try {
       setFolderStatsLoading(true)
-      const response = await fetch('/api/analytics/folders')
+      // Utiliser l'API simplifiée pour le dashboard
+      const response = await fetch('/api/analytics/folders-simple')
       if (response.ok) {
         const data = await response.json()
-        // Formater les données pour l'affichage
-        const formattedStats = {
-          totalFolders: data.folders.length,
-          organizedLinks: data.folders.reduce((sum: number, f: any) => sum + f.linksCount, 0),
-          topFolders: data.folders.filter((f: any) => f.totalClicks > 0)
-        }
-        setFolderStats(formattedStats)
+        setFolderStats(data)
       }
     } catch (error) {
       console.error('Erreur lors du chargement des stats dossiers:', error)
