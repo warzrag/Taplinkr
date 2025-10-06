@@ -106,11 +106,15 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   }
 
   const profileImage = link?.profileImage || null
+  const profileStyle = link?.profileStyle || 'circle'
   const coverImage = link?.coverImage || null
   const title = link?.title || 'Mes liens'
   const bio = link?.description || null
   const multiLinks = link?.multiLinks || []
   const clicks = link?.clicks || 0
+
+  // En mode beacon, utiliser profileImage comme background
+  const backgroundImage = profileStyle === 'beacon' ? profileImage : coverImage
 
   console.log('🔍 PublicLinkPreviewFinal - link:', link)
   console.log('🔍 PublicLinkPreviewFinal - multiLinks:', multiLinks)
@@ -119,11 +123,11 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     <div className="min-h-screen relative bg-gray-900">
       {/* Background flouté pour desktop */}
       <div className="hidden md:block fixed inset-0 z-0">
-        {coverImage ? (
+        {backgroundImage ? (
           <div
             className="w-full h-full blur-3xl scale-110"
             style={{
-              backgroundImage: `url(${coverImage})`,
+              backgroundImage: `url(${backgroundImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
@@ -139,11 +143,11 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
 
       {/* Background pour mobile */}
       <div className="md:hidden fixed inset-0 z-0">
-        {coverImage ? (
+        {backgroundImage ? (
           <div
             className="w-full h-full"
             style={{
-              backgroundImage: `url(${coverImage})`,
+              backgroundImage: `url(${backgroundImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
@@ -160,11 +164,11 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         <div className="w-full md:w-[390px] md:max-h-[844px] md:rounded-[3rem] md:shadow-2xl md:overflow-hidden md:bg-black/10 md:backdrop-blur-xl">
           {/* Background image pour desktop (dans le cadre) */}
           <div className="hidden md:block absolute inset-0 z-0 rounded-[3rem] overflow-hidden">
-            {coverImage ? (
+            {backgroundImage ? (
               <div
                 className="w-full h-full"
                 style={{
-                  backgroundImage: `url(${coverImage})`,
+                  backgroundImage: `url(${backgroundImage})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
@@ -182,7 +186,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           
           {/* Header avec profil */}
           <div className="text-center mb-8">
-            {profileImage && (
+            {/* Photo de profil en rond - seulement en mode circle */}
+            {profileImage && profileStyle === 'circle' && (
               <div className="mb-4">
                 <img
                   src={profileImage}
