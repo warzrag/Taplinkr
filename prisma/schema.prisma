@@ -183,21 +183,25 @@ model Click {
 }
 
 model Folder {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  color       String?
-  icon        String?
-  userId      String
-  parentId    String?
-  order       Int      @default(0)
-  isExpanded  Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent      Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children    Folder[] @relation("FolderHierarchy")
-  links       Link[]
+  id               String   @id @default(cuid())
+  name             String
+  description      String?
+  color            String?
+  icon             String?
+  userId           String
+  parentId         String?
+  order            Int      @default(0)
+  isExpanded       Boolean  @default(true)
+  teamShared       Boolean  @default(false)
+  teamId           String?
+  originalOwnerId  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team             Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  parent           Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children         Folder[] @relation("FolderHierarchy")
+  links            Link[]
 
   @@map("folders")
 }
@@ -476,10 +480,11 @@ model Team {
   isActive        Boolean          @default(true)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  
+
   owner           User             @relation("TeamOwner", fields: [ownerId], references: [id])
   members         User[]
   links           Link[]
+  folders         Folder[]
   invitations     TeamInvitation[]
   sharedTemplates TeamTemplate[]
   analytics       TeamAnalytics[]

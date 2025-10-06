@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 
-// GET - Récupérer tous les dossiers de l'utilisateur
+// GET - Récupérer tous les dossiers de l'utilisateur (personnels + équipe)
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -11,9 +11,26 @@ export async function GET() {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
+    // Récupérer l'utilisateur et son équipe
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, teamId: true }
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
+    }
+
+    // Inclure les dossiers personnels ET les dossiers d'équipe partagés
     const folders = await prisma.folder.findMany({
-      where: { 
-        user: { email: session.user.email },
+      where: {
+        OR: [
+          { userId: user.id },  // Mes dossiers personnels
+          ...(user.teamId ? [{
+            teamId: user.teamId,  // Dossiers d'équipe
+            teamShared: true
+          }] : [])
+        ],
         parentId: null // Seulement les dossiers racine
       },
       include: {
