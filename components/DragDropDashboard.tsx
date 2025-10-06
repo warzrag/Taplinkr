@@ -337,7 +337,12 @@ export default function DragDropDashboard({
   }
 
   const handleFolderMouseLeave = () => {
-    setTooltipState(prev => ({ ...prev, visible: false }))
+    setTooltipState({
+      visible: false,
+      folderId: null,
+      folderName: '',
+      position: { x: 0, y: 0 }
+    })
   }
 
   const handleCreateFolder = async (parentId?: string) => {
