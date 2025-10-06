@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const multiLink = await prisma.multiLink.findUnique({
       where: { id: multiLinkId },
       include: {
-        link: true
+        parentLink: true
       }
     })
 
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
     // Créer un enregistrement dans la table Click
     await prisma.click.create({
       data: {
-        linkId: multiLink.linkId,
-        userId: multiLink.link.userId,
+        linkId: multiLink.parentLinkId,
+        userId: multiLink.parentLink.userId,
         ip: ipAddress,
         userAgent,
         referer,
