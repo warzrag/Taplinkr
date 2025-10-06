@@ -158,19 +158,31 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
     setPosition(position)
   }
 
+  // Compteur pour logger seulement les premiers pays
+  let countryCounter = 0
+
   const getCountryColor = (geo: any) => {
     const countryCode = geo.properties.ISO_A3
     const clicks = clicksByCountry[countryCode] || 0
 
-    // Debug - logger tous les codes ISO pour trouver la France
-    if (geo.properties.NAME && geo.properties.NAME.toLowerCase().includes('france')) {
-      console.log('🗺️ Pays contenant "France":', {
+    // Logger les 10 premiers pays pour debug
+    if (countryCounter < 10) {
+      console.log(`🗺️ Pays #${countryCounter + 1}:`, {
         NAME: geo.properties.NAME,
         ISO_A3: geo.properties.ISO_A3,
-        ISO_A2: geo.properties.ISO_A2,
-        allProps: geo.properties,
         clicks: clicks,
-        hasClicksInMap: clicksByCountry[countryCode] !== undefined
+        hasClicksInClicksByCountry: clicksByCountry[countryCode] !== undefined
+      })
+      countryCounter++
+    }
+
+    // Logger spécifiquement si on trouve la France
+    if (geo.properties.NAME && geo.properties.NAME.toLowerCase().includes('franc')) {
+      console.log('🇫🇷 FRANCE TROUVÉE:', {
+        NAME: geo.properties.NAME,
+        ISO_A3: geo.properties.ISO_A3,
+        clicks: clicks,
+        clicksByCountry: clicksByCountry
       })
     }
 
