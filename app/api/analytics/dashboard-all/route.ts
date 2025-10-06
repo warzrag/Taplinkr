@@ -87,8 +87,12 @@ export async function GET() {
         id: link.id,
         title: link.title,
         slug: link.slug,
-        clicks: Math.max(link.clicks || 0, link.views || 0),
-        totalMultiLinkClicks: 0
+        clicks: link.clicks || 0,
+        views: link.views || 0,
+        // Le dashboard attend _count.analyticsEvents
+        _count: {
+          analyticsEvents: link.clicks || 0
+        }
       }))
     } catch (e) {
       console.error('Erreur top links:', e)
