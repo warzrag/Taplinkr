@@ -24,9 +24,24 @@ export async function GET() {
 
     console.log(`❌ Cache miss pour user ${session.user.id}`)
 
+    // Récupérer l'équipe de l'utilisateur
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { teamId: true }
+    })
+
     // Une seule requête optimisée avec les données essentielles
+    // Inclure à la fois les liens personnels ET les liens d'équipe partagés
     const links = await prisma.link.findMany({
-      where: { userId: session.user.id },
+      where: {
+        OR: [
+          { userId: session.user.id },  // Mes liens personnels
+          ...(user?.teamId ? [{
+            teamId: user.teamId,         // Liens de mon équipe
+            teamShared: true
+          }] : [])
+        ]
+      },
       select: {
         id: true,
         slug: true,
@@ -44,6 +59,8 @@ export async function GET() {
         order: true,
         createdAt: true,
         updatedAt: true,
+        teamShared: true,  // Ajouter pour savoir si c'est un lien d'équipe
+        userId: true,      // Ajouter pour savoir qui est le propriétaire
         // Inclure juste le nombre de multiLinks
         multiLinks: {
           select: {

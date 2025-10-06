@@ -12,9 +12,24 @@ export async function GET() {
       return NextResponse.json([])
     }
 
+    // Récupérer l'équipe de l'utilisateur
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { teamId: true }
+    })
+
     // ⚡ Optimisation: charger seulement les champs essentiels
+    // Inclure les liens personnels ET les liens d'équipe
     const links = await prisma.link.findMany({
-      where: { userId: session.user.id },
+      where: {
+        OR: [
+          { userId: session.user.id },  // Mes liens
+          ...(user?.teamId ? [{
+            teamId: user.teamId,         // Liens d'équipe
+            teamShared: true
+          }] : [])
+        ]
+      },
       orderBy: { order: 'asc' },
       select: {
         id: true,
@@ -33,6 +48,8 @@ export async function GET() {
         directUrl: true,
         order: true,
         folderId: true,
+        teamShared: true,  // Pour distinguer les liens d'équipe
+        userId: true,      // Pour savoir qui est le propriétaire
         createdAt: true,
         updatedAt: true,
         // Charger seulement le count des multiLinks, pas tous les détails
