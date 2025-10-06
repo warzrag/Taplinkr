@@ -68,6 +68,51 @@ const countryCodeMapping: Record<string, string> = {
   'CY': 'CYP'
 }
 
+// Conversion des NOMS de pays (anglais) vers codes ISO-3
+const countryNameToISO3: Record<string, string> = {
+  'France': 'FRA',
+  'United States of America': 'USA',
+  'United Kingdom': 'GBR',
+  'Germany': 'DEU',
+  'Spain': 'ESP',
+  'Italy': 'ITA',
+  'Canada': 'CAN',
+  'Brazil': 'BRA',
+  'Japan': 'JPN',
+  'China': 'CHN',
+  'India': 'IND',
+  'Australia': 'AUS',
+  'Mexico': 'MEX',
+  'Russia': 'RUS',
+  'South Africa': 'ZAF',
+  'Belgium': 'BEL',
+  'Netherlands': 'NLD',
+  'Switzerland': 'CHE',
+  'Sweden': 'SWE',
+  'Norway': 'NOR',
+  'Portugal': 'PRT',
+  'Austria': 'AUT',
+  'Denmark': 'DNK',
+  'Finland': 'FIN',
+  'Greece': 'GRC',
+  'Poland': 'POL',
+  'Romania': 'ROU',
+  'Czech Republic': 'CZE',
+  'Czechia': 'CZE',
+  'Hungary': 'HUN',
+  'Slovakia': 'SVK',
+  'Bulgaria': 'BGR',
+  'Croatia': 'HRV',
+  'Slovenia': 'SVN',
+  'Lithuania': 'LTU',
+  'Latvia': 'LVA',
+  'Estonia': 'EST',
+  'Ireland': 'IRL',
+  'Luxembourg': 'LUX',
+  'Malta': 'MLT',
+  'Cyprus': 'CYP'
+}
+
 // Noms des pays en français
 const countryNames: Record<string, string> = {
   'FR': 'France',
@@ -163,29 +208,29 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
 
   const getCountryColor = (geo: any) => {
     // world-atlas@2 utilise geo.id pour le code ISO numérique
-    // On doit convertir en ISO_A3 via une table de correspondance
-    const countryId = geo.id
-    const countryCode = geo.properties?.ISO_A3 || geo.properties?.name || countryId
-    const clicks = clicksByCountry[countryCode] || 0
+    // geo.properties.name contient le nom en anglais (ex: "France")
+    const countryName = geo.properties?.name
+    // Convertir le nom en code ISO-3 pour matcher avec clicksByCountry
+    const countryCodeISO3 = countryName ? countryNameToISO3[countryName] : null
+    const clicks = countryCodeISO3 ? (clicksByCountry[countryCodeISO3] || 0) : 0
 
     // Logger les 10 premiers pays pour debug
     if (countryCounter < 10) {
       console.log(`🗺️ Pays #${countryCounter + 1}:`, {
         id: geo.id,
-        properties: geo.properties,
-        countryCode: countryCode,
+        name: countryName,
+        iso3: countryCodeISO3,
         clicks: clicks,
-        hasClicksInClicksByCountry: clicksByCountry[countryCode] !== undefined
+        hasClicksInMap: countryCodeISO3 ? (clicksByCountry[countryCodeISO3] !== undefined) : false
       })
       countryCounter++
     }
 
     // Logger spécifiquement si on trouve la France (id 250 dans world-atlas)
-    if (geo.id === '250' || (geo.properties?.name && geo.properties.name.toLowerCase().includes('franc'))) {
-      console.log('🇫🇷 FRANCE TROUVÉE:', {
-        id: geo.id,
-        properties: geo.properties,
-        countryCode: countryCode,
+    if (geo.id === '250') {
+      console.log('🇫🇷 FRANCE DÉTECTÉE:', {
+        name: countryName,
+        iso3: countryCodeISO3,
         clicks: clicks,
         clicksByCountry: clicksByCountry
       })
