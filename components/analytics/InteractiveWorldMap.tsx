@@ -21,8 +21,8 @@ interface InteractiveWorldMapProps {
   }
 }
 
-// URL pour la topologie du monde - utiliser la version GeoJSON directe
-const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json"
+// URL pour la topologie du monde - version officielle react-simple-maps
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
 
 // Mapping des codes pays ISO-2 vers ISO-3 pour la carte
 const countryCodeMapping: Record<string, string> = {
@@ -162,25 +162,30 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
   let countryCounter = 0
 
   const getCountryColor = (geo: any) => {
-    const countryCode = geo.properties.ISO_A3
+    // world-atlas@2 utilise geo.id pour le code ISO numérique
+    // On doit convertir en ISO_A3 via une table de correspondance
+    const countryId = geo.id
+    const countryCode = geo.properties?.ISO_A3 || geo.properties?.name || countryId
     const clicks = clicksByCountry[countryCode] || 0
 
     // Logger les 10 premiers pays pour debug
     if (countryCounter < 10) {
       console.log(`🗺️ Pays #${countryCounter + 1}:`, {
-        NAME: geo.properties.NAME,
-        ISO_A3: geo.properties.ISO_A3,
+        id: geo.id,
+        properties: geo.properties,
+        countryCode: countryCode,
         clicks: clicks,
         hasClicksInClicksByCountry: clicksByCountry[countryCode] !== undefined
       })
       countryCounter++
     }
 
-    // Logger spécifiquement si on trouve la France
-    if (geo.properties.NAME && geo.properties.NAME.toLowerCase().includes('franc')) {
+    // Logger spécifiquement si on trouve la France (id 250 dans world-atlas)
+    if (geo.id === '250' || (geo.properties?.name && geo.properties.name.toLowerCase().includes('franc'))) {
       console.log('🇫🇷 FRANCE TROUVÉE:', {
-        NAME: geo.properties.NAME,
-        ISO_A3: geo.properties.ISO_A3,
+        id: geo.id,
+        properties: geo.properties,
+        countryCode: countryCode,
         clicks: clicks,
         clicksByCountry: clicksByCountry
       })
