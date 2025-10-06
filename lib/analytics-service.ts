@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { headers } from 'next/headers'
-import { getGeoData, parseUserAgent, parseReferer, parseUTMParams } from './geo-service'
+import { getLocationFromIP } from './geo-location-helper'
+import { parseUserAgent, parseReferer, parseUTMParams } from './geo-service'
 
 interface AnalyticsData {
   linkId: string
@@ -33,16 +34,16 @@ export class AnalyticsService {
     try {
       // Parser les informations de l'appareil
       const deviceInfo = parseUserAgent(data.request.userAgent || '')
-      
+
       // Parser les paramètres UTM
       const utmParams = parseUTMParams(data.request.url || '')
-      
+
       // Parser le referer
       const refererInfo = parseReferer(data.request.referer || null)
-      
-      // Obtenir les données géographiques
-      const geoData = await getGeoData(data.request.ip || 'unknown')
-      
+
+      // Obtenir les données géographiques (utilise le cache partagé)
+      const geoData = await getLocationFromIP(data.request.ip || 'unknown')
+
       // Create analytics event avec toutes les données réelles
       await prisma.analyticsEvent.create({
         data: {
@@ -55,8 +56,8 @@ export class AnalyticsService {
           country: geoData.country,
           region: geoData.region,
           city: geoData.city,
-          latitude: geoData.latitude,
-          longitude: geoData.longitude,
+          latitude: geoData.lat,
+          longitude: geoData.lon,
           device: deviceInfo.device,
           browser: deviceInfo.browser,
           os: deviceInfo.os,
@@ -70,7 +71,7 @@ export class AnalyticsService {
 
       // Update daily summary
       await this.updateDailySummary(data.linkId, data.userId, data.eventType)
-      
+
     } catch (error) {
       console.error('Error tracking analytics event:', error)
     }
