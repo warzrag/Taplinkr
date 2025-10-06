@@ -16,7 +16,7 @@ export async function GET() {
 
     // Récupérer les dossiers de l'utilisateur
     const foldersResponse = await fetch(
-      `${supabaseUrl}/rest/v1/Folder?userId=eq.${session.user.id}&order=order.asc`,
+      `${supabaseUrl}/rest/v1/folders?userId=eq.${session.user.id}&order=order.asc`,
       {
         headers: {
           'apikey': supabaseAnonKey,
@@ -34,7 +34,7 @@ export async function GET() {
 
     // Récupérer TOUS les liens de l'utilisateur
     const linksResponse = await fetch(
-      `${supabaseUrl}/rest/v1/Link?userId=eq.${session.user.id}&order=order.asc&select=*`,
+      `${supabaseUrl}/rest/v1/links?userId=eq.${session.user.id}&order=order.asc&select=*`,
       {
         headers: {
           'apikey': supabaseAnonKey,
