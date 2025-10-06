@@ -18,7 +18,7 @@ async function checkMultiLinks() {
     console.log(`ID: ${link.id}`)
 
     const multiLinks = await pool.query(
-      'SELECT id, title, url, icon, icon_image FROM multi_links WHERE parent_link_id = $1 ORDER BY "order" ASC',
+      'SELECT id, title, url, icon, "iconImage" FROM multi_links WHERE "parentLinkId" = $1 ORDER BY "order" ASC',
       [link.id]
     )
 
