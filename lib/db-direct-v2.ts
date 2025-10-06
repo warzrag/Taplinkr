@@ -118,7 +118,7 @@ export async function createMultiLinksDB(linkId: string, multiLinks: any[]) {
     for (const ml of multiLinks) {
       const result = await query(
         `INSERT INTO multi_links (
-          id, link_id, title, url, icon, icon_image, "order", clicks,
+          id, parent_link_id, title, url, icon, icon_image, "order", clicks,
           created_at, updated_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
         [
