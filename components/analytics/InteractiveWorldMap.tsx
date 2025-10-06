@@ -21,8 +21,8 @@ interface InteractiveWorldMapProps {
   }
 }
 
-// URL pour la topologie du monde
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
+// URL pour la topologie du monde - utiliser la version GeoJSON directe
+const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json"
 
 // Mapping des codes pays ISO-2 vers ISO-3 pour la carte
 const countryCodeMapping: Record<string, string> = {
