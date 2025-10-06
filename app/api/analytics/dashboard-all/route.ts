@@ -116,6 +116,67 @@ export async function GET() {
       console.error('Erreur top countries:', e)
     }
 
+    // 6. Générer les données des 7 derniers jours pour le graphique
+    let summary = []
+    try {
+      const today = new Date()
+      today.setHours(23, 59, 59, 999)
+
+      const sevenDaysAgo = new Date(today)
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+      sevenDaysAgo.setHours(0, 0, 0, 0)
+
+      // Récupérer les clics des 7 derniers jours
+      const clicks = await prisma.click.findMany({
+        where: {
+          userId: session.user.id,
+          createdAt: {
+            gte: sevenDaysAgo,
+            lte: today
+          }
+        },
+        select: {
+          createdAt: true
+        }
+      })
+
+      // Grouper par jour
+      const clicksByDay = new Map()
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(sevenDaysAgo)
+        date.setDate(date.getDate() + i)
+        const dateKey = date.toISOString().split('T')[0]
+        clicksByDay.set(dateKey, 0)
+      }
+
+      // Compter les clics par jour
+      clicks.forEach(click => {
+        const dateKey = new Date(click.createdAt).toISOString().split('T')[0]
+        if (clicksByDay.has(dateKey)) {
+          clicksByDay.set(dateKey, clicksByDay.get(dateKey) + 1)
+        }
+      })
+
+      // Convertir en tableau pour le graphique
+      summary = Array.from(clicksByDay.entries()).map(([date, clicks]) => ({
+        date,
+        clicks
+      }))
+
+      console.log('📈 Données 7 derniers jours:', summary)
+    } catch (e) {
+      console.error('Erreur summary 7 jours:', e)
+      // Générer des données vides si erreur
+      summary = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date()
+        date.setDate(date.getDate() - (6 - i))
+        return {
+          date: date.toISOString().split('T')[0],
+          clicks: 0
+        }
+      })
+    }
+
     // Retourner les données
     return NextResponse.json({
       totalLinks,
@@ -127,10 +188,7 @@ export async function GET() {
       visitorsChange: 0,
       topLinks,
       topCountries,
-      chartData: {
-        labels: [],
-        clicks: []
-      },
+      summary,
       debug: {
         message: "Affichage des clics de l'utilisateur actuel uniquement",
         currentUser: session.user.email,
