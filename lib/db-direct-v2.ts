@@ -51,11 +51,11 @@ export async function createLinkDB(linkData: any) {
     // Adapter les champs à la structure de la table "links"
     const result = await query(
       `INSERT INTO links (
-        id, "userId", title, slug, description, 
-        "isDirect", "directUrl", "isActive", 
+        id, "userId", title, slug, description,
+        "isDirect", "directUrl", "isActive",
         "shieldEnabled", "isUltraLink", "isOnline",
         clicks, views, "order",
-        color, icon, "profileImage", "coverImage",
+        color, icon, "profileImage", "profileStyle", "coverImage",
         "fontFamily", "borderRadius", "backgroundColor", "textColor",
         "instagramUrl", "tiktokUrl", "twitterUrl", "youtubeUrl",
         animation, "createdAt", "updatedAt"
@@ -64,10 +64,10 @@ export async function createLinkDB(linkData: any) {
         $6, $7, $8,
         $9, $10, $11,
         $12, $13, $14,
-        $15, $16, $17, $18,
-        $19, $20, $21, $22,
-        $23, $24, $25, $26,
-        $27, $28, $29
+        $15, $16, $17, $18, $19,
+        $20, $21, $22, $23,
+        $24, $25, $26, $27,
+        $28, $29, $30
       ) RETURNING *`,
       [
         linkData.id,
@@ -87,6 +87,7 @@ export async function createLinkDB(linkData: any) {
         linkData.primaryColor || '#3b82f6', // color
         linkData.icon || '',
         linkData.profileImage,
+        linkData.profileStyle || 'circle',
         linkData.coverImage,
         linkData.fontFamily || 'system',
         linkData.borderRadius || 'rounded-xl',

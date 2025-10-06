@@ -85,6 +85,7 @@ model Link {
   coverImage         String?
   coverImagePosition String?
   profileImage       String?
+  profileStyle       String?             @default("circle")
   coverId            String?
   fontFamily         String?
   borderRadius       String?
