@@ -84,7 +84,9 @@
       "Bash(psql:*)",
       "Bash(DATABASE_URL:*)",
       "Bash(npx supabase:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node check-pg-links.js)",
+      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node check-multilinks.js)"
     ],
     "deny": []
   }
