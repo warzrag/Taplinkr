@@ -38,6 +38,11 @@ export default function FolderAnalyticsTooltip({
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Réinitialiser les données quand le folderId change
+    setData(null)
+  }, [folderId])
+
+  useEffect(() => {
     if (isVisible && !data && !loading) {
       fetchAnalytics()
     }
