@@ -109,16 +109,6 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
   // Utiliser les données du premier lien ou les données par défaut
   const firstLink = links[0]
 
-  // Debug pour voir les données des réseaux sociaux
-  if (firstLink) {
-    console.log('🔍 Debug réseaux sociaux:', {
-      instagram: firstLink.instagramUrl,
-      twitter: firstLink.twitterUrl,
-      youtube: firstLink.youtubeUrl,
-      tiktok: firstLink.tiktokUrl,
-      profileStyle: firstLink.profileStyle
-    })
-  }
 
   const displayName = firstLink?.title || user?.name || defaultDemoData.name
   const displayBio = firstLink?.description || user?.bio || defaultDemoData.bio

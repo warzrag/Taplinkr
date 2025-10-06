@@ -112,6 +112,7 @@ export async function createLinkDB(linkData: any) {
 // Créer des multilinks
 export async function createMultiLinksDB(linkId: string, multiLinks: any[]) {
   try {
+    console.log('📎 createMultiLinksDB - linkId:', linkId, 'multiLinks:', multiLinks)
     const createdLinks = []
 
     for (const ml of multiLinks) {
