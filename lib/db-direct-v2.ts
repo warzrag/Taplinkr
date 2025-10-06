@@ -118,8 +118,8 @@ export async function createMultiLinksDB(linkId: string, multiLinks: any[]) {
     for (const ml of multiLinks) {
       const result = await query(
         `INSERT INTO multi_links (
-          id, "linkId", title, url, icon, "iconImage", "order", clicks,
-          "createdAt", "updatedAt"
+          id, link_id, title, url, icon, icon_image, "order", clicks,
+          created_at, updated_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
         [
           `${linkId}_${ml.order || 0}_${Date.now()}`,
