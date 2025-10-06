@@ -15,13 +15,23 @@ export async function GET(request: Request) {
     const { authorized, userId, teamId, error } = await requireTeamPermission(TeamAction.VIEW_LINKS)
     if (!authorized) return error
 
-    // Récupérer tous les liens de l'équipe
+    // ⚡ Récupérer tous les liens de l'équipe (optimisé)
     const teamLinks = await prisma.link.findMany({
       where: {
         teamId: teamId,
         teamShared: true
       },
-      include: {
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        clicks: true,
+        views: true,
+        createdAt: true,
+        updatedAt: true,
+        lastModifiedBy: true,
+        teamShared: true,
         user: {
           select: {
             id: true,
@@ -44,7 +54,9 @@ export async function GET(request: Request) {
             email: true
           }
         },
-        multiLinks: true
+        _count: {
+          select: { multiLinks: true }
+        }
       },
       orderBy: [
         { order: 'asc' },
@@ -52,16 +64,21 @@ export async function GET(request: Request) {
       ]
     })
 
-    // Logger l'accès
-    await logTeamAction(teamId!, userId!, 'team_links_accessed', undefined, {
+    // Logger l'accès (async, sans attendre)
+    logTeamAction(teamId!, userId!, 'team_links_accessed', undefined, {
       count: teamLinks.length
-    }, 'info', request)
+    }, 'info', request).catch(() => {})
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       links: teamLinks,
       teamId,
       count: teamLinks.length
     })
+
+    // Cache HTTP pour performance
+    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+
+    return response
   } catch (error) {
     console.error('Erreur récupération liens équipe:', error)
     return NextResponse.json(
