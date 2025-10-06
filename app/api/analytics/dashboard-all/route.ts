@@ -82,7 +82,7 @@ export async function GET() {
           views: true
         }
       })
-      
+
       topLinks = allLinks.map(link => ({
         id: link.id,
         title: link.title,
@@ -92,6 +92,28 @@ export async function GET() {
       }))
     } catch (e) {
       console.error('Erreur top links:', e)
+    }
+
+    // 5. Top 10 pays pour cet utilisateur
+    let topCountries = []
+    try {
+      const countryCounts = await prisma.click.groupBy({
+        by: ['country'],
+        where: {
+          userId: session.user.id,
+          country: { not: 'Unknown' } // Exclure Unknown
+        },
+        _count: { country: true }
+      })
+
+      topCountries = countryCounts
+        .sort((a, b) => b._count.country - a._count.country)
+        .slice(0, 10)
+        .map(item => [item.country, item._count.country])
+
+      console.log('📊 Top 10 pays:', topCountries)
+    } catch (e) {
+      console.error('Erreur top countries:', e)
     }
 
     // Retourner les données
@@ -104,6 +126,7 @@ export async function GET() {
       viewsChange: 0,
       visitorsChange: 0,
       topLinks,
+      topCountries,
       chartData: {
         labels: [],
         clicks: []
