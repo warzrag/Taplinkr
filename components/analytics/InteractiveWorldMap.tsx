@@ -162,13 +162,15 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
     const countryCode = geo.properties.ISO_A3
     const clicks = clicksByCountry[countryCode] || 0
 
-    // Debug pour la France
-    if (geo.properties.NAME === 'France' || countryCode === 'FRA') {
-      console.log('🇫🇷 France trouvée:', {
+    // Debug - logger tous les codes ISO pour trouver la France
+    if (geo.properties.NAME && geo.properties.NAME.toLowerCase().includes('france')) {
+      console.log('🗺️ Pays contenant "France":', {
         NAME: geo.properties.NAME,
-        ISO_A3: countryCode,
+        ISO_A3: geo.properties.ISO_A3,
+        ISO_A2: geo.properties.ISO_A2,
+        allProps: geo.properties,
         clicks: clicks,
-        clicksByCountry: clicksByCountry
+        hasClicksInMap: clicksByCountry[countryCode] !== undefined
       })
     }
 
