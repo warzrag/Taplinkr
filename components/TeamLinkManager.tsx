@@ -49,7 +49,7 @@ interface TeamLinkManagerProps {
 export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkManagerProps) {
   const [teamLinks, setTeamLinks] = useState<TeamLink[]>([])
   const [userLinks, setUserLinks] = useState<TeamLink[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Commencer à false pour affichage immédiat
   const [selectedLink, setSelectedLink] = useState<TeamLink | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [filter, setFilter] = useState<'all' | 'mine' | 'team'>('all')
@@ -63,8 +63,13 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
     try {
       setLoading(true)
 
-      // Charger les liens de l'équipe
-      const teamResponse = await fetch('/api/team/sync-links')
+      // ⚡ Charger les deux APIs en parallèle
+      const [teamResponse, userResponse] = await Promise.all([
+        fetch('/api/team/sync-links'),
+        fetch('/api/links/fast') // Utiliser l'API rapide au lieu de /api/links
+      ])
+
+      // Traiter les liens d'équipe
       if (teamResponse.ok) {
         const teamData = await teamResponse.json()
         setTeamLinks(teamData.links || [])
@@ -72,16 +77,13 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
         setTeamLinks([])
       }
 
-      // Charger les liens personnels de l'utilisateur
-      const userResponse = await fetch('/api/links')
+      // Traiter les liens personnels
       if (userResponse.ok) {
         const userData = await userResponse.json()
-        // Vérifier que userData.links existe avant de filtrer
-        if (userData.links && Array.isArray(userData.links)) {
-          setUserLinks(userData.links.filter((link: any) => !link.teamShared))
-        } else {
-          setUserLinks([])
-        }
+        const links = userData.links || []
+        setUserLinks(links.filter((link: any) => !link.teamShared))
+      } else {
+        setUserLinks([])
       }
     } catch (error) {
       console.error('Erreur chargement liens:', error)
