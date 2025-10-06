@@ -169,47 +169,47 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
   }
 
   return (
-    <div className="space-y-6 dark:bg-gray-900">
+    <div className="space-y-4 sm:space-y-6 dark:bg-gray-900">
       {/* Header avec filtres */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
-              <Users className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Liens d'équipe</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Gérez et partagez vos liens avec l'équipe</p>
+              <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100">Liens d'équipe</h2>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Gérez et partagez vos liens</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                 filter === 'all'
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               Tous ({filteredLinks.length})
             </button>
             <button
               onClick={() => setFilter('mine')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                 filter === 'mine'
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               Mes liens ({userLinks.length})
             </button>
             <button
               onClick={() => setFilter('team')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                 filter === 'team'
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               Équipe ({teamLinks.length})
@@ -218,13 +218,15 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
         </div>
 
         {/* Indicateur de rôle */}
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center gap-2">
-          {getRoleIcon(userRole)}
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Votre rôle: <span className="font-medium capitalize">{userRole || 'Viewer'}</span>
-          </span>
+        <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          <div className="flex items-center gap-2">
+            {getRoleIcon(userRole)}
+            <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+              Votre rôle: <span className="font-medium capitalize">{userRole || 'Viewer'}</span>
+            </span>
+          </div>
           {canShare && (
-            <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-gray-500 dark:text-gray-400 sm:ml-auto">
               Vous pouvez partager et modifier les liens
             </span>
           )}
@@ -232,7 +234,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
       </div>
 
       {/* Liste des liens */}
-      <div className="grid gap-4">
+      <div className="grid gap-3 sm:gap-4">
         <AnimatePresence>
           {filteredLinks.map((link, index) => (
             <motion.div
@@ -241,129 +243,128 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-start gap-4">
-                    {/* Avatar du propriétaire */}
-                    <div className="relative">
-                      {link.user?.image ? (
-                        <img
-                          src={link.user.image}
-                          alt={link.user?.name || link.user?.email || ''}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                          {(link.user?.name || link.user?.email || 'U')[0].toUpperCase()}
-                        </div>
-                      )}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  {/* Avatar du propriétaire */}
+                  <div className="relative flex-shrink-0">
+                    {link.user?.image ? (
+                      <img
+                        src={link.user.image}
+                        alt={link.user?.name || link.user?.email || ''}
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm sm:text-base">
+                        {(link.user?.name || link.user?.email || 'U')[0].toUpperCase()}
+                      </div>
+                    )}
+                    {link.teamShared && (
+                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full flex items-center justify-center">
+                        <Share2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">{link.title}</h3>
                       {link.teamShared && (
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                          <Share2 className="w-3 h-3 text-white" />
-                        </div>
+                        <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs font-medium rounded-full whitespace-nowrap">
+                          Partagé
+                        </span>
                       )}
                     </div>
 
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">{link.title}</h3>
-                        {link.teamShared && (
-                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                            Partagé
-                          </span>
-                        )}
-                      </div>
+                    {link.description && (
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">{link.description}</p>
+                    )}
 
-                      {link.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{link.description}</p>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <UserCheck className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate max-w-[120px] sm:max-w-none">{link.user?.name || link.user?.email || 'Utilisateur'}</span>
+                      </span>
+                      {link.lastModifier && link.lastModifier.id !== link.user?.id && (
+                        <span className="flex items-center gap-1">
+                          <Edit3 className="w-3 h-3 flex-shrink-0" />
+                          <span className="hidden sm:inline">Modifié par</span>
+                          <span className="truncate max-w-[100px]">{link.lastModifier.name || link.lastModifier.email}</span>
+                        </span>
                       )}
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 flex-shrink-0" />
+                        {new Date(link.updatedAt).toLocaleDateString()}
+                      </span>
+                    </div>
 
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <UserCheck className="w-3 h-3" />
-                          {link.user?.name || link.user?.email || 'Utilisateur'}
-                        </span>
-                        {link.lastModifier && link.lastModifier.id !== link.user?.id && (
-                          <span className="flex items-center gap-1">
-                            <Edit3 className="w-3 h-3" />
-                            Modifié par {link.lastModifier.name || link.lastModifier.email}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(link.updatedAt).toLocaleDateString()}
-                        </span>
+                    {/* Statistiques */}
+                    <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-3">
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                        <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span>{link.views}</span>
                       </div>
-
-                      {/* Statistiques */}
-                      <div className="flex items-center gap-4 mt-3">
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <Eye className="w-4 h-4" />
-                          <span>{link.views} vues</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <BarChart className="w-4 h-4" />
-                          <span>{link.clicks} clics</span>
-                        </div>
-                        {link.multiLinks && link.multiLinks.length > 0 && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <Zap className="w-4 h-4" />
-                            <span>{link.multiLinks.length} liens</span>
-                          </div>
-                        )}
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                        <BarChart className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span>{link.clicks}</span>
                       </div>
+                      {link.multiLinks && link.multiLinks.length > 0 && (
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                          <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <span>{link.multiLinks.length}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 ml-4">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     onClick={() => copyLink(link.slug)}
-                    className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                     title="Copier le lien"
                   >
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
 
                   <Link
                     href={`/${link.slug}`}
                     target="_blank"
-                    className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                     title="Ouvrir le lien"
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </Link>
 
                   {!link.teamShared && (
                     <button
                       onClick={() => shareLink(link.id)}
-                      className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 rounded-lg transition-all shadow-lg transform hover:scale-110"
+                      className="p-2 sm:p-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 rounded-lg transition-all shadow-lg"
                       title="Partager avec l'équipe"
                     >
-                      <Share2 className="w-5 h-5" />
+                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   )}
 
                   {link.teamShared && (
                     <button
                       onClick={() => unshareLink(link.id)}
-                      className="p-3 bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 rounded-lg transition-all shadow-lg transform hover:scale-110"
+                      className="p-2 sm:p-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 rounded-lg transition-all shadow-lg"
                       title="Retirer du partage"
                     >
-                      <Lock className="w-5 h-5" />
+                      <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   )}
 
                   {canEdit && (
                     <Link
                       href={`/dashboard/links/${link.id}/edit`}
-                      className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                       title="Modifier"
                     >
-                      <Edit3 className="w-4 h-4" />
+                      <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Link>
                   )}
                 </div>
