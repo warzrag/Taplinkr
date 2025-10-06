@@ -11,7 +11,6 @@ export default function AdminPage() {
   const router = useRouter()
   const [folders, setFolders] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [sharing, setSharing] = useState(false)
   const [stats, setStats] = useState({ total: 0, shared: 0, notShared: 0 })
 
   useEffect(() => {
@@ -45,25 +44,43 @@ export default function AdminPage() {
     }
   }
 
-  const shareAllFolders = async () => {
+  const shareFolder = async (folderId: string, folderName: string) => {
     try {
-      setSharing(true)
-      const response = await fetch('/api/folders/share-all', {
-        method: 'POST'
+      const response = await fetch('/api/folders/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folderId })
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        toast.success(data.message)
-        loadFolders() // Recharger pour voir les changements
+        toast.success(`"${folderName}" partagé avec l'équipe`)
+        loadFolders()
       } else {
         toast.error(data.error || 'Erreur lors du partage')
       }
     } catch (error) {
-      toast.error('Erreur lors du partage des dossiers')
-    } finally {
-      setSharing(false)
+      toast.error('Erreur lors du partage')
+    }
+  }
+
+  const unshareFolder = async (folderId: string, folderName: string) => {
+    try {
+      const response = await fetch(`/api/folders/share?folderId=${folderId}`, {
+        method: 'DELETE'
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(`"${folderName}" retiré du partage`)
+        loadFolders()
+      } else {
+        toast.error(data.error || 'Erreur')
+      }
+    } catch (error) {
+      toast.error('Erreur lors du retrait')
     }
   }
 
@@ -119,38 +136,6 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Action de partage */}
-        {stats.notShared > 0 && (
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-2xl p-6 sm:p-8 mb-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Partager avec l'équipe
-                </h3>
-                <p className="text-indigo-100 text-sm">
-                  Vous avez {stats.notShared} dossier{stats.notShared > 1 ? 's' : ''} non partagé{stats.notShared > 1 ? 's' : ''}. Partagez-les avec votre équipe en un clic.
-                </p>
-              </div>
-              <button
-                onClick={shareAllFolders}
-                disabled={sharing}
-                className="w-full sm:w-auto px-6 py-3 bg-white text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
-              >
-                {sharing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-600"></div>
-                    Partage...
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="w-5 h-5" />
-                    Tout partager
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Liste des dossiers */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -169,38 +154,58 @@ export default function AdminPage() {
                 <p className="text-gray-600 dark:text-gray-400">Aucun dossier trouvé</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 {folders.map((folder) => (
                   <div
                     key={folder.id}
                     className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600"
                   >
                     <div className="flex-shrink-0">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
                         folder.teamShared
                           ? 'bg-green-100 dark:bg-green-900/30'
                           : 'bg-orange-100 dark:bg-orange-900/30'
                       }`}>
-                        <span className="text-xl">{folder.icon || '📁'}</span>
+                        <span className="text-2xl">{folder.icon || '📁'}</span>
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                      <h3 className="font-semibold text-base text-gray-900 dark:text-white truncate">
                         {folder.name}
                       </h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                         {folder.teamShared ? (
                           <>
-                            <Check className="w-3 h-3 text-green-600" />
-                            Partagé
+                            <Check className="w-4 h-4 text-green-600" />
+                            Partagé avec l'équipe
                           </>
                         ) : (
                           <>
-                            <AlertCircle className="w-3 h-3 text-orange-600" />
+                            <AlertCircle className="w-4 h-4 text-orange-600" />
                             Non partagé
                           </>
                         )}
                       </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {folder.teamShared ? (
+                        <button
+                          onClick={() => unshareFolder(folder.id, folder.name)}
+                          className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center gap-2"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          <span className="hidden sm:inline">Retirer</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => shareFolder(folder.id, folder.name)}
+                          className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-purple-700 transition-all flex items-center gap-2 shadow-md"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          <span className="hidden sm:inline">Partager avec la team</span>
+                          <span className="sm:hidden">Partager</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
