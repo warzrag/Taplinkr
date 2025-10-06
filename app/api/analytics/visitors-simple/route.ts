@@ -41,9 +41,22 @@ export async function GET(request: Request) {
       linkId: { in: linkIds }
     }
 
-    // Filtrage par device désactivé pour l'instant car la colonne n'existe pas
+    // Filtrage par device si spécifié (basé sur userAgent car 'device' contient le nom)
+    if (device === 'mobile') {
+      whereConditions.OR = [
+        { userAgent: { contains: 'Mobile', mode: 'insensitive' } },
+        { userAgent: { contains: 'Android', mode: 'insensitive' } },
+        { userAgent: { contains: 'iPhone', mode: 'insensitive' } }
+      ]
+    } else if (device === 'desktop') {
+      whereConditions.AND = [
+        { userAgent: { not: { contains: 'Mobile', mode: 'insensitive' } } },
+        { userAgent: { not: { contains: 'Tablet', mode: 'insensitive' } } },
+        { userAgent: { not: { contains: 'iPad', mode: 'insensitive' } } }
+      ]
+    }
 
-    // Récupérer les clics avec seulement les colonnes de base
+    // Récupérer les clics avec toutes les données nécessaires
     const [clicks, total] = await Promise.all([
       prisma.click.findMany({
         where: whereConditions,
@@ -56,7 +69,20 @@ export async function GET(request: Request) {
           userAgent: true,
           ip: true,
           referer: true,
-          linkId: true
+          linkId: true,
+          country: true,
+          city: true,
+          region: true,
+          browser: true,
+          os: true,
+          device: true,
+          screenResolution: true,
+          language: true,
+          timezone: true,
+          duration: true,
+          multiLinkId: true,
+          latitude: true,
+          longitude: true
         }
       }),
       prisma.click.count({
@@ -64,60 +90,81 @@ export async function GET(request: Request) {
       })
     ])
 
-    // Transformer les clics en format visiteur simplifié
+    // Transformer les clics en format visiteur
     const visitors = clicks.map((click) => {
       const link = linkMap.get(click.linkId)
-      
-      // Extraction simple du navigateur et OS
+
+      // Utiliser les données déjà stockées dans la BDD (mieux que de re-parser userAgent)
       const userAgent = click.userAgent || ''
-      let browser = 'Unknown'
-      let os = 'Unknown'
-      
-      // Détection basique du navigateur
-      if (userAgent.includes('Chrome')) browser = 'Chrome'
-      else if (userAgent.includes('Safari')) browser = 'Safari'
-      else if (userAgent.includes('Firefox')) browser = 'Firefox'
-      else if (userAgent.includes('Edge')) browser = 'Edge'
-      
-      // Détection basique de l'OS
-      if (userAgent.includes('Windows')) os = 'Windows'
-      else if (userAgent.includes('Mac')) os = 'macOS'
-      else if (userAgent.includes('Linux')) os = 'Linux'
-      else if (userAgent.includes('Android')) os = 'Android'
-      else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS'
-      
-      // Déterminer le type d'appareil depuis le userAgent
-      let deviceName = 'Desktop Computer'
+      const browser = click.browser || 'Unknown'
+      const os = click.os || 'Unknown'
+      const deviceName = click.device || 'Unknown'
+
+      // Déterminer le type d'appareil
       let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop'
-      
       if (userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone')) {
-        deviceName = 'Mobile Phone'
         deviceType = 'mobile'
       } else if (userAgent.includes('Tablet') || userAgent.includes('iPad')) {
-        deviceName = 'Tablet'
         deviceType = 'tablet'
+      }
+
+      // Extraire le code pays (2 lettres) depuis le nom du pays si possible
+      let countryCode = 'XX'
+      const country = click.country || 'Unknown'
+
+      // Mapping simple des pays vers codes ISO-2
+      const countryToCode: Record<string, string> = {
+        'France': 'FR',
+        'United States': 'US',
+        'United Kingdom': 'GB',
+        'Germany': 'DE',
+        'Spain': 'ES',
+        'Italy': 'IT',
+        'Canada': 'CA',
+        'Belgium': 'BE',
+        'Netherlands': 'NL',
+        'Switzerland': 'CH',
+        'Unknown': 'XX'
+      }
+      countryCode = countryToCode[country] || 'XX'
+
+      // Extraction sécurisée du referrer domain
+      let referrerDomain = 'Direct'
+      if (click.referer) {
+        try {
+          referrerDomain = new URL(click.referer).hostname
+        } catch {
+          referrerDomain = 'Direct'
+        }
       }
 
       return {
         id: click.id,
         timestamp: click.createdAt.toISOString(),
         location: {
-          city: 'N/A',
-          region: 'N/A',
-          country: 'Unknown',
-          countryCode: 'XX'
+          city: click.city || 'Unknown',
+          region: click.region || 'Unknown',
+          country: country,
+          countryCode: countryCode,
+          latitude: click.latitude || undefined,
+          longitude: click.longitude || undefined
         },
         linkSlug: link?.slug || 'unknown',
         linkTitle: link?.title || 'Lien supprimé',
         browser: browser,
         os: os,
         referrer: click.referer || '',
-        referrerDomain: click.referer ? new URL(click.referer).hostname : 'Direct',
+        referrerDomain: referrerDomain,
         device: deviceName,
         deviceType: deviceType,
         status: 'success' as const,
         ip: click.ip || '',
-        userAgent: userAgent
+        userAgent: userAgent,
+        screenResolution: click.screenResolution || undefined,
+        language: click.language || undefined,
+        timezone: click.timezone || undefined,
+        duration: click.duration || undefined,
+        multiLinkClicked: click.multiLinkId || undefined
       }
     })
 
