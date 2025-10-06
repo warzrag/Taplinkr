@@ -1,9 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node check-folder-hugo.js)",
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node check-views.js)",
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node check-all-folders.js)"
+      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1\" node -e \"\nconst { Pool } = require(''pg'');\nconst pool = new Pool({ connectionString: process.env.DATABASE_URL });\npool.query(''SELECT ip, country, city, device, \"\"createdAt\"\" FROM clicks ORDER BY \"\"createdAt\"\" DESC LIMIT 5'')\n  .then(r => {\n    console.log(''\\n🔍 Derniers clics enregistrés:\\n'');\n    r.rows.forEach((c, i) => {\n      console.log((i+1) + ''. IP: '' + c.ip);\n      console.log(''   Pays: '' + (c.country || ''NULL''));\n      console.log(''   Ville: '' + (c.city || ''NULL''));\n      console.log(''   Device: '' + c.device);\n      console.log(''   Date: '' + c.createdAt.toISOString());\n      console.log('''');\n    });\n    pool.end();\n  })\n  .catch(e => { console.error(e); pool.end(); });\n\")"
     ],
     "deny": [],
     "ask": []

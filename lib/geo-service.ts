@@ -13,8 +13,11 @@ interface GeoData {
 }
 
 export async function getGeoData(ip: string): Promise<Partial<GeoData>> {
+  console.log('🌍 getGeoData appelé avec IP:', ip)
+
   // Ne pas géolocaliser les IPs locales
-  if (ip === 'unknown' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
+  if (ip === 'unknown' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('::1')) {
+    console.log('⚠️ IP locale détectée, utilisation de France par défaut')
     return {
       country: 'France', // Default to France for local IPs
       countryCode: 'FR',
@@ -25,36 +28,62 @@ export async function getGeoData(ip: string): Promise<Partial<GeoData>> {
 
   try {
     // Utilisation de ipapi.co (gratuit, limite de 1000 requêtes par jour)
-    const response = await fetch(`https://ipapi.co/${ip}/json/`)
-    
+    console.log(`🔄 Appel API ipapi.co pour: ${ip}`)
+    const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+      headers: {
+        'User-Agent': 'TapLinkr/1.0'
+      }
+    })
+
+    console.log(`📡 Réponse ipapi.co: status=${response.status}`)
+
     if (!response.ok) {
-      throw new Error('Failed to fetch geo data')
+      console.error(`❌ Erreur ipapi.co: ${response.status} ${response.statusText}`)
+      // Ne pas lancer d'erreur, retourner Unknown
+      return {
+        country: 'Unknown',
+        countryCode: 'XX',
+        region: 'Unknown',
+        city: 'Unknown'
+      }
     }
 
     const data = await response.json()
+    console.log('📦 Données reçues:', JSON.stringify(data))
 
-    if (!data.error) {
+    if (data.error) {
+      console.error(`❌ Erreur API: ${data.error} - ${data.reason}`)
       return {
-        country: data.country_name || 'Unknown',
-        countryCode: data.country_code || 'XX',
-        region: data.region || 'Unknown',
-        city: data.city || 'Unknown',
-        latitude: data.latitude || 0,
-        longitude: data.longitude || 0,
-        timezone: data.timezone || 'Unknown',
-        isp: data.org || 'Unknown'
+        country: 'Unknown',
+        countryCode: 'XX',
+        region: 'Unknown',
+        city: 'Unknown'
       }
     }
-  } catch (error) {
-    console.error('Error fetching geo data:', error)
-  }
 
-  // Fallback pour les cas d'erreur
-  return {
-    country: 'Unknown',
-    countryCode: 'XX',
-    region: 'Unknown',
-    city: 'Unknown'
+    const geoData = {
+      country: data.country_name || 'Unknown',
+      countryCode: data.country_code || 'XX',
+      region: data.region || 'Unknown',
+      city: data.city || 'Unknown',
+      latitude: data.latitude || 0,
+      longitude: data.longitude || 0,
+      timezone: data.timezone || 'Unknown',
+      isp: data.org || 'Unknown'
+    }
+
+    console.log('✅ Géolocalisation réussie:', geoData.country, geoData.city)
+    return geoData
+
+  } catch (error) {
+    console.error('❌ Exception lors de la géolocalisation:', error)
+    // Retourner Unknown au lieu de propager l'erreur
+    return {
+      country: 'Unknown',
+      countryCode: 'XX',
+      region: 'Unknown',
+      city: 'Unknown'
+    }
   }
 }
 
