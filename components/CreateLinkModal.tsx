@@ -215,13 +215,19 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       const url = editingLink ? `/api/links/${editingLink.id}` : '/api/links-create-final'
       const method = editingLink ? 'PUT' : 'POST'
       
+      console.log('🔍 AVANT ENVOI - multiLinks:', multiLinks)
+      console.log('🔍 AVANT ENVOI - linkType:', linkType)
+
+      const filteredMultiLinks = linkType === 'multi' ? multiLinks.filter(link => link.title || link.url) : []
+      console.log('🔍 APRÈS FILTRE - filteredMultiLinks:', filteredMultiLinks)
+
       const requestBody = {
         ...data,
         isDirect: linkType === 'direct',
         directUrl: linkType === 'direct' ? directUrl : null,
         shieldEnabled: linkType === 'direct' ? shieldEnabled : false,
         isUltraLink: linkType === 'direct' ? isUltraLink : false,
-        multiLinks: linkType === 'multi' ? multiLinks.filter(link => link.title || link.url) : [],
+        multiLinks: filteredMultiLinks,
         profileImage: profileImage || null,
         profileStyle: profileStyle || 'circle',
         coverImage: profileStyle === 'beacon' ? (profileImage || null) : (coverImage || null),
@@ -237,8 +243,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         textColor: textColor || '#1f2937'
       }
       
-      console.log('Sending request:', { url, method, body: requestBody })
-      
+      console.log('🚀 ENVOI DE LA REQUÊTE')
+      console.log('📤 URL:', url)
+      console.log('📤 METHOD:', method)
+      console.log('📤 REQUEST BODY:', JSON.stringify(requestBody, null, 2))
+      console.log('📤 multiLinks dans body:', requestBody.multiLinks)
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
