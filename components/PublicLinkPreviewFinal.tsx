@@ -112,6 +112,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const bio = link?.description || null
   const multiLinks = link?.multiLinks || []
   const clicks = link?.clicks || 0
+  const borderRadius = link?.borderRadius || 'rounded-2xl' // Forme des boutons
 
   // En mode beacon, utiliser profileImage comme background
   const backgroundImage = profileStyle === 'beacon' ? profileImage : coverImage
@@ -223,7 +224,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   return (
                     <div
                       key={linkId}
-                      className="w-full bg-red-900 bg-opacity-20 backdrop-blur-md border border-red-500 border-opacity-40 rounded-xl p-4 transform transition-all duration-200"
+                      className={`w-full bg-red-900 bg-opacity-20 backdrop-blur-md border border-red-500 border-opacity-40 ${borderRadius} p-4 transform transition-all duration-200`}
                     >
                       <div className="text-center">
                         <p className="text-white text-sm mb-3">⚠️ Contenu réservé aux +18 ans</p>
@@ -271,7 +272,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   <button
                     key={linkId}
                     onClick={() => handleLinkClick(linkId, linkUrl)}
-                    className="w-full bg-white/90 hover:bg-white/95 backdrop-blur-sm rounded-2xl py-3 px-4 shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-3 group"
+                    className={`w-full bg-white/90 hover:bg-white/95 backdrop-blur-sm ${borderRadius} py-3 px-4 shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-3 group`}
                   >
                     {linkIcon && (
                       <img
