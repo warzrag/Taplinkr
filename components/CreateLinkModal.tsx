@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap, Smartphone, Eye, Camera, User, Sparkle, Check, AlertCircle, Loader2, Instagram, Twitter, Youtube, Info } from 'lucide-react'
+import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap, Smartphone, Eye, Camera, User, Sparkle, Check, AlertCircle, Loader2, Instagram, Twitter, Youtube, Info, Bell, ArrowLeft, Rocket, TrendingUp, BarChart3 } from 'lucide-react'
 import { Link as LinkType } from '@/types'
 import { usePermissions } from '@/hooks/usePermissions'
 import ImageUpload from './upload/ImageUpload'
@@ -52,6 +52,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [directUrl, setDirectUrl] = useState(editingLink?.directUrl || '')
   const [shieldEnabled, setShieldEnabled] = useState(editingLink?.shieldEnabled || false)
   const [isUltraLink, setIsUltraLink] = useState(editingLink?.isUltraLink || false)
+  const [showDirectLinkComingSoon, setShowDirectLinkComingSoon] = useState(false)
   const [multiLinks, setMultiLinks] = useState<MultiLinkData[]>(
     editingLink?.multiLinks && editingLink.multiLinks.length > 0
       ? editingLink.multiLinks.map(ml => ({
@@ -153,6 +154,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setDirectUrl('')
       setShieldEnabled(false)
       setIsUltraLink(false)
+      setShowDirectLinkComingSoon(false)
       setMultiLinks([{ title: '', url: '' }])
       setProfileImage('')
       setCoverImage('')
@@ -323,7 +325,91 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           {/* Form - Scrollable */}
           <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
             <div className="space-y-6">
-            {step === 1 ? (
+            {showDirectLinkComingSoon ? (
+                /* Page Bientôt disponible - Lien Direct */
+                <div className="flex flex-col items-center text-center py-8">
+                  {/* Icon Animation */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', duration: 0.6 }}
+                    className="mb-6"
+                  >
+                    <div className="relative">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+                        className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-xl opacity-20"
+                      />
+                      <div className="relative bg-gradient-to-br from-purple-600 to-pink-600 p-6 rounded-2xl shadow-xl">
+                        <Zap className="w-12 h-12 text-white" />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Title */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="mb-6"
+                  >
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <Sparkles className="w-5 h-5 text-yellow-500" />
+                      <span className="text-xs font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 uppercase tracking-wider">
+                        Bientôt disponible
+                      </span>
+                      <Sparkles className="w-5 h-5 text-yellow-500" />
+                    </div>
+                    <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                      Lien Direct
+                    </h3>
+                    <p className="text-gray-600 max-w-md mx-auto">
+                      Créez des redirections instantanées avec tracking avancé
+                    </p>
+                  </motion.div>
+
+                  {/* Features */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="grid grid-cols-1 gap-4 mb-6 w-full max-w-sm"
+                  >
+                    {[
+                      { icon: Rocket, title: 'Redirection ultra-rapide' },
+                      { icon: TrendingUp, title: 'Analytics détaillées' },
+                      { icon: BarChart3, title: 'Tracking personnalisé' }
+                    ].map((feature, index) => (
+                      <motion.div
+                        key={feature.title}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 + index * 0.1 }}
+                        className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-xl"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center flex-shrink-0">
+                          <feature.icon className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">{feature.title}</span>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+
+                  {/* Back Button */}
+                  <motion.button
+                    type="button"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                    onClick={() => setShowDirectLinkComingSoon(false)}
+                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Retour au choix du type
+                  </motion.button>
+                </div>
+              ) : step === 1 ? (
                 /* Étape 1: Choix du type de lien */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -403,27 +489,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => {
-                        if (!hasPermission('hasCustomThemes')) {
-                          requirePermission('hasCustomThemes')
-                          return
-                        }
-                        setLinkType('direct')
-                        setStep(3)
+                        setShowDirectLinkComingSoon(true)
                       }}
                       className="relative p-8 rounded-2xl border-2 border-gray-200 hover:border-purple-500 bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 transition-all duration-300 group overflow-hidden"
                     >
-                      {!hasPermission('hasCustomThemes') && (
-                        <motion.div
-                          className="absolute top-4 right-4"
-                          initial={{ opacity: 0, scale: 0 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.6, type: "spring" }}
-                        >
-                          <span className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full font-semibold shadow-lg">
-                            🔒 PRO
-                          </span>
-                        </motion.div>
-                      )}
+                      <motion.div
+                        className="absolute top-4 right-4"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6, type: "spring" }}
+                      >
+                        <span className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full font-semibold shadow-lg">
+                          Bientôt
+                        </span>
+                      </motion.div>
 
                       <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-xl">
                         <Zap className="w-10 h-10 text-white" />
