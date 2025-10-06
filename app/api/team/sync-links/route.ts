@@ -13,7 +13,17 @@ import {
 export async function GET(request: Request) {
   try {
     const { authorized, userId, teamId, error } = await requireTeamPermission(TeamAction.VIEW_LINKS)
-    if (!authorized) return error
+
+    // 🔍 DEBUG: Log pour comprendre pourquoi ça ne marche pas
+    console.log('🔍 GET /api/team/sync-links - Debug:')
+    console.log('  authorized:', authorized)
+    console.log('  userId:', userId)
+    console.log('  teamId:', teamId)
+
+    if (!authorized) {
+      console.log('  ❌ NON AUTORISÉ - Retour erreur')
+      return error
+    }
 
     // ⚡ Récupérer tous les liens de l'équipe (optimisé)
     const teamLinks = await prisma.link.findMany({

@@ -69,11 +69,20 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
         fetch('/api/links/fast') // Utiliser l'API rapide au lieu de /api/links
       ])
 
+      // 🔍 DEBUG
+      console.log('🔍 TeamLinkManager - Réponses API:')
+      console.log('  Team API status:', teamResponse.status, teamResponse.ok ? '✅' : '❌')
+      console.log('  User API status:', userResponse.status, userResponse.ok ? '✅' : '❌')
+
       // Traiter les liens d'équipe
       if (teamResponse.ok) {
         const teamData = await teamResponse.json()
+        console.log('  Team data:', teamData)
+        console.log('  Team links count:', teamData.links?.length || 0)
         setTeamLinks(teamData.links || [])
       } else {
+        const errorData = await teamResponse.json().catch(() => ({ error: 'Unknown' }))
+        console.log('  ❌ Team API error:', errorData)
         setTeamLinks([])
       }
 
@@ -81,8 +90,12 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
       if (userResponse.ok) {
         const userData = await userResponse.json()
         const links = userData.links || []
+        console.log('  User links count:', links.length)
+        console.log('  User links (non-shared):', links.filter((link: any) => !link.teamShared).length)
         setUserLinks(links.filter((link: any) => !link.teamShared))
       } else {
+        const errorData = await userResponse.json().catch(() => ({ error: 'Unknown' }))
+        console.log('  ❌ User API error:', errorData)
         setUserLinks([])
       }
     } catch (error) {
