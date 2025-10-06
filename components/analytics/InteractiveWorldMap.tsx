@@ -266,9 +266,11 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
                     geography={geo}
                     fill={getCountryColor(geo)}
                     stroke="#9ca3af"
-                    strokeWidth={1}
+                    strokeWidth={0.5}
                     onMouseEnter={(event) => handleMouseEnter(geo, event)}
                     onMouseLeave={handleMouseLeave}
+                    onTouchStart={(event) => handleMouseEnter(geo, event)}
+                    onTouchEnd={handleMouseLeave}
                     style={{
                       default: {
                         outline: 'none',
@@ -277,7 +279,7 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
                       hover: {
                         fill: hasClicks ? '#4338ca' : '#e0e7ff',
                         stroke: '#4b5563',
-                        strokeWidth: 2,
+                        strokeWidth: 1,
                         outline: 'none',
                         cursor: 'pointer'
                       },
@@ -294,72 +296,72 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
         </ZoomableGroup>
       </ComposableMap>
 
-      {/* Légende améliorée */}
-      <div className="absolute bottom-4 left-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-xl p-5 shadow-xl border border-gray-200 dark:border-gray-700">
-        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
-          Distribution des clics
+      {/* Légende améliorée - Optimisée mobile */}
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-lg sm:rounded-xl p-2 sm:p-5 shadow-xl border border-gray-200 dark:border-gray-700 max-w-[140px] sm:max-w-none">
+        <p className="text-[10px] sm:text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5 sm:mb-3">
+          Clics
         </p>
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-gray-100 rounded border border-gray-300" />
-            <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Aucun clic</span>
+        <div className="space-y-1 sm:space-y-2">
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="w-3 h-3 sm:w-5 sm:h-5 bg-gray-100 rounded border border-gray-300 flex-shrink-0" />
+            <span className="text-[9px] sm:text-sm text-gray-700 dark:text-gray-300 font-medium truncate">Aucun</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-violet-200 rounded border border-violet-300" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">1-10 clics</span>
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="w-3 h-3 sm:w-5 sm:h-5 bg-violet-200 rounded border border-violet-300 flex-shrink-0" />
+            <span className="text-[9px] sm:text-sm text-gray-700 dark:text-gray-300 truncate">1-10</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-violet-300 rounded border border-violet-400" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">11-50 clics</span>
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="w-3 h-3 sm:w-5 sm:h-5 bg-violet-300 rounded border border-violet-400 flex-shrink-0" />
+            <span className="text-[9px] sm:text-sm text-gray-700 dark:text-gray-300 truncate">11-50</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-violet-400 rounded border border-violet-500" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">51-100 clics</span>
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="w-3 h-3 sm:w-5 sm:h-5 bg-violet-400 rounded border border-violet-500 flex-shrink-0" />
+            <span className="text-[9px] sm:text-sm text-gray-700 dark:text-gray-300 truncate">51-100</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-violet-500 rounded border border-violet-600" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">101-500 clics</span>
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="w-3 h-3 sm:w-5 sm:h-5 bg-violet-500 rounded border border-violet-600 flex-shrink-0" />
+            <span className="text-[9px] sm:text-sm text-gray-700 dark:text-gray-300 truncate">101-500</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-violet-700 rounded border border-violet-800" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">500+ clics</span>
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="w-3 h-3 sm:w-5 sm:h-5 bg-violet-700 rounded border border-violet-800 flex-shrink-0" />
+            <span className="text-[9px] sm:text-sm text-gray-700 dark:text-gray-300 truncate">500+</span>
           </div>
         </div>
       </div>
 
-      {/* Contrôles de zoom */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2">
+      {/* Contrôles de zoom - Optimisés mobile */}
+      <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex flex-col gap-1.5 sm:gap-2">
         <button
           onClick={() => setPosition({ ...position, zoom: Math.min(position.zoom * 1.5, 10) })}
-          className="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="bg-white dark:bg-gray-800 rounded-lg p-1.5 sm:p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors active:scale-95"
           title="Zoomer"
         >
-          <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         </button>
         <button
           onClick={() => setPosition({ ...position, zoom: Math.max(position.zoom / 1.5, 0.75) })}
-          className="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="bg-white dark:bg-gray-800 rounded-lg p-1.5 sm:p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors active:scale-95"
           title="Dézoomer"
         >
-          <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
           </svg>
         </button>
         <button
           onClick={() => setPosition({ coordinates: [10, 30], zoom: 1 })}
-          className="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="bg-white dark:bg-gray-800 rounded-lg p-1.5 sm:p-2 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors active:scale-95"
           title="Réinitialiser la vue"
         >
-          <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
           </svg>
         </button>
       </div>
 
-      {/* Instructions */}
-      <div className="absolute top-4 left-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-lg px-4 py-3 text-sm text-gray-700 dark:text-gray-300 shadow-lg">
+      {/* Instructions - Cachées sur mobile */}
+      <div className="hidden sm:block absolute top-4 left-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-lg px-4 py-3 text-sm text-gray-700 dark:text-gray-300 shadow-lg">
         <p className="font-medium mb-1">Navigation</p>
         <p className="flex items-center gap-2">
           <span className="text-gray-500">🖱️</span>
@@ -371,39 +373,39 @@ export default function InteractiveWorldMap({ data }: InteractiveWorldMapProps) 
         </p>
       </div>
 
-      {/* Tooltip */}
+      {/* Tooltip - Optimisé mobile */}
       {tooltip && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="fixed z-50 bg-gray-900 dark:bg-gray-800 text-white rounded-lg shadow-2xl border border-gray-700 p-4 pointer-events-none"
+          className="fixed z-50 bg-gray-900 dark:bg-gray-800 text-white rounded-lg shadow-2xl border border-gray-700 p-2 sm:p-4 pointer-events-none max-w-[180px] sm:max-w-none"
           style={{
             left: tooltip.x + 10,
             top: tooltip.y - 10,
             transform: 'translateY(-100%)'
           }}
         >
-          <p className="font-bold text-lg mb-2">
+          <p className="font-bold text-xs sm:text-lg mb-1 sm:mb-2 truncate">
             {tooltip.country}
           </p>
           {tooltip.clicks > 0 ? (
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                <p className="text-sm">
+            <div className="space-y-0.5 sm:space-y-1">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-400 rounded-full flex-shrink-0"></div>
+                <p className="text-[10px] sm:text-sm">
                   <span className="font-semibold text-blue-300">{tooltip.clicks}</span> clic{tooltip.clicks > 1 ? 's' : ''}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <p className="text-sm">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full flex-shrink-0"></div>
+                <p className="text-[10px] sm:text-sm">
                   <span className="font-semibold text-green-300">{tooltip.percentage.toFixed(1)}%</span> du total
                 </p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-400">Aucun clic enregistré</p>
+            <p className="text-[10px] sm:text-sm text-gray-400">Aucun clic</p>
           )}
         </motion.div>
       )}
