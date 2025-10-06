@@ -12,18 +12,34 @@ import {
 // GET: Récupérer tous les liens partagés de l'équipe
 export async function GET(request: Request) {
   try {
-    const { authorized, userId, teamId, error } = await requireTeamPermission(TeamAction.VIEW_LINKS)
+    // 🔍 FALLBACK: Si requireTeamPermission échoue, utiliser la session directement
+    const session = await getServerSession(authOptions)
 
-    // 🔍 DEBUG: Log pour comprendre pourquoi ça ne marche pas
-    console.log('🔍 GET /api/team/sync-links - Debug:')
-    console.log('  authorized:', authorized)
-    console.log('  userId:', userId)
-    console.log('  teamId:', teamId)
+    console.log('🔍 GET /api/team/sync-links - Session:')
+    console.log('  session existe:', !!session)
+    console.log('  session.user:', session?.user)
 
-    if (!authorized) {
-      console.log('  ❌ NON AUTORISÉ - Retour erreur')
-      return error
+    if (!session?.user?.id) {
+      console.log('  ❌ Pas de session')
+      return NextResponse.json({ error: 'Non autorisé', links: [] }, { status: 401 })
     }
+
+    // Récupérer l'utilisateur et son équipe
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { teamId: true, teamRole: true }
+    })
+
+    console.log('  user.teamId:', user?.teamId)
+    console.log('  user.teamRole:', user?.teamRole)
+
+    if (!user?.teamId) {
+      console.log('  ❌ Utilisateur sans équipe')
+      return NextResponse.json({ error: 'Pas d\'équipe', links: [] }, { status: 404 })
+    }
+
+    const userId = session.user.id
+    const teamId = user.teamId
 
     // ⚡ Récupérer tous les liens de l'équipe (optimisé)
     const teamLinks = await prisma.link.findMany({
@@ -74,6 +90,11 @@ export async function GET(request: Request) {
       ]
     })
 
+    console.log('  ✅ Liens trouvés:', teamLinks.length)
+    teamLinks.forEach((link, i) => {
+      console.log('    Lien', i + 1 + ':', link.slug, '-', link.title)
+    })
+
     // Logger l'accès (async, sans attendre)
     logTeamAction(teamId!, userId!, 'team_links_accessed', undefined, {
       count: teamLinks.length
@@ -85,14 +106,19 @@ export async function GET(request: Request) {
       count: teamLinks.length
     })
 
+    console.log('  📤 Retour API:', {
+      count: teamLinks.length,
+      teamId
+    })
+
     // Cache HTTP pour performance
     response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
 
     return response
   } catch (error) {
-    console.error('Erreur récupération liens équipe:', error)
+    console.error('❌ Erreur récupération liens équipe:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la récupération des liens' },
+      { error: 'Erreur lors de la récupération des liens', links: [] },
       { status: 500 }
     )
   }
