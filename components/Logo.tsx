@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { motion } from 'framer-motion'
 
 interface LogoProps {
@@ -9,6 +9,13 @@ interface LogoProps {
 }
 
 export default function Logo({ size = 'md', showText = true, animated = true, className = '' }: LogoProps) {
+  const gradientId = React.useId()
+  const outerGradientId = `${gradientId}-outer`
+  const surfaceGradientId = `${gradientId}-surface`
+  const strokeGradientId = `${gradientId}-stroke`
+  const linkGradientId = `${gradientId}-link`
+  const glowGradientId = `${gradientId}-glow`
+
   const sizes = {
     sm: { icon: 28, text: 16 },
     md: { icon: 36, text: 18 },
@@ -20,7 +27,6 @@ export default function Logo({ size = 'md', showText = true, animated = true, cl
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      {/* Icon */}
       <motion.div
         className="relative"
         whileHover={animated ? { scale: 1.05 } : {}}
@@ -33,100 +39,133 @@ export default function Logo({ size = 'md', showText = true, animated = true, cl
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Background Circle */}
+          <defs>
+            <linearGradient id={outerGradientId} x1="8" y1="8" x2="56" y2="56">
+              <stop offset="0%" stopColor="#4338CA" />
+              <stop offset="45%" stopColor="#6366F1" />
+              <stop offset="100%" stopColor="#22D3EE" />
+            </linearGradient>
+            <linearGradient id={surfaceGradientId} x1="16" y1="14" x2="48" y2="50">
+              <stop offset="0%" stopColor="#0F172A" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#1E293B" stopOpacity="0.65" />
+            </linearGradient>
+            <linearGradient id={strokeGradientId} x1="16" y1="16" x2="48" y2="48">
+              <stop offset="0%" stopColor="#93C5FD" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.55" />
+            </linearGradient>
+            <linearGradient id={linkGradientId} x1="20" y1="20" x2="46" y2="44">
+              <stop offset="0%" stopColor="#F8FAFC" />
+              <stop offset="100%" stopColor="#60A5FA" />
+            </linearGradient>
+            <radialGradient id={glowGradientId} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+
+          <motion.rect
+            x="6"
+            y="6"
+            width="52"
+            height="52"
+            rx="18"
+            fill={`url(#${outerGradientId})`}
+            initial={{ rotate: 0 }}
+            animate={animated ? { rotate: [0, 2, -2, 0] } : { rotate: 0 }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          />
+
+          <motion.rect
+            x="12"
+            y="12"
+            width="40"
+            height="40"
+            rx="14"
+            fill={`url(#${surfaceGradientId})`}
+            stroke={`url(#${strokeGradientId})`}
+            strokeWidth="1.5"
+            initial={animated ? { opacity: 0, scale: 0.92 } : { opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.45, ease: 'easeOut', delay: 0.15 }}
+          />
+
           <motion.circle
             cx="32"
             cy="32"
-            r="30"
-            fill="url(#gradient)"
-            initial={{ rotate: 0 }}
-            animate={animated ? { rotate: 360 } : {}}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            r="12.5"
+            fill={`url(#${glowGradientId})`}
+            initial={{ opacity: animated ? 0 : 0.4, scale: animated ? 0.85 : 1 }}
+            animate={animated ? { opacity: [0.25, 0.55, 0.25], scale: [0.9, 1.05, 0.9] } : { opacity: 0.4, scale: 1 }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
           />
-          
-          {/* Inner Design */}
-          <g transform="translate(32, 32)">
-            {/* Central Node */}
-            <motion.circle
-              cx="0"
-              cy="0"
-              r="6"
-              fill="white"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            />
-            
-            {/* Connection Lines */}
-            {[0, 72, 144, 216, 288].map((angle, i) => (
-              <motion.g
-                key={angle}
-                transform={`rotate(${angle})`}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 + i * 0.1 }}
-              >
-                <line
-                  x1="8"
-                  y1="0"
-                  x2="18"
-                  y2="0"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="22"
-                  cy="0"
-                  r="4"
-                  fill="white"
-                />
-              </motion.g>
-            ))}
-          </g>
-          
-          {/* Gradient Definition */}
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#4F46E5" />
-              <stop offset="100%" stopColor="#2563EB" />
-            </linearGradient>
-          </defs>
-        </svg>
 
-        {/* Animated Sparkle */}
-        {animated && (
-          <motion.div
-            className="absolute -top-1 -right-1"
-            initial={{ scale: 0, rotate: 0 }}
-            animate={{ 
-              scale: [0, 1, 0],
-              rotate: [0, 180, 360]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              repeatDelay: 2
-            }}
+          <motion.g
+            initial={animated ? { opacity: 0, y: 4 } : { opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.25, ease: 'easeOut' }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M8 0L9.79 6.21L16 8L9.79 9.79L8 16L6.21 9.79L0 8L6.21 6.21L8 0Z"
-                fill="#FCD34D"
-              />
-            </svg>
-          </motion.div>
-        )}
+            <motion.path
+              d="M23 26c0-4.418 3.582-8 8-8h6c4.418 0 8 3.582 8 8s-3.582 8-8 8h-3.2"
+              stroke={`url(#${linkGradientId})`}
+              strokeWidth="3.4"
+              strokeLinecap="round"
+              fill="none"
+              initial={{ pathLength: animated ? 0 : 1 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.6, delay: 0.25, ease: 'easeOut' }}
+            />
+            <motion.path
+              d="M41 38c0 4.418-3.582 8-8 8h-6c-4.418 0-8-3.582-8-8s3.582-8 8-8h3.2"
+              stroke={`url(#${linkGradientId})`}
+              strokeWidth="3.4"
+              strokeLinecap="round"
+              fill="none"
+              initial={{ pathLength: animated ? 0 : 1 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.6, delay: 0.35, ease: 'easeOut' }}
+            />
+            <motion.path
+              d="M27.2 30.8L36.8 39.2"
+              stroke="white"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeOpacity="0.55"
+              initial={{ pathLength: animated ? 0 : 1 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.5, delay: 0.45, ease: 'easeOut' }}
+            />
+            <motion.circle
+              cx="32"
+              cy="32"
+              r="3.2"
+              fill="#F8FAFC"
+              initial={{ scale: animated ? 0 : 1 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 14, delay: 0.5 }}
+            />
+          </motion.g>
+
+          {animated && (
+            <motion.circle
+              cx="48"
+              cy="18"
+              r="4"
+              fill="#FDE68A"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
+              transition={{ duration: 2.6, repeat: Infinity, repeatDelay: 1.8, ease: 'easeInOut' }}
+            />
+          )}
+        </svg>
       </motion.div>
 
-      {/* Text */}
       {showText && (
         <motion.span
-          className="font-bold bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-400 dark:to-blue-400 bg-clip-text text-transparent select-none"
+          className="font-bold bg-gradient-to-r from-indigo-200 via-sky-300 to-emerald-200 dark:from-indigo-300 dark:via-sky-400 dark:to-cyan-300 bg-clip-text text-transparent tracking-tight select-none"
           style={{ fontSize: currentSize.text }}
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
         >
           TapLinkr
         </motion.span>
@@ -135,8 +174,15 @@ export default function Logo({ size = 'md', showText = true, animated = true, cl
   )
 }
 
-// Variante simplifiée pour les favicons et petites tailles
+// Variante simplifiee pour les favicons et petites tailles
 export function LogoIcon({ size = 32, className = '' }: { size?: number; className?: string }) {
+  const gradientId = React.useId()
+  const outerGradientId = `${gradientId}-outer`
+  const surfaceGradientId = `${gradientId}-surface`
+  const strokeGradientId = `${gradientId}-stroke`
+  const linkGradientId = `${gradientId}-link`
+  const glowGradientId = `${gradientId}-glow`
+
   return (
     <svg
       width={size}
@@ -146,24 +192,64 @@ export function LogoIcon({ size = 32, className = '' }: { size?: number; classNa
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      <circle cx="32" cy="32" r="30" fill="url(#icon-gradient)" />
-      
-      <g transform="translate(32, 32)">
-        <circle cx="0" cy="0" r="6" fill="white" />
-        {[0, 72, 144, 216, 288].map((angle) => (
-          <g key={angle} transform={`rotate(${angle})`}>
-            <line x1="8" y1="0" x2="18" y2="0" stroke="white" strokeWidth="2" strokeLinecap="round" />
-            <circle cx="22" cy="0" r="4" fill="white" />
-          </g>
-        ))}
-      </g>
-      
       <defs>
-        <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#4F46E5" />
-          <stop offset="100%" stopColor="#2563EB" />
+        <linearGradient id={outerGradientId} x1="8" y1="8" x2="56" y2="56">
+          <stop offset="0%" stopColor="#4338CA" />
+          <stop offset="45%" stopColor="#6366F1" />
+          <stop offset="100%" stopColor="#22D3EE" />
         </linearGradient>
+        <linearGradient id={surfaceGradientId} x1="16" y1="14" x2="48" y2="50">
+          <stop offset="0%" stopColor="#111827" stopOpacity="0.88" />
+          <stop offset="100%" stopColor="#1E293B" stopOpacity="0.68" />
+        </linearGradient>
+        <linearGradient id={strokeGradientId} x1="16" y1="16" x2="48" y2="48">
+          <stop offset="0%" stopColor="#93C5FD" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.55" />
+        </linearGradient>
+        <linearGradient id={linkGradientId} x1="20" y1="20" x2="46" y2="44">
+          <stop offset="0%" stopColor="#F8FAFC" />
+          <stop offset="100%" stopColor="#7DD3FC" />
+        </linearGradient>
+        <radialGradient id={glowGradientId} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
+        </radialGradient>
       </defs>
+
+      <rect x="6" y="6" width="52" height="52" rx="18" fill={`url(#${outerGradientId})`} />
+      <rect
+        x="12"
+        y="12"
+        width="40"
+        height="40"
+        rx="14"
+        fill={`url(#${surfaceGradientId})`}
+        stroke={`url(#${strokeGradientId})`}
+        strokeWidth="1.5"
+      />
+      <circle cx="32" cy="32" r="12.5" fill={`url(#${glowGradientId})`} opacity="0.7" />
+      <path
+        d="M23 26c0-4.418 3.582-8 8-8h6c4.418 0 8 3.582 8 8s-3.582 8-8 8h-3.2"
+        stroke={`url(#${linkGradientId})`}
+        strokeWidth="3.4"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M41 38c0 4.418-3.582 8-8 8h-6c-4.418 0-8-3.582-8-8s3.582-8 8-8h3.2"
+        stroke={`url(#${linkGradientId})`}
+        strokeWidth="3.4"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M27.2 30.8L36.8 39.2"
+        stroke="#F8FAFC"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeOpacity="0.6"
+      />
+      <circle cx="32" cy="32" r="3.2" fill="#F8FAFC" />
     </svg>
   )
 }
