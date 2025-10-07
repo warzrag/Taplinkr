@@ -992,8 +992,8 @@ export default function DragDropDashboard({
               <Link2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Liens libres</h2>
-              <p className="text-sm text-gray-500">{unorganizedLinks.length} liens non organisés</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Liens libres</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{unorganizedLinks.length} liens non organisés</p>
             </div>
           </div>
 
