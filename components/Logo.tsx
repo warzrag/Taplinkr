@@ -122,7 +122,7 @@ export default function Logo({ size = 'md', showText = true, animated = true, cl
       {/* Text */}
       {showText && (
         <motion.span
-          className="font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent select-none"
+          className="font-bold bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-400 dark:to-blue-400 bg-clip-text text-transparent select-none"
           style={{ fontSize: currentSize.text }}
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
