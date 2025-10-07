@@ -22,7 +22,7 @@ import {
   Folder,
   Database
 } from 'lucide-react'
-import LinkLogo from '@/components/LinkLogo'
+import Logo from '@/components/Logo'
 import LivePhonePreview from '@/components/LivePhonePreview'
 import { LinkUpdateProvider } from '@/contexts/LinkUpdateContext'
 import { ProfileProvider } from '@/contexts/ProfileContext'
@@ -137,7 +137,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <X className="w-5 h-5" />
             </button>
             <div className="flex justify-center">
-              <LinkLogo size="lg" showText={true} />
+              <Logo size="lg" showText={true} />
             </div>
           </div>
         </div>
@@ -287,7 +287,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="w-6 h-6" />
             </button>
             <div className="lg:hidden flex-1 flex justify-center px-4">
-              <LinkLogo size="md" showText={true} />
+              <Logo size="md" showText={true} />
             </div>
           </div>
           <div className="flex items-center gap-4">

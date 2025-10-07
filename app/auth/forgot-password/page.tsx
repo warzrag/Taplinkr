@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import { Mail, ArrowLeft, Send, CheckCircle } from 'lucide-react'
-import LinkLogo from '@/components/LinkLogo'
+import Logo from '@/components/Logo'
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
@@ -112,7 +112,7 @@ export default function ForgotPasswordPage() {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <LinkLogo size="lg" showText={true} />
+          <Logo size="lg" showText={true} />
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
