@@ -110,24 +110,41 @@ export default function Dashboard() {
       const cachedDashboard = localStorage.getItem('dashboard-stats')
       const cachedFolders = localStorage.getItem('folder-stats')
 
+      // 🔥 STALE-WHILE-REVALIDATE: Toujours afficher le cache si disponible
       if (cachedDashboard) {
-        const cached = JSON.parse(cachedDashboard)
-        // Vérifier si le cache a moins de 2 minutes
-        if (Date.now() - cached.timestamp < 120000) {
+        try {
+          const cached = JSON.parse(cachedDashboard)
           setDashboardStats(cached.data)
           setAnalyticsLoading(false)
+
+          // Log si le cache est vieux (> 30 min)
+          const cacheAge = Date.now() - cached.timestamp
+          if (cacheAge > 1800000) {
+            console.log('⚠️ Cache dashboard ancien:', Math.floor(cacheAge / 60000), 'minutes')
+          }
+        } catch (err) {
+          console.error('Erreur parsing cache dashboard:', err)
+          localStorage.removeItem('dashboard-stats')
         }
       }
 
       if (cachedFolders) {
-        const cached = JSON.parse(cachedFolders)
-        if (Date.now() - cached.timestamp < 120000) {
+        try {
+          const cached = JSON.parse(cachedFolders)
           setFolderStats(cached.data)
           setFolderStatsLoading(false)
+
+          const cacheAge = Date.now() - cached.timestamp
+          if (cacheAge > 1800000) {
+            console.log('⚠️ Cache folders ancien:', Math.floor(cacheAge / 60000), 'minutes')
+          }
+        } catch (err) {
+          console.error('Erreur parsing cache folders:', err)
+          localStorage.removeItem('folder-stats')
         }
       }
 
-      // Charger les vraies données en arrière-plan
+      // Charger les vraies données en arrière-plan (toujours)
       Promise.all([
         fetchDashboardStats(),
         fetchFolderStats()

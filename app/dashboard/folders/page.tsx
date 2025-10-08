@@ -36,6 +36,42 @@ export default function FoldersPage() {
 
   // Récupérer les dossiers et les liens
   useEffect(() => {
+    // ⚡ STALE-WHILE-REVALIDATE: Charger depuis le cache d'abord
+    const cachedFolders = localStorage.getItem('folders-page-cache')
+    if (cachedFolders) {
+      try {
+        const cached = JSON.parse(cachedFolders)
+
+        // Toujours afficher le cache, même s'il est vieux
+        if (cached.folders) {
+          const foldersWithExpanded = (cached.folders || []).map((folder: any) => ({
+            ...folder,
+            isExpanded: false,
+            children: folder.children?.map((child: any) => ({
+              ...child,
+              isExpanded: false
+            })) || []
+          }))
+          setFolders(foldersWithExpanded)
+        }
+
+        if (cached.unorganizedLinks) {
+          setUnorganizedLinks(cached.unorganizedLinks)
+        }
+
+        setLoading(false)
+
+        const cacheAge = Date.now() - cached.timestamp
+        if (cacheAge > 1800000) {
+          console.log('⚠️ Cache folders page ancien:', Math.floor(cacheAge / 60000), 'minutes')
+        }
+      } catch (err) {
+        console.error('Erreur parsing cache folders page:', err)
+        localStorage.removeItem('folders-page-cache')
+      }
+    }
+
+    // Charger les vraies données en arrière-plan
     fetchData()
   }, [])
 
@@ -62,8 +98,11 @@ export default function FoldersPage() {
       ])
 
       // Traiter les dossiers
+      let foldersData: any[] = []
+      let unorganizedLinksData: LinkType[] = []
+
       if (foldersResponse.ok) {
-        const foldersData = await foldersResponse.json()
+        foldersData = await foldersResponse.json()
         const foldersWithExpanded = (foldersData || []).map((folder: any) => ({
           ...folder,
           isExpanded: false,
@@ -80,6 +119,16 @@ export default function FoldersPage() {
         const linksData = await linksResponse.json()
         const unorganized = linksData.filter((link: LinkType) => !link.folderId)
         setUnorganizedLinks(unorganized)
+        unorganizedLinksData = unorganized
+      }
+
+      // 🔥 Sauvegarder dans le cache localStorage
+      if (foldersResponse.ok || linksResponse.ok) {
+        localStorage.setItem('folders-page-cache', JSON.stringify({
+          folders: foldersData,
+          unorganizedLinks: unorganizedLinksData,
+          timestamp: Date.now()
+        }))
       }
     } catch (error) {
       console.error('Erreur lors du chargement:', error)
