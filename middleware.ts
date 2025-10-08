@@ -3,11 +3,27 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const response = NextResponse.next()
 
-  // Laisser passer le tracking - protections dans l'API et le composant
-  // if (pathname.startsWith('/api/track')) {
-  //   // Tracking réactivé avec protections
-  // }
+  // Headers de performance et sécurité
+  response.headers.set('X-DNS-Prefetch-Control', 'on')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+
+  // Cache intelligent selon le type de route
+  if (pathname.startsWith('/_next/static')) {
+    // Assets statiques - cache long immutable
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+  } else if (pathname.match(/\.(jpg|jpeg|png|gif|svg|ico|woff2)$/)) {
+    // Images et fonts - cache long
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+  } else if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+    // Pages dashboard/admin - pas de cache
+    response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
+  } else if (pathname.startsWith('/')) {
+    // Pages publiques - cache court
+    response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
+  }
 
   // Ignorer les routes API, static files et les routes Next.js
   if (
@@ -28,18 +44,17 @@ export function middleware(request: NextRequest) {
     pathname === '/' ||
     pathname === '/favicon.ico'
   ) {
-    return NextResponse.next()
+    return response
   }
 
   // Extraire le slug/username depuis l'URL
-  const slug = pathname.slice(1) // Enlever le / au début
+  const slug = pathname.slice(1)
 
   if (slug && slug.length > 0) {
-    // Ne rien faire, laisser Next.js router vers /[slug]
-    return NextResponse.next()
+    return response
   }
 
-  return NextResponse.next()
+  return response
 }
 
 export const config = {

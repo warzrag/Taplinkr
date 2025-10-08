@@ -3,9 +3,28 @@ import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import DebugConsole from '@/components/DebugConsole'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import { WebVitals } from '@/components/WebVitals'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import '../styles/theme-transitions.css'
 import './performance-optimizations.css'
+
+// Optimisation fonts avec next/font - 0 layout shift
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+  preload: true,
+})
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-display',
+  display: 'swap',
+  preload: true,
+})
 
 export const metadata = {
   title: 'TapLinkr - Tap Into Your Digital World',
@@ -38,17 +57,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className={`h-full ${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/final.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="TapLinkr" />
 
-        {/* Préconnexion aux domaines externes pour améliorer les performances */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        {/* Préconnexion Supabase pour images */}
+        <link rel="preconnect" href="https://dkwgorynhgnmldzbhhrb.supabase.co" />
+        <link rel="dns-prefetch" href="https://dkwgorynhgnmldzbhhrb.supabase.co" />
 
         {/* Préchargement des routes critiques */}
         <link rel="prefetch" href="/dashboard" as="document" />
@@ -56,11 +74,12 @@ export default function RootLayout({
         <link rel="prefetch" href="/dashboard/analytics" as="document" />
       </head>
       <body className="h-full bg-gray-50 dark:bg-gray-900 antialiased transition-colors duration-300">
+        <WebVitals />
         <ErrorBoundary>
           <ThemeProvider>
             <Providers>
               {children}
-              <Toaster 
+              <Toaster
               position="top-right"
               toastOptions={{
                 className: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100',
