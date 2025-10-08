@@ -124,7 +124,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-[280px] lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col
+        fixed inset-y-0 left-0 z-50 w-[260px] sm:w-[280px] lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col
         ${sidebarOpen ? 'block' : 'hidden lg:flex'}
       `}>
         {/* Logo */}
@@ -278,25 +278,25 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-64">
         {/* Fixed Header with Theme Toggle */}
-        <div className="fixed top-0 right-0 left-0 lg:left-64 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between">
-          <div className="flex items-center">
+        <div className="fixed top-0 right-0 left-0 lg:left-64 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2 sm:px-4 py-2.5 sm:py-3 lg:px-6 lg:py-4 flex items-center justify-between">
+          <div className="flex items-center min-w-0 flex-1">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="lg:hidden p-1.5 sm:p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            <div className="lg:hidden flex-1 flex justify-center px-4">
-              <Logo size="md" showText={true} />
+            <div className="lg:hidden flex-1 flex justify-center px-2 sm:px-4 min-w-0">
+              <Logo size="sm" showText={true} />
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <ThemeToggle />
           </div>
         </div>
 
         {/* Content with padding top to account for fixed header */}
-        <div className="flex-1 overflow-auto pt-[60px] lg:pt-[72px]">
+        <div className="flex-1 overflow-auto pt-[52px] sm:pt-[60px] lg:pt-[72px]">
           <ProfileProvider>
             <LinksProvider>
               <LinkUpdateProvider updateLinkInPreview={updateLinkInPreview}>

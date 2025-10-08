@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(DATABASE_URL=\"postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:5432/postgres\" node -e \"\nconst { PrismaClient } = require(''@prisma/client'');\nconst prisma = new PrismaClient();\nprisma.user.findMany({\n  select: { id: true, email: true, name: true, teamId: true, teamRole: true },\n  orderBy: { createdAt: ''desc'' },\n  take: 5\n})\n  .then(users => {\n    console.log(''\\n👤 Utilisateurs:\\n'');\n    users.forEach((u, i) => {\n      console.log((i+1) + ''. '' + u.email + '' ('' + u.name + '')'');\n      console.log(''   ID: '' + u.id);\n      console.log(''   TeamId: '' + (u.teamId || ''AUCUNE''));\n      console.log(''   Role: '' + (u.teamRole || ''AUCUN''));\n      console.log('''');\n    });\n    prisma.$disconnect();\n  })\n  .catch(e => { console.error(e); prisma.$disconnect(); });\n\")"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

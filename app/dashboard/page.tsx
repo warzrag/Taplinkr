@@ -235,19 +235,19 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-10 lg:px-8 lg:py-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-10 lg:px-8 lg:py-12">
         {/* Header amélioré */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6 sm:mb-8"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1.5 sm:mb-2">
                 Bonjour {userProfile?.name || session?.user?.email?.split('@')[0]} ! 👋
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400">
                 {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
@@ -268,7 +268,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Actions rapides */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {quickActions.map((action, index) => (
             <motion.div
               key={action.label}
@@ -278,19 +278,19 @@ export default function Dashboard() {
             >
               {action.href ? (
                 <FastLink href={action.href} prefetch={true}>
-                  <div className="relative h-full bg-white dark:bg-gray-800 rounded-2xl p-5 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
+                  <div className="relative h-full bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
                     {/* Content */}
                     <div className="relative z-10">
                       {/* Icon container minimal */}
-                      <div className="inline-flex p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 mb-3 group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors duration-200">
-                        <action.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+                      <div className="inline-flex p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-700 mb-2 sm:mb-3 group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors duration-200">
+                        <action.icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
                       </div>
-                      
+
                       {/* Text content */}
-                      <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 mb-1">
+                      <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 mb-0.5 sm:mb-1">
                         {action.label}
                       </h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                      <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
                         {action.description}
                       </p>
                       
@@ -308,20 +308,20 @@ export default function Dashboard() {
               ) : (
                 <button
                   onClick={action.onClick}
-                  className="relative h-full bg-white dark:bg-gray-800 rounded-2xl p-5 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 w-full text-left"
+                  className="relative h-full bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 w-full text-left"
                 >
                   {/* Content */}
                   <div className="relative z-10">
                     {/* Icon container minimal */}
-                    <div className="inline-flex p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 mb-3 group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors duration-200">
-                      <action.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+                    <div className="inline-flex p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-700 mb-2 sm:mb-3 group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors duration-200">
+                      <action.icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
                     </div>
-                    
+
                     {/* Text content */}
-                    <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 mb-1">
+                    <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 mb-0.5 sm:mb-1">
                       {action.label}
                     </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
                       {action.description}
                     </p>
                   </div>
@@ -332,21 +332,21 @@ export default function Dashboard() {
         </div>
 
         {/* Statistiques principales */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           {/* Cartes de statistiques */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
+              className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-brand-500/15 rounded-xl">
-                  <MousePointer className="w-6 h-6 text-brand-600" />
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 bg-brand-500/15 rounded-lg sm:rounded-xl">
+                  <MousePointer className="w-5 h-5 sm:w-6 sm:h-6 text-brand-600" />
                 </div>
                 {dashboardStats?.growthRate !== undefined && (
-                  <span className={`text-sm font-medium ${
+                  <span className={`text-xs sm:text-sm font-medium ${
                     dashboardStats.growthRate > 0
                       ? 'text-emerald-600'
                       : 'text-red-600'
@@ -355,11 +355,11 @@ export default function Dashboard() {
                   </span>
                 )}
               </div>
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {console.log('🔍 dashboardStats:', dashboardStats) || ''}
                 {dashboardStats?.totalClicks || 0}
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total clics</p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Total clics</p>
             </motion.div>
 
 
@@ -367,34 +367,34 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
+              className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-emerald-500/15 rounded-xl">
-                  <Users className="w-6 h-6 text-emerald-600" />
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 bg-emerald-500/15 rounded-lg sm:rounded-xl">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {dashboardStats?.uniqueVisitors || 0}
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Visiteurs uniques</p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Visiteurs uniques</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
+              className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-amber-500/15 rounded-xl">
-                  <Activity className="w-6 h-6 text-amber-600" />
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 bg-amber-500/15 rounded-lg sm:rounded-xl">
+                  <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {links.filter(l => l.isActive).length}
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Liens actifs</p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Liens actifs</p>
             </motion.div>
           </div>
 
@@ -404,11 +404,11 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 mb-8"
+              className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-gray-700 mb-6 sm:mb-8"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
                     Répartition géographique des clics
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
