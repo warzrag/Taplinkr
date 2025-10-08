@@ -12,7 +12,6 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
-  const [showInvisibleOverlay, setShowInvisibleOverlay] = useState(false)
 
   // 🔥 TECHNIQUE GETMYSOCIAL : Overlay invisible qui force l'ouverture externe
   useEffect(() => {
@@ -23,10 +22,28 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     const isInAppBrowser = isInstagram || isFacebook || isTikTok
 
     if (isInAppBrowser) {
-      console.log('🚨 Navigateur in-app détecté - Activation overlay invisible')
-      // Afficher l'overlay invisible après 0.1s (le temps que la page charge)
+      console.log('🚨 Navigateur in-app détecté - Auto-trigger ouverture Safari')
+
+      // Créer et cliquer automatiquement un lien invisible
       setTimeout(() => {
-        setShowInvisibleOverlay(true)
+        const currentUrl = window.location.href
+        const link = document.createElement('a')
+        link.href = currentUrl
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
+        link.style.display = 'none'
+        document.body.appendChild(link)
+
+        // Auto-click après 500ms (le temps que la page soit visible)
+        setTimeout(() => {
+          console.log('🚀 AUTO-CLICK sur le lien invisible')
+          link.click()
+
+          // Retirer le lien après
+          setTimeout(() => {
+            document.body.removeChild(link)
+          }, 100)
+        }, 500)
       }, 100)
     }
   }, [])
@@ -141,24 +158,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
 
   return (
     <div className="min-h-screen relative bg-gray-900">
-      {/* 🔥 OVERLAY INVISIBLE: Force l'ouverture dans Safari (technique GetMySocial) */}
-      {showInvisibleOverlay && (
-        <a
-          href={typeof window !== 'undefined' ? window.location.href : '#'}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed inset-0 z-[99999] cursor-pointer"
-          style={{
-            background: 'transparent',
-            opacity: 0,
-            pointerEvents: 'auto'
-          }}
-          onClick={(e) => {
-            console.log('🚀 Overlay invisible cliqué - Ouverture Safari')
-            // Le navigateur va automatiquement demander "Ouvrir dans Safari ?"
-          }}
-        />
-      )}
+      {/* L'auto-click se fait dans le useEffect, pas besoin d'overlay visible */}
 
       {/* 🔥 OVERLAY: Prompt pour ouvrir dans navigateur externe */}
       {showBrowserPrompt && (
