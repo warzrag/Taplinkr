@@ -71,8 +71,8 @@ export default function FoldersPage() {
       }
     }
 
-    // Charger les vraies données en arrière-plan
-    fetchData()
+    // Charger les vraies données en arrière-plan (sans forceRefresh au démarrage)
+    fetchData(false)
   }, [])
 
   const fetchData = async (forceRefresh = false) => {
@@ -235,9 +235,10 @@ export default function FoldersPage() {
       })
 
       if (response.ok) {
-        // ⚡ Invalider le cache localStorage du dashboard
+        // ⚡ Invalider TOUS les caches localStorage
         localStorage.removeItem('dashboard-stats')
         localStorage.removeItem('folder-stats')
+        localStorage.removeItem('folders-page-cache')  // 🔥 FIX
 
         toast.success('Dossier modifié')
         // Recharger avec cache bypass
@@ -266,9 +267,10 @@ export default function FoldersPage() {
       })
 
       if (response.ok) {
-        // ⚡ Invalider le cache localStorage du dashboard
+        // ⚡ Invalider TOUS les caches localStorage
         localStorage.removeItem('dashboard-stats')
         localStorage.removeItem('folder-stats')
+        localStorage.removeItem('folders-page-cache')  // 🔥 FIX
 
         toast.success('Dossier supprimé')
         // Recharger avec cache bypass
@@ -305,9 +307,10 @@ export default function FoldersPage() {
       const data = await response.json()
 
       if (response.ok) {
-        // ⚡ Invalider le cache localStorage du dashboard
+        // ⚡ Invalider TOUS les caches localStorage
         localStorage.removeItem('dashboard-stats')
         localStorage.removeItem('folder-stats')
+        localStorage.removeItem('folders-page-cache')  // 🔥 FIX
 
         toast.success(`"${folderName}" partagé avec l'équipe`)
         await fetchData(true)
@@ -328,9 +331,10 @@ export default function FoldersPage() {
       const data = await response.json()
 
       if (response.ok) {
-        // ⚡ Invalider le cache localStorage du dashboard
+        // ⚡ Invalider TOUS les caches localStorage
         localStorage.removeItem('dashboard-stats')
         localStorage.removeItem('folder-stats')
+        localStorage.removeItem('folders-page-cache')  // 🔥 FIX
 
         toast.success(`"${folderName}" retiré du partage`)
         await fetchData(true)
@@ -407,6 +411,8 @@ export default function FoldersPage() {
             setShowCreateModal(true)
           }}
           onFolderCreated={async () => {
+            // 🔥 FIX: Invalider le cache localStorage AVANT de recharger
+            localStorage.removeItem('folders-page-cache')
             // Recharger avec bypass cache après création
             await fetchData(true)
           }}

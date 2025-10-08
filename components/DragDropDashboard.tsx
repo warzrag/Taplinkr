@@ -456,10 +456,11 @@ export default function DragDropDashboard({
         onFoldersChange(updateFolderStructure(folders, formattedFolder))
         refreshLinksContext()
 
-        // ⚡ Invalider le cache localStorage du dashboard
+        // ⚡ Invalider TOUS les caches localStorage
         if (typeof window !== 'undefined') {
           localStorage.removeItem('dashboard-stats')
           localStorage.removeItem('folder-stats')
+          localStorage.removeItem('folders-page-cache')  // 🔥 FIX: Invalider aussi le cache de la page folders
         }
 
         setNewFolderName('')

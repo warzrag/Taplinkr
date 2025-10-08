@@ -6,7 +6,8 @@
       "Bash(git push:*)",
       "Bash(npx prisma db push:*)",
       "Bash(wc:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:getmysocial.com)"
     ],
     "deny": [],
     "ask": []
