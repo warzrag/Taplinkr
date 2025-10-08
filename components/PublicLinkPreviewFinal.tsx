@@ -14,16 +14,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
 
   // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
-  // Note: Le middleware intercepte les in-app browsers et renvoie une page HTML légère
-  // Ce code côté client sert de fallback si le middleware n'a pas détecté
+  // La page se charge normalement, puis redirige après 500ms pour montrer le design
   useEffect(() => {
-    // Ne pas rediriger si on vient déjà d'une tentative de redirection
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('_openedExternal')) {
-      console.log('✅ Déjà redirigé par le middleware')
-      return
-    }
-
     const userAgent = navigator.userAgent || ''
     const isInstagram = userAgent.includes('Instagram')
     const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
@@ -31,52 +23,54 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     const isInAppBrowser = isInstagram || isFacebook || isTikTok
 
     if (isInAppBrowser) {
-      console.log('🚨 Navigateur in-app détecté (fallback client-side)')
+      console.log('🚨 Navigateur in-app détecté - Redirection dans 500ms')
 
       // Détecter la plateforme
       const isIOS = /iPad|iPhone|iPod/.test(userAgent)
       const isAndroid = /Android/.test(userAgent)
       const currentUrl = window.location.href
 
-      // ⚡ REDIRECTION SYNCHRONE (sans setTimeout pour préserver user gesture)
-      if (isIOS) {
-        // iOS: URL scheme x-safari-https://
-        const safariUrl = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
-        console.log('🍎 iOS détecté - Redirection Safari:', safariUrl)
+      // ⚡ DÉLAI DE 500ms pour montrer la belle page publique, puis rediriger
+      setTimeout(() => {
+        if (isIOS) {
+          // iOS: URL scheme x-safari-https://
+          const safariUrl = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
+          console.log('🍎 iOS - Redirection Safari:', safariUrl)
 
-        try {
-          window.location.href = safariUrl
+          try {
+            window.location.href = safariUrl
 
-          // Si la redirection échoue, afficher l'overlay après 1s
-          setTimeout(() => {
+            // Si la redirection échoue, afficher l'overlay après 1.5s supplémentaire
+            setTimeout(() => {
+              setShowBrowserPrompt(true)
+            }, 1500)
+          } catch (err) {
+            console.error('Erreur redirection iOS:', err)
             setShowBrowserPrompt(true)
-          }, 1000)
-        } catch (err) {
-          console.error('Erreur redirection iOS:', err)
+          }
+        } else if (isAndroid) {
+          // Android: Intent URL
+          const host = currentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
+          const intentUrl = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;end`
+          console.log('🤖 Android - Redirection Chrome:', intentUrl)
+
+          try {
+            window.location.href = intentUrl
+
+            // Si la redirection échoue, afficher l'overlay après 1.5s supplémentaire
+            setTimeout(() => {
+              setShowBrowserPrompt(true)
+            }, 1500)
+          } catch (err) {
+            console.error('Erreur redirection Android:', err)
+            setShowBrowserPrompt(true)
+          }
+        } else {
+          // Plateforme inconnue, afficher l'overlay
+          console.log('⚠️ Plateforme inconnue - Affichage overlay')
           setShowBrowserPrompt(true)
         }
-      } else if (isAndroid) {
-        // Android: Intent URL
-        const host = currentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
-        const intentUrl = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;end`
-        console.log('🤖 Android détecté - Redirection Chrome:', intentUrl)
-
-        try {
-          window.location.href = intentUrl
-
-          // Si la redirection échoue, afficher l'overlay après 1s
-          setTimeout(() => {
-            setShowBrowserPrompt(true)
-          }, 1000)
-        } catch (err) {
-          console.error('Erreur redirection Android:', err)
-          setShowBrowserPrompt(true)
-        }
-      } else {
-        // Plateforme inconnue, afficher l'overlay
-        console.log('⚠️ Plateforme inconnue - Affichage overlay')
-        setShowBrowserPrompt(true)
-      }
+      }, 500) // 🔥 Délai de 500ms comme GetMySocial
     }
   }, [])
 
