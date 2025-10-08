@@ -30,52 +30,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     if (isInAppBrowser) {
       console.log('🚨 Navigateur in-app détecté:', userAgent)
 
-      // Déjà redirigé dans cette session ?
-      const alreadyRedirected = sessionStorage.getItem('browser_redirect_attempted')
-      if (alreadyRedirected) {
-        console.log('⚠️ Redirection déjà tentée, affichage du prompt')
-        setShowBrowserPrompt(true)
-        return
-      }
-
-      // Marquer comme tenté
-      sessionStorage.setItem('browser_redirect_attempted', 'true')
-
-      const currentUrl = window.location.href
-      const isIOS = /iPhone|iPad|iPod/.test(userAgent)
-      const isAndroid = /Android/.test(userAgent)
-
-      // Tenter la redirection automatique
-      if (isIOS) {
-        // iOS: Essayer d'ouvrir dans Safari
-        console.log('📱 iOS détecté - Tentative ouverture Safari')
-
-        // Méthode 1: x-safari-https
-        const safariUrl = currentUrl.replace(/^https?:\/\//, 'x-safari-')
-        window.location.href = safariUrl
-
-        // Fallback après 1 seconde si ça marche pas
-        setTimeout(() => {
-          setShowBrowserPrompt(true)
-        }, 1000)
-
-      } else if (isAndroid) {
-        // Android: Essayer d'ouvrir dans Chrome
-        console.log('🤖 Android détecté - Tentative ouverture Chrome')
-
-        // Méthode 1: intent:// URL
-        const intent = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`
-        window.location.href = intent
-
-        // Fallback après 1 seconde
-        setTimeout(() => {
-          setShowBrowserPrompt(true)
-        }, 1000)
-
-      } else {
-        // Desktop ou autre: afficher le prompt directement
-        setShowBrowserPrompt(true)
-      }
+      // Afficher le prompt directement (sans redirection auto pour éviter les erreurs 404)
+      setShowBrowserPrompt(true)
     }
   }, [])
 
