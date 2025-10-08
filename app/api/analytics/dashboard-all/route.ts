@@ -71,69 +71,84 @@ export async function GET() {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
     sevenDaysAgo.setHours(0, 0, 0, 0)
 
-    // ⚡ OPTIMISATION: Récupérer tous les liens (personnels + équipe)
-    const allLinks = await prisma.link.findMany({
-      where: {
-        OR: [
-          { userId },  // Mes liens
-          ...(user?.teamId ? [{
-            teamId: user.teamId,  // Liens d'équipe
-            teamShared: true
-          }] : [])
-        ]
-      },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        clicks: true,
-        views: true
-      },
-      orderBy: { clicks: 'desc' }
-    })
+    // ⚡ OPTIMISATION ULTRA: Utiliser des agrégations directes
+    const linkWhere = {
+      OR: [
+        { userId },
+        ...(user?.teamId ? [{
+          teamId: user.teamId,
+          teamShared: true
+        }] : [])
+      ]
+    }
 
-    // Récupérer les IDs de tous les liens (personnels + équipe)
-    const allLinkIds = allLinks.map(link => link.id)
-
-    // Maintenant récupérer les clicks pour TOUS ces liens
-    const [actualUniqueVisitors, actualCountryCounts, actualRecentClicks] = await Promise.all([
-      // Visiteurs uniques sur tous les liens
-      prisma.click.findMany({
-        where: { linkId: { in: allLinkIds } },
-        distinct: ['ip'],
-        select: { ip: true }
+    // Requêtes parallèles optimisées
+    const [linksAggregate, topLinks, allLinkIds, clickStats] = await Promise.all([
+      // 1. Stats agrégées des liens en une seule requête
+      prisma.link.aggregate({
+        where: linkWhere,
+        _count: { id: true },
+        _sum: { clicks: true, views: true }
       }),
 
-      // Top pays sur tous les liens
+      // 2. Top 5 liens seulement
+      prisma.link.findMany({
+        where: linkWhere,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          clicks: true,
+          views: true
+        },
+        orderBy: { clicks: 'desc' },
+        take: 5
+      }),
+
+      // 3. Juste les IDs pour les requêtes Click
+      prisma.link.findMany({
+        where: linkWhere,
+        select: { id: true }
+      }),
+
+      // 4. Stats Click en une seule requête groupBy
       prisma.click.groupBy({
         by: ['country'],
         where: {
-          linkId: { in: allLinkIds },
+          link: linkWhere,
           country: { not: 'Unknown' }
         },
-        _count: { country: true }
+        _count: { id: true }
+      })
+    ])
+
+    const linkIds = allLinkIds.map(l => l.id)
+
+    // Requêtes Click optimisées en parallèle
+    const [uniqueVisitors, recentClicks] = await Promise.all([
+      // Visiteurs uniques - comptage direct
+      prisma.click.groupBy({
+        by: ['ip'],
+        where: { linkId: { in: linkIds } }
       }),
 
-      // Clics des 7 derniers jours sur tous les liens
+      // Clics récents - seulement createdAt
       prisma.click.findMany({
         where: {
-          linkId: { in: allLinkIds },
-          createdAt: {
-            gte: sevenDaysAgo,
-            lte: today
-          }
+          linkId: { in: linkIds },
+          createdAt: { gte: sevenDaysAgo, lte: today }
         },
         select: { createdAt: true }
       })
     ])
 
-    // Calculer les stats à partir des données récupérées
-    const totalLinks = allLinks.length
-    const totalClicks = allLinks.reduce((sum, link) => sum + (link.clicks || 0), 0)
-    const uniqueVisitorsCount = actualUniqueVisitors.length
+    // Stats calculées
+    const totalLinks = linksAggregate._count.id
+    const totalClicks = linksAggregate._sum.clicks || 0
+    const uniqueVisitorsCount = uniqueVisitors.length
 
-    // Top 5 liens (déjà triés par clicks desc)
-    const topLinks = allLinks.slice(0, 5).map(link => ({
+    // Top 5 liens formatés
+    const formattedTopLinks = topLinks.map(link => ({
       id: link.id,
       title: link.title,
       slug: link.slug,
@@ -145,12 +160,12 @@ export async function GET() {
     }))
 
     // Top 10 pays
-    const topCountries = actualCountryCounts
-      .sort((a, b) => b._count.country - a._count.country)
+    const topCountries = clickStats
+      .sort((a, b) => b._count.id - a._count.id)
       .slice(0, 10)
       .map(item => {
         const countryCode = countryNameToCode[item.country] || item.country
-        return [countryCode, item._count.country]
+        return [countryCode, item._count.id]
       })
 
     // Générer les données des 7 derniers jours
@@ -162,7 +177,7 @@ export async function GET() {
       clicksByDay.set(dateKey, 0)
     }
 
-    actualRecentClicks.forEach(click => {
+    recentClicks.forEach(click => {
       const dateKey = new Date(click.createdAt).toISOString().split('T')[0]
       if (clicksByDay.has(dateKey)) {
         clicksByDay.set(dateKey, clicksByDay.get(dateKey) + 1)
@@ -174,7 +189,7 @@ export async function GET() {
       clicks
     }))
 
-    // Retourner les données avec cache HTTP
+    // Retourner les données avec cache HTTP optimisé
     const response = NextResponse.json({
       totalLinks,
       totalClicks,
@@ -183,13 +198,13 @@ export async function GET() {
       clicksChange: 0,
       viewsChange: 0,
       visitorsChange: 0,
-      topLinks,
+      topLinks: formattedTopLinks,
       topCountries,
       summary
     })
 
-    // Cache de 30 secondes pour éviter les requêtes répétées
-    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+    // Cache agressif de 1 minute pour performance maximale
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
 
     return response
 

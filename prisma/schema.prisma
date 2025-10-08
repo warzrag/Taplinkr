@@ -179,6 +179,8 @@ model Click {
 
   @@index([linkId, createdAt])
   @@index([userId, createdAt])
+  @@index([linkId, country])
+  @@index([ip])
   @@map("clicks")
 }
 

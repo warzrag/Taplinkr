@@ -59,13 +59,11 @@ export async function GET() {
         order: true,
         createdAt: true,
         updatedAt: true,
-        teamShared: true,  // Ajouter pour savoir si c'est un lien d'équipe
-        userId: true,      // Ajouter pour savoir qui est le propriétaire
-        // Inclure juste le nombre de multiLinks
-        multiLinks: {
-          select: {
-            id: true
-          }
+        teamShared: true,
+        userId: true,
+        // Utiliser _count au lieu de charger les multiLinks
+        _count: {
+          select: { multiLinks: true }
         }
       },
       orderBy: { order: 'asc' }
@@ -74,7 +72,7 @@ export async function GET() {
     // Transformer pour avoir le format attendu
     const formattedLinks = links.map(link => ({
       ...link,
-      multiLinksCount: link.multiLinks?.length || 0,
+      multiLinksCount: link._count?.multiLinks || 0,
       multiLinks: [] // Pas besoin des détails pour le dashboard
     }))
 
