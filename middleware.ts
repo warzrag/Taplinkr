@@ -69,73 +69,104 @@ export function middleware(request: NextRequest) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirection...</title>
+  <title>TapLinkr Shield</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .shield-header {
+      text-align: center;
+      padding: 30px 20px 20px;
+      background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
+    }
+    .shield-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .shield-title {
+      color: #fff;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .shield-subtitle {
+      color: #888;
+      font-size: 14px;
+    }
+    .main-action {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       padding: 20px;
     }
-    .container {
-      text-align: center;
-      color: white;
+    .btn-container {
       width: 100%;
-      max-width: 400px;
-    }
-    .icon {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 20px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-    }
-    h1 {
-      font-size: 28px;
-      margin: 0 0 12px;
-      font-weight: 600;
-    }
-    p {
-      font-size: 16px;
-      opacity: 0.9;
-      margin-bottom: 30px;
-      line-height: 1.5;
+      max-width: 500px;
     }
     .btn {
       display: block;
       width: 100%;
-      background: white;
-      color: #667eea;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
       border: none;
-      padding: 18px 32px;
-      font-size: 18px;
-      font-weight: 600;
-      border-radius: 16px;
+      padding: 24px 40px;
+      font-size: 20px;
+      font-weight: 700;
+      border-radius: 20px;
       cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.2s;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
       text-decoration: none;
-      margin-bottom: 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.1s;
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    .btn:hover::before {
+      left: 100%;
     }
     .btn:active {
       transform: scale(0.98);
     }
-    .small-text {
-      font-size: 13px;
-      opacity: 0.7;
-      margin-top: 20px;
+    .btn-icon {
+      font-size: 24px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    .secure-badge {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-size: 12px;
+    }
+    .secure-badge span {
+      color: #4CAF50;
+      font-weight: 600;
     }
   </style>
   <script>
@@ -147,14 +178,23 @@ export function middleware(request: NextRequest) {
   </script>
 </head>
 <body>
-  <div class="container">
-    <div class="icon">🚀</div>
-    <h1>Ouvre dans ton navigateur</h1>
-    <p>Pour accéder à ce contenu, ouvre cette page dans Safari ou Chrome</p>
-    <a href="${targetUrl}?_openedExternal=1" class="btn" target="_blank" rel="noopener noreferrer">
-      Ouvrir dans Safari
-    </a>
-    <p class="small-text">Appuie sur le bouton ci-dessus pour continuer</p>
+  <div class="shield-header">
+    <div class="shield-icon">🛡️</div>
+    <div class="shield-title">Protection activée</div>
+    <div class="shield-subtitle">Redirection sécurisée en cours...</div>
+  </div>
+
+  <div class="main-action">
+    <div class="btn-container">
+      <a href="${targetUrl}?_openedExternal=1" class="btn" target="_blank" rel="noopener noreferrer">
+        <span class="btn-icon">🚀</span>
+        Continuer
+      </a>
+    </div>
+  </div>
+
+  <div class="secure-badge">
+    <span>✓</span> Connexion sécurisée via TapLinkr Shield
   </div>
 </body>
 </html>`,
