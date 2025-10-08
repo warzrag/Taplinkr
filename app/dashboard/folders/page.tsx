@@ -39,14 +39,26 @@ export default function FoldersPage() {
     fetchData()
   }, [])
 
-  const fetchData = async () => {
+  const fetchData = async (forceRefresh = false) => {
     try {
       setLoading(true)
 
+      // ⚡ Options de fetch pour contourner TOUS les caches si nécessaire
+      const fetchOptions = forceRefresh ? {
+        cache: 'no-cache' as RequestCache,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      } : {}
+
+      // Ajouter timestamp pour être sûr de contourner le cache navigateur
+      const timestamp = forceRefresh ? `?t=${Date.now()}` : ''
+
       // ⚡ Charger les deux APIs en parallèle pour gagner du temps
       const [foldersResponse, linksResponse] = await Promise.all([
-        fetch('/api/folders-direct'),
-        fetch('/api/links-direct')
+        fetch(`/api/folders-direct${timestamp}`, fetchOptions),
+        fetch(`/api/links-direct${timestamp}`, fetchOptions)
       ])
 
       // Traiter les dossiers
@@ -179,14 +191,16 @@ export default function FoldersPage() {
         localStorage.removeItem('folder-stats')
 
         toast.success('Dossier modifié')
+        // Recharger avec cache bypass
+        await fetchData(true)
       } else {
         // En cas d'erreur, restaurer l'ancien état
-        await fetchData()
+        await fetchData(true)
         toast.error('Erreur lors de la modification')
       }
     } catch (error) {
       // En cas d'erreur, restaurer l'ancien état
-      await fetchData()
+      await fetchData(true)
       toast.error('Erreur lors de la modification')
     }
   }
@@ -208,14 +222,16 @@ export default function FoldersPage() {
         localStorage.removeItem('folder-stats')
 
         toast.success('Dossier supprimé')
+        // Recharger avec cache bypass
+        await fetchData(true)
       } else {
         // En cas d'erreur, recharger pour restaurer l'état
-        await fetchData()
+        await fetchData(true)
         toast.error('Erreur lors de la suppression')
       }
     } catch (error) {
       // En cas d'erreur, recharger pour restaurer l'état
-      await fetchData()
+      await fetchData(true)
       toast.error('Erreur lors de la suppression')
     }
   }
@@ -245,7 +261,7 @@ export default function FoldersPage() {
         localStorage.removeItem('folder-stats')
 
         toast.success(`"${folderName}" partagé avec l'équipe`)
-        fetchData()
+        await fetchData(true)
       } else {
         toast.error(data.error || 'Erreur lors du partage')
       }
@@ -268,7 +284,7 @@ export default function FoldersPage() {
         localStorage.removeItem('folder-stats')
 
         toast.success(`"${folderName}" retiré du partage`)
-        fetchData()
+        await fetchData(true)
       } else {
         toast.error(data.error || 'Erreur')
       }
@@ -340,6 +356,10 @@ export default function FoldersPage() {
           onCreateLinkInFolder={(folderId) => {
             setSelectedFolderId(folderId)
             setShowCreateModal(true)
+          }}
+          onFolderCreated={async () => {
+            // Recharger avec bypass cache après création
+            await fetchData(true)
           }}
         />
       </div>

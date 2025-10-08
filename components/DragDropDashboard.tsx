@@ -71,6 +71,7 @@ interface DragDropDashboardProps {
   onShareFolder?: (folderId: string, folderName: string) => void
   onUnshareFolder?: (folderId: string, folderName: string) => void
   onCreateLinkInFolder?: (folderId: string) => void
+  onFolderCreated?: () => void
 }
 
 function SortableFolder({
@@ -340,6 +341,7 @@ export default function DragDropDashboard({
   onShareFolder,
   onUnshareFolder,
   onCreateLinkInFolder,
+  onFolderCreated,
 }: DragDropDashboardProps) {
   const { refreshAll: refreshLinksContext } = useLinks()
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -464,6 +466,10 @@ export default function DragDropDashboard({
         setShowCreateForm(false)
         setCreateInParent(null)
         toast.success('Dossier créé avec succès')
+
+        // ⚡ Appeler le callback pour recharger les données
+        onFolderCreated?.()
+
       } else {
         const errorData = await response.json()
         console.error('❌ [DragDropDashboard] Erreur API:', errorData)
