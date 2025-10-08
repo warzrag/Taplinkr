@@ -22,18 +22,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
     }
 
-    // Cache key unique par utilisateur
-    const cacheKey = `folders:user:${user.id}`
-
-    // Vérifier le cache
-    const cached = await cache.get(cacheKey)
-    if (cached) {
-      const response = NextResponse.json(cached)
-      response.headers.set('X-Cache', 'HIT')
-      // 🔥 FIX: Pas de cache HTTP navigateur
-      response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
-      return response
-    }
+    // 🔥 DÉSACTIVATION CACHE REDIS: Problème multi-instance Next.js
+    // cache.del() n'invalide qu'une instance, pas toutes
+    // On utilise uniquement localStorage côté client pour la performance
 
     // ⚡ OPTIMISATION: Utiliser _count au lieu de charger tous les multiLinks
     const folders = await prisma.folder.findMany({
@@ -97,12 +88,9 @@ export async function GET() {
       orderBy: { order: 'asc' }
     })
 
-    // Mettre en cache 60s
-    await cache.set(cacheKey, folders, 60)
-
+    // 🔥 PAS DE CACHE REDIS (problème multi-instance)
     const response = NextResponse.json(folders)
-    response.headers.set('X-Cache', 'MISS')
-    // 🔥 FIX: Pas de cache HTTP navigateur - uniquement Redis + localStorage
+    response.headers.set('X-Cache', 'NONE')
     response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
     return response
   } catch (error) {
@@ -208,13 +196,8 @@ export async function POST(request: NextRequest) {
       userId: folder.userId
     })
 
-    // ⚡ Invalider TOUS les caches après création
-    const cacheKeys = [
-      `folders:user:${user.id}`,
-      `folders-direct:user:${user.id}`
-    ]
-    await Promise.all(cacheKeys.map(key => cache.del(key)))
-    console.log('🗑️ Caches invalidés:', cacheKeys)
+    // 🔥 Pas besoin d'invalider cache Redis (désactivé)
+    // Le cache localStorage sera invalidé côté client
 
     return NextResponse.json(folder)
   } catch (error) {

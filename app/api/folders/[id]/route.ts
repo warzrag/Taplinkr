@@ -48,12 +48,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     })
 
-    // ⚡ Invalider TOUS les caches après modification
-    const cacheKeys = [
-      `folders:user:${existingFolder.userId}`,
-      `folders-direct:user:${existingFolder.userId}`
-    ]
-    await Promise.all(cacheKeys.map(key => cache.del(key)))
+    // 🔥 Pas besoin d'invalider cache Redis (désactivé)
+    // Le cache localStorage sera invalidé côté client
 
     return NextResponse.json(folder)
   } catch (error) {
@@ -93,12 +89,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       where: { id: params.id }
     })
 
-    // ⚡ Invalider TOUS les caches après suppression
-    const cacheKeys = [
-      `folders:user:${existingFolder.userId}`,
-      `folders-direct:user:${existingFolder.userId}`
-    ]
-    await Promise.all(cacheKeys.map(key => cache.del(key)))
+    // 🔥 Pas besoin d'invalider cache Redis (désactivé)
+    // Le cache localStorage sera invalidé côté client
 
     return NextResponse.json({ success: true })
   } catch (error) {

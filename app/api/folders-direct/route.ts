@@ -37,21 +37,10 @@ export async function GET() {
       hasTeam: !!user.teamId
     })
 
-    // Cache key unique par utilisateur
-    const cacheKey = `folders-direct:user:${user.id}`
-
-    // Vérifier le cache
-    const cached = await cache.get(cacheKey)
-    if (cached) {
-      console.log('✅ [folders-direct] Cache HIT')
-      const response = NextResponse.json(cached)
-      response.headers.set('X-Cache', 'HIT')
-      // 🔥 FIX: Pas de cache HTTP navigateur
-      response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
-      return response
-    }
-
-    console.log('⚡ [folders-direct] Cache MISS - Requête DB')
+    // 🔥 DÉSACTIVATION CACHE REDIS: Problème multi-instance Next.js
+    // cache.del() n'invalide qu'une instance, pas toutes
+    // On utilise uniquement localStorage côté client pour la performance
+    console.log('⚡ [folders-direct] Requête DB (pas de cache Redis)')
 
     // ⚡ Optimisation: charger seulement les champs nécessaires + dossiers d'équipe
     const folders = await prisma.folder.findMany({
@@ -119,12 +108,9 @@ export async function GET() {
       names: folders.map(f => f.name)
     })
 
-    // Mettre en cache 60s
-    await cache.set(cacheKey, folders, 60)
-
+    // 🔥 PAS DE CACHE REDIS (problème multi-instance)
     const response = NextResponse.json(folders)
-    response.headers.set('X-Cache', 'MISS')
-    // 🔥 FIX: Pas de cache HTTP navigateur - uniquement Redis + localStorage
+    response.headers.set('X-Cache', 'NONE')
     response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
 
     return response
