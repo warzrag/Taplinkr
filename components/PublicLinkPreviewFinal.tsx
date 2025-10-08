@@ -30,8 +30,58 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     if (isInAppBrowser) {
       console.log('🚨 Navigateur in-app détecté:', userAgent)
 
-      // Afficher le prompt directement (sans redirection auto pour éviter les erreurs 404)
-      setShowBrowserPrompt(true)
+      const currentUrl = window.location.href
+      const isIOS = /iPhone|iPad|iPod/.test(userAgent)
+      const isAndroid = /Android/.test(userAgent)
+
+      // 🔥 TECHNIQUE GETMYSOCIAL : Auto-trigger ouverture navigateur externe
+      if (isIOS) {
+        console.log('📱 iOS - Auto-trigger Safari')
+
+        // Méthode 1 : Tenter avec googlechrome:// d'abord (si Chrome installé)
+        try {
+          window.location.href = 'googlechrome://' + currentUrl.replace(/^https?:\/\//, '')
+        } catch (e) {
+          console.log('Chrome non installé')
+        }
+
+        // Méthode 2 : Forcer l'ouverture avec un lien invisible qui s'auto-clique
+        setTimeout(() => {
+          const link = document.createElement('a')
+          link.href = currentUrl
+          link.target = '_blank'
+          link.rel = 'noopener noreferrer'
+          link.style.display = 'none'
+          document.body.appendChild(link)
+
+          // Simuler un vrai clic utilisateur (pas juste .click())
+          const clickEvent = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+          })
+          link.dispatchEvent(clickEvent)
+
+          setTimeout(() => document.body.removeChild(link), 100)
+        }, 200)
+
+      } else if (isAndroid) {
+        console.log('🤖 Android - Auto-trigger Chrome')
+
+        // Android : Utiliser intent:// qui déclenche automatiquement le choix navigateur
+        const intentUrl = 'intent://' + currentUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;action=android.intent.action.VIEW;end'
+        window.location.href = intentUrl
+      }
+
+      // Fallback : Afficher le prompt manuel après 3 secondes si toujours là
+      setTimeout(() => {
+        // Vérifier si on est toujours dans l'in-app browser
+        if (window.navigator.userAgent.includes('Instagram') ||
+            window.navigator.userAgent.includes('FBAN') ||
+            window.navigator.userAgent.includes('TikTok')) {
+          setShowBrowserPrompt(true)
+        }
+      }, 3000)
     }
   }, [])
 
