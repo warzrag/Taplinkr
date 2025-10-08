@@ -71,73 +71,90 @@ export function middleware(request: NextRequest) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Redirection...</title>
   <style>
-    body {
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+    body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      padding: 20px;
     }
     .container {
       text-align: center;
       color: white;
-      padding: 20px;
+      width: 100%;
+      max-width: 400px;
     }
-    .spinner {
-      border: 4px solid rgba(255,255,255,0.3);
-      border-top: 4px solid white;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
+    .icon {
+      width: 80px;
+      height: 80px;
       margin: 0 auto 20px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    h1 {
+      font-size: 28px;
+      margin: 0 0 12px;
+      font-weight: 600;
     }
-    h1 { font-size: 24px; margin: 0 0 10px; }
-    p { font-size: 14px; opacity: 0.9; }
+    p {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 18px 32px;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .small-text {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 20px;
+    }
   </style>
   <script>
-    // 🔥 REDIRECTION AUTOMATIQUE (avec paramètre pour éviter la boucle)
-    (function() {
+    function openInBrowser() {
       const targetUrl = "${targetUrl}";
       const urlWithParam = targetUrl + (targetUrl.includes('?') ? '&' : '?') + '_openedExternal=1';
-
-      // Créer un lien et le cliquer automatiquement (trigger le prompt iOS)
-      setTimeout(function() {
-        const a = document.createElement('a');
-        a.href = urlWithParam;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-
-        const event = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true
-        });
-        a.dispatchEvent(event);
-
-        setTimeout(() => document.body.removeChild(a), 100);
-      }, 300);
-
-      // Fallback : Rediriger après 2 secondes si toujours là
-      setTimeout(function() {
-        window.location.href = urlWithParam;
-      }, 2000);
-    })();
+      window.location.href = urlWithParam;
+    }
   </script>
 </head>
 <body>
   <div class="container">
-    <div class="spinner"></div>
-    <h1>Redirection en cours...</h1>
-    <p>Vous allez être redirigé vers votre navigateur</p>
+    <div class="icon">🚀</div>
+    <h1>Ouvre dans ton navigateur</h1>
+    <p>Pour accéder à ce contenu, ouvre cette page dans Safari ou Chrome</p>
+    <a href="${targetUrl}?_openedExternal=1" class="btn" target="_blank" rel="noopener noreferrer">
+      Ouvrir dans Safari
+    </a>
+    <p class="small-text">Appuie sur le bouton ci-dessus pour continuer</p>
   </div>
 </body>
 </html>`,
