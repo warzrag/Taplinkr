@@ -174,6 +174,10 @@ export default function FoldersPage() {
       })
 
       if (response.ok) {
+        // ⚡ Invalider le cache localStorage du dashboard
+        localStorage.removeItem('dashboard-stats')
+        localStorage.removeItem('folder-stats')
+
         toast.success('Dossier modifié')
       } else {
         // En cas d'erreur, restaurer l'ancien état
@@ -199,9 +203,11 @@ export default function FoldersPage() {
       })
 
       if (response.ok) {
+        // ⚡ Invalider le cache localStorage du dashboard
+        localStorage.removeItem('dashboard-stats')
+        localStorage.removeItem('folder-stats')
+
         toast.success('Dossier supprimé')
-        // Recharger pour être sûr d'avoir les données à jour
-        await fetchData()
       } else {
         // En cas d'erreur, recharger pour restaurer l'état
         await fetchData()
@@ -234,6 +240,10 @@ export default function FoldersPage() {
       const data = await response.json()
 
       if (response.ok) {
+        // ⚡ Invalider le cache localStorage du dashboard
+        localStorage.removeItem('dashboard-stats')
+        localStorage.removeItem('folder-stats')
+
         toast.success(`"${folderName}" partagé avec l'équipe`)
         fetchData()
       } else {
@@ -253,6 +263,10 @@ export default function FoldersPage() {
       const data = await response.json()
 
       if (response.ok) {
+        // ⚡ Invalider le cache localStorage du dashboard
+        localStorage.removeItem('dashboard-stats')
+        localStorage.removeItem('folder-stats')
+
         toast.success(`"${folderName}" retiré du partage`)
         fetchData()
       } else {
