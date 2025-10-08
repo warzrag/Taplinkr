@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 interface PublicLinkPreviewProps {
   link: any
@@ -254,14 +255,15 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
       {/* Background flouté pour desktop */}
       <div className="hidden md:block fixed inset-0 z-0">
         {backgroundImage ? (
-          <div
-            className="w-full h-full blur-3xl scale-110"
-            style={{
-              backgroundImage: `url(${backgroundImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
+          <div className="w-full h-full blur-3xl scale-110 relative">
+            <Image
+              src={backgroundImage}
+              alt=""
+              fill
+              loading="lazy"
+              className="object-cover"
+              sizes="100vw"
+            />
             <div className="absolute inset-0 bg-black/60" />
           </div>
         ) : (
@@ -274,14 +276,15 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
       {/* Background pour mobile */}
       <div className="md:hidden fixed inset-0 z-0">
         {backgroundImage ? (
-          <div
-            className="w-full h-full"
-            style={{
-              backgroundImage: `url(${backgroundImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
+          <div className="w-full h-full relative">
+            <Image
+              src={backgroundImage}
+              alt=""
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
             <div className="absolute inset-0 bg-black/40" />
           </div>
         ) : (
@@ -295,14 +298,15 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           {/* Background image pour desktop (dans le cadre) */}
           <div className="hidden md:block absolute inset-0 z-0 rounded-[3rem] overflow-hidden">
             {backgroundImage ? (
-              <div
-                className="w-full h-full"
-                style={{
-                  backgroundImage: `url(${backgroundImage})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              >
+              <div className="w-full h-full relative">
+                <Image
+                  src={backgroundImage}
+                  alt=""
+                  fill
+                  loading="lazy"
+                  className="object-cover"
+                  sizes="390px"
+                />
                 <div className="absolute inset-0 bg-black/40" />
               </div>
             ) : (
@@ -318,11 +322,14 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           <div className="text-center mb-8">
             {/* Photo de profil en rond - seulement en mode circle */}
             {profileImage && profileStyle === 'circle' && (
-              <div className="mb-4">
-                <img
+              <div className="mb-4 relative w-24 h-24 mx-auto">
+                <Image
                   src={profileImage}
                   alt="Profile"
-                  className="w-24 h-24 mx-auto rounded-full border-4 border-white/30 shadow-2xl object-cover"
+                  width={96}
+                  height={96}
+                  priority
+                  className="rounded-full border-4 border-white/30 shadow-2xl object-cover"
                 />
               </div>
             )}
@@ -404,14 +411,19 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                     className={`w-full bg-white/90 hover:bg-white/95 backdrop-blur-sm ${borderRadius} py-3 px-4 shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-2 group`}
                   >
                     {linkIcon && (
-                      <img
-                        src={linkIcon}
-                        alt=""
-                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                        onError={(e: any) => {
-                          e.target.style.display = 'none'
-                        }}
-                      />
+                      <div className="relative w-10 h-10 flex-shrink-0">
+                        <Image
+                          src={linkIcon}
+                          alt=""
+                          width={40}
+                          height={40}
+                          loading="lazy"
+                          className="rounded-lg object-cover"
+                          onError={(e: any) => {
+                            e.currentTarget.style.display = 'none'
+                          }}
+                        />
+                      </div>
                     )}
 
                     <span className="flex-1 text-center text-gray-900 font-semibold text-xs whitespace-nowrap px-1" style={{ minWidth: 0 }}>
