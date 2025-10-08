@@ -13,7 +13,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
 
-  // 🔥 TECHNIQUE GETMYSOCIAL : Overlay invisible qui force l'ouverture externe
+  // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
   useEffect(() => {
     const userAgent = navigator.userAgent || ''
     const isInstagram = userAgent.includes('Instagram')
@@ -22,16 +22,52 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     const isInAppBrowser = isInstagram || isFacebook || isTikTok
 
     if (isInAppBrowser) {
-      console.log('🚨 Navigateur in-app détecté - Auto-trigger ouverture Safari')
+      console.log('🚨 Navigateur in-app détecté - Redirection automatique')
 
-      // Forcer l'ouverture dans le navigateur externe après 500ms
-      setTimeout(() => {
-        const currentUrl = window.location.href
-        console.log('🚀 FORCER ouverture Safari avec window.open()')
+      // Détecter la plateforme
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent)
+      const isAndroid = /Android/.test(userAgent)
+      const currentUrl = window.location.href
 
-        // window.open() trigger automatiquement le prompt iOS "Ouvrir dans Safari ?"
-        window.open(currentUrl, '_blank', 'noopener,noreferrer')
-      }, 500)
+      // ⚡ REDIRECTION SYNCHRONE (sans setTimeout pour préserver user gesture)
+      if (isIOS) {
+        // iOS: URL scheme x-safari-https://
+        const safariUrl = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
+        console.log('🍎 iOS détecté - Redirection Safari:', safariUrl)
+
+        try {
+          window.location.href = safariUrl
+
+          // Si la redirection échoue, afficher l'overlay après 1s
+          setTimeout(() => {
+            setShowBrowserPrompt(true)
+          }, 1000)
+        } catch (err) {
+          console.error('Erreur redirection iOS:', err)
+          setShowBrowserPrompt(true)
+        }
+      } else if (isAndroid) {
+        // Android: Intent URL
+        const host = currentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
+        const intentUrl = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;end`
+        console.log('🤖 Android détecté - Redirection Chrome:', intentUrl)
+
+        try {
+          window.location.href = intentUrl
+
+          // Si la redirection échoue, afficher l'overlay après 1s
+          setTimeout(() => {
+            setShowBrowserPrompt(true)
+          }, 1000)
+        } catch (err) {
+          console.error('Erreur redirection Android:', err)
+          setShowBrowserPrompt(true)
+        }
+      } else {
+        // Plateforme inconnue, afficher l'overlay
+        console.log('⚠️ Plateforme inconnue - Affichage overlay')
+        setShowBrowserPrompt(true)
+      }
     }
   }, [])
 

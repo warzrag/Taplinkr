@@ -10,7 +10,10 @@
       "WebFetch(domain:getmysocial.com)",
       "WebFetch(domain:www.taplinkr.com)",
       "Bash(npm run build:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebSearch",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": [],
     "ask": []
