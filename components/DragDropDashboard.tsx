@@ -415,11 +415,19 @@ export default function DragDropDashboard({
       
       if (response.ok) {
         const newFolder = await response.json()
-        
+
+        // ⚡ Formater le dossier avec toutes les propriétés nécessaires
+        const formattedFolder = {
+          ...newFolder,
+          isExpanded: false,
+          links: newFolder.links || [],
+          children: newFolder.children || []
+        }
+
         // Toujours mettre à jour instantanément
         const updateFolderStructure = (folders: any[], newFolder: any): any[] => {
           if (!parentId && !createInParent) {
-            // Dossier racine
+            // Dossier racine - ajouter avec animation
             return [...folders, newFolder]
           } else {
             // Sous-dossier - trouver le parent et y ajouter l'enfant
@@ -442,10 +450,10 @@ export default function DragDropDashboard({
             })
           }
         }
-        
-        onFoldersChange(updateFolderStructure(folders, newFolder))
+
+        onFoldersChange(updateFolderStructure(folders, formattedFolder))
         refreshLinksContext()
-        
+
         setNewFolderName('')
         setShowCreateForm(false)
         setCreateInParent(null)

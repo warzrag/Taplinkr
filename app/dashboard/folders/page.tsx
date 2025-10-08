@@ -79,17 +79,26 @@ export default function FoldersPage() {
 
   const handleToggleLink = async (id: string, isActive: boolean) => {
     try {
+      // Optimistic update
+      setUnorganizedLinks(prev => prev.map(l => l.id === id ? { ...l, isActive } : l))
+      setFolders(prev => prev.map(f => ({
+        ...f,
+        links: f.links.map(l => l.id === id ? { ...l, isActive } : l)
+      })))
+
       const response = await fetch('/api/links/toggle', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ linkId: id, isActive })
       })
-      
+
       if (response.ok) {
         toast.success(isActive ? 'Lien activé' : 'Lien désactivé')
-        fetchData()
+      } else {
+        await fetchData()
       }
     } catch (error) {
+      await fetchData()
       toast.error('Erreur lors de la mise à jour')
     }
   }
@@ -101,17 +110,27 @@ export default function FoldersPage() {
 
   const handleDeleteLink = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce lien ?')) return
-    
+
     try {
+      // Optimistic update
+      setUnorganizedLinks(prev => prev.filter(l => l.id !== id))
+      setFolders(prev => prev.map(f => ({
+        ...f,
+        links: f.links.filter(l => l.id !== id)
+      })))
+
       const response = await fetch(`/api/links/${id}`, {
         method: 'DELETE'
       })
-      
+
       if (response.ok) {
         toast.success('Lien supprimé')
-        fetchData()
+      } else {
+        await fetchData()
+        toast.error('Erreur lors de la suppression')
       }
     } catch (error) {
+      await fetchData()
       toast.error('Erreur lors de la suppression')
     }
   }
@@ -141,17 +160,29 @@ export default function FoldersPage() {
     if (!newName || newName === folder.name) return
 
     try {
+      // ⚡ Optimistic update - Modifier immédiatement
+      setFolders(prevFolders =>
+        prevFolders.map(f =>
+          f.id === folder.id ? { ...f, name: newName } : f
+        )
+      )
+
       const response = await fetch(`/api/folders/${folder.id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName })
       })
-      
+
       if (response.ok) {
         toast.success('Dossier modifié')
-        fetchData()
+      } else {
+        // En cas d'erreur, restaurer l'ancien état
+        await fetchData()
+        toast.error('Erreur lors de la modification')
       }
     } catch (error) {
+      // En cas d'erreur, restaurer l'ancien état
+      await fetchData()
       toast.error('Erreur lors de la modification')
     }
   }
