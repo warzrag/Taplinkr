@@ -205,6 +205,11 @@ export async function POST(request: NextRequest) {
       userId: folder.userId
     })
 
+    // ⚡ Invalider le cache après création
+    const cacheKey = `folders:user:${user.id}`
+    await cache.del(cacheKey)
+    console.log('🗑️ Cache invalidé:', cacheKey)
+
     return NextResponse.json(folder)
   } catch (error) {
     console.error('Erreur lors de la création du dossier:', error)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
+import { cache } from '@/lib/redis-cache'
 
 // PUT - Mettre à jour un dossier
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
@@ -47,6 +48,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     })
 
+    // ⚡ Invalider le cache après modification
+    const cacheKey = `folders:user:${existingFolder.userId}`
+    await cache.del(cacheKey)
+
     return NextResponse.json(folder)
   } catch (error) {
     console.error('Erreur lors de la mise à jour du dossier:', error)
@@ -84,6 +89,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     await prisma.folder.delete({
       where: { id: params.id }
     })
+
+    // ⚡ Invalider le cache après suppression
+    const cacheKey = `folders:user:${existingFolder.userId}`
+    await cache.del(cacheKey)
 
     return NextResponse.json({ success: true })
   } catch (error) {

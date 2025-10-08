@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { cache } from '@/lib/redis-cache'
 
 // POST - Partager un dossier avec l'équipe
 export async function POST(request: NextRequest) {
@@ -48,6 +49,10 @@ export async function POST(request: NextRequest) {
         originalOwnerId: folder.originalOwnerId || user.id
       }
     })
+
+    // ⚡ Invalider le cache après partage
+    const cacheKey = `folders:user:${user.id}`
+    await cache.del(cacheKey)
 
     return NextResponse.json({
       message: 'Dossier partagé avec succès',
@@ -104,6 +109,10 @@ export async function DELETE(request: NextRequest) {
         teamId: null
       }
     })
+
+    // ⚡ Invalider le cache après retrait
+    const cacheKey = `folders:user:${user!.id}`
+    await cache.del(cacheKey)
 
     return NextResponse.json({
       message: 'Dossier retiré du partage',
