@@ -54,8 +54,11 @@ export function middleware(request: NextRequest) {
   const isTikTok = userAgent.includes('TikTok') || userAgent.includes('musical_ly')
   const isInAppBrowser = isInstagram || isFacebook || isTikTok
 
-  // Si c'est un navigateur in-app, renvoyer une page de redirection
-  if (isInAppBrowser && pathname.length > 1) {
+  // Vérifier si on a déjà essayé de rediriger (éviter la boucle infinie)
+  const redirectAttempted = request.nextUrl.searchParams.get('_openedExternal')
+
+  // Si c'est un navigateur in-app ET qu'on n'a pas encore essayé de rediriger
+  if (isInAppBrowser && pathname.length > 1 && !redirectAttempted) {
     const currentUrl = request.nextUrl.clone()
     const targetUrl = currentUrl.toString()
 
@@ -100,19 +103,15 @@ export function middleware(request: NextRequest) {
     p { font-size: 14px; opacity: 0.9; }
   </style>
   <script>
-    // 🔥 REDIRECTION AUTOMATIQUE
+    // 🔥 REDIRECTION AUTOMATIQUE (avec paramètre pour éviter la boucle)
     (function() {
       const targetUrl = "${targetUrl}";
-
-      // Tenter d'ouvrir dans le navigateur externe
-      setTimeout(function() {
-        window.location.href = targetUrl;
-      }, 100);
+      const urlWithParam = targetUrl + (targetUrl.includes('?') ? '&' : '?') + '_openedExternal=1';
 
       // Créer un lien et le cliquer automatiquement (trigger le prompt iOS)
       setTimeout(function() {
         const a = document.createElement('a');
-        a.href = targetUrl;
+        a.href = urlWithParam;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
         document.body.appendChild(a);
@@ -125,7 +124,12 @@ export function middleware(request: NextRequest) {
         a.dispatchEvent(event);
 
         setTimeout(() => document.body.removeChild(a), 100);
-      }, 200);
+      }, 300);
+
+      // Fallback : Rediriger après 2 secondes si toujours là
+      setTimeout(function() {
+        window.location.href = urlWithParam;
+      }, 2000);
     })();
   </script>
 </head>
