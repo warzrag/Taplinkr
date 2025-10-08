@@ -14,7 +14,16 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
 
   // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
+  // Note: Le middleware intercepte les in-app browsers et renvoie une page HTML légère
+  // Ce code côté client sert de fallback si le middleware n'a pas détecté
   useEffect(() => {
+    // Ne pas rediriger si on vient déjà d'une tentative de redirection
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('_openedExternal')) {
+      console.log('✅ Déjà redirigé par le middleware')
+      return
+    }
+
     const userAgent = navigator.userAgent || ''
     const isInstagram = userAgent.includes('Instagram')
     const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
@@ -22,7 +31,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     const isInAppBrowser = isInstagram || isFacebook || isTikTok
 
     if (isInAppBrowser) {
-      console.log('🚨 Navigateur in-app détecté - Redirection automatique')
+      console.log('🚨 Navigateur in-app détecté (fallback client-side)')
 
       // Détecter la plateforme
       const isIOS = /iPad|iPhone|iPod/.test(userAgent)
