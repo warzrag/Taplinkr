@@ -158,17 +158,27 @@ export default function FoldersPage() {
 
   const handleDeleteFolder = async (folderId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce dossier et tous ses liens ?')) return
-    
+
     try {
+      // Optimistic update - Retirer immédiatement du state
+      setFolders(prevFolders => prevFolders.filter(f => f.id !== folderId))
+
       const response = await fetch(`/api/folders/${folderId}`, {
         method: 'DELETE'
       })
-      
+
       if (response.ok) {
         toast.success('Dossier supprimé')
-        fetchData()
+        // Recharger pour être sûr d'avoir les données à jour
+        await fetchData()
+      } else {
+        // En cas d'erreur, recharger pour restaurer l'état
+        await fetchData()
+        toast.error('Erreur lors de la suppression')
       }
     } catch (error) {
+      // En cas d'erreur, recharger pour restaurer l'état
+      await fetchData()
       toast.error('Erreur lors de la suppression')
     }
   }

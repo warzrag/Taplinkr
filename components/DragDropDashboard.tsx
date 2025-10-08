@@ -955,33 +955,45 @@ export default function DragDropDashboard({
             items={folders.map(f => `folder-${f.id}`)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-4">
-              {folders.length === 0 ? (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-center justify-center py-12 text-center"
-                >
-                  <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
-                    <FolderIcon className="w-12 h-12 text-blue-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucun dossier encore</h3>
-                  <p className="text-gray-500 mb-4 max-w-xs">
-                    Créez votre premier dossier pour organiser vos liens
-                  </p>
-                  <motion.button
-                    onClick={() => setShowCreateForm(true)}
-                    className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+            <AnimatePresence mode="popLayout">
+              <div className="space-y-4">
+                {folders.length === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center justify-center py-12 text-center"
                   >
-                    Créer mon premier dossier
-                  </motion.button>
-                </motion.div>
-              ) : (
-                folders.map((folder) => renderFolder(folder, 0))
-              )}
-            </div>
+                    <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
+                      <FolderIcon className="w-12 h-12 text-blue-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucun dossier encore</h3>
+                    <p className="text-gray-500 mb-4 max-w-xs">
+                      Créez votre premier dossier pour organiser vos liens
+                    </p>
+                    <motion.button
+                      onClick={() => setShowCreateForm(true)}
+                      className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Créer mon premier dossier
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  folders.map((folder) => (
+                    <motion.div
+                      key={folder.id}
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -100, scale: 0.9 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    >
+                      {renderFolder(folder, 0)}
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </AnimatePresence>
           </SortableContext>
         </div>
 
