@@ -59,19 +59,63 @@ export function middleware(request: NextRequest) {
 
   // Si c'est un navigateur in-app ET qu'on n'a pas encore essayé de rediriger
   if (isInAppBrowser && pathname.length > 1 && !redirectAttempted) {
-    // 🔥 DÉSACTIVER COMPLÈTEMENT LA DÉTECTION
-    // Laisser la page se charger normalement
-    // La redirection côté client dans PublicLinkPreviewFinal s'occupera du reste
-    return response
-  }
+    // 🚀 REDIRECTION INSTANTANÉE : Renvoyer une page HTML ultra-légère
+    // Détection de plateforme
+    const isIOS = userAgent.includes('iPhone') || userAgent.includes('iPad') || userAgent.includes('iPod')
+    const isAndroid = userAgent.includes('Android')
 
-  // Code de détection désactivé - l'auto-click se fait côté client maintenant
+    const currentUrl = `https://${request.headers.get('host')}${pathname}`
 
-  // Extraire le slug/username depuis l'URL
-  const slug = pathname.slice(1)
+    // Page HTML minimale avec script inline pour redirection instantanée
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Redirection...</title>
+  <style>
+    body{margin:0;padding:0;background:#111;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .loader{text-align:center}
+    .spinner{width:40px;height:40px;margin:0 auto 20px;border:4px solid #333;border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <p>Redirection vers votre navigateur...</p>
+  </div>
+  <script>
+    (function() {
+      const isIOS = ${isIOS};
+      const isAndroid = ${isAndroid};
+      const currentUrl = '${currentUrl}';
 
-  if (slug && slug.length > 0) {
-    return response
+      if (isIOS) {
+        const safariUrl = 'x-safari-https://' + currentUrl.replace(/^https?:\\/\\//, '');
+        console.log('🍎 iOS - Redirection Safari');
+        window.location.href = safariUrl;
+      } else if (isAndroid) {
+        const host = currentUrl.replace(/^https?:\\/\\//, '').replace(/\\/$/, '');
+        const intentUrl = 'intent://' + host + '#Intent;scheme=https;action=android.intent.action.VIEW;end';
+        console.log('🤖 Android - Redirection Chrome');
+        window.location.href = intentUrl;
+      } else {
+        // Fallback: charger la vraie page
+        window.location.href = currentUrl + '?_openedExternal=1';
+      }
+    })();
+  </script>
+</body>
+</html>`
+
+    return new NextResponse(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store, must-revalidate'
+      }
+    })
   }
 
   return response
