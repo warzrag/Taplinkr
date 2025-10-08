@@ -49,11 +49,33 @@ export function LinksProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    setLoading(true)
+    // ⚡ INSTANT: Charger depuis cache d'abord
+    const cached = localStorage.getItem('links-cache')
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached)
+        // Cache valide pendant 2 minutes
+        if (Date.now() - timestamp < 120000) {
+          setLinks(data.links || [])
+          setPersonalLinks(data.personalLinks || [])
+          setTeamLinks(data.teamLinks || [])
+          setHasTeam(data.hasTeam || false)
+          setLoading(false)
+          setHasLoaded(true)
+          console.log('⚡ Liens chargés depuis cache:', data.links?.length || 0)
+        }
+      } catch (e) {
+        console.error('Cache invalide:', e)
+      }
+    }
+
+    // Ne pas afficher loading si on a du cache
+    if (!cached) {
+      setLoading(true)
+    }
     console.log('🔄 Chargement des liens...')
 
     try {
-      // D'abord essayer l'API rapide
       const response = await fetch('/api/links/fast')
 
       if (response.ok) {
@@ -62,27 +84,35 @@ export function LinksProvider({ children }: { children: ReactNode }) {
         let allLinks = []
 
         if (data.links) {
-          // Format de l'API rapide
           allLinks = data.links || []
           setPersonalLinks(allLinks)
           setTeamLinks([])
           setHasTeam(false)
           setLinks(allLinks)
         } else if (data.personalLinks !== undefined) {
-          // Format de l'API classique (fallback)
           setPersonalLinks(data.personalLinks || [])
           setTeamLinks(data.teamLinks || [])
           setHasTeam(data.hasTeam || false)
           allLinks = [...(data.personalLinks || []), ...(data.teamLinks || [])]
           setLinks(allLinks)
         } else {
-          // Format simple avec juste un tableau
           allLinks = Array.isArray(data) ? data : []
           setLinks(allLinks)
           setPersonalLinks(allLinks)
           setTeamLinks([])
           setHasTeam(false)
         }
+
+        // ⚡ Sauvegarder dans cache
+        localStorage.setItem('links-cache', JSON.stringify({
+          data: {
+            links: allLinks,
+            personalLinks: data.personalLinks || allLinks,
+            teamLinks: data.teamLinks || [],
+            hasTeam: data.hasTeam || false
+          },
+          timestamp: Date.now()
+        }))
 
         console.log('✅ Liens chargés:', allLinks.length)
       } else {
@@ -110,6 +140,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   }
 
   const refreshLinks = async () => {
+    // ⚡ Invalider le cache avant de recharger
+    localStorage.removeItem('links-cache')
     await fetchLinks()
   }
 
@@ -119,6 +151,10 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
   const refreshAll = async () => {
     console.log('🔄 Rafraîchissement global')
+    // ⚡ Invalider tous les caches
+    localStorage.removeItem('links-cache')
+    localStorage.removeItem('dashboard-stats')
+    localStorage.removeItem('folder-stats')
     await Promise.all([fetchLinks(), fetchFolders()])
   }
 

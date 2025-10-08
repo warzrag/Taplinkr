@@ -106,7 +106,28 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      // Charger les données en parallèle pour gagner du temps
+      // ⚡ INSTANT: Charger depuis le cache localStorage d'abord
+      const cachedDashboard = localStorage.getItem('dashboard-stats')
+      const cachedFolders = localStorage.getItem('folder-stats')
+
+      if (cachedDashboard) {
+        const cached = JSON.parse(cachedDashboard)
+        // Vérifier si le cache a moins de 2 minutes
+        if (Date.now() - cached.timestamp < 120000) {
+          setDashboardStats(cached.data)
+          setAnalyticsLoading(false)
+        }
+      }
+
+      if (cachedFolders) {
+        const cached = JSON.parse(cachedFolders)
+        if (Date.now() - cached.timestamp < 120000) {
+          setFolderStats(cached.data)
+          setFolderStatsLoading(false)
+        }
+      }
+
+      // Charger les vraies données en arrière-plan
       Promise.all([
         fetchDashboardStats(),
         fetchFolderStats()
@@ -118,16 +139,22 @@ export default function Dashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      setAnalyticsLoading(true)
+      // Ne pas afficher le loading si on a déjà du cache
+      const hasCache = localStorage.getItem('dashboard-stats')
+      if (!hasCache) {
+        setAnalyticsLoading(true)
+      }
 
-      // Récupérer les vraies données analytics
-      const response = await fetch('/api/analytics/dashboard-all', {
-        // Ajouter un cache court pour éviter les requêtes répétées
-        next: { revalidate: 30 }
-      })
+      const response = await fetch('/api/analytics/dashboard-all')
       if (response.ok) {
         const data = await response.json()
         setDashboardStats(data)
+
+        // ⚡ Sauvegarder dans le cache
+        localStorage.setItem('dashboard-stats', JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }))
       } else {
         console.error('Erreur API dashboard-all:', response.status)
       }
@@ -140,12 +167,21 @@ export default function Dashboard() {
 
   const fetchFolderStats = async () => {
     try {
-      setFolderStatsLoading(true)
-      // Utiliser l'API simplifiée pour le dashboard
+      const hasCache = localStorage.getItem('folder-stats')
+      if (!hasCache) {
+        setFolderStatsLoading(true)
+      }
+
       const response = await fetch('/api/analytics/folders-simple')
       if (response.ok) {
         const data = await response.json()
         setFolderStats(data)
+
+        // ⚡ Sauvegarder dans le cache
+        localStorage.setItem('folder-stats', JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }))
       }
     } catch (error) {
       console.error('Erreur lors du chargement des stats dossiers:', error)
