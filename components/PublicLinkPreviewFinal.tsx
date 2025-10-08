@@ -11,7 +11,74 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [clickId, setClickId] = useState<string | null>(null)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
-  
+  const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
+
+  // 🔥 SMART REDIRECT: Forcer l'ouverture dans le navigateur externe
+  useEffect(() => {
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
+
+    // Détecter les navigateurs in-app
+    const isInstagram = userAgent.includes('Instagram')
+    const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
+    const isTikTok = userAgent.includes('TikTok') || userAgent.includes('musical_ly')
+    const isTwitter = userAgent.includes('Twitter')
+    const isLinkedIn = userAgent.includes('LinkedInApp')
+    const isSnapchat = userAgent.includes('Snapchat')
+
+    const isInAppBrowser = isInstagram || isFacebook || isTikTok || isTwitter || isLinkedIn || isSnapchat
+
+    if (isInAppBrowser) {
+      console.log('🚨 Navigateur in-app détecté:', userAgent)
+
+      // Déjà redirigé dans cette session ?
+      const alreadyRedirected = sessionStorage.getItem('browser_redirect_attempted')
+      if (alreadyRedirected) {
+        console.log('⚠️ Redirection déjà tentée, affichage du prompt')
+        setShowBrowserPrompt(true)
+        return
+      }
+
+      // Marquer comme tenté
+      sessionStorage.setItem('browser_redirect_attempted', 'true')
+
+      const currentUrl = window.location.href
+      const isIOS = /iPhone|iPad|iPod/.test(userAgent)
+      const isAndroid = /Android/.test(userAgent)
+
+      // Tenter la redirection automatique
+      if (isIOS) {
+        // iOS: Essayer d'ouvrir dans Safari
+        console.log('📱 iOS détecté - Tentative ouverture Safari')
+
+        // Méthode 1: x-safari-https
+        const safariUrl = currentUrl.replace(/^https?:\/\//, 'x-safari-')
+        window.location.href = safariUrl
+
+        // Fallback après 1 seconde si ça marche pas
+        setTimeout(() => {
+          setShowBrowserPrompt(true)
+        }, 1000)
+
+      } else if (isAndroid) {
+        // Android: Essayer d'ouvrir dans Chrome
+        console.log('🤖 Android détecté - Tentative ouverture Chrome')
+
+        // Méthode 1: intent:// URL
+        const intent = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`
+        window.location.href = intent
+
+        // Fallback après 1 seconde
+        setTimeout(() => {
+          setShowBrowserPrompt(true)
+        }, 1000)
+
+      } else {
+        // Desktop ou autre: afficher le prompt directement
+        setShowBrowserPrompt(true)
+      }
+    }
+  }, [])
+
   // Tracker la vue avec protection contre les multiples appels
   useEffect(() => {
     if (!link?.id) return
@@ -122,6 +189,71 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
 
   return (
     <div className="min-h-screen relative bg-gray-900">
+      {/* 🔥 OVERLAY: Prompt pour ouvrir dans navigateur externe */}
+      {showBrowserPrompt && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4">
+          <div className="max-w-md w-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl border border-white/10 p-8 shadow-2xl">
+            <div className="text-center space-y-6">
+              {/* Icon */}
+              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </div>
+
+              {/* Titre */}
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  Ouvre dans ton navigateur
+                </h2>
+                <p className="text-gray-400 text-sm">
+                  Pour une meilleure expérience, ouvre cette page dans Safari ou Chrome
+                </p>
+              </div>
+
+              {/* Instructions */}
+              <div className="bg-white/5 rounded-2xl p-4 text-left space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    1
+                  </div>
+                  <p className="text-white text-sm">
+                    Appuie sur les <span className="font-bold">3 points</span> ou <span className="font-bold">···</span> en haut
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    2
+                  </div>
+                  <p className="text-white text-sm">
+                    Sélectionne <span className="font-bold">"Ouvrir dans Safari"</span> ou <span className="font-bold">"Ouvrir dans Chrome"</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Copier le lien */}
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                  alert('Lien copié ! Colle-le dans Safari ou Chrome')
+                }}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all"
+              >
+                📋 Copier le lien
+              </button>
+
+              {/* Bouton fermer */}
+              <button
+                onClick={() => setShowBrowserPrompt(false)}
+                className="text-gray-400 text-sm hover:text-white transition-colors"
+              >
+                Continuer quand même
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Background flouté pour desktop */}
       <div className="hidden md:block fixed inset-0 z-0">
         {backgroundImage ? (
