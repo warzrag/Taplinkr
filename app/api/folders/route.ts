@@ -30,6 +30,8 @@ export async function GET() {
     if (cached) {
       const response = NextResponse.json(cached)
       response.headers.set('X-Cache', 'HIT')
+      // 🔥 FIX: Pas de cache HTTP navigateur
+      response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
       return response
     }
 
@@ -100,7 +102,8 @@ export async function GET() {
 
     const response = NextResponse.json(folders)
     response.headers.set('X-Cache', 'MISS')
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    // 🔥 FIX: Pas de cache HTTP navigateur - uniquement Redis + localStorage
+    response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
     return response
   } catch (error) {
     console.error('Erreur lors de la récupération des dossiers:', error)

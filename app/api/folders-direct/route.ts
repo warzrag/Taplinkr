@@ -46,6 +46,8 @@ export async function GET() {
       console.log('✅ [folders-direct] Cache HIT')
       const response = NextResponse.json(cached)
       response.headers.set('X-Cache', 'HIT')
+      // 🔥 FIX: Pas de cache HTTP navigateur
+      response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
       return response
     }
 
@@ -122,7 +124,8 @@ export async function GET() {
 
     const response = NextResponse.json(folders)
     response.headers.set('X-Cache', 'MISS')
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    // 🔥 FIX: Pas de cache HTTP navigateur - uniquement Redis + localStorage
+    response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
 
     return response
 
