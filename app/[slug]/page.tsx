@@ -35,7 +35,36 @@ export default async function LinkPage({ params }: PageProps) {
       notFound()
     }
 
-    return <PublicLinkPreviewFinal link={link} />
+    return (
+      <>
+        {/* Script inline pour redirection INSTANTANÉE avant chargement React */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const ua = navigator.userAgent || '';
+                const isInApp = ua.includes('Instagram') || ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('TikTok');
+                if (!isInApp) return;
+
+                const isIOS = /iPad|iPhone|iPod/.test(ua);
+                const isAndroid = /Android/.test(ua);
+                const url = window.location.href;
+
+                setTimeout(function() {
+                  if (isIOS) {
+                    window.location.href = 'x-safari-https://' + url.replace(/^https?:\\/\\//, '');
+                  } else if (isAndroid) {
+                    const host = url.replace(/^https?:\\/\\//, '').replace(/\\/$/, '');
+                    window.location.href = 'intent://' + host + '#Intent;scheme=https;action=android.intent.action.VIEW;end';
+                  }
+                }, 500);
+              })();
+            `,
+          }}
+        />
+        <PublicLinkPreviewFinal link={link} />
+      </>
+    )
   } catch (error) {
     console.error('Error loading link:', error)
     notFound()
@@ -64,4 +93,4 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 // Configuration pour ISR (Incremental Static Regeneration)
-export const revalidate = 3600 // 1 heure de cache
+export const revalidate = 60 // 1 minute de cache - balance entre fraîcheur et performance

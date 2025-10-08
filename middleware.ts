@@ -10,6 +10,11 @@ export function middleware(request: NextRequest) {
   response.headers.set('X-Frame-Options', 'SAMEORIGIN')
   response.headers.set('X-Content-Type-Options', 'nosniff')
 
+  // Headers performance additionnels pour pages publiques
+  if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/admin')) {
+    response.headers.set('Link', '<https://dkwgorynhgnmldzbhhrb.supabase.co>; rel=preconnect')
+  }
+
   // Cache intelligent selon le type de route
   if (pathname.startsWith('/_next/static')) {
     // Assets statiques - cache long immutable

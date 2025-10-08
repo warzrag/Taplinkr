@@ -15,65 +15,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
 
   // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
-  // La page se charge normalement, puis redirige après 500ms pour montrer le design
-  useEffect(() => {
-    const userAgent = navigator.userAgent || ''
-    const isInstagram = userAgent.includes('Instagram')
-    const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
-    const isTikTok = userAgent.includes('TikTok')
-    const isInAppBrowser = isInstagram || isFacebook || isTikTok
-
-    if (isInAppBrowser) {
-      console.log('🚨 Navigateur in-app détecté - Redirection dans 500ms')
-
-      // Détecter la plateforme
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent)
-      const isAndroid = /Android/.test(userAgent)
-      const currentUrl = window.location.href
-
-      // ⚡ DÉLAI DE 500ms pour montrer la belle page publique, puis rediriger
-      setTimeout(() => {
-        if (isIOS) {
-          // iOS: URL scheme x-safari-https://
-          const safariUrl = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
-          console.log('🍎 iOS - Redirection Safari:', safariUrl)
-
-          try {
-            window.location.href = safariUrl
-
-            // Si la redirection échoue, afficher l'overlay après 1.5s supplémentaire
-            setTimeout(() => {
-              setShowBrowserPrompt(true)
-            }, 1500)
-          } catch (err) {
-            console.error('Erreur redirection iOS:', err)
-            setShowBrowserPrompt(true)
-          }
-        } else if (isAndroid) {
-          // Android: Intent URL
-          const host = currentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
-          const intentUrl = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;end`
-          console.log('🤖 Android - Redirection Chrome:', intentUrl)
-
-          try {
-            window.location.href = intentUrl
-
-            // Si la redirection échoue, afficher l'overlay après 1.5s supplémentaire
-            setTimeout(() => {
-              setShowBrowserPrompt(true)
-            }, 1500)
-          } catch (err) {
-            console.error('Erreur redirection Android:', err)
-            setShowBrowserPrompt(true)
-          }
-        } else {
-          // Plateforme inconnue, afficher l'overlay
-          console.log('⚠️ Plateforme inconnue - Affichage overlay')
-          setShowBrowserPrompt(true)
-        }
-      }, 500) // 🔥 Délai de 500ms comme GetMySocial
-    }
-  }, [])
+  // Note: La redirection est gérée par un script inline dans page.tsx pour être INSTANTANÉE
+  // Ce code n'est plus nécessaire car le script s'exécute avant React
 
   // Tracker la vue avec protection contre les multiples appels
   useEffect(() => {
