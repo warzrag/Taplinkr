@@ -59,6 +59,15 @@ export function middleware(request: NextRequest) {
 
   // Si c'est un navigateur in-app ET qu'on n'a pas encore essayé de rediriger
   if (isInAppBrowser && pathname.length > 1 && !redirectAttempted) {
+    // 🔥 DÉSACTIVER COMPLÈTEMENT LA DÉTECTION
+    // Laisser la page se charger normalement
+    // La redirection côté client dans PublicLinkPreviewFinal s'occupera du reste
+    return response
+  }
+
+  // ANCIEN CODE (désactivé pour test)
+  /*
+  if (false && isInAppBrowser && pathname.length > 1 && !redirectAttempted) {
     const currentUrl = request.nextUrl.clone()
     const targetUrl = currentUrl.toString()
 
