@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { cache } from '@/lib/redis-cache'
 
 // Route qui utilise Prisma pour récupérer les dossiers
 export async function GET() {
@@ -10,6 +11,17 @@ export async function GET() {
 
     if (!session?.user?.id) {
       return NextResponse.json([])
+    }
+
+    // Cache key unique par utilisateur
+    const cacheKey = `folders-direct:user:${session.user.id}`
+
+    // Vérifier le cache
+    const cached = await cache.get(cacheKey)
+    if (cached) {
+      const response = NextResponse.json(cached)
+      response.headers.set('X-Cache', 'HIT')
+      return response
     }
 
     // ⚡ Optimisation: charger seulement les champs nécessaires
@@ -67,10 +79,12 @@ export async function GET() {
       }
     })
 
-    const response = NextResponse.json(folders)
+    // Mettre en cache 60s
+    await cache.set(cacheKey, folders, 60)
 
-    // Cache de 30 secondes
-    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+    const response = NextResponse.json(folders)
+    response.headers.set('X-Cache', 'MISS')
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
 
     return response
 

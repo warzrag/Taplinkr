@@ -50,9 +50,12 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // ⚡ Invalider le cache après partage
-    const cacheKey = `folders:user:${user.id}`
-    await cache.del(cacheKey)
+    // ⚡ Invalider TOUS les caches après partage
+    const cacheKeys = [
+      `folders:user:${user.id}`,
+      `folders-direct:user:${user.id}`
+    ]
+    await Promise.all(cacheKeys.map(key => cache.del(key)))
 
     return NextResponse.json({
       message: 'Dossier partagé avec succès',
@@ -110,9 +113,12 @@ export async function DELETE(request: NextRequest) {
       }
     })
 
-    // ⚡ Invalider le cache après retrait
-    const cacheKey = `folders:user:${user!.id}`
-    await cache.del(cacheKey)
+    // ⚡ Invalider TOUS les caches après retrait
+    const cacheKeys = [
+      `folders:user:${user!.id}`,
+      `folders-direct:user:${user!.id}`
+    ]
+    await Promise.all(cacheKeys.map(key => cache.del(key)))
 
     return NextResponse.json({
       message: 'Dossier retiré du partage',

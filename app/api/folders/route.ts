@@ -205,10 +205,13 @@ export async function POST(request: NextRequest) {
       userId: folder.userId
     })
 
-    // ⚡ Invalider le cache après création
-    const cacheKey = `folders:user:${user.id}`
-    await cache.del(cacheKey)
-    console.log('🗑️ Cache invalidé:', cacheKey)
+    // ⚡ Invalider TOUS les caches après création
+    const cacheKeys = [
+      `folders:user:${user.id}`,
+      `folders-direct:user:${user.id}`
+    ]
+    await Promise.all(cacheKeys.map(key => cache.del(key)))
+    console.log('🗑️ Caches invalidés:', cacheKeys)
 
     return NextResponse.json(folder)
   } catch (error) {

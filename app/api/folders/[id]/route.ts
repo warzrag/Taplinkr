@@ -48,9 +48,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     })
 
-    // ⚡ Invalider le cache après modification
-    const cacheKey = `folders:user:${existingFolder.userId}`
-    await cache.del(cacheKey)
+    // ⚡ Invalider TOUS les caches après modification
+    const cacheKeys = [
+      `folders:user:${existingFolder.userId}`,
+      `folders-direct:user:${existingFolder.userId}`
+    ]
+    await Promise.all(cacheKeys.map(key => cache.del(key)))
 
     return NextResponse.json(folder)
   } catch (error) {
@@ -90,9 +93,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       where: { id: params.id }
     })
 
-    // ⚡ Invalider le cache après suppression
-    const cacheKey = `folders:user:${existingFolder.userId}`
-    await cache.del(cacheKey)
+    // ⚡ Invalider TOUS les caches après suppression
+    const cacheKeys = [
+      `folders:user:${existingFolder.userId}`,
+      `folders-direct:user:${existingFolder.userId}`
+    ]
+    await Promise.all(cacheKeys.map(key => cache.del(key)))
 
     return NextResponse.json({ success: true })
   } catch (error) {
