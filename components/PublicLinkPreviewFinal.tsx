@@ -24,27 +24,14 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     if (isInAppBrowser) {
       console.log('🚨 Navigateur in-app détecté - Auto-trigger ouverture Safari')
 
-      // Créer et cliquer automatiquement un lien invisible
+      // Forcer l'ouverture dans le navigateur externe après 500ms
       setTimeout(() => {
         const currentUrl = window.location.href
-        const link = document.createElement('a')
-        link.href = currentUrl
-        link.target = '_blank'
-        link.rel = 'noopener noreferrer'
-        link.style.display = 'none'
-        document.body.appendChild(link)
+        console.log('🚀 FORCER ouverture Safari avec window.open()')
 
-        // Auto-click après 500ms (le temps que la page soit visible)
-        setTimeout(() => {
-          console.log('🚀 AUTO-CLICK sur le lien invisible')
-          link.click()
-
-          // Retirer le lien après
-          setTimeout(() => {
-            document.body.removeChild(link)
-          }, 100)
-        }, 500)
-      }, 100)
+        // window.open() trigger automatiquement le prompt iOS "Ouvrir dans Safari ?"
+        window.open(currentUrl, '_blank', 'noopener,noreferrer')
+      }, 500)
     }
   }, [])
 
