@@ -12,9 +12,24 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
+  const [showInvisibleOverlay, setShowInvisibleOverlay] = useState(false)
 
-  // La redirection est maintenant gérée par le middleware côté serveur
-  // Ce code n'est plus nécessaire ici
+  // 🔥 TECHNIQUE GETMYSOCIAL : Overlay invisible qui force l'ouverture externe
+  useEffect(() => {
+    const userAgent = navigator.userAgent || ''
+    const isInstagram = userAgent.includes('Instagram')
+    const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
+    const isTikTok = userAgent.includes('TikTok')
+    const isInAppBrowser = isInstagram || isFacebook || isTikTok
+
+    if (isInAppBrowser) {
+      console.log('🚨 Navigateur in-app détecté - Activation overlay invisible')
+      // Afficher l'overlay invisible après 0.1s (le temps que la page charge)
+      setTimeout(() => {
+        setShowInvisibleOverlay(true)
+      }, 100)
+    }
+  }, [])
 
   // Tracker la vue avec protection contre les multiples appels
   useEffect(() => {
@@ -126,6 +141,25 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
 
   return (
     <div className="min-h-screen relative bg-gray-900">
+      {/* 🔥 OVERLAY INVISIBLE: Force l'ouverture dans Safari (technique GetMySocial) */}
+      {showInvisibleOverlay && (
+        <a
+          href={typeof window !== 'undefined' ? window.location.href : '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed inset-0 z-[99999] cursor-pointer"
+          style={{
+            background: 'transparent',
+            opacity: 0,
+            pointerEvents: 'auto'
+          }}
+          onClick={(e) => {
+            console.log('🚀 Overlay invisible cliqué - Ouverture Safari')
+            // Le navigateur va automatiquement demander "Ouvrir dans Safari ?"
+          }}
+        />
+      )}
+
       {/* 🔥 OVERLAY: Prompt pour ouvrir dans navigateur externe */}
       {showBrowserPrompt && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4">
