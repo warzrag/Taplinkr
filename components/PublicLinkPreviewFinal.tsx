@@ -14,32 +14,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
 
-  // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
-  useEffect(() => {
-    const userAgent = navigator.userAgent || ''
-    const isInstagram = userAgent.includes('Instagram')
-    const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
-    const isTikTok = userAgent.includes('TikTok')
-    const isInAppBrowser = isInstagram || isFacebook || isTikTok
-
-    if (isInAppBrowser) {
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent)
-      const isAndroid = /Android/.test(userAgent)
-      const currentUrl = window.location.href
-
-      // Redirection après 200ms (optimisé pour vitesse maximale)
-      setTimeout(() => {
-        if (isIOS) {
-          const safariUrl = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
-          window.location.href = safariUrl
-        } else if (isAndroid) {
-          const host = currentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
-          const intentUrl = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;end`
-          window.location.href = intentUrl
-        }
-      }, 200)
-    }
-  }, [])
+  // 🔥 REDIRECTION : Gérée dans layout.tsx (script synchrone dans <body>)
+  // Le script s'exécute IMMÉDIATEMENT avant React pour redirection ultra-rapide
 
   // Tracker la vue avec protection contre les multiples appels
   useEffect(() => {
