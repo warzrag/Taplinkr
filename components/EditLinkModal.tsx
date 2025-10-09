@@ -186,34 +186,34 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
                   <>
                     {/* Titre du lien (nom interne) */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Titre du lien
                       </label>
                       <input
                         type="text"
                         value={linkData.internalName}
                         onChange={(e) => setLinkData({ ...linkData, internalName: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                         placeholder="Ex: Lien Laura 🌶️ (visible uniquement dans le dashboard)"
                       />
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         Nom visible uniquement dans votre dashboard pour vous organiser
                       </p>
                     </div>
 
                     {/* Titre de la page */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Titre de la page
                       </label>
                       <input
                         type="text"
                         value={linkData.title}
                         onChange={(e) => setLinkData({ ...linkData, title: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                         placeholder="Ex: Laura Twitter lauraa_bpts (visible par les visiteurs)"
                       />
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         Titre visible par vos visiteurs sur la page publique
                       </p>
                     </div>
