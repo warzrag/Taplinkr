@@ -16,6 +16,7 @@ export interface Link {
   id: string
   slug: string
   title: string
+  internalName?: string
   description?: string
   color?: string
   icon?: string

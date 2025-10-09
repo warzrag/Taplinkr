@@ -43,7 +43,7 @@ export default function LinkCard({
 
   const handleRename = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    const currentName = (link as any).internalName || link.title
+    const currentName = link.internalName || link.title
     const newName = prompt('Nom interne du lien:', currentName)
     if (newName === null || newName === currentName) return
 
@@ -165,7 +165,7 @@ export default function LinkCard({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
-                  {(link as any).internalName || link.title}
+                  {link.internalName || link.title}
                 </h3>
                 <button
                   onClick={handleRename}
@@ -174,7 +174,7 @@ export default function LinkCard({
                 >
                   <Edit3 size={14} className="text-gray-400 hover:text-indigo-600" />
                 </button>
-                {(link as any).internalName && (
+                {link.internalName && (
                   <span className="text-xs text-gray-400 dark:text-gray-500 italic truncate">
                     ({link.title})
                   </span>
