@@ -63,5 +63,6 @@ export async function generateMetadata({ params }: PageProps) {
   }
 }
 
-// Configuration pour ISR (Incremental Static Regeneration)
-export const revalidate = 60 // 1 minute de cache - balance entre fraîcheur et performance
+// Configuration pour rendu dynamique ultra-rapide
+export const dynamic = 'force-dynamic' // Toujours frais, pas de cache statique
+export const fetchCache = 'force-no-store' // Pas de cache fetch

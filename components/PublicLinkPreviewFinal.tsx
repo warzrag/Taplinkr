@@ -29,7 +29,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
       const isAndroid = /Android/.test(userAgent)
       const currentUrl = window.location.href
 
-      // Redirection après 500ms pour montrer la page
+      // Redirection après 300ms (optimisé pour vitesse maximale)
       setTimeout(() => {
         if (isIOS) {
           const safariUrl = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
@@ -41,7 +41,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           console.log('🤖 Android - Redirection Chrome')
           window.location.href = intentUrl
         }
-      }, 500)
+      }, 300)
     }
   }, [])
 
@@ -251,9 +251,12 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
               src={backgroundImage}
               alt=""
               fill
-              priority
+              loading="eager"
+              quality={60}
               className="object-cover"
               sizes="100vw"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             />
             <div className="absolute inset-0 bg-black/40" />
           </div>
@@ -298,7 +301,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   alt="Profile"
                   width={96}
                   height={96}
-                  priority
+                  loading="eager"
+                  quality={75}
                   className="rounded-full border-4 border-white/30 shadow-2xl object-cover"
                 />
               </div>
