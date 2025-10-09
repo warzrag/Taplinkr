@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Trophy, Medal, Award, TrendingUp, Users, BarChart, Eye, ChevronLeft, Crown
+  Trophy, Medal, Award, TrendingUp, Users, BarChart, Eye, ChevronLeft, Crown, Folder
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
@@ -24,6 +24,21 @@ interface LeaderboardMember {
   }
 }
 
+interface CreatorStats {
+  folder: {
+    id: string
+    name: string
+    icon: string
+    color: string
+  }
+  stats: {
+    totalClicks: number
+    totalViews: number
+    totalLinks: number
+    conversionRate: number
+  }
+}
+
 interface LeaderboardData {
   leaderboard: LeaderboardMember[]
   teamTotals: {
@@ -31,6 +46,7 @@ interface LeaderboardData {
     totalViews: number
     totalLinks: number
   }
+  creatorsStats: CreatorStats[]
   period: string
 }
 
@@ -242,37 +258,113 @@ export default function TeamLeaderboardPage() {
           </div>
         </motion.div>
 
-        {/* Leaderboard */}
-        <div className="space-y-4">
-          {data.leaderboard.map((member, index) => {
-            const rank = index + 1
-            const isPodium = rank <= 3
-
-            return (
-              <motion.div
-                key={member.user.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${
-                  isPodium ? 'ring-2 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900' : ''
-                } ${
-                  rank === 1 ? 'ring-yellow-400' : rank === 2 ? 'ring-gray-400' : rank === 3 ? 'ring-orange-400' : ''
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  {/* Rang + Icône podium */}
-                  <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                    {isPodium && getPodiumIcon(rank)}
-                    <span className={`text-2xl font-bold ${
-                      rank === 1 ? 'text-yellow-500' :
-                      rank === 2 ? 'text-gray-400' :
-                      rank === 3 ? 'text-orange-400' :
-                      'text-gray-500'
-                    }`}>
-                      #{rank}
-                    </span>
+        {/* Stats Créatrices */}
+        {data.creatorsStats && data.creatorsStats.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <Folder className="w-6 h-6 text-blue-500" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Stats Créatrices
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {data.creatorsStats.map((creator, index) => (
+                <motion.div
+                  key={creator.folder.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4"
+                  style={{ borderColor: creator.folder.color }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div
+                      className="text-3xl p-2 rounded-lg"
+                      style={{ backgroundColor: `${creator.folder.color}20` }}
+                    >
+                      {creator.folder.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate">
+                        {creator.folder.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {creator.stats.totalLinks} liens
+                      </p>
+                    </div>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Clics</p>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        {creator.stats.totalClicks.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vues</p>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        {creator.stats.totalViews.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <p className="text-xs text-blue-600 dark:text-blue-400">
+                      Taux de conversion: <span className="font-bold">{creator.stats.conversionRate}%</span>
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Leaderboard Membres */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-4">
+            <Trophy className="w-6 h-6 text-yellow-500" />
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Leaderboard Membres
+            </h2>
+          </div>
+          {data.leaderboard.length === 0 || data.leaderboard.every(m => m.stats.totalLinks === 0) ? (
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+              <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400">
+                Aucun membre n'a encore de liens assignés
+              </p>
+            </div>
+          ) : (
+            data.leaderboard.filter(m => m.stats.totalLinks > 0).map((member, index) => {
+              const rank = index + 1
+              const isPodium = rank <= 3
+
+              return (
+                <motion.div
+                  key={member.user.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${
+                    isPodium ? 'ring-2 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900' : ''
+                  } ${
+                    rank === 1 ? 'ring-yellow-400' : rank === 2 ? 'ring-gray-400' : rank === 3 ? 'ring-orange-400' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Rang + Icône podium */}
+                    <div className="flex flex-col items-center gap-1 min-w-[60px]">
+                      {isPodium && getPodiumIcon(rank)}
+                      <span className={`text-2xl font-bold ${
+                        rank === 1 ? 'text-yellow-500' :
+                        rank === 2 ? 'text-gray-400' :
+                        rank === 3 ? 'text-orange-400' :
+                        'text-gray-500'
+                      }`}>
+                        #{rank}
+                      </span>
+                    </div>
 
                   {/* Avatar + Nom */}
                   <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -332,7 +424,8 @@ export default function TeamLeaderboardPage() {
                 </div>
               </motion.div>
             )
-          })}
+          })
+        )}
         </div>
       </div>
     </div>

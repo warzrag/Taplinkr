@@ -106,9 +106,87 @@ export async function GET(request: NextRequest) {
       { totalClicks: 0, totalViews: 0, totalLinks: 0 }
     )
 
+    // 🎯 STATS CRÉATRICES : Calculer les clics par dossier racine
+    // Récupérer tous les dossiers racine (parentId = null) du owner
+    const owner = teamMembers.find(m => m.teamRole === 'owner')
+    let creatorsStats = []
+
+    if (owner) {
+      const rootFolders = await prisma.folder.findMany({
+        where: {
+          userId: owner.id,
+          parentId: null
+        },
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          color: true
+        }
+      })
+
+      // Pour chaque dossier racine, calculer les clics
+      creatorsStats = await Promise.all(
+        rootFolders.map(async (folder) => {
+          // Fonction récursive pour obtenir tous les IDs de dossiers enfants
+          const getAllFolderIds = async (folderId: string): Promise<string[]> => {
+            const children = await prisma.folder.findMany({
+              where: { parentId: folderId },
+              select: { id: true }
+            })
+
+            const childIds = children.map(c => c.id)
+            const allChildIds = await Promise.all(
+              childIds.map(id => getAllFolderIds(id))
+            )
+
+            return [folderId, ...childIds, ...allChildIds.flat()]
+          }
+
+          const allFolderIds = await getAllFolderIds(folder.id)
+
+          // Récupérer tous les liens dans ces dossiers
+          const links = await prisma.link.findMany({
+            where: {
+              folderId: { in: allFolderIds },
+              ...(dateFilter ? { updatedAt: { gte: dateFilter } } : {})
+            },
+            select: {
+              clicks: true,
+              views: true
+            }
+          })
+
+          const totalClicks = links.reduce((sum, link) => sum + link.clicks, 0)
+          const totalViews = links.reduce((sum, link) => sum + link.views, 0)
+          const totalLinks = links.length
+          const conversionRate = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0
+
+          return {
+            folder: {
+              id: folder.id,
+              name: folder.name,
+              icon: folder.icon || '📁',
+              color: folder.color || '#3b82f6'
+            },
+            stats: {
+              totalClicks,
+              totalViews,
+              totalLinks,
+              conversionRate: Number(conversionRate.toFixed(2))
+            }
+          }
+        })
+      )
+
+      // Trier par clics DESC
+      creatorsStats.sort((a, b) => b.stats.totalClicks - a.stats.totalClicks)
+    }
+
     return NextResponse.json({
       leaderboard,
       teamTotals,
+      creatorsStats,
       period
     })
   } catch (error) {
