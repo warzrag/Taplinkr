@@ -18,24 +18,6 @@ export default function PublicLayout({
         `}} />
       </head>
       <body>
-        {/* 🔥 SCRIPT SYNCHRONE - S'EXÉCUTE IMMÉDIATEMENT AVANT REACT */}
-        <script dangerouslySetInnerHTML={{__html: `
-          (function(){
-            var ua=navigator.userAgent||'';
-            if(ua.indexOf('Instagram')===-1&&ua.indexOf('FBAN')===-1&&ua.indexOf('FBAV')===-1&&ua.indexOf('TikTok')===-1)return;
-            var isIOS=/iPad|iPhone|iPod/.test(ua);
-            var isAndroid=/Android/.test(ua);
-            var url=window.location.href;
-            setTimeout(function(){
-              if(isIOS){
-                window.location.href='x-safari-https://'+url.replace(/^https?:\\/\\//,'');
-              }else if(isAndroid){
-                var host=url.replace(/^https?:\\/\\//,'').replace(/\\/$/,'');
-                window.location.href='intent://'+host+'#Intent;scheme=https;action=android.intent.action.VIEW;end';
-              }
-            },200);
-          })();
-        `}} />
         {children}
       </body>
     </html>
