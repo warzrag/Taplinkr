@@ -81,8 +81,14 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
         throw new Error('Erreur lors de la sauvegarde')
       }
 
+      // Vider le cache localStorage pour forcer le rechargement
+      localStorage.removeItem('links-cache')
+      localStorage.removeItem('dashboard-stats')
+
       toast.success('Lien mis à jour !')
-      refreshAll()
+
+      // Attendre que le refresh soit terminé avant de fermer
+      await refreshAll()
       onSuccess()
       onClose()
     } catch (error) {

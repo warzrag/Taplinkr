@@ -55,8 +55,10 @@ export default function LinkCard({
       })
 
       if (response.ok) {
+        // Vider le cache pour forcer le rechargement immédiat
+        localStorage.removeItem('links-cache')
+        localStorage.removeItem('dashboard-stats')
         await refreshLinks()
-        // Toast sera géré par le contexte
       } else {
         alert('Erreur lors du renommage')
       }
