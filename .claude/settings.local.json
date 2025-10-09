@@ -14,7 +14,13 @@
       "WebSearch",
       "WebFetch(domain:gist.github.com)",
       "WebFetch(domain:stackoverflow.com)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "WebFetch(domain:linktr.ee)",
+      "WebFetch(domain:beacons.ai)",
+      "WebFetch(domain:stan.store)",
+      "WebFetch(domain:koji.com)",
+      "WebFetch(domain:allmylinks.com)",
+      "WebFetch(domain:campsite.bio)"
     ],
     "deny": [],
     "ask": []

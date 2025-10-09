@@ -55,6 +55,7 @@ model User {
   links                   Link[]
   originalLinks           Link[]                  @relation("OriginalOwner")
   modifiedLinks           Link[]                  @relation("LastModifier")
+  assignedLinks           Link[]                  @relation("AssignedLinks")
   notificationPreferences NotificationPreference?
   notifications           Notification[]
   passwordProtections     PasswordProtection[]
@@ -115,6 +116,7 @@ model Link {
   teamId             String?
   originalOwnerId    String?
   lastModifiedBy     String?
+  assignedToUserId   String?
   analyticsEvents    AnalyticsEvent[]
   analyticsSummary   AnalyticsSummary[]
   clickEvents        Click[]
@@ -125,6 +127,7 @@ model Link {
   team               Team?               @relation(fields: [teamId], references: [id])
   originalOwner      User?               @relation("OriginalOwner", fields: [originalOwnerId], references: [id])
   lastModifier       User?               @relation("LastModifier", fields: [lastModifiedBy], references: [id])
+  assignedTo         User?               @relation("AssignedLinks", fields: [assignedToUserId], references: [id])
   multiLinks         MultiLink[]
   passwordAttempts   PasswordAttempt[]
   passwordProtection PasswordProtection?
@@ -132,6 +135,7 @@ model Link {
   auditLogs          TeamAuditLog[]
 
   @@index([teamId, teamShared])
+  @@index([assignedToUserId])
   @@map("links")
 }
 

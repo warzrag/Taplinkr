@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users, Share2, Lock, Unlock, Edit3, Trash2, Eye, Clock,
   Shield, AlertCircle, CheckCircle, UserCheck, UserX, Crown,
-  Zap, Star, Copy, ExternalLink, BarChart
+  Zap, Star, Copy, ExternalLink, BarChart, UserPlus
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
@@ -21,6 +21,7 @@ interface TeamLink {
   createdAt: string
   updatedAt: string
   lastModifiedBy?: string
+  assignedToUserId?: string | null
   user: {
     id: string
     name?: string
@@ -37,7 +38,20 @@ interface TeamLink {
     name?: string
     email: string
   }
+  assignedTo?: {
+    id: string
+    name?: string
+    email: string
+  } | null
   multiLinks?: any[]
+}
+
+interface TeamMember {
+  id: string
+  name?: string
+  email: string
+  image?: string
+  teamRole: string
 }
 
 interface TeamLinkManagerProps {
@@ -49,14 +63,16 @@ interface TeamLinkManagerProps {
 export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkManagerProps) {
   const [teamLinks, setTeamLinks] = useState<TeamLink[]>([])
   const [userLinks, setUserLinks] = useState<TeamLink[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(false) // Commencer à false pour affichage immédiat
   const [selectedLink, setSelectedLink] = useState<TeamLink | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [filter, setFilter] = useState<'all' | 'mine' | 'team'>('all')
 
-  // Charger les liens
+  // Charger les liens et membres
   useEffect(() => {
     fetchLinks()
+    fetchTeamMembers()
   }, [])
 
   const fetchLinks = async () => {
@@ -148,6 +164,40 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
   const copyLink = (slug: string) => {
     navigator.clipboard.writeText(`https://taplinkr.com/${slug}`)
     toast.success('Lien copié!')
+  }
+
+  const fetchTeamMembers = async () => {
+    try {
+      const response = await fetch('/api/teams')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.team?.members) {
+          setTeamMembers(data.team.members)
+        }
+      }
+    } catch (error) {
+      console.error('Erreur chargement membres:', error)
+    }
+  }
+
+  const assignLink = async (linkId: string, assignedToUserId: string | null) => {
+    try {
+      const response = await fetch('/api/team/assign-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ linkId, assignedToUserId })
+      })
+
+      if (response.ok) {
+        toast.success(assignedToUserId ? 'Lien assigné' : 'Assignation retirée')
+        fetchLinks()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Erreur lors de l\'assignation')
+      }
+    } catch (error) {
+      toast.error('Erreur lors de l\'assignation du lien')
+    }
   }
 
   const getRoleIcon = (role?: string) => {
@@ -313,7 +363,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     </div>
 
                     {/* Statistiques */}
-                    <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-3">
+                    <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-3 flex-wrap">
                       <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                         <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                         <span>{link.views}</span>
@@ -326,6 +376,14 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                         <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                           <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                           <span>{link.multiLinks.length}</span>
+                        </div>
+                      )}
+
+                      {/* Badge Assigné à */}
+                      {link.assignedTo && (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
+                          <UserPlus className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate max-w-[100px]">{link.assignedTo.name || link.assignedTo.email}</span>
                         </div>
                       )}
                     </div>
@@ -379,6 +437,23 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     >
                       <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Link>
+                  )}
+
+                  {/* Dropdown assignation (seulement si owner/admin ET lien partagé) */}
+                  {link.teamShared && (userRole === 'owner' || userRole === 'admin') && teamMembers.length > 0 && (
+                    <select
+                      value={link.assignedToUserId || ''}
+                      onChange={(e) => assignLink(link.id, e.target.value || null)}
+                      className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      title="Assigner à un membre"
+                    >
+                      <option value="">Non assigné</option>
+                      {teamMembers.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name || member.email}
+                        </option>
+                      ))}
+                    </select>
                   )}
                 </div>
               </div>

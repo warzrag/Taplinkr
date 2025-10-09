@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import {
   Users,
   UserPlus,
@@ -19,7 +20,8 @@ import {
   Trash2,
   Send,
   Building,
-  Link2
+  Link2,
+  Trophy
 } from 'lucide-react'
 import { useTeamPermissions } from '@/hooks/useTeamPermissions'
 import { toast } from 'react-hot-toast'
@@ -62,7 +64,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [activeTab, setActiveTab] = useState<'members' | 'links' | 'invitations' | 'settings'>('members')
+  const [activeTab, setActiveTab] = useState<'members' | 'links' | 'leaderboard' | 'invitations' | 'settings'>('members')
   
   // États pour le formulaire d'invitation
   const [inviteEmail, setInviteEmail] = useState('')
@@ -485,6 +487,19 @@ export default function TeamPage() {
                   Liens
                 </span>
               </button>
+              <button
+                onClick={() => setActiveTab('leaderboard')}
+                className={`py-2 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                  activeTab === 'leaderboard'
+                    ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <span className="flex items-center gap-1.5 sm:gap-2">
+                  <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Leaderboard
+                </span>
+              </button>
               {isOwner && (
                 <>
                   <button
@@ -602,6 +617,25 @@ export default function TeamPage() {
               userId={session?.user?.id}
               teamId={team.id}
             />
+          </motion.div>
+        )}
+
+        {activeTab === 'leaderboard' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
+            <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Le leaderboard complet est disponible sur une page dédiée
+            </p>
+            <Link href="/dashboard/team-leaderboard">
+              <button className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-white rounded-xl font-semibold hover:from-yellow-500 hover:to-amber-600 transition-all shadow-lg inline-flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                Voir le Leaderboard
+              </button>
+            </Link>
           </motion.div>
         )}
 
