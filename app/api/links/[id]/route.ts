@@ -144,6 +144,46 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
+    const body = await request.json()
+
+    // Vérifier que le lien appartient à l'utilisateur
+    const existingLink = await prisma.link.findFirst({
+      where: { id: params.id, userId: session.user.id }
+    })
+
+    if (!existingLink) {
+      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+    }
+
+    // Mise à jour partielle (utilisé pour le renommage rapide)
+    const link = await prisma.link.update({
+      where: { id: params.id },
+      data: {
+        ...(body.internalName !== undefined && { internalName: body.internalName || null })
+      }
+    })
+
+    return NextResponse.json(link)
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour partielle du lien:', error)
+    return NextResponse.json({
+      error: 'Erreur serveur',
+      details: error instanceof Error ? error.message : 'Erreur inconnue'
+    }, { status: 500 })
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
