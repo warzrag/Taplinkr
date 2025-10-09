@@ -23,18 +23,26 @@ const nextConfig = {
         providedExports: false,
         sideEffects: false,
       }
-      // Garder le devtool par défaut pour éviter les problèmes de performance
-      // config.devtool = 'cheap-module-source-map'
+    } else {
+      // Production: minification maximale
+      config.optimization = {
+        ...config.optimization,
+        minimize: true,
+        usedExports: true,
+        sideEffects: true,
+      }
     }
     return config
   },
   // Optimisations images
   images: {
     domains: ['dkwgorynhgnmldzbhhrb.supabase.co'],
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    formats: ['image/webp'], // Seulement WebP pour vitesse maximale
+    deviceSizes: [640, 750, 828], // Réduire nombre de tailles
+    imageSizes: [32, 64, 96], // Réduire nombre de tailles
+    minimumCacheTTL: 3600, // Cache long pour performance
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   eslint: {
     ignoreDuringBuilds: true,

@@ -63,6 +63,5 @@ export async function generateMetadata({ params }: PageProps) {
   }
 }
 
-// Configuration pour rendu dynamique ultra-rapide
-export const dynamic = 'force-dynamic' // Toujours frais, pas de cache statique
-export const fetchCache = 'force-no-store' // Pas de cache fetch
+// Configuration optimale pour vitesse maximale
+export const revalidate = 60 // Cache ISR 60s pour performance extrême
