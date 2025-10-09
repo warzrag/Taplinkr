@@ -13,6 +13,22 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
+  const [sessionId, setSessionId] = useState<string>('')
+
+  // 🔥 GÉNÉRER SESSION ID UNIQUE (comme GetMySocial)
+  useEffect(() => {
+    // Vérifier si un sessionId existe déjà dans sessionStorage
+    let existingSessionId = sessionStorage.getItem('VISIT_SESSION_ID')
+
+    if (!existingSessionId) {
+      // Générer un nouveau sessionId unique
+      existingSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      sessionStorage.setItem('VISIT_SESSION_ID', existingSessionId)
+    }
+
+    setSessionId(existingSessionId)
+    console.log('📊 Session ID:', existingSessionId)
+  }, [])
 
   // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
   useEffect(() => {
@@ -107,15 +123,16 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
       setClickedLinks([...clickedLinks, id])
     }
     
-    // Enregistrer le clic dans la base de données
+    // Enregistrer le clic dans la base de données avec sessionId
     try {
       await fetch('/api/track-multilink-click', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           multiLinkId: id,
+          sessionId: sessionId, // 🔥 Envoyer sessionId pour déduplication
           screenResolution: `${window.screen.width}x${window.screen.height}`,
           language: navigator.language || 'en',
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone

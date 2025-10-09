@@ -5,7 +5,7 @@ import { getLocationFromIP } from '@/lib/geo-location-helper'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { multiLinkId, screenResolution, language, timezone } = body
+    const { multiLinkId, sessionId, screenResolution, language, timezone } = body
 
     if (!multiLinkId) {
       return NextResponse.json({ error: 'multiLinkId requis' }, { status: 400 })
@@ -21,6 +21,23 @@ export async function POST(request: NextRequest) {
 
     if (!multiLink) {
       return NextResponse.json({ error: 'MultiLink non trouvé' }, { status: 404 })
+    }
+
+    // 🔥 DÉDUPLICATION PAR SESSION (comme GetMySocial)
+    // Vérifier si ce sessionId a déjà cliqué sur ce lien
+    let isDuplicate = false
+    if (sessionId) {
+      const existingClick = await prisma.click.findFirst({
+        where: {
+          multiLinkId: multiLinkId,
+          sessionId: sessionId
+        }
+      })
+
+      if (existingClick) {
+        isDuplicate = true
+        console.log('🔄 Clic dupliqué détecté - Session:', sessionId, 'Link:', multiLinkId)
+      }
     }
 
     // Récupérer les informations de la requête
@@ -46,7 +63,7 @@ export async function POST(request: NextRequest) {
     const browser = extractBrowser(userAgent)
     const os = extractOS(userAgent)
 
-    // Créer un enregistrement dans la table Click
+    // Créer un enregistrement dans la table Click (même si dupliqué, pour analytics)
     await prisma.click.create({
       data: {
         linkId: multiLink.parentLinkId,
@@ -65,24 +82,30 @@ export async function POST(request: NextRequest) {
         region: locationData.region || null,
         latitude: locationData.latitude || null,
         longitude: locationData.longitude || null,
-        multiLinkId: multiLinkId
+        multiLinkId: multiLinkId,
+        sessionId: sessionId || null // 🔥 Stocker le sessionId
       }
     })
 
-    // Incrémenter le compteur de clics du MultiLink
-    await prisma.multiLink.update({
-      where: { id: multiLinkId },
-      data: {
-        clicks: {
-          increment: 1
+    // 🔥 Incrémenter le compteur UNIQUEMENT si ce n'est PAS un duplicate
+    if (!isDuplicate) {
+      await prisma.multiLink.update({
+        where: { id: multiLinkId },
+        data: {
+          clicks: {
+            increment: 1
+          }
         }
-      }
-    })
+      })
+      console.log('✅ Clic unique comptabilisé - Session:', sessionId, 'Link:', multiLinkId)
+    } else {
+      console.log('⏭️ Clic dupliqué ignoré dans le compteur - Session:', sessionId, 'Link:', multiLinkId)
+    }
 
     // Ne pas incrémenter le compteur du lien principal
     // Les clics sont comptés uniquement lors des visites de page
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, isDuplicate })
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement du clic MultiLink:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
