@@ -129,6 +129,10 @@ export async function PUT(
       }
     })
 
+    // Invalider le cache après mise à jour
+    await cache.del(`links:user:${session.user.id}`)
+    console.log(`🗑️ Cache invalidé pour user ${session.user.id}`)
+
     return NextResponse.json(link)
   } catch (error) {
     console.error('Erreur lors de la mise à jour du lien:', error)
@@ -173,6 +177,10 @@ export async function PATCH(
         ...(body.internalName !== undefined && { internalName: body.internalName || null })
       }
     })
+
+    // Invalider le cache après mise à jour
+    await cache.del(`links:user:${session.user.id}`)
+    console.log(`🗑️ Cache invalidé pour user ${session.user.id}`)
 
     return NextResponse.json(link)
   } catch (error) {
