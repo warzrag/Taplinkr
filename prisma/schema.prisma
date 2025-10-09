@@ -80,6 +80,7 @@ model Link {
   userId             String
   slug               String              @unique
   title              String
+  internalName       String?
   description        String?
   color              String?
   icon               String?

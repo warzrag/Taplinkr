@@ -51,6 +51,7 @@ export async function GET(request: Request) {
         id: true,
         slug: true,
         title: true,
+        internalName: true,
         description: true,
         clicks: true,
         views: true,

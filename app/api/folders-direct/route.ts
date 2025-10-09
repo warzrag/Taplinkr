@@ -61,6 +61,7 @@ export async function GET() {
           select: {
             id: true,
             title: true,
+            internalName: true,
             slug: true,
             icon: true,
             color: true,
@@ -84,6 +85,7 @@ export async function GET() {
               select: {
                 id: true,
                 title: true,
+                internalName: true,
                 slug: true,
                 icon: true,
                 color: true,

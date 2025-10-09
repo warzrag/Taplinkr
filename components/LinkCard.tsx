@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Link as LinkType } from '@/types'
-import { ExternalLink, Eye, EyeOff, Shield, GripVertical, Edit, Trash2, Copy, CheckCircle, XCircle, Loader2, Folder, BarChart3, Calendar, Link2, MoreVertical, Zap, Layers } from 'lucide-react'
+import { ExternalLink, Eye, EyeOff, Shield, GripVertical, Edit, Trash2, Copy, CheckCircle, XCircle, Loader2, Folder, BarChart3, Calendar, Link2, MoreVertical, Zap, Layers, Edit3 } from 'lucide-react'
 import Image from 'next/image'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -21,24 +21,48 @@ interface LinkCardProps {
   attributes?: any
 }
 
-export default function LinkCard({ 
-  link, 
-  onToggle, 
-  onEdit, 
+export default function LinkCard({
+  link,
+  onToggle,
+  onEdit,
   onDelete,
   onMoveToFolder,
   onRemoveFromFolder,
   isDragging,
   listeners,
-  attributes 
+  attributes
 }: LinkCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
-  const { incrementLinkClicks } = useLinks()
+  const { incrementLinkClicks, refreshLinks } = useLinks()
 
   const handleToggle = async () => {
     onToggle(link.id, !link.isActive)
+  }
+
+  const handleRename = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const currentName = (link as any).internalName || link.title
+    const newName = prompt('Nom interne du lien:', currentName)
+    if (newName === null || newName === currentName) return
+
+    try {
+      const response = await fetch(`/api/links/${link.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ internalName: newName.trim() || null })
+      })
+
+      if (response.ok) {
+        await refreshLinks()
+        // Toast sera géré par le contexte
+      } else {
+        alert('Erreur lors du renommage')
+      }
+    } catch (error) {
+      alert('Erreur lors du renommage du lien')
+    }
   }
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -141,8 +165,20 @@ export default function LinkCard({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
-                  {link.title}
+                  {(link as any).internalName || link.title}
                 </h3>
+                <button
+                  onClick={handleRename}
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors opacity-0 group-hover:opacity-100"
+                  title="Renommer le lien"
+                >
+                  <Edit3 size={14} className="text-gray-400 hover:text-indigo-600" />
+                </button>
+                {(link as any).internalName && (
+                  <span className="text-xs text-gray-400 dark:text-gray-500 italic truncate">
+                    ({link.title})
+                  </span>
+                )}
                 {/* Badges de protection - Plus gros et plus visibles */}
                 {link.isDirect && !link.shieldEnabled && !link.isUltraLink && (
                   <div className="px-3 py-1.5 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-200 dark:border-gray-600" title="Direct Link - Niveau 1">

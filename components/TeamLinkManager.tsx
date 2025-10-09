@@ -14,6 +14,7 @@ interface TeamLink {
   id: string
   slug: string
   title: string
+  internalName?: string | null
   description?: string
   teamShared: boolean
   clicks: number
@@ -200,6 +201,32 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
     }
   }
 
+  const renameLink = async (linkId: string, currentName: string) => {
+    const newName = prompt('Nom interne du lien:', currentName)
+    if (newName === null || newName === currentName) return
+
+    try {
+      const response = await fetch('/api/team/sync-links', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          linkId,
+          updates: { internalName: newName.trim() || null }
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Lien renommé')
+        fetchLinks()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Erreur lors du renommage')
+      }
+    } catch (error) {
+      toast.error('Erreur lors du renommage du lien')
+    }
+  }
+
   const getRoleIcon = (role?: string) => {
     switch (role) {
       case 'owner':
@@ -332,10 +359,26 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">{link.title}</h3>
+                      <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">
+                        {link.internalName || link.title}
+                      </h3>
+                      {(userRole === 'owner' || userRole === 'admin') && (
+                        <button
+                          onClick={() => renameLink(link.id, link.internalName || link.title)}
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                          title="Renommer le lien"
+                        >
+                          <Edit3 className="w-3 h-3 text-gray-400 hover:text-indigo-600" />
+                        </button>
+                      )}
                       {link.teamShared && (
                         <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs font-medium rounded-full whitespace-nowrap">
                           Partagé
+                        </span>
+                      )}
+                      {link.internalName && (
+                        <span className="text-xs text-gray-400 dark:text-gray-500 italic truncate">
+                          ({link.title})
                         </span>
                       )}
                     </div>
