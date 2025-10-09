@@ -14,8 +14,36 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
 
-  // 🔥 REDIRECTION : Gérée dans layout.tsx (script inline dans <head>)
-  // Le script s'exécute AVANT React pour redirection instantanée
+  // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
+  useEffect(() => {
+    const userAgent = navigator.userAgent || ''
+    const isInstagram = userAgent.includes('Instagram')
+    const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
+    const isTikTok = userAgent.includes('TikTok')
+    const isInAppBrowser = isInstagram || isFacebook || isTikTok
+
+    if (isInAppBrowser) {
+      console.log('🚨 Navigateur in-app détecté - Redirection dans 500ms')
+
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent)
+      const isAndroid = /Android/.test(userAgent)
+      const currentUrl = window.location.href
+
+      // Redirection après 500ms pour montrer la page
+      setTimeout(() => {
+        if (isIOS) {
+          const safariUrl = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
+          console.log('🍎 iOS - Redirection Safari')
+          window.location.href = safariUrl
+        } else if (isAndroid) {
+          const host = currentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
+          const intentUrl = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;end`
+          console.log('🤖 Android - Redirection Chrome')
+          window.location.href = intentUrl
+        }
+      }, 500)
+    }
+  }, [])
 
   // Tracker la vue avec protection contre les multiples appels
   useEffect(() => {
