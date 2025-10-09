@@ -13,7 +13,8 @@
       "Bash(npx tsc:*)",
       "WebSearch",
       "WebFetch(domain:gist.github.com)",
-      "WebFetch(domain:stackoverflow.com)"
+      "WebFetch(domain:stackoverflow.com)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
