@@ -14,28 +14,8 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
 
-  // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
-  useEffect(() => {
-    const userAgent = navigator.userAgent || ''
-    const isInstagram = userAgent.includes('Instagram')
-    const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
-    const isTikTok = userAgent.includes('TikTok')
-    const isInAppBrowser = isInstagram || isFacebook || isTikTok
-
-    if (isInAppBrowser) {
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent)
-      const isAndroid = /Android/.test(userAgent)
-      const currentUrl = window.location.href
-
-      // Redirection immédiate sans délai
-      if (isIOS) {
-        window.location.href = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
-      } else if (isAndroid) {
-        const host = currentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
-        window.location.href = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;end`
-      }
-    }
-  }, [])
+  // 🔥 REDIRECTION : Gérée par /public/redirect.js chargé dans <head> du layout
+  // Le script se charge AVANT React pour redirection ultra-rapide
 
   // Tracker la vue avec protection contre les multiples appels
   useEffect(() => {
