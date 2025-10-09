@@ -63,7 +63,7 @@ export default function LinksPage() {
   // Filtrer et trier les liens personnels
   const filteredLinks = personalLinks
     .filter(link => {
-      const matchesSearch = link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = (link.internalName || link.title).toLowerCase().includes(searchTerm.toLowerCase()) ||
                           link.slug.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesFilter = filterType === 'all' ||
                           (filterType === 'active' && link.isActive) ||
@@ -449,8 +449,13 @@ export default function LinksPage() {
                         
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 line-clamp-1">
-                            {link.title}
+                            {link.internalName || link.title}
                           </h3>
+                          {link.internalName && (
+                            <p className="text-xs text-gray-400 dark:text-gray-500 italic mt-0.5">
+                              ({link.title})
+                            </p>
+                          )}
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                               link.isActive
@@ -642,7 +647,14 @@ export default function LinksPage() {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-gray-100">{link.title}</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">
+                              {link.internalName || link.title}
+                              {link.internalName && (
+                                <span className="text-xs text-gray-400 dark:text-gray-500 italic ml-1">
+                                  ({link.title})
+                                </span>
+                              )}
+                            </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">/{link.slug}</p>
                           </div>
                         </div>
