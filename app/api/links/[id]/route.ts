@@ -22,15 +22,16 @@ export async function PUT(
       body: JSON.stringify(body, null, 2)
     })
     
-    const { 
-      title, 
+    const {
+      title,
+      internalName,
       slug,
-      description, 
-      color, 
-      icon, 
+      description,
+      color,
+      icon,
       coverImage,
       coverImagePosition,
-      profileImage, 
+      profileImage,
       isActive,
       fontFamily,
       borderRadius,
@@ -89,6 +90,7 @@ export async function PUT(
       where: { id: params.id },
       data: {
         ...(title !== undefined && { title }),
+        ...(internalName !== undefined && { internalName: internalName || null }),
         ...(slug !== undefined && { slug }),
         ...(description !== undefined && { description: description || null }),
         ...(color !== undefined && { color: color || null }),

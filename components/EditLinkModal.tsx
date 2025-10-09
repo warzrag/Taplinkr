@@ -19,6 +19,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
   const [activeTab, setActiveTab] = useState('general')
   const [saving, setSaving] = useState(false)
   const [linkData, setLinkData] = useState({
+    internalName: '',
     title: '',
     description: '',
     slug: '',
@@ -49,6 +50,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
   useEffect(() => {
     if (editingLink) {
       setLinkData({
+        internalName: (editingLink as any).internalName || '',
         title: editingLink.title || '',
         description: editingLink.description || '',
         slug: editingLink.slug || '',
@@ -182,18 +184,38 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
               >
                 {activeTab === 'general' && (
                   <>
-                    {/* Titre */}
+                    {/* Titre du lien (nom interne) */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Titre
+                        Titre du lien
+                      </label>
+                      <input
+                        type="text"
+                        value={linkData.internalName}
+                        onChange={(e) => setLinkData({ ...linkData, internalName: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        placeholder="Ex: Lien Laura 🌶️ (visible uniquement dans le dashboard)"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Nom visible uniquement dans votre dashboard pour vous organiser
+                      </p>
+                    </div>
+
+                    {/* Titre de la page */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Titre de la page
                       </label>
                       <input
                         type="text"
                         value={linkData.title}
                         onChange={(e) => setLinkData({ ...linkData, title: e.target.value })}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        placeholder="Mon lien"
+                        placeholder="Ex: Laura Twitter lauraa_bpts (visible par les visiteurs)"
                       />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Titre visible par vos visiteurs sur la page publique
+                      </p>
                     </div>
 
                     {/* Slug */}
