@@ -220,16 +220,16 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
                     {/* Slug */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         URL personnalisée
                       </label>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">taplinkr.com/</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">taplinkr.com/</span>
                         <input
                           type="text"
                           value={linkData.slug}
                           onChange={(e) => setLinkData({ ...linkData, slug: e.target.value })}
-                          className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                          className="flex-1 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                           placeholder="mon-lien"
                         />
                       </div>
@@ -237,14 +237,14 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
                     {/* Description */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Description
                       </label>
                       <textarea
                         value={linkData.description}
                         onChange={(e) => setLinkData({ ...linkData, description: e.target.value })}
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
                         placeholder="Une courte description..."
                       />
                     </div>
@@ -254,30 +254,30 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
                 {activeTab === 'links' && (
                   <>
                     {multiLinks.map((link, index) => (
-                      <div key={index} className="p-4 border border-gray-200 rounded-xl space-y-3">
+                      <div key={index} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl space-y-3 bg-gray-50 dark:bg-gray-800">
                         {/* Titre et URL */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                               Titre
                             </label>
                             <input
                               type="text"
                               value={link.title}
                               onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                               placeholder="Mon lien"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                               URL
                             </label>
                             <input
                               type="url"
                               value={link.url}
                               onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                               placeholder="https://..."
                             />
                           </div>
@@ -286,26 +286,26 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
                         {/* Icon et Description */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                               Icône
                             </label>
                             <input
                               type="text"
                               value={link.icon || ''}
                               onChange={(e) => updateMultiLink(index, 'icon', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                               placeholder="🔗"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                               Description
                             </label>
                             <input
                               type="text"
                               value={link.description || ''}
                               onChange={(e) => updateMultiLink(index, 'description', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                               placeholder="Courte description"
                             />
                           </div>
@@ -314,7 +314,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
                         {/* Bouton supprimer */}
                         <button
                           onClick={() => removeMultiLink(index)}
-                          className="w-full py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                          className="w-full py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
                         >
                           <Trash2 className="w-4 h-4" />
                           Supprimer ce lien
