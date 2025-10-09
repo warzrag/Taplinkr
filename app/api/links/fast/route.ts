@@ -46,6 +46,7 @@ export async function GET() {
         id: true,
         slug: true,
         title: true,
+        internalName: true,
         description: true,
         icon: true,
         color: true,

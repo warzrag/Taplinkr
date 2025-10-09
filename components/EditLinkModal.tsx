@@ -50,7 +50,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
   useEffect(() => {
     if (editingLink) {
       setLinkData({
-        internalName: (editingLink as any).internalName || '',
+        internalName: editingLink.internalName || '',
         title: editingLink.title || '',
         description: editingLink.description || '',
         slug: editingLink.slug || '',
