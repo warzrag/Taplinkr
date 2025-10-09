@@ -6,9 +6,6 @@ export default function PublicLayout({
   return (
     <html lang="fr">
       <head>
-        {/* 🔥 SCRIPT REDIRECTION - SE CHARGE EN PREMIER AVANT REACT */}
-        <script src="/redirect.js" />
-
         {/* Préconnexion Supabase pour images */}
         <link rel="preconnect" href="https://dkwgorynhgnmldzbhhrb.supabase.co" />
         <link rel="dns-prefetch" href="https://dkwgorynhgnmldzbhhrb.supabase.co" />
