@@ -21,6 +21,7 @@ interface CreateLinkModalProps {
 
 interface FormData {
   title: string
+  internalName?: string
   slug?: string
   description?: string
   instagramUrl?: string
@@ -32,6 +33,7 @@ interface FormData {
 interface MultiLinkData {
   title: string
   url: string
+  description?: string
   icon?: string
   iconImage?: string
 }
@@ -58,10 +60,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       ? editingLink.multiLinks.map(ml => ({
           title: ml.title,
           url: ml.url,
+          description: ml.description || '',
           icon: ml.icon,
           iconImage: ml.iconImage
         }))
-      : [{ title: 'Mon Instagram', url: 'https://instagram.com/moncompte', icon: '', iconImage: '' }]
+      : [{ title: 'Mon Instagram', url: 'https://instagram.com/moncompte', description: '', icon: '', iconImage: '' }]
   )
   const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
   const [profileStyle, setProfileStyle] = useState<'circle' | 'beacon'>(editingLink?.profileStyle || 'circle')
@@ -165,7 +168,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }
 
   const addMultiLink = () => {
-    const newLinks = [...multiLinks, { title: '', url: '', icon: '', iconImage: '' }]
+    const newLinks = [...multiLinks, { title: '', url: '', description: '', icon: '', iconImage: '' }]
     setMultiLinks(newLinks)
   }
 
@@ -1296,11 +1299,42 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </div>
                   </motion.div>
 
+                  {/* Nom interne (dashboard) avec animation */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nom interne (optionnel)
+                    </label>
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <input
+                        type="text"
+                        {...register('internalName')}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base"
+                        placeholder="Ex: Laura Twitter 🐦 (visible uniquement dans votre dashboard)"
+                      />
+                    </motion.div>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-xs text-gray-500 mt-1 flex items-center gap-1"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      Pour vous organiser dans le dashboard (invisible pour vos visiteurs)
+                    </motion.p>
+                  </motion.div>
+
                   {/* URL personnalisée avec animation */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
+                    transition={{ delay: 0.25 }}
                   >
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Personnalisez votre URL
@@ -1443,7 +1477,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: 0.35 }}
                   >
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Description (optionnel)
@@ -1613,6 +1647,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-base"
                                     placeholder="https://example.com"
                                   />
+                                  <input
+                                    type="text"
+                                    value={link.description || ''}
+                                    onChange={(e) => updateMultiLink(index, 'description', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-base text-sm"
+                                    placeholder="Description courte (optionnel)"
+                                  />
                                 </div>
                               </div>
                               {multiLinks.length > 1 && (
@@ -1648,6 +1689,28 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           />
                         </div>
                       )}
+
+                      {/* Toggle isActive */}
+                      <div className="pt-4 border-t">
+                        <label className="flex items-center justify-between cursor-pointer">
+                          <div>
+                            <span className="text-sm font-medium text-gray-700">Lien actif</span>
+                            <p className="text-xs text-gray-500">Désactivez pour créer un brouillon</p>
+                          </div>
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              checked={linkType === 'multi' ? true : true}
+                              className="sr-only peer"
+                              disabled
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                          </div>
+                        </label>
+                        <p className="text-xs text-gray-500 mt-2">
+                          💡 Les liens sont actifs par défaut. Vous pourrez les désactiver plus tard.
+                        </p>
+                      </div>
                     </>
                   )}
 

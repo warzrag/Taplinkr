@@ -27,11 +27,28 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
     icon: '',
     isActive: true
   })
+  const [designData, setDesignData] = useState({
+    profileImage: '',
+    profileStyle: 'circle' as 'circle' | 'beacon',
+    coverImage: '',
+    animation: 'none',
+    borderRadius: 'rounded-xl',
+    fontFamily: 'system',
+    backgroundColor: '#ffffff',
+    textColor: '#1f2937'
+  })
+  const [socialData, setSocialData] = useState({
+    instagramUrl: '',
+    tiktokUrl: '',
+    twitterUrl: '',
+    youtubeUrl: ''
+  })
   const [multiLinks, setMultiLinks] = useState<Array<{
     id?: string
     title: string
     url: string
     icon?: string
+    iconImage?: string
     description?: string
   }>>([])
   const [fullLink, setFullLink] = useState<Link | null>(null)
@@ -71,6 +88,22 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
               icon: loadedFullLink.icon || '',
               isActive: loadedFullLink.isActive ?? true
             })
+            setDesignData({
+              profileImage: loadedFullLink.profileImage || '',
+              profileStyle: loadedFullLink.profileStyle || 'circle',
+              coverImage: loadedFullLink.coverImage || '',
+              animation: loadedFullLink.animation || 'none',
+              borderRadius: loadedFullLink.borderRadius || 'rounded-xl',
+              fontFamily: loadedFullLink.fontFamily || 'system',
+              backgroundColor: loadedFullLink.backgroundColor || '#ffffff',
+              textColor: loadedFullLink.textColor || '#1f2937'
+            })
+            setSocialData({
+              instagramUrl: loadedFullLink.instagramUrl || '',
+              tiktokUrl: loadedFullLink.tiktokUrl || '',
+              twitterUrl: loadedFullLink.twitterUrl || '',
+              youtubeUrl: loadedFullLink.youtubeUrl || ''
+            })
             // Charger les multiLinks complets
             if (loadedFullLink.multiLinks && loadedFullLink.multiLinks.length > 0) {
               setMultiLinks(loadedFullLink.multiLinks)
@@ -90,6 +123,22 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
             icon: editingLink.icon || '',
             isActive: editingLink.isActive ?? true
           })
+          setDesignData({
+            profileImage: editingLink.profileImage || '',
+            profileStyle: editingLink.profileStyle || 'circle',
+            coverImage: editingLink.coverImage || '',
+            animation: editingLink.animation || 'none',
+            borderRadius: editingLink.borderRadius || 'rounded-xl',
+            fontFamily: editingLink.fontFamily || 'system',
+            backgroundColor: editingLink.backgroundColor || '#ffffff',
+            textColor: editingLink.textColor || '#1f2937'
+          })
+          setSocialData({
+            instagramUrl: editingLink.instagramUrl || '',
+            tiktokUrl: editingLink.tiktokUrl || '',
+            twitterUrl: editingLink.twitterUrl || '',
+            youtubeUrl: editingLink.youtubeUrl || ''
+          })
           setMultiLinks([])
         }
       }
@@ -104,6 +153,8 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
       const liveLink = {
         ...fullLink,
         ...linkData,
+        ...designData,
+        ...socialData,
         multiLinks: multiLinks.map((ml, index) => ({
           ...ml,
           order: index,
@@ -113,7 +164,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
       console.log('📱 Envoi à la preview:', liveLink)
       onLiveUpdate(liveLink)
     }
-  }, [linkData, multiLinks, fullLink, onLiveUpdate])
+  }, [linkData, designData, socialData, multiLinks, fullLink, onLiveUpdate])
 
   const handleSave = async () => {
     if (!editingLink) return
@@ -125,6 +176,8 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...linkData,
+          ...designData,
+          ...socialData,
           multiLinks: multiLinks
         })
       })
@@ -427,17 +480,213 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                 )}
 
                 {activeTab === 'design' && (
-                  <div className="text-center py-12">
-                    <Palette className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">Options de design à venir</p>
-                  </div>
+                  <>
+                    {/* Style d'affichage */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Style d'affichage
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setDesignData({ ...designData, profileStyle: 'circle' })}
+                          className={`p-4 border-2 rounded-xl transition-all ${
+                            designData.profileStyle === 'circle'
+                              ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                          }`}
+                        >
+                          <div className="text-center">
+                            <div className="text-2xl mb-2">⭕</div>
+                            <div className="text-sm font-medium">Minimal</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Photo ronde classique</div>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDesignData({ ...designData, profileStyle: 'beacon' })}
+                          className={`p-4 border-2 rounded-xl transition-all ${
+                            designData.profileStyle === 'beacon'
+                              ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                          }`}
+                        >
+                          <div className="text-center">
+                            <div className="text-2xl mb-2">🖼️</div>
+                            <div className="text-sm font-medium">Immersif</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Image plein écran</div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Animation */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Animation des liens
+                      </label>
+                      <select
+                        value={designData.animation}
+                        onChange={(e) => setDesignData({ ...designData, animation: e.target.value })}
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="none">Aucune</option>
+                        <option value="pulse">Pulse 💗</option>
+                        <option value="rotate">Rotate 🔄</option>
+                        <option value="lift">Lift 🚀</option>
+                      </select>
+                    </div>
+
+                    {/* Forme des boutons */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Forme des boutons
+                      </label>
+                      <select
+                        value={designData.borderRadius}
+                        onChange={(e) => setDesignData({ ...designData, borderRadius: e.target.value })}
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="rounded">Léger</option>
+                        <option value="rounded-xl">Moyen</option>
+                        <option value="rounded-2xl">Arrondi</option>
+                        <option value="rounded-3xl">Très arrondi</option>
+                        <option value="rounded-full">Pilule</option>
+                        <option value="rounded-none">Carré</option>
+                      </select>
+                    </div>
+
+                    {/* Police */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Police de caractères
+                      </label>
+                      <select
+                        value={designData.fontFamily}
+                        onChange={(e) => setDesignData({ ...designData, fontFamily: e.target.value })}
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="system">Système</option>
+                        <option value="inter">Inter</option>
+                        <option value="roboto">Roboto</option>
+                        <option value="poppins">Poppins</option>
+                        <option value="montserrat">Montserrat</option>
+                        <option value="playfair">Playfair</option>
+                        <option value="mono">Mono</option>
+                      </select>
+                    </div>
+
+                    {/* Couleurs */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Couleur de fond
+                        </label>
+                        <input
+                          type="color"
+                          value={designData.backgroundColor}
+                          onChange={(e) => setDesignData({ ...designData, backgroundColor: e.target.value })}
+                          className="w-full h-12 rounded-xl border border-gray-300 dark:border-gray-600 cursor-pointer"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Couleur du texte
+                        </label>
+                        <input
+                          type="color"
+                          value={designData.textColor}
+                          onChange={(e) => setDesignData({ ...designData, textColor: e.target.value })}
+                          className="w-full h-12 rounded-xl border border-gray-300 dark:border-gray-600 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+
+                    {/* TODO: Ajouter uploads d'images dans une prochaine version */}
+                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl">
+                      <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                        💡 Les uploads de photos de profil et de couverture seront disponibles prochainement.
+                      </p>
+                    </div>
+                  </>
                 )}
 
                 {activeTab === 'social' && (
-                  <div className="text-center py-12">
-                    <Share2 className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">Réseaux sociaux à venir</p>
-                  </div>
+                  <>
+                    {/* Instagram */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Instagram
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-gray-400">@</span>
+                        <input
+                          type="text"
+                          value={socialData.instagramUrl}
+                          onChange={(e) => setSocialData({ ...socialData, instagramUrl: e.target.value })}
+                          className="flex-1 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="votrecompte"
+                        />
+                      </div>
+                    </div>
+
+                    {/* TikTok */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        TikTok
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-gray-400">@</span>
+                        <input
+                          type="text"
+                          value={socialData.tiktokUrl}
+                          onChange={(e) => setSocialData({ ...socialData, tiktokUrl: e.target.value })}
+                          className="flex-1 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="votrecompte"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Twitter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Twitter / X
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-gray-400">@</span>
+                        <input
+                          type="text"
+                          value={socialData.twitterUrl}
+                          onChange={(e) => setSocialData({ ...socialData, twitterUrl: e.target.value })}
+                          className="flex-1 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="votrecompte"
+                        />
+                      </div>
+                    </div>
+
+                    {/* YouTube */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        YouTube
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-gray-400">@</span>
+                        <input
+                          type="text"
+                          value={socialData.youtubeUrl}
+                          onChange={(e) => setSocialData({ ...socialData, youtubeUrl: e.target.value })}
+                          className="flex-1 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="votrecompte"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        💡 Ces liens apparaîtront en bas de votre page publique comme icônes cliquables.
+                      </p>
+                    </div>
+                  </>
                 )}
               </motion.div>
             </AnimatePresence>
