@@ -28,6 +28,7 @@ interface LinksContextType {
   refreshAll: () => Promise<void>
   forceRefresh: () => void
   incrementLinkClicks: (linkId: string) => void
+  updateLinkOptimistic: (linkId: string, updates: Partial<LinkType>) => void
 }
 
 const LinksContext = createContext<LinksContextType | undefined>(undefined)
@@ -173,6 +174,31 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const updateLinkOptimistic = (linkId: string, updates: Partial<LinkType>) => {
+    // Mise à jour optimiste instantanée du state local
+    setLinks(prevLinks =>
+      prevLinks.map(link =>
+        link.id === linkId
+          ? { ...link, ...updates }
+          : link
+      )
+    )
+    setPersonalLinks(prevLinks =>
+      prevLinks.map(link =>
+        link.id === linkId
+          ? { ...link, ...updates }
+          : link
+      )
+    )
+    setTeamLinks(prevLinks =>
+      prevLinks.map(link =>
+        link.id === linkId
+          ? { ...link, ...updates }
+          : link
+      )
+    )
+  }
+
   // Chargement initial UNIQUE
   useEffect(() => {
     // Charger une seule fois au montage
@@ -212,7 +238,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
       refreshFolders,
       refreshAll,
       forceRefresh,
-      incrementLinkClicks
+      incrementLinkClicks,
+      updateLinkOptimistic
     }}>
       {children}
     </LinksContext.Provider>
