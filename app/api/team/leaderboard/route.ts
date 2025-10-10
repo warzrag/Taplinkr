@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
           user: {
             id: member.id,
             name: member.name,
+            nickname: member.nickname,
             email: member.email,
             image: member.image,
             teamRole: member.teamRole
@@ -189,6 +190,11 @@ export async function GET(request: NextRequest) {
       teamTotals,
       creatorsStats,
       period
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache'
+      }
     })
   } catch (error) {
     console.error('Erreur leaderboard:', error)
