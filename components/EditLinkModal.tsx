@@ -12,9 +12,10 @@ interface EditLinkModalProps {
   editingLink: Link | null
   onClose: () => void
   onSuccess: () => void
+  onLiveUpdate?: (linkData: any) => void
 }
 
-export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess }: EditLinkModalProps) {
+export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess, onLiveUpdate }: EditLinkModalProps) {
   const { refreshAll, updateLinkOptimistic } = useLinks()
   const [activeTab, setActiveTab] = useState('general')
   const [saving, setSaving] = useState(false)
@@ -86,6 +87,22 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
       loadFullLink()
     }
   }, [editingLink])
+
+  // ⚡ Live preview update - appeler onLiveUpdate à chaque changement
+  useEffect(() => {
+    if (editingLink && onLiveUpdate) {
+      const liveLink = {
+        ...editingLink,
+        ...linkData,
+        multiLinks: multiLinks.map((ml, index) => ({
+          ...ml,
+          order: index,
+          clicks: 0
+        }))
+      }
+      onLiveUpdate(liveLink)
+    }
+  }, [linkData, multiLinks, editingLink, onLiveUpdate])
 
   const handleSave = async () => {
     if (!editingLink) return
