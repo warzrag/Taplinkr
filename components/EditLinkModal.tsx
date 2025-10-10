@@ -107,11 +107,8 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
       const updatedLink = await response.json()
 
-      // ⚡ METTRE À JOUR LE STATE IMMÉDIATEMENT avec les données complètes
-      updateLinkOptimistic(editingLink.id, {
-        ...linkData,
-        multiLinks: multiLinks // Inclure les multiLinks aussi !
-      })
+      // ⚡ METTRE À JOUR LE STATE IMMÉDIATEMENT avec les données du serveur
+      updateLinkOptimistic(editingLink.id, updatedLink)
 
       toast.success('Lien mis à jour !')
 
@@ -119,11 +116,10 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
       onSuccess()
       onClose()
 
-      // Vider le cache et refresh en arrière-plan
+      // Vider le cache - pas besoin de refresh, la mise à jour optimiste suffit !
       localStorage.removeItem('links-cache')
       localStorage.removeItem('dashboard-stats')
       localStorage.removeItem('folder-stats')
-      setTimeout(() => refreshAll(true), 500)
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de la sauvegarde')

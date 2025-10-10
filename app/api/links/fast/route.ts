@@ -88,7 +88,12 @@ export async function GET() {
     // Mettre en cache pour 3 secondes seulement (pour mise à jour quasi-instantanée)
     await cache.set(cacheKey, response, 3)
 
-    return NextResponse.json(response)
+    return NextResponse.json(response, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    })
   } catch (error) {
     console.error('Erreur API fast links:', error)
     return NextResponse.json({ links: [] })

@@ -78,7 +78,13 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     console.log('🔄 Chargement des liens...')
 
     try {
-      const response = await fetch('/api/links/fast')
+      const response = await fetch('/api/links/fast', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      })
 
       if (response.ok) {
         const data = await response.json()
