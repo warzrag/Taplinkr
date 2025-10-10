@@ -55,7 +55,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
   const [fullLink, setFullLink] = useState<Link | null>(null)
 
   const addMultiLink = () => {
-    setMultiLinks([...multiLinks, { title: '', url: '', icon: '🔗' }])
+    setMultiLinks([...multiLinks, { title: '', url: '', description: '', icon: '', iconImage: '' }])
   }
 
   const removeMultiLink = (index: number) => {
