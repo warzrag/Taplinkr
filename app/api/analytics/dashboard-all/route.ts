@@ -97,6 +97,7 @@ export async function GET() {
         select: {
           id: true,
           title: true,
+          internalName: true,
           slug: true,
           clicks: true,
           views: true
@@ -151,6 +152,7 @@ export async function GET() {
     const formattedTopLinks = topLinks.map(link => ({
       id: link.id,
       title: link.title,
+      internalName: link.internalName,
       slug: link.slug,
       clicks: link.clicks || 0,
       views: link.views || 0,
@@ -190,7 +192,7 @@ export async function GET() {
     }))
 
     // Retourner les données avec cache HTTP optimisé
-    const response = NextResponse.json({
+    return NextResponse.json({
       totalLinks,
       totalClicks,
       totalViews: totalClicks,
@@ -201,12 +203,12 @@ export async function GET() {
       topLinks: formattedTopLinks,
       topCountries,
       summary
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache'
+      }
     })
-
-    // Cache agressif de 1 minute pour performance maximale
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
-
-    return response
 
   } catch (error) {
     console.error('Erreur dashboard-all:', error)
