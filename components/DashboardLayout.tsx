@@ -43,11 +43,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   
   // Fonction pour mettre à jour un lien spécifique en temps réel
   const updateLinkInPreview = (updatedLink: any) => {
-    setLinks(prevLinks => 
-      prevLinks.map(link => 
+    setLinks(prevLinks => {
+      if (!Array.isArray(prevLinks)) return []
+      return prevLinks.map(link =>
         link.id === updatedLink.id ? updatedLink : link
       )
-    )
+    })
   }
 
   // Récupérer les liens pour la prévisualisation
@@ -57,7 +58,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         const response = await fetch('/api/links')
         if (response.ok) {
           const data = await response.json()
-          setLinks(data)
+          // L'API retourne un objet { links: [], personalLinks: [], ... }
+          // On veut juste le tableau links
+          setLinks(Array.isArray(data) ? data : (data.links || []))
         }
       } catch (error) {
         console.error('Erreur lors du chargement des liens:', error)
