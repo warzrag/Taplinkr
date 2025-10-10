@@ -43,37 +43,38 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   const [hasLoaded, setHasLoaded] = useState(false)
 
   // Fonction simplifiée sans retry automatique
-  const fetchLinks = async () => {
+  const fetchLinks = async (skipCache: boolean = false) => {
     // Éviter les appels multiples
-    if (loading) {
+    if (loading && !skipCache) {
       console.log('⏸️ Chargement déjà en cours')
       return
     }
 
-    // ⚡ INSTANT: Charger depuis cache d'abord
-    const cached = localStorage.getItem('links-cache')
-    if (cached) {
-      try {
-        const { data, timestamp } = JSON.parse(cached)
-        // Cache valide pendant 5 secondes seulement (pour mises à jour rapides)
-        if (Date.now() - timestamp < 5000) {
-          setLinks(data.links || [])
-          setPersonalLinks(data.personalLinks || [])
-          setTeamLinks(data.teamLinks || [])
-          setHasTeam(data.hasTeam || false)
-          setLoading(false)
-          setHasLoaded(true)
-          console.log('⚡ Liens chargés depuis cache:', data.links?.length || 0)
+    // ⚡ INSTANT: Charger depuis cache d'abord (sauf si skipCache)
+    if (!skipCache) {
+      const cached = localStorage.getItem('links-cache')
+      if (cached) {
+        try {
+          const { data, timestamp } = JSON.parse(cached)
+          // Cache valide pendant 5 secondes seulement (pour mises à jour rapides)
+          if (Date.now() - timestamp < 5000) {
+            setLinks(data.links || [])
+            setPersonalLinks(data.personalLinks || [])
+            setTeamLinks(data.teamLinks || [])
+            setHasTeam(data.hasTeam || false)
+            setLoading(false)
+            setHasLoaded(true)
+            console.log('⚡ Liens chargés depuis cache:', data.links?.length || 0)
+          }
+        } catch (e) {
+          console.error('Cache invalide:', e)
         }
-      } catch (e) {
-        console.error('Cache invalide:', e)
       }
+    } else {
+      console.log('🚫 Cache ignoré - Chargement forcé depuis la DB')
     }
 
-    // Ne pas afficher loading si on a du cache
-    if (!cached) {
-      setLoading(true)
-    }
+    setLoading(true)
     console.log('🔄 Chargement des liens...')
 
     try {
@@ -150,13 +151,13 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     await fetchFolders()
   }
 
-  const refreshAll = async () => {
+  const refreshAll = async (skipCache: boolean = true) => {
     console.log('🔄 Rafraîchissement global')
     // ⚡ Invalider tous les caches
     localStorage.removeItem('links-cache')
     localStorage.removeItem('dashboard-stats')
     localStorage.removeItem('folder-stats')
-    await Promise.all([fetchLinks(), fetchFolders()])
+    await Promise.all([fetchLinks(skipCache), fetchFolders()])
   }
 
   const forceRefresh = () => {

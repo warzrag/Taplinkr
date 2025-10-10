@@ -15,7 +15,7 @@ interface EditLinkModalProps {
 }
 
 export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess }: EditLinkModalProps) {
-  const { refreshAll, updateLinkOptimistic } = useLinks()
+  const { refreshAll } = useLinks()
   const [activeTab, setActiveTab] = useState('general')
   const [saving, setSaving] = useState(false)
   const [linkData, setLinkData] = useState({
@@ -112,16 +112,10 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
       localStorage.removeItem('dashboard-stats')
       localStorage.removeItem('folder-stats')
 
-      // ⚡ MISE À JOUR OPTIMISTE INSTANTANÉE
-      updateLinkOptimistic(editingLink.id, {
-        ...linkData,
-        multiLinks: updatedLink.multiLinks || multiLinks
-      })
-
       toast.success('Lien mis à jour !')
 
-      // Refresh immédiat SANS cache (l'API a déjà invalidé le cache Redis)
-      await refreshAll()
+      // ⚡ Refresh SANS CACHE pour voir les changements immédiatement
+      await refreshAll(true) // true = ignore le cache complètement
 
       onSuccess()
       onClose()

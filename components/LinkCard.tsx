@@ -35,7 +35,7 @@ export default function LinkCard({
   const [isHovered, setIsHovered] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
-  const { incrementLinkClicks, refreshLinks, updateLinkOptimistic } = useLinks()
+  const { incrementLinkClicks, refreshLinks } = useLinks()
 
   const handleToggle = async () => {
     onToggle(link.id, !link.isActive)
@@ -48,12 +48,6 @@ export default function LinkCard({
     if (newName === null || newName === currentName) return
 
     try {
-      // ⚡ MISE À JOUR OPTIMISTE INSTANTANÉE
-      // Mettre à jour immédiatement l'interface
-      updateLinkOptimistic(link.id, {
-        internalName: newName.trim() || null
-      })
-
       const response = await fetch(`/api/links/${link.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -61,23 +55,15 @@ export default function LinkCard({
       })
 
       if (response.ok) {
-        // Vider le cache pour le prochain chargement
+        // Vider le cache
         localStorage.removeItem('links-cache')
         localStorage.removeItem('dashboard-stats')
-        // Rafraîchir en arrière-plan
-        setTimeout(() => refreshLinks(), 500)
+        // Rafraîchir immédiatement sans cache
+        await refreshLinks()
       } else {
-        // En cas d'erreur, restaurer l'ancien nom
-        updateLinkOptimistic(link.id, {
-          internalName: link.internalName
-        })
         alert('Erreur lors du renommage')
       }
     } catch (error) {
-      // En cas d'erreur, restaurer l'ancien nom
-      updateLinkOptimistic(link.id, {
-        internalName: link.internalName
-      })
       alert('Erreur lors du renommage du lien')
     }
   }
