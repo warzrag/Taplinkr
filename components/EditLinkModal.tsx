@@ -51,12 +51,16 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
 
   useEffect(() => {
     if (editingLink) {
+      // Initialiser fullLink immédiatement avec editingLink pour la preview
+      setFullLink(editingLink)
+
       // Charger le lien complet avec ses multiLinks depuis l'API
       const loadFullLink = async () => {
         try {
           const response = await fetch(`/api/links/${editingLink.id}`)
           if (response.ok) {
             const loadedFullLink = await response.json()
+            console.log('🔍 Lien complet chargé:', loadedFullLink)
             setFullLink(loadedFullLink)
             setLinkData({
               internalName: loadedFullLink.internalName || '',
@@ -103,6 +107,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
           clicks: 0
         }))
       }
+      console.log('📱 Envoi à la preview:', liveLink)
       onLiveUpdate(liveLink)
     }
   }, [linkData, multiLinks, fullLink, onLiveUpdate])
