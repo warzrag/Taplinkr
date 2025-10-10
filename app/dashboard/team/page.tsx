@@ -615,10 +615,10 @@ export default function TeamPage() {
                         {(isOwner || isAdmin()) && (
                           <button
                             onClick={() => updateNickname(member.id, (member as any).nickname, member.name || member.email)}
-                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-all duration-200 opacity-0 group-hover:opacity-100 z-10"
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors flex-shrink-0"
                             title="Modifier le surnom"
                           >
-                            <Edit3 size={14} className="text-gray-500 hover:text-purple-600 transition-colors" />
+                            <Edit3 size={14} className="text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
                           </button>
                         )}
                       </div>
