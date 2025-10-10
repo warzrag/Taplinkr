@@ -86,7 +86,12 @@ export default function TeamPage() {
   const fetchTeam = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/teams')
+      const response = await fetch('/api/teams', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      })
       const data = await response.json()
       
       if (response.ok && data.team) {
@@ -219,7 +224,10 @@ export default function TeamPage() {
       }
 
       toast.success('Surnom mis à jour !')
-      fetchTeam()
+
+      // Vider le cache et rafraîchir
+      localStorage.removeItem('team-cache')
+      await fetchTeam()
     } catch (error: any) {
       toast.error(error.message || 'Erreur lors de la mise à jour du surnom')
     }

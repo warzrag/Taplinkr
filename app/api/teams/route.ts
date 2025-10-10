@@ -47,8 +47,13 @@ export async function GET(request: NextRequest) {
     })
 
     const team = user?.ownedTeam || user?.team
-    
-    return NextResponse.json({ team })
+
+    return NextResponse.json({ team }, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    })
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'équipe:', error)
     return NextResponse.json(
