@@ -154,7 +154,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
           initial={{ opacity: 0, y: window.innerWidth < 640 ? '100%' : 0, scale: window.innerWidth < 640 ? 1 : 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: window.innerWidth < 640 ? '100%' : 0, scale: window.innerWidth < 640 ? 1 : 0.95 }}
-          className="relative bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg lg:max-w-2xl max-h-[100vh] sm:max-h-[90vh] overflow-hidden flex flex-col z-50"
+          className="relative bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg lg:max-w-2xl max-h-[100vh] sm:max-h-[90vh] overflow-hidden flex flex-col z-50"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 sm:p-6 lg:p-8 pb-4">
@@ -163,33 +163,33 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
                 <Link2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   Modifier le lien
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {linkData.title || 'Sans titre'}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
             >
-              <X className="w-6 h-6 text-gray-500" />
+              <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
             </button>
           </div>
 
           {/* Tabs */}
           <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex gap-2 border-b border-gray-200">
+            <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors relative ${
                     activeTab === tab.id
-                      ? 'text-indigo-600'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'text-indigo-600 dark:text-indigo-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -197,7 +197,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
                   {activeTab === tab.id && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400"
                       transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -360,7 +360,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
                     {/* Bouton ajouter */}
                     <button
                       onClick={addMultiLink}
-                      className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-colors font-medium flex items-center justify-center gap-2"
+                      className="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-300 hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-400 transition-colors font-medium flex items-center justify-center gap-2"
                     >
                       <Plus className="w-5 h-5" />
                       Ajouter un lien
@@ -368,8 +368,8 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
                     {multiLinks.length === 0 && (
                       <div className="text-center py-12">
-                        <Link2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500 mb-4">Aucun lien pour le moment</p>
+                        <Link2 className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400 mb-4">Aucun lien pour le moment</p>
                         <button
                           onClick={addMultiLink}
                           className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all"
@@ -383,15 +383,15 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
                 {activeTab === 'design' && (
                   <div className="text-center py-12">
-                    <Palette className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Options de design à venir</p>
+                    <Palette className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">Options de design à venir</p>
                   </div>
                 )}
 
                 {activeTab === 'social' && (
                   <div className="text-center py-12">
-                    <Share2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Réseaux sociaux à venir</p>
+                    <Share2 className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">Réseaux sociaux à venir</p>
                   </div>
                 )}
               </motion.div>
@@ -399,11 +399,11 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
           </div>
 
           {/* Footer */}
-          <div className="p-4 sm:p-6 lg:p-8 pt-4 border-t border-gray-200 bg-gray-50">
+          <div className="p-4 sm:p-6 lg:p-8 pt-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
             <div className="flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 Annuler
               </button>
