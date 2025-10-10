@@ -64,4 +64,4 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 // Configuration optimale pour vitesse maximale
-export const revalidate = 60 // Cache ISR 60s pour performance extrême
+export const revalidate = 0 // Désactiver le cache temporairement pour debugging
