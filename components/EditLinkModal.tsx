@@ -33,6 +33,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
     icon?: string
     description?: string
   }>>([])
+  const [fullLink, setFullLink] = useState<Link | null>(null)
 
   const addMultiLink = () => {
     setMultiLinks([...multiLinks, { title: '', url: '', icon: '🔗' }])
@@ -55,17 +56,18 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
         try {
           const response = await fetch(`/api/links/${editingLink.id}`)
           if (response.ok) {
-            const fullLink = await response.json()
+            const loadedFullLink = await response.json()
+            setFullLink(loadedFullLink)
             setLinkData({
-              internalName: fullLink.internalName || '',
-              title: fullLink.title || '',
-              description: fullLink.description || '',
-              slug: fullLink.slug || '',
-              isActive: fullLink.isActive ?? true
+              internalName: loadedFullLink.internalName || '',
+              title: loadedFullLink.title || '',
+              description: loadedFullLink.description || '',
+              slug: loadedFullLink.slug || '',
+              isActive: loadedFullLink.isActive ?? true
             })
             // Charger les multiLinks complets
-            if (fullLink.multiLinks && fullLink.multiLinks.length > 0) {
-              setMultiLinks(fullLink.multiLinks)
+            if (loadedFullLink.multiLinks && loadedFullLink.multiLinks.length > 0) {
+              setMultiLinks(loadedFullLink.multiLinks)
             } else {
               setMultiLinks([])
             }
@@ -73,6 +75,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
         } catch (error) {
           console.error('Erreur chargement lien complet:', error)
           // Fallback sur editingLink
+          setFullLink(editingLink)
           setLinkData({
             internalName: editingLink.internalName || '',
             title: editingLink.title || '',
@@ -90,9 +93,9 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
 
   // ⚡ Live preview update - appeler onLiveUpdate à chaque changement
   useEffect(() => {
-    if (editingLink && onLiveUpdate) {
+    if (fullLink && onLiveUpdate) {
       const liveLink = {
-        ...editingLink,
+        ...fullLink,
         ...linkData,
         multiLinks: multiLinks.map((ml, index) => ({
           ...ml,
@@ -102,7 +105,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
       }
       onLiveUpdate(liveLink)
     }
-  }, [linkData, multiLinks, editingLink, onLiveUpdate])
+  }, [linkData, multiLinks, fullLink, onLiveUpdate])
 
   const handleSave = async () => {
     if (!editingLink) return
