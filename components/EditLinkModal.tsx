@@ -6,6 +6,7 @@ import { X, Save, Link2, Settings, Palette, Share2, Plus, Trash2 } from 'lucide-
 import { toast } from 'react-hot-toast'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link } from '@/types'
+import IconUpload from './upload/IconUpload'
 
 interface EditLinkModalProps {
   isOpen: boolean
@@ -417,17 +418,14 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                         </div>
 
                         {/* Icon et Description */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-3">
                           <div>
                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                              Icône
+                              Icône / Favicon
                             </label>
-                            <input
-                              type="text"
-                              value={link.icon || ''}
-                              onChange={(e) => updateMultiLink(index, 'icon', e.target.value)}
-                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                              placeholder="🔗"
+                            <IconUpload
+                              value={link.iconImage || link.icon || ''}
+                              onChange={(iconUrl) => updateMultiLink(index, 'iconImage', iconUrl)}
                             />
                           </div>
                           <div>
