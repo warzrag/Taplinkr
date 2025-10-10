@@ -24,6 +24,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
     title: '',
     description: '',
     slug: '',
+    icon: '',
     isActive: true
   })
   const [multiLinks, setMultiLinks] = useState<Array<{
@@ -67,6 +68,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
               title: loadedFullLink.title || '',
               description: loadedFullLink.description || '',
               slug: loadedFullLink.slug || '',
+              icon: loadedFullLink.icon || '',
               isActive: loadedFullLink.isActive ?? true
             })
             // Charger les multiLinks complets
@@ -85,6 +87,7 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
             title: editingLink.title || '',
             description: editingLink.description || '',
             slug: editingLink.slug || '',
+            icon: editingLink.icon || '',
             isActive: editingLink.isActive ?? true
           })
           setMultiLinks([])
@@ -307,6 +310,23 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                         className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
                         placeholder="Une courte description..."
                       />
+                    </div>
+
+                    {/* Icône / Favicon */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Icône / Favicon
+                      </label>
+                      <input
+                        type="text"
+                        value={linkData.icon}
+                        onChange={(e) => setLinkData({ ...linkData, icon: e.target.value })}
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        placeholder="🔗 ou URL d'une image"
+                      />
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Emoji (ex: 🔗 🌟 💎) ou URL d'une image pour l'icône de votre page
+                      </p>
                     </div>
                   </>
                 )}
