@@ -35,6 +35,14 @@ export default async function LinkPage({ params }: PageProps) {
       notFound()
     }
 
+    // 🔍 DEBUG: Vérifier les multiLinks
+    console.log(`🔍 [${params.slug}] Loaded link with ${link.multiLinks?.length || 0} multiLinks`)
+    if (link.multiLinks && link.multiLinks.length > 0) {
+      link.multiLinks.forEach((ml, i) => {
+        console.log(`   ${i+1}. ${ml.title} -> ${ml.url}`)
+      })
+    }
+
     return <PublicLinkPreviewFinal link={link} />
   } catch (error) {
     console.error('Error loading link:', error)
@@ -65,3 +73,4 @@ export async function generateMetadata({ params }: PageProps) {
 
 // Configuration optimale pour vitesse maximale
 export const revalidate = 0 // Désactiver le cache temporairement pour debugging
+export const dynamic = 'force-dynamic' // Forcer le mode dynamique (pas de cache)

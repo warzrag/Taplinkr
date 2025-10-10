@@ -20,7 +20,8 @@
       "WebFetch(domain:stan.store)",
       "WebFetch(domain:koji.com)",
       "WebFetch(domain:allmylinks.com)",
-      "WebFetch(domain:campsite.bio)"
+      "WebFetch(domain:campsite.bio)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
