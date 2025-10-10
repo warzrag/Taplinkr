@@ -389,56 +389,57 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                   <>
                     {multiLinks.map((link, index) => (
                       <div key={index} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl space-y-3 bg-gray-50 dark:bg-gray-800">
-                        {/* Titre et URL */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* Structure identique à CreateLinkModal */}
+                        <div className="flex gap-3">
+                          {/* Icône à gauche */}
                           <div>
                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                              Titre
-                            </label>
-                            <input
-                              type="text"
-                              value={link.title}
-                              onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
-                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                              placeholder="Mon lien"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                              URL
-                            </label>
-                            <input
-                              type="url"
-                              value={link.url}
-                              onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
-                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                              placeholder="https://..."
-                            />
-                          </div>
-                        </div>
-
-                        {/* Icon et Description */}
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                              Icône / Favicon
+                              Icône
                             </label>
                             <IconUpload
                               value={link.iconImage || link.icon || ''}
                               onChange={(iconUrl) => updateMultiLink(index, 'iconImage', iconUrl)}
                             />
                           </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                              Description
-                            </label>
-                            <input
-                              type="text"
-                              value={link.description || ''}
-                              onChange={(e) => updateMultiLink(index, 'description', e.target.value)}
-                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                              placeholder="Courte description"
-                            />
+
+                          {/* Champs à droite */}
+                          <div className="flex-1 space-y-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Titre
+                              </label>
+                              <input
+                                type="text"
+                                value={link.title}
+                                onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
+                                className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                placeholder="Mon lien"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                URL
+                              </label>
+                              <input
+                                type="url"
+                                value={link.url}
+                                onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
+                                className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                placeholder="https://..."
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Description
+                              </label>
+                              <input
+                                type="text"
+                                value={link.description || ''}
+                                onChange={(e) => updateMultiLink(index, 'description', e.target.value)}
+                                className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                placeholder="Courte description"
+                              />
+                            </div>
                           </div>
                         </div>
 
