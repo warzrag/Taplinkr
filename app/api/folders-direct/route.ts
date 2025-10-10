@@ -71,6 +71,16 @@ export async function GET() {
             isDirect: true,
             order: true,
             folderId: true,
+            assignedToUserId: true,
+            assignedTo: {
+              select: {
+                id: true,
+                name: true,
+                nickname: true,
+                email: true,
+                image: true
+              }
+            },
             // Ne pas charger les multiLinks ici
             _count: {
               select: { multiLinks: true }
@@ -95,6 +105,16 @@ export async function GET() {
                 isDirect: true,
                 order: true,
                 folderId: true,
+                assignedToUserId: true,
+                assignedTo: {
+                  select: {
+                    id: true,
+                    name: true,
+                    nickname: true,
+                    email: true,
+                    image: true
+                  }
+                },
                 _count: {
                   select: { multiLinks: true }
                 }

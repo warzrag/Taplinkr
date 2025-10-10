@@ -51,6 +51,16 @@ export async function GET() {
         folderId: true,
         teamShared: true,  // Pour distinguer les liens d'équipe
         userId: true,      // Pour savoir qui est le propriétaire
+        assignedToUserId: true,
+        assignedTo: {
+          select: {
+            id: true,
+            name: true,
+            nickname: true,
+            email: true,
+            image: true
+          }
+        },
         createdAt: true,
         updatedAt: true,
         // Charger seulement le count des multiLinks, pas tous les détails

@@ -269,7 +269,19 @@ export default function LinkCard({
               <span className="text-xs sm:text-sm font-semibold text-indigo-600 dark:text-indigo-400">{link.clicks || 0}</span>
               <span className="text-xs sm:text-sm text-indigo-500 dark:text-indigo-400 hidden sm:inline">clics</span>
             </div>
-            
+
+            {/* Badge Membre Assigné - Ultra visible */}
+            {link.assignedTo && (
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1.5 rounded-lg shadow-md border-2 border-emerald-600 dark:border-emerald-400">
+                <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center font-bold text-emerald-600 text-xs">
+                  {((link.assignedTo as any).nickname || link.assignedTo.name || link.assignedTo.email)[0].toUpperCase()}
+                </div>
+                <span className="text-sm font-bold text-white">
+                  {(link.assignedTo as any).nickname || link.assignedTo.name || link.assignedTo.email}
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center gap-1 sm:gap-2 bg-gray-50 dark:bg-gray-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg">
               <Calendar size={12} className="text-gray-500 dark:text-gray-400 sm:w-[14px] sm:h-[14px]" />
               <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{formatDate(link.createdAt)}</span>

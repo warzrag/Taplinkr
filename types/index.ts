@@ -46,6 +46,14 @@ export interface Link {
   createdAt: string
   updatedAt: string
   folderId?: string
+  assignedToUserId?: string
+  assignedTo?: {
+    id: string
+    name?: string
+    nickname?: string
+    email: string
+    image?: string
+  }
   multiLinks?: MultiLink[]
   user?: {
     id: string

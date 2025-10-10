@@ -62,6 +62,16 @@ export async function GET() {
         updatedAt: true,
         teamShared: true,
         userId: true,
+        assignedToUserId: true,
+        assignedTo: {
+          select: {
+            id: true,
+            name: true,
+            nickname: true,
+            email: true,
+            image: true
+          }
+        },
         // Utiliser _count au lieu de charger les multiLinks
         _count: {
           select: { multiLinks: true }
