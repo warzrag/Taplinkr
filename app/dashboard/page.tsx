@@ -103,12 +103,15 @@ export default function Dashboard() {
     organizedLinks: 0,
     topFolders: []
   })
+  const [teamLeaderboard, setTeamLeaderboard] = useState<any>(null)
+  const [teamLoading, setTeamLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'authenticated') {
       // ⚡ INSTANT: Charger depuis le cache localStorage d'abord
       const cachedDashboard = localStorage.getItem('dashboard-stats')
       const cachedFolders = localStorage.getItem('folder-stats')
+      const cachedTeam = localStorage.getItem('team-leaderboard-stats')
 
       // 🔥 STALE-WHILE-REVALIDATE: Toujours afficher le cache si disponible
       if (cachedDashboard) {
@@ -144,10 +147,27 @@ export default function Dashboard() {
         }
       }
 
+      if (cachedTeam) {
+        try {
+          const cached = JSON.parse(cachedTeam)
+          setTeamLeaderboard(cached.data)
+          setTeamLoading(false)
+
+          const cacheAge = Date.now() - cached.timestamp
+          if (cacheAge > 1800000) {
+            console.log('⚠️ Cache team ancien:', Math.floor(cacheAge / 60000), 'minutes')
+          }
+        } catch (err) {
+          console.error('Erreur parsing cache team:', err)
+          localStorage.removeItem('team-leaderboard-stats')
+        }
+      }
+
       // Charger les vraies données en arrière-plan (toujours)
       Promise.all([
         fetchDashboardStats(),
-        fetchFolderStats()
+        fetchFolderStats(),
+        fetchTeamLeaderboard()
       ]).catch(err => console.error('Erreur chargement dashboard:', err))
     }
   }, [status])
@@ -204,6 +224,41 @@ export default function Dashboard() {
       console.error('Erreur lors du chargement des stats dossiers:', error)
     } finally {
       setFolderStatsLoading(false)
+    }
+  }
+
+  const fetchTeamLeaderboard = async () => {
+    try {
+      const hasCache = localStorage.getItem('team-leaderboard-stats')
+      if (!hasCache) {
+        setTeamLoading(true)
+      }
+
+      const response = await fetch('/api/team/leaderboard?period=all', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setTeamLeaderboard(data)
+
+        // ⚡ Sauvegarder dans le cache
+        localStorage.setItem('team-leaderboard-stats', JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }))
+      } else if (response.status === 400) {
+        // L'utilisateur n'a pas d'équipe
+        setTeamLeaderboard(null)
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du leaderboard:', error)
+      setTeamLeaderboard(null)
+    } finally {
+      setTeamLoading(false)
     }
   }
 
@@ -599,6 +654,71 @@ export default function Dashboard() {
               </div>
             )}
           </motion.div>
+
+          {/* Performance de l'équipe */}
+          {teamLeaderboard && teamLeaderboard.leaderboard && teamLeaderboard.leaderboard.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.625 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Performance de l'équipe
+                </h2>
+                <FastLink href="/dashboard/team-leaderboard" prefetch={true}>
+                  <span className="text-sm text-brand-600 hover:underline flex items-center gap-1">
+                    Voir détails
+                    <ChevronRight className="w-4 h-4" />
+                  </span>
+                </FastLink>
+              </div>
+
+              {teamLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-brand-600 border-t-transparent rounded-full mx-auto" />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {teamLeaderboard.leaderboard.slice(0, 5).map((member: any, index: number) => (
+                    <motion.div
+                      key={member.user.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.625 + index * 0.05 }}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm ${
+                          index === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
+                          index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-500' :
+                          index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
+                          'bg-gradient-to-br from-blue-400 to-indigo-500'
+                        }`}>
+                          {((member.user as any).nickname || member.user.name || member.user.email)[0].toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {(member.user as any).nickname || member.user.name || member.user.email}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {member.stats.totalLinks} {member.stats.totalLinks > 1 ? 'liens assignés' : 'lien assigné'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">
+                          {member.stats.totalClicks}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">clics</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
 
           {/* Analyse des dossiers */}
           <motion.div
