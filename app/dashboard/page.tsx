@@ -656,7 +656,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* Performance de l'équipe */}
-          {teamLeaderboard && teamLeaderboard.leaderboard && teamLeaderboard.leaderboard.length > 0 && (
+          {teamLeaderboard && teamLeaderboard.leaderboard && Array.isArray(teamLeaderboard.leaderboard) && teamLeaderboard.leaderboard.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
