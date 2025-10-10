@@ -4,6 +4,40 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/redis-cache'
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
+    const link = await prisma.link.findFirst({
+      where: {
+        id: params.id,
+        userId: session.user.id
+      },
+      include: {
+        multiLinks: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    })
+
+    if (!link) {
+      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+    }
+
+    return NextResponse.json(link)
+  } catch (error) {
+    console.error('Erreur lors de la récupération du lien:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }

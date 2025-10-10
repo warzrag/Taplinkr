@@ -49,17 +49,41 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
   useEffect(() => {
     if (editingLink) {
-      setLinkData({
-        internalName: editingLink.internalName || '',
-        title: editingLink.title || '',
-        description: editingLink.description || '',
-        slug: editingLink.slug || '',
-        isActive: editingLink.isActive ?? true
-      })
-      // Charger les multiLinks
-      if (editingLink.multiLinks && editingLink.multiLinks.length > 0) {
-        setMultiLinks(editingLink.multiLinks)
+      // Charger le lien complet avec ses multiLinks depuis l'API
+      const loadFullLink = async () => {
+        try {
+          const response = await fetch(`/api/links/${editingLink.id}`)
+          if (response.ok) {
+            const fullLink = await response.json()
+            setLinkData({
+              internalName: fullLink.internalName || '',
+              title: fullLink.title || '',
+              description: fullLink.description || '',
+              slug: fullLink.slug || '',
+              isActive: fullLink.isActive ?? true
+            })
+            // Charger les multiLinks complets
+            if (fullLink.multiLinks && fullLink.multiLinks.length > 0) {
+              setMultiLinks(fullLink.multiLinks)
+            } else {
+              setMultiLinks([])
+            }
+          }
+        } catch (error) {
+          console.error('Erreur chargement lien complet:', error)
+          // Fallback sur editingLink
+          setLinkData({
+            internalName: editingLink.internalName || '',
+            title: editingLink.title || '',
+            description: editingLink.description || '',
+            slug: editingLink.slug || '',
+            isActive: editingLink.isActive ?? true
+          })
+          setMultiLinks([])
+        }
       }
+
+      loadFullLink()
     }
   }, [editingLink])
 
