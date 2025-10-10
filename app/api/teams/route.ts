@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
               select: { id: true, name: true, email: true, image: true }
             },
             members: {
-              select: { id: true, name: true, email: true, image: true, teamRole: true }
+              select: { id: true, name: true, nickname: true, email: true, image: true, teamRole: true }
             },
             invitations: {
               where: { status: 'pending' },
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         ownedTeam: {
           include: {
             members: {
-              select: { id: true, name: true, email: true, image: true, teamRole: true }
+              select: { id: true, name: true, nickname: true, email: true, image: true, teamRole: true }
             },
             invitations: {
               where: { status: 'pending' },

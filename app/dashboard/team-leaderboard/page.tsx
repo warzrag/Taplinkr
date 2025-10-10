@@ -376,13 +376,13 @@ export default function TeamLeaderboardPage() {
                       />
                     ) : (
                       <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${getPodiumColor(rank)} flex items-center justify-center text-white font-bold text-lg`}>
-                        {(member.user.name || member.user.email)[0].toUpperCase()}
+                        {((member.user as any).nickname || member.user.name || member.user.email)[0].toUpperCase()}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-lg text-gray-900 dark:text-white truncate">
-                          {member.user.name || member.user.email}
+                          {(member.user as any).nickname || member.user.name || member.user.email}
                         </h3>
                         {member.user.teamRole === 'owner' && (
                           <Crown className="w-4 h-4 text-yellow-500 flex-shrink-0" />

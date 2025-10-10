@@ -25,6 +25,7 @@ model User {
   stripeSubscriptionId    String?                 @unique
   teamId                  String?
   teamRole                String?                 @default("member")
+  nickname                String?
   emailVerified           Boolean                 @default(false)
   emailVerificationToken  String?                 @unique
   emailVerificationExpiry DateTime?

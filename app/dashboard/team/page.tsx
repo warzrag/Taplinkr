@@ -21,7 +21,8 @@ import {
   Send,
   Building,
   Link2,
-  Trophy
+  Trophy,
+  Edit3
 } from 'lucide-react'
 import { useTeamPermissions } from '@/hooks/useTeamPermissions'
 import { toast } from 'react-hot-toast'
@@ -177,20 +178,50 @@ export default function TeamPage() {
   
   const removeMember = async (memberId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir retirer ce membre ?')) return
-    
+
     try {
       const response = await fetch(`/api/teams/members/${memberId}`, {
         method: 'DELETE'
       })
-      
+
       if (!response.ok) {
         throw new Error('Erreur lors de la suppression')
       }
-      
+
       toast.success('Membre retiré de l\'équipe')
       fetchTeam()
     } catch (error) {
       toast.error('Erreur lors de la suppression du membre')
+    }
+  }
+
+  const updateNickname = async (memberId: string, currentNickname: string | null, memberName: string) => {
+    const newNickname = prompt(
+      'Surnom du membre (laissez vide pour utiliser le nom réel):',
+      currentNickname || ''
+    )
+
+    if (newNickname === null) return // Annulé
+
+    try {
+      const response = await fetch('/api/team/update-nickname', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memberId,
+          nickname: newNickname.trim() || null
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Erreur lors de la mise à jour')
+      }
+
+      toast.success('Surnom mis à jour !')
+      fetchTeam()
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la mise à jour du surnom')
     }
   }
   
@@ -577,9 +608,25 @@ export default function TeamPage() {
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">
-                        {member.name || member.email}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">
+                          {(member as any).nickname || member.name || member.email}
+                        </h3>
+                        {(isOwner || isAdmin) && (
+                          <button
+                            onClick={() => updateNickname(member.id, (member as any).nickname, member.name || member.email)}
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors opacity-0 group-hover:opacity-100"
+                            title="Modifier le surnom"
+                          >
+                            <Edit3 size={14} className="text-gray-400 hover:text-brand-600" />
+                          </button>
+                        )}
+                      </div>
+                      {(member as any).nickname && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+                          ({member.name || member.email})
+                        </p>
+                      )}
                       <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                         {member.email}
                       </p>

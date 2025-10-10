@@ -426,7 +426,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                       {link.assignedTo && (
                         <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
                           <UserPlus className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate max-w-[100px]">{link.assignedTo.name || link.assignedTo.email}</span>
+                          <span className="truncate max-w-[100px]">{(link.assignedTo as any).nickname || link.assignedTo.name || link.assignedTo.email}</span>
                         </div>
                       )}
                     </div>
@@ -493,7 +493,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                       <option value="">Non assigné</option>
                       {teamMembers.map((member) => (
                         <option key={member.id} value={member.id}>
-                          {member.name || member.email}
+                          {(member as any).nickname || member.name || member.email}
                         </option>
                       ))}
                     </select>
