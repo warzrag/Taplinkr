@@ -107,8 +107,11 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
       const updatedLink = await response.json()
 
-      // ⚡ METTRE À JOUR LE STATE IMMÉDIATEMENT
-      updateLinkOptimistic(editingLink.id, linkData)
+      // ⚡ METTRE À JOUR LE STATE IMMÉDIATEMENT avec les données complètes
+      updateLinkOptimistic(editingLink.id, {
+        ...linkData,
+        multiLinks: multiLinks // Inclure les multiLinks aussi !
+      })
 
       toast.success('Lien mis à jour !')
 
