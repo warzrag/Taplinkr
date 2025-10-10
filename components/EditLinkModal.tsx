@@ -107,25 +107,24 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
       const updatedLink = await response.json()
 
+      // Vider le cache localStorage
+      localStorage.removeItem('links-cache')
+      localStorage.removeItem('dashboard-stats')
+      localStorage.removeItem('folder-stats')
+
       // ⚡ MISE À JOUR OPTIMISTE INSTANTANÉE
-      // Mettre à jour le state local immédiatement sans attendre le cache
       updateLinkOptimistic(editingLink.id, {
         ...linkData,
         multiLinks: updatedLink.multiLinks || multiLinks
       })
 
-      // Vider le cache localStorage pour le prochain chargement
-      localStorage.removeItem('links-cache')
-      localStorage.removeItem('dashboard-stats')
-
       toast.success('Lien mis à jour !')
 
-      // Fermer immédiatement - la mise à jour est déjà visible !
+      // Refresh immédiat SANS cache (l'API a déjà invalidé le cache Redis)
+      await refreshAll()
+
       onSuccess()
       onClose()
-
-      // Rafraîchir en arrière-plan pour synchroniser avec la DB
-      setTimeout(() => refreshAll(), 500)
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de la sauvegarde')

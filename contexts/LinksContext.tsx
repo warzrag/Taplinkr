@@ -55,8 +55,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     if (cached) {
       try {
         const { data, timestamp } = JSON.parse(cached)
-        // Cache valide pendant 2 minutes
-        if (Date.now() - timestamp < 120000) {
+        // Cache valide pendant 5 secondes seulement (pour mises à jour rapides)
+        if (Date.now() - timestamp < 5000) {
           setLinks(data.links || [])
           setPersonalLinks(data.personalLinks || [])
           setTeamLinks(data.teamLinks || [])

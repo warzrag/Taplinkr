@@ -85,8 +85,8 @@ export async function GET() {
       count: formattedLinks.length
     }
 
-    // Mettre en cache pour 60 secondes avec le cache Redis-like
-    await cache.set(cacheKey, response, 60)
+    // Mettre en cache pour 3 secondes seulement (pour mise à jour quasi-instantanée)
+    await cache.set(cacheKey, response, 3)
 
     return NextResponse.json(response)
   } catch (error) {
