@@ -164,6 +164,17 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const clicks = link?.clicks || 0
   const borderRadius = link?.borderRadius || 'rounded-2xl' // Forme des boutons
 
+  // 🔍 DEBUG: Vérifier les multiLinks côté client
+  useEffect(() => {
+    console.log('🔍 [PublicLinkPreviewFinal] Received link:', {
+      id: link?.id,
+      slug: link?.slug,
+      title: link?.title,
+      multiLinksCount: link?.multiLinks?.length || 0,
+      multiLinks: link?.multiLinks
+    })
+  }, [link])
+
   // En mode beacon, utiliser profileImage comme background
   const backgroundImage = profileStyle === 'beacon' ? profileImage : coverImage
 
