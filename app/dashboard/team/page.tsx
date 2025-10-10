@@ -599,7 +599,7 @@ export default function TeamPage() {
 
             {/* Members */}
             {team.members?.filter(member => member.teamRole !== 'owner').map((member) => (
-              <div key={member.id} className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+              <div key={member.id} className="group bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
                 <div className="flex items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-blue-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
@@ -612,7 +612,7 @@ export default function TeamPage() {
                         <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">
                           {(member as any).nickname || member.name || member.email}
                         </h3>
-                        {(isOwner || isAdmin) && (
+                        {(isOwner || isAdmin()) && (
                           <button
                             onClick={() => updateNickname(member.id, (member as any).nickname, member.name || member.email)}
                             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors opacity-0 group-hover:opacity-100"
