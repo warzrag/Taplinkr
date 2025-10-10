@@ -15,7 +15,7 @@ interface EditLinkModalProps {
 }
 
 export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess }: EditLinkModalProps) {
-  const { refreshAll } = useLinks()
+  const { refreshAll, updateLinkOptimistic } = useLinks()
   const [activeTab, setActiveTab] = useState('general')
   const [saving, setSaving] = useState(false)
   const [linkData, setLinkData] = useState({
@@ -107,18 +107,20 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess 
 
       const updatedLink = await response.json()
 
-      // Vider le cache localStorage
-      localStorage.removeItem('links-cache')
-      localStorage.removeItem('dashboard-stats')
-      localStorage.removeItem('folder-stats')
+      // ⚡ METTRE À JOUR LE STATE IMMÉDIATEMENT
+      updateLinkOptimistic(editingLink.id, linkData)
 
       toast.success('Lien mis à jour !')
 
-      // ⚡ Refresh SANS CACHE pour voir les changements immédiatement
-      await refreshAll(true) // true = ignore le cache complètement
-
+      // Fermer immédiatement - le changement est déjà visible !
       onSuccess()
       onClose()
+
+      // Vider le cache et refresh en arrière-plan
+      localStorage.removeItem('links-cache')
+      localStorage.removeItem('dashboard-stats')
+      localStorage.removeItem('folder-stats')
+      setTimeout(() => refreshAll(true), 500)
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de la sauvegarde')

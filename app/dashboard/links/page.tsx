@@ -767,10 +767,11 @@ export default function LinksPage() {
             setShowEditModal(false)
             setEditingLink(null)
           }}
-          onSuccess={async () => {
+          onSuccess={() => {
             setShowEditModal(false)
             setEditingLink(null)
-            await refreshLinks()
+            // Le modal a déjà mis à jour le state avec updateLinkOptimistic
+            // Pas besoin de refreshLinks ici, ça se fait en arrière-plan
           }}
           onLiveUpdate={() => {}}
         />
