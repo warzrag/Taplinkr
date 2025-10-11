@@ -385,6 +385,9 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                 const linkUrl = item?.url || '#'
                 const linkIcon = item?.icon || item?.iconImage || null
                 const isClicked = clickedLinks.includes(linkId)
+
+                // 🔍 DEBUG: Vérifier si l'icône existe
+                console.log('🖼️ MultiLink:', linkTitle, '| icon:', item?.icon, '| iconImage:', item?.iconImage, '| Final:', linkIcon)
                 
                 if (confirmingLink === linkId) {
                   // Afficher la confirmation dans le bouton
