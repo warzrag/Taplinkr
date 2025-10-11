@@ -32,18 +32,10 @@ import {
   FolderOpen
 } from 'lucide-react'
 // Lazy load des modales pour améliorer le temps de chargement initial
-const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
-  loading: () => <div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full" /></div>,
-  ssr: false
-})
 import dynamic from 'next/dynamic'
 import FastLink from '@/components/FastLink'
-const EditLinkModal = dynamic(() => import('@/components/EditLinkModal'), {
+const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
   loading: () => <div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full" /></div>,
-  ssr: false
-})
-const EditPhonePreview = dynamic(() => import('@/components/EditPhonePreview'), {
-  loading: () => <div className="w-full h-full bg-gray-100 animate-pulse rounded-3xl" />,
   ssr: false
 })
 import { useLinkUpdate } from '@/contexts/LinkUpdateContext'
@@ -83,9 +75,6 @@ export default function Dashboard() {
   const { links: contextLinks, loading: contextLoading, refreshLinks } = useLinks()
   const { requireLimit } = usePermissions()
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editingLink, setEditingLink] = useState<LinkType | null>(null)
-  const [liveEditingLink, setLiveEditingLink] = useState<LinkType | null>(null)
   const [dashboardStats, setDashboardStats] = useState<any>({
     totalLinks: 0,
     totalClicks: 0,
@@ -280,9 +269,8 @@ export default function Dashboard() {
   }
 
   const handleEdit = (link: LinkType) => {
-    setEditingLink(link)
-    setLiveEditingLink(link)
-    setShowEditModal(true)
+    // Rediriger vers la page Links pour éditer
+    router.push('/dashboard/links')
   }
 
   const handleDelete = async (linkId: string) => {
@@ -1150,50 +1138,6 @@ export default function Dashboard() {
           />
         )}
         
-        {showEditModal && editingLink && (
-          <>
-            <EditLinkModal
-              isOpen={showEditModal}
-              editingLink={editingLink}
-              onClose={() => {
-                setShowEditModal(false)
-                setEditingLink(null)
-                setLiveEditingLink(null)
-              }}
-              onSuccess={async () => {
-                setShowEditModal(false)
-                setEditingLink(null)
-                setLiveEditingLink(null)
-                await refreshLinks()
-                fetchDashboardStats()
-              }}
-              onLiveUpdate={(linkData) => {
-                setLiveEditingLink({ ...linkData } as LinkType)
-                if (updateLinkInPreview) updateLinkInPreview(linkData)
-              }}
-            />
-            
-            {!editingLink?.isDirect && (
-              <div className="hidden xl:block">
-                <EditPhonePreview
-                  isVisible={showEditModal}
-                  user={userProfile ? {
-                    name: userProfile.name,
-                    username: userProfile.username,
-                    image: userProfile.image,
-                    bio: userProfile.bio
-                  } : {
-                    name: 'Chargement...',
-                    username: 'user',
-                    image: null,
-                    bio: ''
-                  }}
-                  links={liveEditingLink ? [liveEditingLink] : []}
-                />
-              </div>
-            )}
-          </>
-        )}
       </AnimatePresence>
     </div>
   )

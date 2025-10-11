@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ChevronLeft, FolderPlus, Plus } from 'lucide-react'
 import Link from 'next/link'
 import DragDropDashboard from '@/components/DragDropDashboard'
 import CreateLinkModal from '@/components/CreateLinkModal'
-import EditLinkModal from '@/components/EditLinkModal'
 import { toast } from 'react-hot-toast'
 import { Link as LinkType } from '@/types'
 
@@ -26,12 +26,11 @@ interface Folder {
 }
 
 export default function FoldersPage() {
+  const router = useRouter()
   const [folders, setFolders] = useState<Folder[]>([])
   const [unorganizedLinks, setUnorganizedLinks] = useState<LinkType[]>([])
   const [loading, setLoading] = useState(false) // Commencer à false pour affichage immédiat
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editingLink, setEditingLink] = useState<LinkType | null>(null)
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
 
   // Récupérer les dossiers et les liens
@@ -165,8 +164,8 @@ export default function FoldersPage() {
   }
 
   const handleEditLink = (link: LinkType) => {
-    setEditingLink(link)
-    setShowEditModal(true)
+    // Rediriger vers la page Links pour éditer
+    router.push('/dashboard/links')
   }
 
   const handleDeleteLink = async (id: string) => {
@@ -437,23 +436,6 @@ export default function FoldersPage() {
           await fetchData()
         }}
       />
-      
-      {editingLink && (
-        <EditLinkModal
-          isOpen={showEditModal}
-          editingLink={editingLink}
-          onClose={() => {
-            setShowEditModal(false)
-            setEditingLink(null)
-          }}
-          onSuccess={async () => {
-            setShowEditModal(false)
-            setEditingLink(null)
-            await fetchData()
-          }}
-          onLiveUpdate={() => {}}
-        />
-      )}
     </div>
   )
 }
