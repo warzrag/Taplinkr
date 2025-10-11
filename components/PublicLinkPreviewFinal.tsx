@@ -287,15 +287,13 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
               placeholder="blur"
               blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             />
-            {/* Gradients noirs en mode beacon - comme dans la preview téléphone */}
+            {/* Gradients noirs en mode beacon - dégradé progressif et doux */}
             {profileStyle === 'beacon' ? (
               <>
-                {/* Dégradé principal du bas (60% de hauteur) */}
-                <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
-                {/* Couche supplémentaire pour intensifier le noir en bas (30%) */}
-                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black via-black/90 to-transparent" />
-                {/* Dégradé du haut pour la lisibilité (20%) */}
-                <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/50 to-transparent" />
+                {/* Dégradé principal du bas - très progressif */}
+                <div className="absolute bottom-0 left-0 right-0 h-[70%] bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
+                {/* Dégradé du haut pour la lisibilité */}
+                <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-black/40 to-transparent" />
               </>
             ) : (
               <div className="absolute inset-0 bg-black/40" />
@@ -321,15 +319,13 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   className="object-cover"
                   sizes="390px"
                 />
-                {/* Gradients noirs en mode beacon - comme dans la preview téléphone */}
+                {/* Gradients noirs en mode beacon - dégradé progressif et doux */}
                 {profileStyle === 'beacon' ? (
                   <>
-                    {/* Dégradé principal du bas (60% de hauteur) */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
-                    {/* Couche supplémentaire pour intensifier le noir en bas (30%) */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black via-black/90 to-transparent" />
-                    {/* Dégradé du haut pour la lisibilité (20%) */}
-                    <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/50 to-transparent" />
+                    {/* Dégradé principal du bas - très progressif */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[70%] bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
+                    {/* Dégradé du haut pour la lisibilité */}
+                    <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-black/40 to-transparent" />
                   </>
                 ) : (
                   <div className="absolute inset-0 bg-black/40" />
