@@ -38,8 +38,10 @@ import {
 import Link from 'next/link'
 import CreateLinkModal from '@/components/CreateLinkModal'
 import EditLinkModal from '@/components/EditLinkModal'
+import EditPhonePreview from '@/components/EditPhonePreview'
 import TeamLinksSection from '@/components/TeamLinksSection'
 import { useLinks } from '@/contexts/LinksContext'
+import { useProfile } from '@/contexts/ProfileContext'
 import { Link as LinkType } from '@/types'
 import { format, formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -49,10 +51,12 @@ import { usePermissions } from '@/hooks/usePermissions'
 export default function LinksPage() {
   const { data: session } = useSession()
   const { personalLinks, teamLinks, hasTeam, loading, refreshLinks } = useLinks()
+  const { userProfile } = useProfile()
   const { requireLimit } = usePermissions()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
+  const [liveEditingLink, setLiveEditingLink] = useState<LinkType | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'active' | 'inactive'>('all')
   const [sortBy, setSortBy] = useState<'recent' | 'clicks' | 'name'>('recent')
@@ -760,21 +764,48 @@ export default function LinksPage() {
       />
       
       {editingLink && (
-        <EditLinkModal
-          isOpen={showEditModal}
-          editingLink={editingLink}
-          onClose={() => {
-            setShowEditModal(false)
-            setEditingLink(null)
-          }}
-          onSuccess={() => {
-            setShowEditModal(false)
-            setEditingLink(null)
-            // Le modal a déjà mis à jour le state avec updateLinkOptimistic
-            // Pas besoin de refreshLinks ici, ça se fait en arrière-plan
-          }}
-          onLiveUpdate={() => {}}
-        />
+        <>
+          <EditLinkModal
+            isOpen={showEditModal}
+            editingLink={editingLink}
+            onClose={() => {
+              setShowEditModal(false)
+              setEditingLink(null)
+              setLiveEditingLink(null)
+            }}
+            onSuccess={() => {
+              setShowEditModal(false)
+              setEditingLink(null)
+              setLiveEditingLink(null)
+              // Le modal a déjà mis à jour le state avec updateLinkOptimistic
+              // Pas besoin de refreshLinks ici, ça se fait en arrière-plan
+            }}
+            onLiveUpdate={(linkData) => {
+              setLiveEditingLink({ ...linkData } as LinkType)
+            }}
+          />
+
+          {/* Preview du téléphone - seulement pour les liens non-directs */}
+          {!editingLink?.isDirect && (
+            <div className="hidden xl:block">
+              <EditPhonePreview
+                isVisible={showEditModal}
+                user={userProfile ? {
+                  name: userProfile.name,
+                  username: userProfile.username,
+                  image: userProfile.image,
+                  bio: userProfile.bio
+                } : {
+                  name: 'Chargement...',
+                  username: 'user',
+                  image: null,
+                  bio: ''
+                }}
+                links={liveEditingLink ? [liveEditingLink] : []}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   )
