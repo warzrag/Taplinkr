@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/redis-cache'
+import { revalidatePath } from 'next/cache'
 
 export async function GET(
   request: NextRequest,
@@ -168,6 +169,12 @@ export async function PUT(
     await cache.del(`links:user:${session.user.id}`)
     console.log(`🗑️ Cache invalidé pour user ${session.user.id}`)
 
+    // ⚡ Revalider la page publique pour mise à jour instantanée
+    if (existingLink.slug) {
+      revalidatePath(`/${existingLink.slug}`, 'page')
+      console.log(`🔄 Page revalidée: /${existingLink.slug}`)
+    }
+
     return NextResponse.json(link)
   } catch (error) {
     console.error('Erreur lors de la mise à jour du lien:', error)
@@ -217,6 +224,12 @@ export async function PATCH(
     await cache.del(`links:user:${session.user.id}`)
     console.log(`🗑️ Cache invalidé pour user ${session.user.id}`)
 
+    // ⚡ Revalider la page publique
+    if (existingLink.slug) {
+      revalidatePath(`/${existingLink.slug}`, 'page')
+      console.log(`🔄 Page revalidée: /${existingLink.slug}`)
+    }
+
     return NextResponse.json(link)
   } catch (error) {
     console.error('Erreur lors de la mise à jour partielle du lien:', error)
@@ -250,6 +263,16 @@ export async function DELETE(
     await prisma.link.delete({
       where: { id: params.id }
     })
+
+    // Invalider le cache après suppression
+    await cache.del(`links:user:${session.user.id}`)
+    console.log(`🗑️ Cache invalidé pour user ${session.user.id}`)
+
+    // ⚡ Revalider la page publique (elle n'existera plus)
+    if (existingLink.slug) {
+      revalidatePath(`/${existingLink.slug}`, 'page')
+      console.log(`🔄 Page supprimée du cache: /${existingLink.slug}`)
+    }
 
     return NextResponse.json({ message: 'Lien supprimé' })
   } catch (error) {

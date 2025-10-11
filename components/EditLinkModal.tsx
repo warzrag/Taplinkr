@@ -199,10 +199,16 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
       onSuccess()
       onClose()
 
-      // Vider le cache - pas besoin de refresh, la mise à jour optimiste suffit !
+      // Vider le cache
       localStorage.removeItem('links-cache')
       localStorage.removeItem('dashboard-stats')
       localStorage.removeItem('folder-stats')
+      localStorage.removeItem('folders-page-cache')
+
+      // ⚡ Refresh silencieux en arrière-plan pour garantir la synchronisation
+      setTimeout(() => {
+        refreshAll(false) // false = utilise le cache pendant le chargement
+      }, 100)
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de la sauvegarde')
