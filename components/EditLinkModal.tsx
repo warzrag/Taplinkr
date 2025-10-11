@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link } from '@/types'
 import IconUpload from './upload/IconUpload'
+import ImageUpload from './upload/ImageUpload'
 
 interface EditLinkModalProps {
   isOpen: boolean
@@ -369,22 +370,17 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                     {/* Icône / Favicon */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Icône / Favicon
+                        Icône / Favicon de la page
                       </label>
-                      <div className="flex items-start gap-4">
-                        <IconUpload
-                          value={linkData.icon}
-                          onChange={(iconUrl) => setLinkData({ ...linkData, icon: iconUrl })}
-                        />
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Cliquez sur le carré pour uploader une image qui représentera votre page.
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Format recommandé : 512x512px, PNG ou JPG (max 2MB)
-                          </p>
-                        </div>
-                      </div>
+                      <ImageUpload
+                        value={linkData.icon}
+                        onChange={(iconUrl) => setLinkData({ ...linkData, icon: iconUrl })}
+                        type="avatar"
+                        aspectRatio="square"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        Image carrée qui représentera votre page (format recommandé : 512x512px)
+                      </p>
                     </div>
                   </>
                 )}
