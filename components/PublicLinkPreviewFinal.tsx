@@ -287,13 +287,17 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
               placeholder="blur"
               blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             />
-            {/* Gradients noirs en mode beacon - dégradé progressif et doux */}
+            {/* Gradients noirs en mode beacon - EXACTEMENT comme LivePhonePreview */}
             {profileStyle === 'beacon' ? (
               <>
-                {/* Dégradé principal du bas - très progressif */}
-                <div className="absolute bottom-0 left-0 right-0 h-[70%] bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
-                {/* Dégradé du haut pour la lisibilité */}
-                <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-black/40 to-transparent" />
+                {/* Dégradé noir professionnel style premium - remonté */}
+                <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
+
+                {/* Couche supplémentaire pour intensifier le noir */}
+                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black via-black/90 to-transparent" />
+
+                {/* Dégradé du haut pour la lisibilité de la barre de statut */}
+                <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/50 to-transparent" />
               </>
             ) : (
               <div className="absolute inset-0 bg-black/40" />
@@ -319,13 +323,17 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   className="object-cover"
                   sizes="390px"
                 />
-                {/* Gradients noirs en mode beacon - dégradé progressif et doux */}
+                {/* Gradients noirs en mode beacon - EXACTEMENT comme LivePhonePreview */}
                 {profileStyle === 'beacon' ? (
                   <>
-                    {/* Dégradé principal du bas - très progressif */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[70%] bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
-                    {/* Dégradé du haut pour la lisibilité */}
-                    <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-black/40 to-transparent" />
+                    {/* Dégradé noir professionnel style premium - remonté */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
+
+                    {/* Couche supplémentaire pour intensifier le noir */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black via-black/90 to-transparent" />
+
+                    {/* Dégradé du haut pour la lisibilité de la barre de statut */}
+                    <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/50 to-transparent" />
                   </>
                 ) : (
                   <div className="absolute inset-0 bg-black/40" />
