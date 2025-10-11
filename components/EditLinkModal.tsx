@@ -372,12 +372,14 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Icône / Favicon de la page
                       </label>
-                      <ImageUpload
-                        value={linkData.icon}
-                        onChange={(iconUrl) => setLinkData({ ...linkData, icon: iconUrl })}
-                        type="avatar"
-                        aspectRatio="square"
-                      />
+                      <div className="max-w-[150px]">
+                        <ImageUpload
+                          value={linkData.icon}
+                          onChange={(iconUrl) => setLinkData({ ...linkData, icon: iconUrl })}
+                          type="avatar"
+                          aspectRatio="square"
+                        />
+                      </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         Image carrée qui représentera votre page (format recommandé : 512x512px)
                       </p>
@@ -394,12 +396,14 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Icône du lien
                           </label>
-                          <ImageUpload
-                            value={link.iconImage || link.icon || ''}
-                            onChange={(iconUrl) => updateMultiLink(index, 'iconImage', iconUrl)}
-                            type="avatar"
-                            aspectRatio="square"
-                          />
+                          <div className="max-w-[120px]">
+                            <ImageUpload
+                              value={link.iconImage || link.icon || ''}
+                              onChange={(iconUrl) => updateMultiLink(index, 'iconImage', iconUrl)}
+                              type="avatar"
+                              aspectRatio="square"
+                            />
+                          </div>
                         </div>
 
                         {/* Champs du lien */}
