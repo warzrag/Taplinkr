@@ -445,18 +445,22 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                     className={`w-full bg-white/90 hover:bg-white/95 backdrop-blur-sm ${borderRadius} py-3 px-4 shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-2 group`}
                   >
                     {linkIcon && (
-                      <div className="relative w-10 h-10 flex-shrink-0">
-                        <Image
-                          src={linkIcon}
-                          alt=""
-                          width={40}
-                          height={40}
-                          loading="lazy"
-                          className="rounded-lg object-cover"
-                          onError={(e: any) => {
-                            e.currentTarget.style.display = 'none'
-                          }}
-                        />
+                      <div className="relative w-10 h-10 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
+                        {linkIcon.startsWith('http') || linkIcon.startsWith('/') ? (
+                          <Image
+                            src={linkIcon}
+                            alt=""
+                            width={40}
+                            height={40}
+                            loading="lazy"
+                            className="rounded-lg object-cover"
+                            onError={(e: any) => {
+                              e.currentTarget.style.display = 'none'
+                            }}
+                          />
+                        ) : (
+                          <span className="text-xl">{linkIcon}</span>
+                        )}
                       </div>
                     )}
 
