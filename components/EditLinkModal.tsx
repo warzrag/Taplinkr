@@ -371,16 +371,20 @@ export default function EditLinkModal({ isOpen, editingLink, onClose, onSuccess,
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Icône / Favicon
                       </label>
-                      <input
-                        type="text"
-                        value={linkData.icon}
-                        onChange={(e) => setLinkData({ ...linkData, icon: e.target.value })}
-                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        placeholder="🔗 ou URL d'une image"
-                      />
-                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Emoji (ex: 🔗 🌟 💎) ou URL d'une image pour l'icône de votre page
-                      </p>
+                      <div className="flex items-start gap-4">
+                        <IconUpload
+                          value={linkData.icon}
+                          onChange={(iconUrl) => setLinkData({ ...linkData, icon: iconUrl })}
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Cliquez sur le carré pour uploader une image qui représentera votre page.
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Format recommandé : 512x512px, PNG ou JPG (max 2MB)
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </>
                 )}
