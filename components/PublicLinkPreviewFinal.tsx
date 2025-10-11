@@ -443,7 +443,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   >
                     {linkIcon && (
                       <div className="relative w-10 h-10 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
-                        {linkIcon.startsWith('http') || linkIcon.startsWith('/') ? (
+                        {linkIcon.startsWith('http') || linkIcon.startsWith('/') || linkIcon.startsWith('data:') ? (
                           <Image
                             src={linkIcon}
                             alt=""
