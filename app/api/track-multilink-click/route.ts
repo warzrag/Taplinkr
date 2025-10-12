@@ -83,11 +83,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Détection simple du device
-    const device = userAgent.toLowerCase().includes('mobile') ? 'mobile' : 
+    const device = userAgent.toLowerCase().includes('mobile') ? 'mobile' :
                   userAgent.toLowerCase().includes('tablet') ? 'tablet' : 'desktop'
 
-    // Récupérer la géolocalisation
-    const ipAddress = ip.toString().split(',')[0].trim()
+    // Récupérer la géolocalisation (ipAddress déjà défini ligne 39)
     let locationData
     try {
       locationData = await getLocationFromIP(ipAddress)
