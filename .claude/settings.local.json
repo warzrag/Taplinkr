@@ -22,7 +22,8 @@
       "WebFetch(domain:allmylinks.com)",
       "WebFetch(domain:campsite.bio)",
       "Bash(pkill:*)",
-      "Bash(curl -s http://localhost:3000/api/links-direct)"
+      "Bash(curl -s http://localhost:3000/api/links-direct)",
+      "WebFetch(domain:www.instagram.com)"
     ],
     "deny": [],
     "ask": []

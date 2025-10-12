@@ -11,6 +11,48 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'multiLinkId requis' }, { status: 400 })
     }
 
+    // Récupérer les informations de la requête
+    const ip = request.ip || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const userAgent = request.headers.get('user-agent') || ''
+    const referer = request.headers.get('referer') || ''
+
+    // 🤖 BOT DETECTION (GetMySocial style)
+    const botPatterns = [
+      'bot', 'crawler', 'spider', 'scraper',
+      'curl', 'wget', 'python-requests', 'http',
+      'axios', 'fetch', 'postman'
+    ]
+    const isBot = botPatterns.some(pattern =>
+      userAgent.toLowerCase().includes(pattern)
+    )
+
+    if (isBot) {
+      console.log('🤖 Bot détecté, clic ignoré:', userAgent)
+      return NextResponse.json({
+        success: true,
+        counted: false,
+        reason: 'bot_detected'
+      })
+    }
+
+    // ⚡ RATE LIMITING (GetMySocial style - max 10 clics/minute par IP)
+    const ipAddress = ip.toString().split(',')[0].trim()
+    const oneMinuteAgo = new Date(Date.now() - 60000)
+
+    const recentClicks = await prisma.click.count({
+      where: {
+        ip: ipAddress,
+        createdAt: { gte: oneMinuteAgo }
+      }
+    })
+
+    if (recentClicks >= 10) {
+      console.log('🚫 Rate limit dépassé:', ipAddress, '- Clics:', recentClicks)
+      return NextResponse.json({
+        error: 'Trop de clics. Réessayez dans 1 minute.'
+      }, { status: 429 })
+    }
+
     // Vérifier que le MultiLink existe et récupérer le lien parent
     const multiLink = await prisma.multiLink.findUnique({
       where: { id: multiLinkId },
@@ -23,7 +65,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'MultiLink non trouvé' }, { status: 404 })
     }
 
-    // 🔥 DÉDUPLICATION PAR SESSION (comme GetMySocial)
+    // 🔥 DÉDUPLICATION PAR SESSION (comme GetMySocial avec timeout 30 min)
     // Vérifier si ce sessionId a déjà cliqué sur ce lien
     let isDuplicate = false
     if (sessionId) {
@@ -39,11 +81,6 @@ export async function POST(request: NextRequest) {
         console.log('🔄 Clic dupliqué détecté - Session:', sessionId, 'Link:', multiLinkId)
       }
     }
-
-    // Récupérer les informations de la requête
-    const ip = request.ip || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
-    const userAgent = request.headers.get('user-agent') || ''
-    const referer = request.headers.get('referer') || ''
 
     // Détection simple du device
     const device = userAgent.toLowerCase().includes('mobile') ? 'mobile' : 

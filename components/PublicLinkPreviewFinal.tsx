@@ -15,19 +15,48 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
   const [sessionId, setSessionId] = useState<string>('')
 
-  // 🔥 GÉNÉRER SESSION ID UNIQUE (comme GetMySocial)
+  // 🔥 GÉNÉRER SESSION ID UNIQUE (comme GetMySocial avec timeout 30 min)
   useEffect(() => {
-    // Vérifier si un sessionId existe déjà dans sessionStorage
-    let existingSessionId = sessionStorage.getItem('VISIT_SESSION_ID')
+    const SESSION_TIMEOUT = 30 * 60 * 1000 // 30 minutes (standard industrie)
 
-    if (!existingSessionId) {
-      // Générer un nouveau sessionId unique
-      existingSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      sessionStorage.setItem('VISIT_SESSION_ID', existingSessionId)
+    // Récupérer la session depuis localStorage
+    const sessionData = localStorage.getItem('VISIT_SESSION')
+
+    let currentSessionId: string
+
+    if (sessionData) {
+      try {
+        const { id, lastActivity } = JSON.parse(sessionData)
+        const timeSinceLastActivity = Date.now() - lastActivity
+
+        // Vérifier si la session a expiré (> 30 min)
+        if (timeSinceLastActivity > SESSION_TIMEOUT) {
+          console.log('⏰ Session expirée (> 30 min) - Nouvelle session créée')
+          // Session expirée, créer une nouvelle
+          currentSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        } else {
+          // Session valide, réutiliser
+          currentSessionId = id
+          console.log('✅ Session valide (< 30 min)')
+        }
+      } catch (e) {
+        // Erreur de parsing, créer nouvelle session
+        currentSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      }
+    } else {
+      // Pas de session existante, en créer une
+      currentSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      console.log('🆕 Nouvelle session créée')
     }
 
-    setSessionId(existingSessionId)
-    console.log('📊 Session ID:', existingSessionId)
+    // Sauvegarder avec timestamp
+    localStorage.setItem('VISIT_SESSION', JSON.stringify({
+      id: currentSessionId,
+      lastActivity: Date.now()
+    }))
+
+    setSessionId(currentSessionId)
+    console.log('📊 Session ID:', currentSessionId)
   }, [])
 
   // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
@@ -123,6 +152,18 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
       setClickedLinks([...clickedLinks, id])
     }
     
+    // ⚡ Mettre à jour lastActivity au clic (GetMySocial style)
+    const sessionData = localStorage.getItem('VISIT_SESSION')
+    if (sessionData) {
+      try {
+        const session = JSON.parse(sessionData)
+        session.lastActivity = Date.now()
+        localStorage.setItem('VISIT_SESSION', JSON.stringify(session))
+      } catch (e) {
+        console.error('Erreur mise à jour session:', e)
+      }
+    }
+
     // Enregistrer le clic dans la base de données avec sessionId
     try {
       await fetch('/api/track-multilink-click', {
@@ -141,7 +182,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     } catch (error) {
       console.error('Erreur tracking clic:', error)
     }
-    
+
     // Ouvrir le lien
     window.open(url, '_blank')
   }
