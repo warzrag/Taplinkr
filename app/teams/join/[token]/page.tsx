@@ -166,10 +166,10 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
           <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Users className="w-10 h-10 text-purple-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Rejoindre l'équipe {invitation.team.name}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             {invitation.invitedBy.name || invitation.invitedBy.email} vous a invité en tant que {getRoleLabel(invitation.role)}
           </p>
         </div>
@@ -178,7 +178,7 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
         <form onSubmit={handleJoin} className="space-y-6">
           {/* Email (read-only) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Adresse email
             </label>
             <div className="relative">
@@ -187,14 +187,14 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
                 type="email"
                 value={invitation.email}
                 disabled
-                className="w-full pl-12 pr-4 py-3 bg-gray-100 border border-gray-300 rounded-xl text-gray-600"
+                className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-300"
               />
             </div>
           </div>
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Votre nom *
             </label>
             <input
@@ -203,13 +203,13 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
               onChange={(e) => setName(e.target.value)}
               placeholder="Jean Dupont"
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Créer un mot de passe *
             </label>
             <div className="relative">
@@ -221,17 +221,17 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
                 placeholder="Minimum 8 caractères"
                 required
                 minLength={8}
-                className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full pl-12 pr-12 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Le mot de passe doit contenir au moins 8 caractères
             </p>
           </div>
@@ -257,8 +257,8 @@ export default function JoinTeamPage({ params }: { params: { token: string } }) 
         </form>
 
         {/* Info */}
-        <div className="mt-8 p-4 bg-purple-50 rounded-xl">
-          <p className="text-sm text-purple-700 text-center">
+        <div className="mt-8 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+          <p className="text-sm text-purple-700 dark:text-purple-300 text-center">
             En créant votre compte, vous acceptez nos conditions d'utilisation et rejoignez automatiquement l'équipe {invitation.team.name}
           </p>
         </div>
