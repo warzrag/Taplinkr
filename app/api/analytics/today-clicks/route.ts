@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         const todayClicks = await prisma.click.count({
           where: {
             linkId: link.id,
-            timestamp: {
+            createdAt: {
               gte: startOfToday,
               lte: endOfToday,
             },
@@ -60,13 +60,22 @@ export async function GET(request: NextRequest) {
     )
 
     // Filtrer pour ne garder que les liens qui ont des clics aujourd'hui
-    // OU garder tous les liens (tu peux choisir)
     const linksWithClicksToday = clicksData.filter(link => link.todayClicks > 0)
+
+    // Si aucun clic aujourd'hui, on prend les 10 liens avec le plus de clics total
+    let finalLinks = linksWithClicksToday
+    if (finalLinks.length === 0) {
+      finalLinks = clicksData
+        .sort((a, b) => b.totalClicks - a.totalClicks)
+        .slice(0, 10)
+    }
 
     return NextResponse.json({
       startOfToday: startOfToday.toISOString(),
       endOfToday: endOfToday.toISOString(),
-      links: linksWithClicksToday.length > 0 ? linksWithClicksToday : clicksData.slice(0, 10), // Top 10 si aucun clic aujourd'hui
+      links: finalLinks,
+      hasClicksToday: linksWithClicksToday.length > 0,
+      totalLinks: clicksData.length,
     })
   } catch (error) {
     console.error('Erreur lors de la récupération des clics d\'aujourd\'hui:', error)

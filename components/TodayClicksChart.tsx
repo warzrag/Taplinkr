@@ -17,6 +17,8 @@ interface TodayClicksData {
   startOfToday: string
   endOfToday: string
   links: LinkClickData[]
+  hasClicksToday: boolean
+  totalLinks: number
 }
 
 export default function TodayClicksChart() {
@@ -77,7 +79,7 @@ export default function TodayClicksChart() {
               Clics d'aujourd'hui
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Aucun clic enregistré pour le moment
+              Aucun lien trouvé
             </p>
           </div>
         </div>
@@ -86,7 +88,7 @@ export default function TodayClicksChart() {
             <TrendingUp className="w-8 h-8 text-gray-400" />
           </div>
           <p className="text-gray-500 dark:text-gray-400">
-            Les clics apparaîtront ici au fur et à mesure
+            Créez des liens pour voir vos statistiques ici
           </p>
         </div>
       </motion.div>
@@ -156,12 +158,14 @@ export default function TodayClicksChart() {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                Clics d'aujourd'hui
-                <Sparkles className="w-4 h-4 text-yellow-500" />
+                {data.hasClicksToday ? "Clics d'aujourd'hui" : "Vos meilleurs liens"}
+                {data.hasClicksToday && <Sparkles className="w-4 h-4 text-yellow-500" />}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                Statistiques en temps réel
+                {data.hasClicksToday
+                  ? "Statistiques en temps réel"
+                  : "Pas de clics aujourd'hui - Historique total"}
               </p>
             </div>
           </div>
@@ -170,7 +174,7 @@ export default function TodayClicksChart() {
               {totalTodayClicks}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Total aujourd'hui
+              {data.hasClicksToday ? "Total aujourd'hui" : "Clics aujourd'hui"}
             </p>
           </div>
         </div>
@@ -208,7 +212,9 @@ export default function TodayClicksChart() {
         {/* Légende avec les liens */}
         <div className="mt-6 space-y-2">
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-            Top {chartData.length} liens
+            {data.hasClicksToday
+              ? `Top ${chartData.length} liens aujourd'hui`
+              : `Top ${chartData.length} liens (historique)`}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {chartData.map((link, index) => (
