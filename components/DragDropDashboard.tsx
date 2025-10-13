@@ -345,29 +345,28 @@ function SortableLink({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? undefined : transition,
     opacity: isDragging ? 0.3 : 1,
     zIndex: isDragging ? 999 : 'auto',
+    borderTop: '1px solid transparent', // Prévient margin collapse
   }
 
   return (
-    <div className="mb-3 sm:mb-4">
-      <div
-        ref={setNodeRef}
-        style={style}
-        className={isDragging ? 'cursor-grabbing' : ''}
-      >
-        <LinkCard
-          link={link}
-          onToggle={onToggle}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onRemoveFromFolder={onRemoveFromFolder}
-          isDragging={isDragging}
-          listeners={listeners}
-          attributes={attributes}
-        />
-      </div>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`mb-4 ${isDragging ? 'cursor-grabbing' : ''}`}
+    >
+      <LinkCard
+        link={link}
+        onToggle={onToggle}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onRemoveFromFolder={onRemoveFromFolder}
+        isDragging={isDragging}
+        listeners={listeners}
+        attributes={attributes}
+      />
     </div>
   )
 }
@@ -532,7 +531,7 @@ export default function DragDropDashboard({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Distance minimale pour éviter les drags accidentels
+        distance: 3, // Réduit pour un drag plus fluide et réactif
         delay: 0,
         tolerance: 5,
       },
@@ -865,11 +864,13 @@ export default function DragDropDashboard({
       styles: {
         active: {
           opacity: '0.4',
+          height: 'auto',
+          minHeight: 'auto',
         },
       },
     }),
     duration: 200,
-    easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+    easing: 'cubic-bezier(0.4, 0, 0.2, 1)', // Plus naturel, moins "bouncy"
   }
 
   // Fonction récursive pour afficher les dossiers imbriqués
@@ -900,7 +901,7 @@ export default function DragDropDashboard({
                 items={folder.links.map(l => `link-${l.id}`)}
                 strategy={verticalListSortingStrategy}
               >
-                <div>
+                <div className="flex flex-col">
                   {folder.links.map((link) => (
                     <SortableLink
                       key={link.id}
@@ -1119,7 +1120,7 @@ export default function DragDropDashboard({
                   items={unorganizedLinks.map(l => `link-${l.id}`)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div>
+                  <div className="flex flex-col">
                     {unorganizedLinks.map((link) => (
                       <SortableLink
                         key={link.id}

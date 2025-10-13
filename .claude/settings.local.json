@@ -32,7 +32,9 @@
       "Bash(cat:*)",
       "Bash(for comp in PublicLinkPreview PublicLinkPreviewSimple PublicLinkPreviewVisible)",
       "Bash(do echo \"=== $comp.tsx ===\")",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.dndkit.com)"
     ],
     "deny": [],
     "ask": []
