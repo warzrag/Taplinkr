@@ -45,9 +45,18 @@ export default function FoldersPage() {
 
     if (cached) {
       try {
-
         // Toujours afficher le cache, même s'il est vieux
         if (cached.folders) {
+          console.log('📦 Cache folders chargé:', cached.folders.length, 'dossiers')
+          cached.folders.forEach(f => {
+            console.log(`  - ${f.name}:`, f.links?.length || 0, 'liens,', f.children?.length || 0, 'sous-dossiers')
+            if (f.children) {
+              f.children.forEach((c: any) => {
+                console.log(`    └─ ${c.name}:`, c.links?.length || 0, 'liens')
+              })
+            }
+          })
+
           const foldersWithExpanded = (cached.folders || []).map((folder: any) => ({
             ...folder,
             isExpanded: false,
