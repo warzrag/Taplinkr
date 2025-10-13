@@ -338,25 +338,26 @@ function SortableLink({
     transition,
     opacity: isDragging ? 0.3 : 1,
     zIndex: isDragging ? 999 : 'auto',
-    position: 'relative' as const,
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={isDragging ? 'cursor-grabbing' : ''}
-    >
-      <LinkCard
-        link={link}
-        onToggle={onToggle}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onRemoveFromFolder={onRemoveFromFolder}
-        isDragging={isDragging}
-        listeners={listeners}
-        attributes={attributes}
-      />
+    <div className="mb-3 sm:mb-4">
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={isDragging ? 'cursor-grabbing' : ''}
+      >
+        <LinkCard
+          link={link}
+          onToggle={onToggle}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onRemoveFromFolder={onRemoveFromFolder}
+          isDragging={isDragging}
+          listeners={listeners}
+          attributes={attributes}
+        />
+      </div>
     </div>
   )
 }
@@ -889,7 +890,7 @@ export default function DragDropDashboard({
                 items={folder.links.map(l => `link-${l.id}`)}
                 strategy={verticalListSortingStrategy}
               >
-                <div className="space-y-2">
+                <div>
                   {folder.links.map((link) => (
                     <SortableLink
                       key={link.id}
@@ -1108,7 +1109,7 @@ export default function DragDropDashboard({
                   items={unorganizedLinks.map(l => `link-${l.id}`)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="space-y-4">
+                  <div>
                     {unorganizedLinks.map((link) => (
                       <SortableLink
                         key={link.id}

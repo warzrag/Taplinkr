@@ -111,7 +111,7 @@ export default function LinkCard({
   return (
     <div
       className={`
-        relative group rounded-xl sm:rounded-2xl p-0.5 sm:p-1 mb-3 sm:mb-4 transition-all duration-300
+        relative group rounded-xl sm:rounded-2xl p-0.5 sm:p-1 transition-all duration-300
         ${!isDragging && 'hover:scale-[1.01] sm:hover:scale-[1.02]'}
         ${!link.isActive ? 'opacity-60 grayscale' : ''}
         ${!isDragging ? 'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800' : ''}
