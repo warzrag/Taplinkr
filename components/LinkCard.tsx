@@ -109,16 +109,16 @@ export default function LinkCard({
   }
 
   return (
-    <div 
+    <div
       className={`
         relative group rounded-xl sm:rounded-2xl p-0.5 sm:p-1 mb-3 sm:mb-4 transition-all duration-300
-        ${isDragging ? 'scale-105 rotate-1' : 'hover:scale-[1.01] sm:hover:scale-[1.02]'}
+        ${!isDragging && 'hover:scale-[1.01] sm:hover:scale-[1.02]'}
         ${!link.isActive ? 'opacity-60 grayscale' : ''}
         ${!isDragging ? 'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800' : ''}
       `}
       style={{
-        background: isDragging 
-          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+        background: isDragging
+          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
           : ''
       }}
       onMouseEnter={() => setIsHovered(true)}

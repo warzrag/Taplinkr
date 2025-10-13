@@ -132,11 +132,10 @@ function SortableFolder({
         marginLeft: `${depth * 20}px`,
       }}
       className={`group relative rounded-xl overflow-hidden transition-all duration-150 ${
-        isDragging ? 'opacity-50 scale-105 shadow-2xl' : 'hover:shadow-lg'
+        isDragging ? 'opacity-50 shadow-2xl' : 'hover:shadow-lg'
       } ${isOver ? 'ring-2 ring-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 scale-[1.02]' : 'bg-white border border-gray-100 hover:border-gray-200'}`}
-      layout
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
+      whileHover={!isDragging ? { scale: 1.01 } : undefined}
+      whileTap={!isDragging ? { scale: 0.99 } : undefined}
     >
       {/* En-tête du dossier */}
       <div 
@@ -339,10 +338,15 @@ function SortableLink({
     transition,
     opacity: isDragging ? 0.3 : 1,
     zIndex: isDragging ? 999 : 'auto',
+    position: 'relative' as const,
   }
 
   return (
-    <div ref={setNodeRef} style={style} className={isDragging ? 'cursor-grabbing' : ''}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={isDragging ? 'cursor-grabbing' : ''}
+    >
       <LinkCard
         link={link}
         onToggle={onToggle}
@@ -1029,45 +1033,31 @@ export default function DragDropDashboard({
             items={folders.map(f => `folder-${f.id}`)}
             strategy={verticalListSortingStrategy}
           >
-            <AnimatePresence mode="popLayout">
-              <div className="space-y-4">
-                {folders.length === 0 ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col items-center justify-center py-12 text-center"
+            <div className="space-y-4">
+              {folders.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
+                    <FolderIcon className="w-12 h-12 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucun dossier encore</h3>
+                  <p className="text-gray-500 mb-4 max-w-xs">
+                    Créez votre premier dossier pour organiser vos liens
+                  </p>
+                  <button
+                    onClick={() => setShowCreateForm(true)}
+                    className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-shadow"
                   >
-                    <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
-                      <FolderIcon className="w-12 h-12 text-blue-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucun dossier encore</h3>
-                    <p className="text-gray-500 mb-4 max-w-xs">
-                      Créez votre premier dossier pour organiser vos liens
-                    </p>
-                    <motion.button
-                      onClick={() => setShowCreateForm(true)}
-                      className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Créer mon premier dossier
-                    </motion.button>
-                  </motion.div>
-                ) : (
-                  folders.map((folder) => (
-                    <motion.div
-                      key={folder.id}
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -100, scale: 0.9 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                    >
-                      {renderFolder(folder, 0)}
-                    </motion.div>
-                  ))
-                )}
-              </div>
-            </AnimatePresence>
+                    Créer mon premier dossier
+                  </button>
+                </div>
+              ) : (
+                folders.map((folder) => (
+                  <div key={folder.id}>
+                    {renderFolder(folder, 0)}
+                  </div>
+                ))
+              )}
+            </div>
           </SortableContext>
         </div>
 
