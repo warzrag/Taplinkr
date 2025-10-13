@@ -46,9 +46,11 @@ export default function FoldersPage() {
           const foldersWithExpanded = (cached.folders || []).map((folder: any) => ({
             ...folder,
             isExpanded: false,
+            links: folder.links || [], // 🔥 FIX: Préserver les liens du dossier
             children: folder.children?.map((child: any) => ({
               ...child,
-              isExpanded: false
+              isExpanded: false,
+              links: child.links || [] // 🔥 FIX: Préserver les liens des sous-dossiers
             })) || []
           }))
           setFolders(foldersWithExpanded)
@@ -105,9 +107,11 @@ export default function FoldersPage() {
         const foldersWithExpanded = (foldersData || []).map((folder: any) => ({
           ...folder,
           isExpanded: false,
+          links: folder.links || [], // 🔥 FIX: Préserver les liens du dossier
           children: folder.children?.map((child: any) => ({
             ...child,
-            isExpanded: false
+            isExpanded: false,
+            links: child.links || [] // 🔥 FIX: Préserver les liens des sous-dossiers
           })) || []
         }))
         setFolders(foldersWithExpanded)
