@@ -91,6 +91,8 @@ export default function SignIn() {
       if (result?.error) {
         if (result.error === 'EMAIL_NOT_VERIFIED') {
           toast.error('Veuillez vérifier votre email avant de vous connecter', { duration: 5000 })
+        } else if (result.error === 'RATE_LIMIT_EXCEEDED') {
+          toast.error('Trop de tentatives de connexion. Réessayez dans 15 minutes.', { duration: 10000 })
         } else {
           toast.error('Email ou mot de passe incorrect')
         }

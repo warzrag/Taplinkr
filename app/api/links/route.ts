@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { nanoid } from 'nanoid'
 import { getUpgradeMessage } from '@/lib/permissions'
 import { getTeamAwareUserPermissions, checkTeamLimit } from '@/lib/team-permissions'
+import { validateURL } from '@/lib/url-validator'
 
 export async function GET() {
   
@@ -191,15 +192,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Au moins un lien requis' }, { status: 400 })
       }
       
-      // Valider chaque sous-lien
+      // Valider chaque sous-lien avec protection XSS
       for (const link of multiLinks) {
         if (!link.title || !link.url) {
           return NextResponse.json({ error: 'Chaque lien doit avoir un titre et une URL' }, { status: 400 })
         }
-        try {
-          new URL(link.url)
-        } catch {
-          return NextResponse.json({ error: `URL invalide: ${link.url}` }, { status: 400 })
+
+        // 🔥 VALIDATION SÉCURISÉE - Rejeter javascript:, data:, etc.
+        if (!validateURL(link.url)) {
+          return NextResponse.json({
+            error: `URL invalide ou dangereuse: ${link.url}. Seuls http:// et https:// sont autorisés.`
+          }, { status: 400 })
         }
       }
     }

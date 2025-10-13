@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
 import { nanoid } from 'nanoid'
+import { checkRateLimit, resetRateLimit, RateLimitPresets } from '@/lib/rate-limit'
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -36,21 +37,34 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         console.log('🔐 Authorize called with:', { email: credentials?.email, hasPassword: !!credentials?.password })
-        
+
         if (!credentials?.email || !credentials?.password) {
           console.log('❌ Missing credentials')
           return null
         }
-        
+
+        // 🔥 RATE LIMITING - Protection contre brute force
+        const rateLimitResult = checkRateLimit(
+          credentials.email,
+          RateLimitPresets.AUTH_LOGIN
+        )
+
+        if (!rateLimitResult.success) {
+          console.log('🚫 Rate limit exceeded for:', credentials.email)
+          throw new Error('RATE_LIMIT_EXCEEDED')
+        }
+
+        console.log('✅ Rate limit OK - Remaining attempts:', rateLimitResult.remaining)
+
         try {
           const user = await prisma.user.findUnique({
             where: { email: credentials.email }
           })
 
-          console.log('👤 User found:', { 
-            exists: !!user, 
+          console.log('👤 User found:', {
+            exists: !!user,
             hasPassword: !!(user?.password),
-            email: user?.email 
+            email: user?.email
           })
 
           if (!user || !user.password) {
@@ -61,11 +75,14 @@ export const authOptions: NextAuthOptions = {
           console.log('🔍 Comparing passwords...')
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
           console.log('🔑 Password valid:', isPasswordValid)
-          
+
           if (!isPasswordValid) {
             console.log('❌ Invalid password')
             return null
           }
+
+          // ✅ Connexion réussie - Réinitialiser le rate limit
+          resetRateLimit(credentials.email)
 
           // Vérifier si l'email est vérifié
           if (!user.emailVerified) {

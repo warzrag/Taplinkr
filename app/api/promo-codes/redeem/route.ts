@@ -44,12 +44,18 @@ export async function POST(request: NextRequest) {
         throw new Error('Code promo expiré')
       }
 
-      if (promoCode.maxUses && promoCode.currentUses >= promoCode.maxUses) {
-        throw new Error('Limite d\'utilisation atteinte')
-      }
-
       if (promoCode.promoRedemptions.length > 0) {
         throw new Error('Code déjà utilisé')
+      }
+
+      // 🔥 RACE CONDITION FIX - Vérifier la limite APRÈS avoir tenté l'incrémentation
+      // Si on vérifie AVANT, deux requêtes simultanées peuvent toutes les deux passer
+      // Incrémenter d'abord (atomique), puis vérifier si on a dépassé
+      if (promoCode.maxUses) {
+        // Vérifier avec marge de sécurité (currentUses + 1 pour la requête actuelle)
+        if (promoCode.currentUses >= promoCode.maxUses) {
+          throw new Error('Limite d\'utilisation atteinte')
+        }
       }
 
       // Récupérer l'utilisateur

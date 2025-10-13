@@ -23,7 +23,16 @@
       "WebFetch(domain:campsite.bio)",
       "Bash(pkill:*)",
       "Bash(curl -s http://localhost:3000/api/links-direct)",
-      "WebFetch(domain:www.instagram.com)"
+      "WebFetch(domain:www.instagram.com)",
+      "Bash(find:*)",
+      "Bash(for file in components/PublicLinkPreview.tsx components/PublicLinkPreviewBeautiful.tsx components/PublicLinkPreviewSimple.tsx)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(grep:*)",
+      "Bash(done)",
+      "Bash(cat:*)",
+      "Bash(for comp in PublicLinkPreview PublicLinkPreviewSimple PublicLinkPreviewVisible)",
+      "Bash(do echo \"=== $comp.tsx ===\")",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
