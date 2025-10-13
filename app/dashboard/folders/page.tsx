@@ -9,6 +9,7 @@ import DragDropDashboard from '@/components/DragDropDashboard'
 import CreateLinkModal from '@/components/CreateLinkModal'
 import { toast } from 'react-hot-toast'
 import { Link as LinkType } from '@/types'
+import { safeGetItem, safeSetItem } from '@/lib/safe-storage'
 
 interface Folder {
   id: string
@@ -36,10 +37,14 @@ export default function FoldersPage() {
   // Récupérer les dossiers et les liens
   useEffect(() => {
     // ⚡ STALE-WHILE-REVALIDATE: Charger depuis le cache d'abord
-    const cachedFolders = localStorage.getItem('folders-page-cache')
-    if (cachedFolders) {
+    const cached = safeGetItem<{
+      folders: any[]
+      unorganizedLinks: LinkType[]
+      timestamp: number
+    }>('folders-page-cache')
+
+    if (cached) {
       try {
-        const cached = JSON.parse(cachedFolders)
 
         // Toujours afficher le cache, même s'il est vieux
         if (cached.folders) {
@@ -68,7 +73,6 @@ export default function FoldersPage() {
         }
       } catch (err) {
         console.error('Erreur parsing cache folders page:', err)
-        localStorage.removeItem('folders-page-cache')
       }
     }
 
@@ -125,13 +129,13 @@ export default function FoldersPage() {
         unorganizedLinksData = unorganized
       }
 
-      // 🔥 Sauvegarder dans le cache localStorage
+      // 🔥 Sauvegarder dans le cache localStorage (avec gestion quota automatique)
       if (foldersResponse.ok || linksResponse.ok) {
-        localStorage.setItem('folders-page-cache', JSON.stringify({
+        safeSetItem('folders-page-cache', {
           folders: foldersData,
           unorganizedLinks: unorganizedLinksData,
           timestamp: Date.now()
-        }))
+        })
       }
     } catch (error) {
       console.error('Erreur lors du chargement:', error)
