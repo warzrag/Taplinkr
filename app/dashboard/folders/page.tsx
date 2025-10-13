@@ -296,9 +296,26 @@ export default function FoldersPage() {
 
   const handleToggleFolder = async (folderId: string) => {
     setFolders(folders.map(folder => {
+      // Vérifier si c'est le dossier parent qui doit être toggle
       if (folder.id === folderId) {
         return { ...folder, isExpanded: !folder.isExpanded }
       }
+
+      // 🔥 FIX: Vérifier aussi dans les sous-dossiers (children)
+      if (folder.children && folder.children.length > 0) {
+        const updatedChildren = folder.children.map(child => {
+          if (child.id === folderId) {
+            return { ...child, isExpanded: !child.isExpanded }
+          }
+          return child
+        })
+
+        // Si un enfant a changé, retourner le parent avec les enfants mis à jour
+        if (updatedChildren.some((child, idx) => child !== folder.children![idx])) {
+          return { ...folder, children: updatedChildren }
+        }
+      }
+
       return folder
     }))
   }
