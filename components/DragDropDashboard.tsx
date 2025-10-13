@@ -306,12 +306,12 @@ function SortableFolder({
   )
 }
 
-function SortableLink({ 
-  link, 
-  onToggle, 
-  onEdit, 
+function SortableLink({
+  link,
+  onToggle,
+  onEdit,
   onDelete,
-  onRemoveFromFolder 
+  onRemoveFromFolder
 }: {
   link: LinkType
   onToggle: (id: string, isActive: boolean) => void
@@ -326,7 +326,7 @@ function SortableLink({
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: `link-${link.id}`,
     data: {
       type: 'link',
@@ -337,10 +337,12 @@ function SortableLink({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.3 : 1,
+    zIndex: isDragging ? 999 : 'auto',
   }
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div ref={setNodeRef} style={style} className={isDragging ? 'cursor-grabbing' : ''}>
       <LinkCard
         link={link}
         onToggle={onToggle}
@@ -515,7 +517,9 @@ export default function DragDropDashboard({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3, // Réduire la distance pour un drag plus réactif
+        distance: 8, // Distance minimale pour éviter les drags accidentels
+        delay: 0,
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -811,13 +815,30 @@ export default function DragDropDashboard({
     setOverId(null)
   }
 
-  // Obtenir l'élément actif pour l'overlay
+  // Obtenir l'élément actif pour l'overlay (récursif pour sous-dossiers)
   let activeItem = null
   if (activeId) {
     if (activeId.startsWith('link-')) {
       const linkId = activeId.replace('link-', '')
-      activeItem = unorganizedLinks.find(l => l.id === linkId) || 
-                   folders.flatMap(f => f.links).find(l => l.id === linkId)
+      // Chercher dans les liens non organisés
+      activeItem = unorganizedLinks.find(l => l.id === linkId)
+
+      // Si pas trouvé, chercher récursivement dans tous les dossiers
+      if (!activeItem) {
+        const findLinkRecursive = (folders: Folder[]): LinkType | undefined => {
+          for (const folder of folders) {
+            const found = folder.links.find(l => l.id === linkId)
+            if (found) return found
+
+            if (folder.children && folder.children.length > 0) {
+              const foundInChild = findLinkRecursive(folder.children)
+              if (foundInChild) return foundInChild
+            }
+          }
+          return undefined
+        }
+        activeItem = findLinkRecursive(folders)
+      }
     } else if (activeId.startsWith('folder-')) {
       const folderId = activeId.replace('folder-', '')
       activeItem = folders.find(f => f.id === folderId)
@@ -828,10 +849,12 @@ export default function DragDropDashboard({
     sideEffects: defaultDropAnimationSideEffects({
       styles: {
         active: {
-          opacity: '0.5',
+          opacity: '0.4',
         },
       },
     }),
+    duration: 200,
+    easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
   }
 
   // Fonction récursive pour afficher les dossiers imbriqués
@@ -1116,13 +1139,15 @@ export default function DragDropDashboard({
       {/* Overlay pendant le drag */}
       <DragOverlay dropAnimation={dropAnimationConfig}>
         {activeItem && activeId?.startsWith('link-') ? (
-          <LinkCard
-            link={activeItem as LinkType}
-            onToggle={() => {}}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            isDragging
-          />
+          <div className="opacity-95 shadow-2xl transform scale-105 cursor-grabbing">
+            <LinkCard
+              link={activeItem as LinkType}
+              onToggle={() => {}}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              isDragging
+            />
+          </div>
         ) : null}
       </DragOverlay>
 
