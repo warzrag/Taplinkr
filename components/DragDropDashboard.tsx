@@ -176,7 +176,17 @@ function SortableFolder({
               <div className="flex items-center space-x-3 mt-1">
                 <span className="text-xs text-gray-500 flex items-center">
                   <Link2 className="w-3 h-3 mr-1" />
-                  {folder.links.length} lien{folder.links.length > 1 ? 's' : ''}
+                  {(() => {
+                    // 🔥 FIX: Compter TOUS les liens (directs + dans sous-dossiers)
+                    const directLinks = folder.links.length
+                    const childrenLinks = folder.children?.reduce((sum, child) => sum + (child.links?.length || 0), 0) || 0
+                    const totalLinks = directLinks + childrenLinks
+
+                    if (directLinks > 0 && childrenLinks > 0) {
+                      return `${totalLinks} lien${totalLinks > 1 ? 's' : ''} (${directLinks} ici, ${childrenLinks} dans sous-dossiers)`
+                    }
+                    return `${totalLinks} lien${totalLinks > 1 ? 's' : ''}`
+                  })()}
                 </span>
                 {folder.children && folder.children.length > 0 && (
                   <span className="text-xs text-gray-500 flex items-center">
