@@ -40,6 +40,7 @@ import CreateLinkModal from '@/components/CreateLinkModal'
 import EditLinkModal from '@/components/EditLinkModal'
 import EditPhonePreview from '@/components/EditPhonePreview'
 import TeamLinksSection from '@/components/TeamLinksSection'
+import TodayClicksChart from '@/components/TodayClicksChart'
 import { useLinks } from '@/contexts/LinksContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import { Link as LinkType } from '@/types'
@@ -394,6 +395,11 @@ export default function LinksPage() {
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Clics moyens</p>
           </motion.div>
+        </div>
+
+        {/* Graphique des clics d'aujourd'hui */}
+        <div className="mb-8">
+          <TodayClicksChart />
         </div>
 
         {/* Section des liens d'équipe */}
