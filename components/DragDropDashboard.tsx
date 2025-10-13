@@ -32,7 +32,8 @@ import {
   Trash2,
   Link2,
   FolderPlus,
-  Share2
+  Share2,
+  MousePointer
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import LinkCard from './LinkCard'
@@ -186,6 +187,25 @@ function SortableFolder({
                       return `${totalLinks} lien${totalLinks > 1 ? 's' : ''} (${directLinks} ici, ${childrenLinks} dans sous-dossiers)`
                     }
                     return `${totalLinks} lien${totalLinks > 1 ? 's' : ''}`
+                  })()}
+                </span>
+                <span className="text-xs text-purple-600 font-medium flex items-center">
+                  <MousePointer className="w-3 h-3 mr-1" />
+                  {(() => {
+                    // 🔥 FIX: Compter TOUS les clics (directs + dans sous-dossiers)
+                    const directClicks = folder.links.reduce((sum, link) => sum + (link.clicks || 0), 0)
+                    const childrenClicks = folder.children?.reduce((sum, child) => {
+                      return sum + (child.links?.reduce((linkSum, link) => linkSum + (link.clicks || 0), 0) || 0)
+                    }, 0) || 0
+                    const totalClicks = directClicks + childrenClicks
+
+                    return totalClicks.toLocaleString()
+                  })()} clic{(() => {
+                    const directClicks = folder.links.reduce((sum, link) => sum + (link.clicks || 0), 0)
+                    const childrenClicks = folder.children?.reduce((sum, child) => {
+                      return sum + (child.links?.reduce((linkSum, link) => linkSum + (link.clicks || 0), 0) || 0)
+                    }, 0) || 0
+                    return (directClicks + childrenClicks) > 1 ? 's' : ''
                   })()}
                 </span>
                 {folder.children && folder.children.length > 0 && (
