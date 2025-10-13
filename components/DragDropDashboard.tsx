@@ -33,7 +33,9 @@ import {
   Link2,
   FolderPlus,
   Share2,
-  MousePointer
+  MousePointer,
+  GripVertical,
+  XCircle
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import LinkCard from './LinkCard'
@@ -138,19 +140,17 @@ function SortableFolder({
       whileTap={!isDragging ? { scale: 0.99 } : undefined}
     >
       {/* En-tête du dossier */}
-      <div 
-        className={`flex items-center justify-between p-4 cursor-pointer transition-all duration-100 ${
+      <div
+        className={`flex items-center justify-between p-4 transition-all duration-100 ${
           isOver ? 'bg-gradient-to-r from-blue-50 to-indigo-50' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100'
         }`}
-        style={{ 
+        style={{
           background: isOver ? undefined : `linear-gradient(135deg, ${folder.color}08, ${folder.color}15)`,
         }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        {...attributes}
-        {...listeners}
       >
-        <div className="flex items-center space-x-4" onClick={onToggle}>
+        <div className="flex items-center space-x-4 cursor-pointer flex-1" onClick={onToggle}>
           <motion.div
             animate={{ rotate: folder.isExpanded ? 90 : 0 }}
             transition={{ duration: 0.2 }}
@@ -219,6 +219,16 @@ function SortableFolder({
         </div>
         
         <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
+          {/* Drag Handle for Folders */}
+          <div
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-grab active:cursor-grabbing"
+            title="Glisser pour déplacer"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="w-4 h-4 text-gray-400" />
+          </div>
+
           {onCreateLink && (
             <motion.button
               onClick={onCreateLink}
