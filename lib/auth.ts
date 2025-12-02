@@ -203,53 +203,60 @@ export const authOptions: NextAuthOptions = {
         token.sessionVersion = (user as any).sessionVersion
       } else if (token.id) {
         // Vérifier si la session est toujours valide
-        const currentUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { 
-            sessionVersion: true,
-            banned: true,
-            teamId: true,
-            teamRole: true,
-            role: true,
-            plan: true,
-            planExpiresAt: true
-          }
-        })
-        
-        // Si l'utilisateur n'existe plus, est banni, ou sa session a été invalidée
-        if (!currentUser || currentUser.banned || currentUser.sessionVersion !== token.sessionVersion) {
-          console.log('🚫 Session invalidée pour:', token.id, {
-            exists: !!currentUser,
-            banned: currentUser?.banned,
-            sessionMismatch: currentUser?.sessionVersion !== token.sessionVersion
+        try {
+          const currentUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: {
+              sessionVersion: true,
+              banned: true,
+              teamId: true,
+              teamRole: true,
+              role: true,
+              plan: true,
+              planExpiresAt: true
+            }
           })
-          return null // Invalider la session
+
+          // Si l'utilisateur n'existe plus, est banni, ou sa session a été invalidée
+          if (!currentUser || currentUser.banned || currentUser.sessionVersion !== token.sessionVersion) {
+            console.log('🚫 Session invalidée pour:', token.id, {
+              exists: !!currentUser,
+              banned: currentUser?.banned,
+              sessionMismatch: currentUser?.sessionVersion !== token.sessionVersion
+            })
+            // Marquer le token comme invalide au lieu de retourner null
+            token.invalid = true
+            return token
+          }
+
+          // Mettre à jour les infos qui peuvent avoir changé
+          token.role = currentUser.role
+          token.plan = currentUser.plan
+          token.planExpiresAt = currentUser.planExpiresAt
+          token.teamId = currentUser.teamId
+          token.teamRole = currentUser.teamRole
+        } catch (error) {
+          console.error('❌ Erreur lors de la vérification du token JWT:', error)
+          // En cas d'erreur DB, garder le token tel quel
         }
-        
-        // Mettre à jour les infos qui peuvent avoir changé
-        token.role = currentUser.role
-        token.plan = currentUser.plan
-        token.planExpiresAt = currentUser.planExpiresAt
-        token.teamId = currentUser.teamId
-        token.teamRole = currentUser.teamRole
       }
       return token
     },
     session: async ({ session, token }) => {
-      if (!token) {
-        // Si le token est null, la session a été invalidée
-        return null
+      if (!token || !token.id || (token as any).invalid) {
+        // Si le token est null, invalide ou marqué comme invalide
+        // Retourner une session vide pour forcer la reconnexion
+        return { ...session, user: { ...session.user, id: '' } }
       }
 
-      if (token) {
-        session.user.id = token.id as string
-        session.user.username = token.username as string
-        session.user.role = token.role as string
-        session.user.plan = token.plan as string
-        session.user.planExpiresAt = token.planExpiresAt as Date | null
-        session.user.teamId = token.teamId as string | null
-        session.user.teamRole = token.teamRole as string | null
-      }
+      session.user.id = token.id as string
+      session.user.username = token.username as string
+      session.user.role = token.role as string
+      session.user.plan = token.plan as string
+      session.user.planExpiresAt = token.planExpiresAt as Date | null
+      session.user.teamId = token.teamId as string | null
+      session.user.teamRole = token.teamRole as string | null
+
       return session
     }
   },
