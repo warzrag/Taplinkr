@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -62,8 +62,17 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session, status } = useSession()
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      console.log('✅ Déjà connecté, redirection vers /dashboard')
+      router.push('/dashboard')
+    }
+  }, [status, session, router])
 
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
@@ -145,6 +154,23 @@ export default function SignIn() {
       toast.error('Erreur lors de la connexion')
       setLoading(false)
     }
+  }
+
+  // Afficher un loader pendant la vérification de session
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-200 border-t-brand-500" />
+          <p className="text-sm text-gray-600 dark:text-gray-400">Vérification...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Si déjà connecté, ne pas afficher le formulaire (éviter le flash)
+  if (status === 'authenticated') {
+    return null
   }
 
   return (
