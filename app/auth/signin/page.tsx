@@ -103,25 +103,49 @@ export default function SignIn() {
 
     console.log('🔐 Tentative de connexion...', { email: data.email })
 
-    // Déterminer l'URL de callback
-    const inviteToken = searchParams.get('invite')
-    const welcomeTeam = searchParams.get('welcome') === 'team'
-    const callbackUrl = inviteToken
-      ? `/dashboard/accept-invitation?token=${inviteToken}`
-      : welcomeTeam
-      ? '/dashboard/team/welcome'
-      : '/dashboard'
+    try {
+      // Déterminer l'URL de callback
+      const inviteToken = searchParams.get('invite')
+      const welcomeTeam = searchParams.get('welcome') === 'team'
+      const callbackUrl = inviteToken
+        ? `/dashboard/accept-invitation?token=${inviteToken}`
+        : welcomeTeam
+        ? '/dashboard/team/welcome'
+        : '/dashboard'
 
-    // Utiliser signIn avec redirect: true - NextAuth gère tout
-    await signIn('credentials', {
-      email: data.email,
-      password: data.password,
-      redirect: true,
-      callbackUrl,
-    })
+      // Utiliser signIn avec redirect: false pour gérer les erreurs
+      const result = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      })
 
-    // Si on arrive ici, c'est qu'il y a eu une erreur (redirect: true ne retourne que sur erreur)
-    setLoading(false)
+      console.log('📊 Résultat signIn:', result)
+
+      if (result?.error) {
+        console.log('❌ Erreur:', result.error)
+        if (result.error === 'EMAIL_NOT_VERIFIED') {
+          toast.error('Veuillez vérifier votre email avant de vous connecter', { duration: 5000 })
+        } else if (result.error === 'RATE_LIMIT_EXCEEDED') {
+          toast.error('Trop de tentatives. Réessayez dans 15 minutes.', { duration: 5000 })
+        } else {
+          toast.error('Email ou mot de passe incorrect')
+        }
+        setLoading(false)
+        return
+      }
+
+      if (result?.ok) {
+        console.log('✅ Connexion réussie, redirection vers:', callbackUrl)
+        toast.success('Connexion réussie !')
+        // Forcer un rechargement complet de la page pour réinitialiser le SessionProvider
+        window.location.href = callbackUrl
+      }
+    } catch (error) {
+      console.error('💥 Erreur:', error)
+      toast.error('Erreur de connexion')
+      setLoading(false)
+    }
   }
 
   // Afficher un loader pendant la vérification de session
