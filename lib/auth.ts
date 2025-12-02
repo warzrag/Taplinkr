@@ -111,6 +111,13 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error('❌ Auth error:', error)
+          // Re-throw pour que NextAuth puisse gérer l'erreur correctement
+          if (error instanceof Error && error.message === 'EMAIL_NOT_VERIFIED') {
+            throw error
+          }
+          if (error instanceof Error && error.message === 'RATE_LIMIT_EXCEEDED') {
+            throw error
+          }
           return null
         }
       }
@@ -233,7 +240,7 @@ export const authOptions: NextAuthOptions = {
         // Si le token est null, la session a été invalidée
         return null
       }
-      
+
       if (token) {
         session.user.id = token.id as string
         session.user.username = token.username as string
