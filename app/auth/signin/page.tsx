@@ -128,9 +128,6 @@ export default function SignIn() {
         console.log('✅ Connexion OK - redirection en cours...')
         toast.success('Connexion réussie !')
 
-        // Petite pause pour laisser la session se créer
-        await new Promise(resolve => setTimeout(resolve, 500))
-
         const inviteToken = searchParams.get('invite')
         const welcomeTeam = searchParams.get('welcome') === 'team'
 
@@ -140,10 +137,13 @@ export default function SignIn() {
           ? '/dashboard/team/welcome'
           : '/dashboard'
 
-        console.log('🔀 Redirection vers:', targetUrl)
+        console.log('🔀 Redirection immédiate vers:', targetUrl)
 
-        // Utiliser window.location pour une redirection plus fiable
+        // Redirection immédiate avec window.location
         window.location.href = targetUrl
+
+        // Ne pas retirer le loading, on attend la redirection
+        return
       } else {
         console.log('⚠️ Résultat inattendu:', result)
         toast.error('Erreur de connexion inattendue')
