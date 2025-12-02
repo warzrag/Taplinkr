@@ -92,13 +92,18 @@ export default function SignIn() {
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {
+      console.log('🔐 Tentative de connexion...', { email: data.email })
+
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
         redirect: false,
       })
 
+      console.log('📊 Résultat signIn:', { ok: result?.ok, error: result?.error, status: result?.status })
+
       if (result?.error) {
+        console.log('❌ Erreur de connexion:', result.error)
         if (result.error === 'EMAIL_NOT_VERIFIED') {
           toast.error('Veuillez vérifier votre email avant de vous connecter', { duration: 5000 })
         } else if (result.error === 'RATE_LIMIT_EXCEEDED') {
@@ -106,22 +111,38 @@ export default function SignIn() {
         } else {
           toast.error('Email ou mot de passe incorrect')
         }
-      } else if (result?.ok) {
+        setLoading(false)
+        return
+      }
+
+      if (result?.ok) {
+        console.log('✅ Connexion OK - redirection en cours...')
         toast.success('Connexion réussie !')
+
+        // Petite pause pour laisser la session se créer
+        await new Promise(resolve => setTimeout(resolve, 500))
+
         const inviteToken = searchParams.get('invite')
         const welcomeTeam = searchParams.get('welcome') === 'team'
 
-        if (inviteToken) {
-          router.push(`/dashboard/accept-invitation?token=${inviteToken}`)
-        } else if (welcomeTeam) {
-          router.push('/dashboard/team/welcome')
-        } else {
-          router.push('/dashboard')
-        }
+        const targetUrl = inviteToken
+          ? `/dashboard/accept-invitation?token=${inviteToken}`
+          : welcomeTeam
+          ? '/dashboard/team/welcome'
+          : '/dashboard'
+
+        console.log('🔀 Redirection vers:', targetUrl)
+
+        // Utiliser window.location pour une redirection plus fiable
+        window.location.href = targetUrl
+      } else {
+        console.log('⚠️ Résultat inattendu:', result)
+        toast.error('Erreur de connexion inattendue')
+        setLoading(false)
       }
     } catch (error) {
+      console.error('💥 Erreur lors de la connexion:', error)
       toast.error('Erreur lors de la connexion')
-    } finally {
       setLoading(false)
     }
   }
