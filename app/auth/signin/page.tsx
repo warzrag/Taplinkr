@@ -100,61 +100,28 @@ export default function SignIn() {
 
   const onSubmit = async (data: FormData) => {
     setLoading(true)
-    try {
-      console.log('🔐 Tentative de connexion...', { email: data.email })
 
-      // Déterminer l'URL de callback
-      const inviteToken = searchParams.get('invite')
-      const welcomeTeam = searchParams.get('welcome') === 'team'
-      const callbackUrl = inviteToken
-        ? `/dashboard/accept-invitation?token=${inviteToken}`
-        : welcomeTeam
-        ? '/dashboard/team/welcome'
-        : '/dashboard'
+    console.log('🔐 Tentative de connexion...', { email: data.email })
 
-      // Utiliser signIn avec redirect: true pour laisser NextAuth gérer les cookies
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-        callbackUrl,
-      })
+    // Déterminer l'URL de callback
+    const inviteToken = searchParams.get('invite')
+    const welcomeTeam = searchParams.get('welcome') === 'team'
+    const callbackUrl = inviteToken
+      ? `/dashboard/accept-invitation?token=${inviteToken}`
+      : welcomeTeam
+      ? '/dashboard/team/welcome'
+      : '/dashboard'
 
-      console.log('📊 Résultat signIn:', { ok: result?.ok, error: result?.error, status: result?.status, url: result?.url })
+    // Utiliser signIn avec redirect: true - NextAuth gère tout
+    await signIn('credentials', {
+      email: data.email,
+      password: data.password,
+      redirect: true,
+      callbackUrl,
+    })
 
-      if (result?.error) {
-        console.log('❌ Erreur de connexion:', result.error)
-        if (result.error === 'EMAIL_NOT_VERIFIED') {
-          toast.error('Veuillez vérifier votre email avant de vous connecter', { duration: 5000 })
-        } else if (result.error === 'RATE_LIMIT_EXCEEDED') {
-          toast.error('Trop de tentatives de connexion. Réessayez dans 15 minutes.', { duration: 10000 })
-        } else {
-          toast.error('Email ou mot de passe incorrect')
-        }
-        setLoading(false)
-        return
-      }
-
-      if (result?.ok) {
-        console.log('✅ Connexion OK - redirection vers:', result.url || callbackUrl)
-        toast.success('Connexion réussie !')
-
-        // Utiliser l'URL retournée par NextAuth si disponible, sinon callbackUrl
-        const redirectUrl = result.url || callbackUrl
-
-        // Forcer un rechargement complet pour que les cookies soient pris en compte
-        window.location.replace(redirectUrl)
-        return
-      } else {
-        console.log('⚠️ Résultat inattendu:', result)
-        toast.error('Erreur de connexion inattendue')
-        setLoading(false)
-      }
-    } catch (error) {
-      console.error('💥 Erreur lors de la connexion:', error)
-      toast.error('Erreur lors de la connexion')
-      setLoading(false)
-    }
+    // Si on arrive ici, c'est qu'il y a eu une erreur (redirect: true ne retourne que sur erreur)
+    setLoading(false)
   }
 
   // Afficher un loader pendant la vérification de session
