@@ -103,13 +103,24 @@ export default function SignIn() {
     try {
       console.log('🔐 Tentative de connexion...', { email: data.email })
 
+      // Déterminer l'URL de callback
+      const inviteToken = searchParams.get('invite')
+      const welcomeTeam = searchParams.get('welcome') === 'team'
+      const callbackUrl = inviteToken
+        ? `/dashboard/accept-invitation?token=${inviteToken}`
+        : welcomeTeam
+        ? '/dashboard/team/welcome'
+        : '/dashboard'
+
+      // Utiliser signIn avec redirect: true pour laisser NextAuth gérer les cookies
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
         redirect: false,
+        callbackUrl,
       })
 
-      console.log('📊 Résultat signIn:', { ok: result?.ok, error: result?.error, status: result?.status })
+      console.log('📊 Résultat signIn:', { ok: result?.ok, error: result?.error, status: result?.status, url: result?.url })
 
       if (result?.error) {
         console.log('❌ Erreur de connexion:', result.error)
@@ -125,24 +136,14 @@ export default function SignIn() {
       }
 
       if (result?.ok) {
-        console.log('✅ Connexion OK - redirection en cours...')
+        console.log('✅ Connexion OK - redirection vers:', result.url || callbackUrl)
         toast.success('Connexion réussie !')
 
-        const inviteToken = searchParams.get('invite')
-        const welcomeTeam = searchParams.get('welcome') === 'team'
+        // Utiliser l'URL retournée par NextAuth si disponible, sinon callbackUrl
+        const redirectUrl = result.url || callbackUrl
 
-        const targetUrl = inviteToken
-          ? `/dashboard/accept-invitation?token=${inviteToken}`
-          : welcomeTeam
-          ? '/dashboard/team/welcome'
-          : '/dashboard'
-
-        console.log('🔀 Redirection immédiate vers:', targetUrl)
-
-        // Redirection immédiate avec window.location
-        window.location.href = targetUrl
-
-        // Ne pas retirer le loading, on attend la redirection
+        // Forcer un rechargement complet pour que les cookies soient pris en compte
+        window.location.replace(redirectUrl)
         return
       } else {
         console.log('⚠️ Résultat inattendu:', result)

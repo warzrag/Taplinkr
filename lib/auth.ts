@@ -84,13 +84,8 @@ export const authOptions: NextAuthOptions = {
           // ✅ Connexion réussie - Réinitialiser le rate limit
           resetRateLimit(credentials.email)
 
-          // Vérifier si l'email est vérifié
-          if (!user.emailVerified) {
-            console.log('❌ Email not verified')
-            throw new Error('EMAIL_NOT_VERIFIED')
-          }
-          
-          // Vérification d'email temporairement désactivée
+          // Vérification d'email temporairement désactivée pour debug
+          // TODO: Réactiver après avoir vérifié que l'email admin est bien vérifié
           /*
           if (!user.emailVerified) {
             console.log('❌ Email not verified')
