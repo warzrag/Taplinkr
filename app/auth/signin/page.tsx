@@ -15,8 +15,11 @@ import {
   Mail,
   Lock,
   Shield,
+  BarChart3,
   Users,
   Zap,
+  TrendingUp,
+  Globe,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -29,22 +32,29 @@ interface FormData {
   password: string
 }
 
-const highlights = [
+const benefits = [
   {
-    icon: Shield,
-    title: 'Sécurité avancée',
-    description: 'Sessions chiffrées, double authentification et gestion des équipes sécurisée.'
+    icon: BarChart3,
+    title: 'Analytics en temps réel',
+    description: 'Tableaux de bord intuitifs pour mesurer vos performances et optimiser votre ROI'
   },
   {
-    icon: Zap,
-    title: 'Analytics en direct',
-    description: 'Visualisez vos clics et conversions en temps réel depuis le dashboard.'
+    icon: Shield,
+    title: 'Sécurité enterprise',
+    description: 'Chiffrement SSL 256-bit, authentification 2FA et conformité RGPD garantie'
   },
   {
     icon: Users,
-    title: 'Collaboration fluide',
-    description: 'Invitez votre équipe, attribuez des rôles et créez ensemble vos campagnes.'
+    title: 'Collaboration avancée',
+    description: 'Gestion d\'équipe avec rôles granulaires et workflows collaboratifs sécurisés'
   },
+]
+
+const metrics = [
+  { value: '500K+', label: 'Professionnels', icon: Users },
+  { value: '99.9%', label: 'Uptime', icon: TrendingUp },
+  { value: '2.4Mds', label: 'Interactions/an', icon: Globe },
+  { value: '<200ms', label: 'Temps réponse', icon: Zap },
 ]
 
 export default function SignIn() {
@@ -117,154 +127,268 @@ export default function SignIn() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-brand-500/20 blur-[180px]" />
-        <div className="absolute -left-20 bottom-[-80px] h-64 w-64 rounded-full bg-secondary-400/15 blur-[160px]" />
+    <div className="relative min-h-screen bg-white dark:bg-gray-950">
+      {/* Background Grid */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-50" />
       </div>
 
-      <Container className="relative z-10 flex min-h-screen items-center py-16">
-        <div className="grid w-full gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] lg:items-center">
+      <Container className="relative z-10 min-h-screen py-12 lg:py-16">
+        <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-16 items-center">
+          {/* Left Column - Benefits */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-[hsl(var(--surface))] p-10 shadow-card lg:flex"
+            transition={{ duration: 0.5 }}
+            className="hidden lg:block space-y-12"
           >
-            <div className="space-y-4">
-              <span className="badge-pill bg-brand-500/10 text-brand-600">Dashboard TapLinkr</span>
-              <h2 className="text-3xl font-semibold">Gérez tout depuis un seul espace</h2>
-              <p className="text-sm text-foreground/65">
-                Visualisez vos analytics, publiez de nouveaux liens, pilotez vos campagnes et collaborez avec votre équipe en toute sécurité.
-              </p>
+            <div className="space-y-6">
+              <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+                Retour à l'accueil
+              </Link>
+
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-1.5 text-sm font-medium">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-gray-700 dark:text-gray-300">Plateforme professionnelle</span>
+                </div>
+
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
+                  Accédez à votre dashboard
+                </h1>
+
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Centralisez vos liens, analysez vos performances et collaborez avec votre équipe en toute sécurité.
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-6">
-              {highlights.map((item) => (
-                <div key={item.title} className="flex gap-4 rounded-2xl border border-border/80 bg-[hsl(var(--surface-muted))] p-4 shadow-sm">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600">
-                    <item.icon className="h-5 w-5" />
+            {/* Benefits Cards */}
+            <div className="space-y-4">
+              {benefits.map((benefit, index) => (
+                <motion.div
+                  key={benefit.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + index * 0.1 }}
+                  className="flex gap-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-lg"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
+                    <benefit.icon className="h-6 w-6" />
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                    <p className="text-xs text-foreground/60">{item.description}</p>
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      {benefit.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {benefit.description}
+                    </p>
                   </div>
-                </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Metrics */}
+            <div className="grid grid-cols-2 gap-4">
+              {metrics.map((metric, index) => (
+                <motion.div
+                  key={metric.label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4 + index * 0.05 }}
+                  className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center"
+                >
+                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400">
+                    <metric.icon className="h-4 w-4" />
+                  </div>
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                    {metric.value}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    {metric.label}
+                  </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>
 
+          {/* Right Column - Sign In Form */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mx-auto w-full max-w-md rounded-3xl border border-border bg-[hsl(var(--surface))] p-8 shadow-card backdrop-blur"
+            transition={{ duration: 0.5 }}
+            className="mx-auto w-full max-w-md"
           >
-            <div className="mb-6 flex items-center justify-between text-sm">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Retour
-              </Link>
+            <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 lg:p-10 shadow-xl">
+              {/* Mobile Back Link */}
+              <div className="mb-8 flex items-center justify-between lg:hidden">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Retour
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
+                >
+                  Créer un compte
+                </Link>
+              </div>
+
+              {/* Logo & Title */}
+              <div className="mb-8 space-y-4 text-center">
+                <div className="flex justify-center">
+                  <Logo size="md" showText={false} />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">
+                    Bon retour
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Connectez-vous pour accéder à votre dashboard
+                  </p>
+                </div>
+              </div>
+
+              {/* Sign In Form */}
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                {/* Email Field */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Adresse email professionnelle
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="email"
+                      {...register('email', {
+                        required: 'L\'email est requis',
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: 'Email invalide',
+                        },
+                      })}
+                      className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-12 pr-4 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+                      placeholder="vous@entreprise.com"
+                    />
+                  </div>
+                  <AnimatePresence>
+                    {errors.email && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        className="text-xs text-rose-500"
+                      >
+                        {errors.email.message}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-gray-900 dark:text-white">
+                      Mot de passe
+                    </label>
+                    <Link
+                      href="/auth/forgot-password"
+                      className="text-xs font-medium text-brand-600 hover:text-brand-500 transition-colors"
+                    >
+                      Mot de passe oublié ?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      {...register('password', { required: 'Le mot de passe est requis' })}
+                      className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-12 pr-12 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <AnimatePresence>
+                    {errors.password && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        className="text-xs text-rose-500"
+                      >
+                        {errors.password.message}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  fullWidth
+                  loading={loading}
+                  className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900"
+                >
+                  Se connecter
+                  <LogIn className="h-4 w-4" />
+                </Button>
+              </form>
+
+              {/* Divider */}
+              <div className="relative my-8">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200 dark:border-gray-800" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">
+                    Pas encore de compte ?
+                  </span>
+                </div>
+              </div>
+
+              {/* Sign Up Link */}
               <Link
                 href="/auth/signup"
-                className="text-foreground/70 transition-colors hover:text-foreground"
+                className="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
               >
-                Créer un compte
+                Créer un compte gratuit
               </Link>
+
+              {/* Security Badge */}
+              <div className="mt-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
+                    <Shield className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                      Connexion sécurisée SSL 256-bit
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      Vos données sont protégées et conformes RGPD
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="mb-8 space-y-3 text-center">
-              <div className="flex justify-center">
-                <Logo size="md" showText={false} />
-              </div>
-              <h1 className="text-2xl font-semibold">Bon retour !</h1>
-              <p className="text-sm text-foreground/60">Connectez-vous pour retrouver votre espace personnalisé.</p>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Adresse email</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
-                  <input
-                    type="email"
-                    {...register('email', {
-                      required: 'L\'email est requis',
-                      pattern: {
-                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: 'Email invalide',
-                      },
-                    })}
-                    className="input pl-12"
-                    placeholder="vous@exemple.com"
-                  />
-                </div>
-                <AnimatePresence>
-                  {errors.email && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      className="text-xs text-rose-500"
-                    >
-                      {errors.email.message}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-foreground">Mot de passe</label>
-                  <Link href="/auth/forgot-password" className="text-xs text-brand-600 hover:text-brand-500">
-                    Mot de passe oublié ?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    {...register('password', { required: 'Le mot de passe est requis' })}
-                    className="input pl-12 pr-12"
-                    placeholder="Votre mot de passe"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((state) => !state)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-2 text-foreground/40 transition-colors hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                <AnimatePresence>
-                  {errors.password && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      className="text-xs text-rose-500"
-                    >
-                      {errors.password.message}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <Button type="submit" fullWidth loading={loading}>
-                Se connecter
-                <LogIn className="h-4 w-4" />
-              </Button>
-            </form>
-
-            <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
-              <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Astuce</p>
-              <p className="mt-2 text-sm text-foreground/70">
-                Activez le Mode Focus dans votre dashboard pour voir l'impact de vos nouveaux liens en temps réel.
-              </p>
-            </div>
+            {/* Support Link */}
+            <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+              Besoin d'aide ?{' '}
+              <Link href="/support" className="font-medium text-brand-600 hover:text-brand-500 transition-colors">
+                Contactez notre support
+              </Link>
+            </p>
           </motion.div>
         </div>
       </Container>

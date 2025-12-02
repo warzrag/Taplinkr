@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -13,10 +13,13 @@ import {
   Globe,
   Palette,
   Shield,
-  Sparkles,
   Users,
   X,
   Zap,
+  TrendingUp,
+  Lock,
+  Eye,
+  Clock,
 } from 'lucide-react'
 import { debounce } from 'lodash'
 
@@ -35,69 +38,84 @@ import { Button } from '@/components/ui/button'
 
 const features = [
   {
-    icon: Palette,
-    title: 'Personnalisation avancée',
-    description: 'Couleurs, typographies, animations et blocs interactifs pour composer une page unique.'
-  },
-  {
     icon: BarChart3,
     title: 'Analytics en temps réel',
-    description: 'Visualisez les clics par canal, géolocalisation, conversions et tendances sur un seul tableau.'
+    description: 'Suivez vos performances avec des tableaux de bord intuitifs. Mesurez chaque interaction, identifiez les tendances et optimisez votre ROI en continu.'
   },
   {
-    icon: Shield,
-    title: 'Protection intelligente',
-    description: 'Liens privés, mots de passe, expiration programmée et double authentification pour vos accès sensibles.'
+    icon: Palette,
+    title: 'Personnalisation professionnelle',
+    description: 'Créez une présence digitale alignée avec votre identité de marque. Templates personnalisables, charte graphique et expérience utilisateur optimale.'
   },
   {
     icon: Users,
-    title: 'Collaboration d’équipe',
-    description: 'Invitez votre équipe, attribuez des rôles et gérez les accès aux pages partagées en un clic.'
+    title: 'Collaboration d\'équipe avancée',
+    description: 'Gérez vos équipes efficacement avec des rôles granulaires, permissions personnalisées et workflows collaboratifs sécurisés.'
+  },
+  {
+    icon: Shield,
+    title: 'Sécurité & Protection',
+    description: 'Protection renforcée avec chiffrement end-to-end, authentification à deux facteurs et conformité RGPD garantie pour vos données sensibles.'
   },
   {
     icon: Zap,
-    title: 'Performances optimisées',
-    description: 'Chargements instantanés, SEO intégré et CDN mondial pour tous vos visiteurs.'
+    title: 'Performance optimisée',
+    description: 'Infrastructure CDN mondiale, temps de chargement < 200ms, uptime 99.9% et optimisation SEO intégrée pour maximiser votre visibilité.'
   },
   {
     icon: Globe,
-    title: 'Intégrations globales',
-    description: 'Ajoutez vos réseaux, vidéos, formulaires, calendriers et playlists préférées en quelques secondes.'
+    title: 'Intégrations professionnelles',
+    description: 'Connectez vos outils métiers : CRM, analytics, marketing automation et plateformes de communication via notre API REST complète.'
   }
+]
+
+const metrics = [
+  { value: '99.9%', label: 'Uptime garanti', icon: TrendingUp },
+  { value: '<200ms', label: 'Temps de réponse', icon: Zap },
+  { value: '256-bit', label: 'Chiffrement SSL', icon: Lock },
+  { value: '24/7', label: 'Support entreprise', icon: Clock },
 ]
 
 const testimonials = [
   {
+    name: 'Marie Dubois',
+    role: 'CEO, TechVision SAS',
+    company: 'TechVision',
+    quote: 'TapLinkr a transformé notre stratégie digitale. Nous avons augmenté notre taux de conversion de 47% en trois mois grâce à leurs analytics précis.',
+    metric: '+47% conversion',
+    avatar: 'MD'
+  },
+  {
+    name: 'Pierre Lefort',
+    role: 'Marketing Director',
+    company: 'InnovateCorp',
+    quote: 'La solution parfaite pour centraliser nos campagnes. Le ROI est mesurable, les rapports sont clairs et notre équipe gagne 15h/semaine.',
+    metric: '15h économisées/sem',
+    avatar: 'PL'
+  },
+  {
     name: 'Sophie Martin',
-    role: 'Créatrice digitale',
-    quote: 'TapLinkr est devenu mon hub officiel : je peux lancer des campagnes et mesurer mes performances en direct.',
-    metric: '+38% de clics',
-  },
-  {
-    name: 'Thomas Dubois',
-    role: 'Entrepreneur',
-    quote: 'L’onboarding est simple et le dashboard me permet de suivre tous nos liens stratégiques pour l’équipe.',
-    metric: '4,9/5 note clients',
-  },
-  {
-    name: 'Emma Laurent',
-    role: 'Artiste & coach',
-    quote: 'J’adore le niveau de personnalisation : ma page ressemble à mon univers, sur mobile comme sur desktop.',
-    metric: 'x2 sur les leads',
+    role: 'Head of Growth',
+    company: 'ScaleUp Partners',
+    quote: 'Sécurité, performance et simplicité. TapLinkr répond à tous nos critères enterprise avec un support réactif et une plateforme fiable.',
+    metric: '99.9% satisfaction',
+    avatar: 'SM'
   },
 ]
 
 const stats = [
-  { value: '50K+', label: 'créateurs actifs' },
-  { value: '120M', label: 'clics suivis/an' },
-  { value: '4,9/5', label: 'satisfaction moyenne' },
+  { value: '500K+', label: 'Professionnels actifs' },
+  { value: '2.4Mds', label: 'Interactions trackées/an' },
+  { value: '150+', label: 'Pays couverts' },
+  { value: 'SOC 2', label: 'Certification sécurité' },
 ]
 
-const popularUsers = [
-  { name: 'studiozen', accent: 'from-brand-500 to-brand-300' },
-  { name: 'agenceflow', accent: 'from-emerald-400 to-teal-400' },
-  { name: 'creatrice', accent: 'from-rose-400 to-amber-300' },
-  { name: 'collectifpro', accent: 'from-indigo-400 to-cyan-400' },
+const trustedBy = [
+  'Fortune 500',
+  'Scale-ups',
+  'Agences digitales',
+  'Entreprises tech',
+  'Consultants',
 ]
 
 export default function Home() {
@@ -174,288 +192,282 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-foreground">
       <SiteHeader />
 
       <main className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-x-0 -top-32 h-[420px] bg-gradient-radial from-brand-500/20 via-transparent to-transparent blur-3xl" />
-          <div className="absolute right-1/2 top-64 h-72 w-72 rounded-full bg-brand-400/10 blur-[160px]" />
-          <div className="absolute left-1/2 top-32 h-80 w-80 rounded-full bg-secondary-300/20 blur-[140px]" />
-        </div>
+        {/* Hero Section */}
+        <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28">
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+          </div>
 
-        <section className="section-default pt-24 pb-20">
-          <Container className="grid items-center gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-8"
-            >
-              <span className="badge-pill bg-[hsl(var(--surface))]/80 text-brand-600 shadow-sm">
-                <Sparkles className="h-4 w-4 text-brand-500" />
-                TapLinkr 2.0 est arrivé
-              </span>
+          <Container>
+            <div className="mx-auto max-w-4xl">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center space-y-8"
+              >
+                <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-1.5 text-sm font-medium">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-gray-700 dark:text-gray-300">Plateforme de gestion de liens professionnelle</span>
+                </div>
 
-              <div className="space-y-6">
-                <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
-                  Centralisez et sublimez
-                  <br className="hidden sm:block" />
-                  votre présence en ligne
+                <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+                  <span className="text-gray-900 dark:text-white">Centralisez votre</span>
+                  <br />
+                  <span className="text-gray-900 dark:text-white">présence digitale</span>
                 </h1>
-                <p className="max-w-xl text-base text-foreground/70 sm:text-lg">
-                  Offrez une expérience cohérente à votre audience. Créez une page élégante, suivez chaque clic et adaptez-vous en temps réel grâce à nos outils professionnels.
+
+                <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+                  Solution enterprise pour centraliser, sécuriser et optimiser vos liens stratégiques.
+                  Analytics avancés, collaboration d'équipe et performance garantie.
                 </p>
-              </div>
 
-              <div className="grid gap-6 rounded-3xl border border-border/80 bg-[hsl(var(--surface))] p-6 shadow-card backdrop-blur">
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">
-                    Réservez votre URL personnalisée
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <div className="flex flex-1 items-center gap-3 rounded-2xl border border-border bg-[hsl(var(--surface))] px-4 py-3 shadow-sm focus-within:border-brand-500">
-                    <span className="text-sm text-foreground/60">taplinkr.com/</span>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(event) => handleUsernameChange(event.target.value)}
-                      placeholder="votre-nom"
-                      maxLength={30}
-                      className="flex-1 bg-transparent text-sm outline-none sm:text-base"
-                    />
-                    <AnimatePresence mode="wait">
-                      {checking && (
-                        <motion.span
-                          key="checking"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"
-                        />
-                      )}
-                      {!checking && available === true && (
-                        <motion.span
-                          key="available"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="text-emerald-500"
-                        >
-                          <Check className="h-5 w-5" />
-                        </motion.span>
-                      )}
-                      {!checking && available === false && (
-                        <motion.span
-                          key="taken"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="text-rose-500"
-                        >
-                          <X className="h-5 w-5" />
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                  <Button
-                    onClick={handleGetStarted}
-                    disabled={!available || checking}
-                    className="sm:w-auto"
-                  >
-                    Commencer
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <AnimatePresence>
-                  {error && (
-                    <motion.p
-                      key="error"
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      className="text-sm text-rose-500"
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-                  {available === true && (
-                    <motion.p
-                      key="available-text"
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      className="text-sm text-emerald-500"
-                    >
-                      Ce nom est disponible, verrouillez-le maintenant !
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-medium uppercase tracking-wide text-foreground/50">
-                    Suggestions populaires
-                  </span>
-                  {popularUsers.map((item) => (
-                    <button
-                      key={item.name}
-                      onClick={() => {
-                        setUsername(item.name)
-                        checkUsername(item.name)
-                      }}
-                      className={`group inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${item.accent} px-4 py-1.5 text-xs font-medium text-white transition-transform hover:-translate-y-0.5`}
-                    >
-                      taplinkr.com/{item.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-6 pt-4">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="flex flex-col">
-                    <span className="text-2xl font-semibold text-foreground">{stat.value}</span>
-                    <span className="text-sm text-foreground/60">{stat.label}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 32 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="relative"
-            >
-              <div className="relative overflow-hidden rounded-[32px] border border-white/40 bg-gradient-to-br from-brand-500/15 via-white to-blue-100 p-6 shadow-brand backdrop-blur">
-                <div className="space-y-4 rounded-3xl bg-[hsl(var(--surface))]/80 p-6 shadow-card">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground/60">taplinkr.com/you</p>
-                      <h3 className="text-xl font-semibold">Votre hub créatif</h3>
-                    </div>
-                    <Sparkles className="h-6 w-6 text-brand-500" />
-                  </div>
-
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between rounded-2xl border border-border/70 bg-[hsl(var(--surface))] px-4 py-3 shadow-sm"
-                      >
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">
-                            {index === 1 ? 'Nouvelle vidéo YouTube' : index === 2 ? 'Programme premium' : 'Newsletter exclusive'}
-                          </p>
-                          <p className="text-xs text-foreground/50">{index === 1 ? '3,6K clics' : index === 2 ? '1,2K abonnés' : 'Ouverture 62%'}</p>
-                        </div>
-                        <button className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-foreground/70">Voir</button>
+                <div className="mx-auto max-w-2xl">
+                  <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+                    <div className="space-y-4">
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Réclamez votre URL professionnelle
                       </div>
-                    ))}
+
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1 flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">taplinkr.com/</span>
+                          <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => handleUsernameChange(e.target.value)}
+                            placeholder="votre-entreprise"
+                            maxLength={30}
+                            className="flex-1 bg-transparent text-sm outline-none text-gray-900 dark:text-white placeholder:text-gray-400"
+                          />
+                          <AnimatePresence mode="wait">
+                            {checking && (
+                              <motion.div
+                                key="checking"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"
+                              />
+                            )}
+                            {!checking && available === true && (
+                              <motion.div
+                                key="available"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                              >
+                                <Check className="h-4 w-4 text-emerald-500" />
+                              </motion.div>
+                            )}
+                            {!checking && available === false && (
+                              <motion.div
+                                key="taken"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                              >
+                                <X className="h-4 w-4 text-rose-500" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+
+                        <Button
+                          onClick={handleGetStarted}
+                          disabled={!available || checking}
+                          className="sm:w-auto whitespace-nowrap bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900"
+                        >
+                          Démarrer maintenant
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <AnimatePresence>
+                        {error && (
+                          <motion.p
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="text-sm text-rose-500"
+                          >
+                            {error}
+                          </motion.p>
+                        )}
+                        {available === true && (
+                          <motion.p
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="text-sm text-emerald-600 dark:text-emerald-400"
+                          >
+                            ✓ Disponible - Sécurisez votre nom dès maintenant
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
 
-                  <div className="rounded-2xl bg-gradient-to-r from-brand-500 to-brand-400 px-5 py-4 text-white shadow-brand">
-                    <p className="text-sm font-medium">Mode campagne</p>
-                    <p className="text-xs text-white/80">Analytiques détaillés sur les 24 dernières heures.</p>
-                    <div className="mt-3 flex items-center justify-between text-xs text-white/90">
-                      <span>+18% clics</span>
-                      <span>+9% abonnements</span>
-                      <span>+32% ventes</span>
+                  <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-emerald-500" />
+                      <span className="text-gray-600 dark:text-gray-400">Sans engagement</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-emerald-500" />
+                      <span className="text-gray-600 dark:text-gray-400">Installation en 2 minutes</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-emerald-500" />
+                      <span className="text-gray-600 dark:text-gray-400">Support premium inclus</span>
                     </div>
                   </div>
                 </div>
-
-                <div className="pointer-events-none absolute -right-6 bottom-12 hidden h-32 w-32 rounded-full bg-brand-500/20 blur-2xl md:block" />
-                <div className="pointer-events-none absolute -left-6 top-10 hidden h-28 w-28 rounded-full bg-secondary-400/20 blur-2xl md:block" />
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </Container>
         </section>
 
-        <section id="features" className="section-default bg-[hsl(var(--surface))]">
-          <Container className="space-y-12">
-            <div className="max-w-2xl space-y-4">
-              <span className="badge-pill">Fonctionnalités</span>
-              <h2 className="text-3xl font-semibold sm:text-4xl">Pensé pour les créateurs ambitieux</h2>
-              <p className="text-foreground/65">
-                TapLinkr simplifie la gestion de vos liens tout en vous offrant des outils d’analyse et de design à la hauteur de vos projets.
+        {/* Trust Bar */}
+        <section className="border-y border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 py-8">
+          <Container>
+            <div className="flex flex-col items-center gap-6">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Ils nous font confiance
               </p>
+              <div className="flex flex-wrap items-center justify-center gap-8">
+                {trustedBy.map((company) => (
+                  <div key={company} className="text-sm font-semibold text-gray-400 dark:text-gray-600">
+                    {company}
+                  </div>
+                ))}
+              </div>
             </div>
+          </Container>
+        </section>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {features.map((feature, index) => (
+        {/* Stats Section */}
+        <section className="py-20 lg:py-28">
+          <Container>
+            <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
+              {stats.map((stat, index) => (
                 <motion.div
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 16 }}
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="card p-6 sm:p-7"
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center"
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-600">
-                    <feature.icon className="h-6 w-6" />
+                  <div className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
+                    {stat.value}
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">{feature.title}</h3>
-                  <p className="mt-2 text-sm text-foreground/65">{feature.description}</p>
+                  <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    {stat.label}
+                  </div>
                 </motion.div>
               ))}
             </div>
           </Container>
         </section>
 
-        <section className="section-default">
-          <Container className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)] lg:items-center">
-            <div className="space-y-5">
-              <span className="badge-pill">Workflow</span>
-              <h2 className="text-3xl font-semibold sm:text-4xl">Publiez, analysez, convertissez</h2>
-              <p className="text-foreground/65">
-                Une interface claire pour lancer vos campagnes, suivre vos statistiques et adapter votre page en direct. En quelques minutes, votre bio devient un véritable tunnel de conversion.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/pricing" className="btn-primary">
-                  Voir les formules
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link href="/auth/signup" className="btn-secondary">
-                  Créer un compte gratuit
-                </Link>
+        {/* Features Section */}
+        <section className="bg-gray-50 dark:bg-gray-900/50 py-20 lg:py-28">
+          <Container>
+            <div className="mx-auto max-w-2xl text-center mb-16">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-1.5 text-sm font-medium mb-6">
+                <Eye className="h-4 w-4 text-brand-500" />
+                <span className="text-gray-700 dark:text-gray-300">Fonctionnalités</span>
               </div>
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
+                Tout ce dont votre entreprise a besoin
+              </h2>
+              <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                Une plateforme complète conçue pour les professionnels exigeants
+              </p>
             </div>
 
-            <div className="grid gap-4 rounded-3xl border border-border bg-[hsl(var(--surface))]/80 p-6 shadow-card">
-              {[1, 2, 3].map((step) => (
-                <div key={step} className="flex gap-4 rounded-2xl bg-[hsl(var(--surface-muted))] p-4">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500/10 text-sm font-semibold text-brand-600">
-                    0{step}
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground">
-                      {step === 1 ? 'Composez votre page en drag & drop' : step === 2 ? 'Activez le suivi intelligent des clics' : 'Optimisez grâce aux recommandations IA'}
-                    </h3>
-                    <p className="mt-1 text-sm text-foreground/60">
-                      {step === 1
-                        ? 'Ajoutez des liens, des blocs vidéo, des formulaires et personnalisez chaque section.'
-                        : step === 2
-                        ? 'Mesurez l’impact par canal et identifiez les sources de trafic les plus performantes.'
-                        : 'Recevez des suggestions automatiques pour améliorer vos conversions et la cohérence visuelle.'}
-                    </p>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature, index) => (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 transition-all hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-lg"
+                >
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white transition-colors group-hover:bg-brand-500 group-hover:text-white">
+                    <feature.icon className="h-6 w-6" />
                   </div>
-                </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </motion.div>
               ))}
             </div>
           </Container>
         </section>
 
-        <section id="temoignages" className="section-default bg-[hsl(var(--surface))]">
-          <Container className="space-y-12">
-            <div className="max-w-2xl space-y-4">
-              <span className="badge-pill">Ils nous font confiance</span>
-              <h2 className="text-3xl font-semibold sm:text-4xl">Des créateurs inspirants partagent déjà avec TapLinkr</h2>
+        {/* Metrics Section */}
+        <section className="py-20 lg:py-28">
+          <Container>
+            <div className="mx-auto max-w-4xl">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
+                  Performance garantie
+                </h2>
+                <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                  Des métriques qui comptent pour votre activité
+                </p>
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {metrics.map((metric, index) => (
+                  <motion.div
+                    key={metric.label}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 text-center"
+                  >
+                    <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400">
+                      <metric.icon className="h-6 w-6" />
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {metric.value}
+                    </div>
+                    <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      {metric.label}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </Container>
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="bg-gray-50 dark:bg-gray-900/50 py-20 lg:py-28">
+          <Container>
+            <div className="mx-auto max-w-2xl text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
+                Ce que disent nos clients
+              </h2>
+              <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                Des résultats mesurables pour des entreprises de toutes tailles
+              </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-3">
               {testimonials.map((testimonial, index) => (
                 <motion.div
                   key={testimonial.name}
@@ -463,19 +475,31 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="card flex h-full flex-col gap-6 p-6"
+                  className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8"
                 >
-                  <div className="space-y-3">
-                    <p className="text-sm text-foreground/70">“{testimonial.quote}”</p>
-                  </div>
-                  <div className="mt-auto flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{testimonial.name}</p>
-                      <p className="text-xs text-foreground/60">{testimonial.role}</p>
+                  <div className="mb-6">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      "{testimonial.quote}"
                     </div>
-                    <span className="rounded-full bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-600">
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-900/20 text-sm font-semibold text-brand-600 dark:text-brand-400">
+                        {testimonial.avatar}
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {testimonial.name}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {testimonial.role}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                       {testimonial.metric}
-                    </span>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -483,25 +507,35 @@ export default function Home() {
           </Container>
         </section>
 
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-600 via-brand-500 to-indigo-500" />
-          <Container className="relative z-10 py-20 text-white">
-            <div className="mx-auto flex max-w-3xl flex-col items-center text-center gap-6">
-              <h2 className="text-3xl font-semibold sm:text-4xl">
-                Prêt à transformer votre bio en expérience immersive ?
+        {/* CTA Section */}
+        <section className="py-20 lg:py-28">
+          <Container>
+            <div className="mx-auto max-w-4xl rounded-3xl border border-gray-200 dark:border-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-12 lg:p-16 text-center">
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
+                Prêt à transformer votre présence digitale ?
               </h2>
-              <p className="text-white/75">
-                Créez gratuitement votre page, explorez nos templates et débloquez les fonctions avancées quand vous le souhaitez.
+              <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Rejoignez plus de 500 000 professionnels qui centralisent et optimisent leurs liens avec TapLinkr
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <Button onClick={handleGetStarted} disabled={!available || checking}>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button
+                  onClick={handleGetStarted}
+                  disabled={!available || checking}
+                  className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900"
+                >
                   Commencer gratuitement
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-                <Link href="/pricing" className="btn-secondary border-white/40 bg-black/10 text-white hover:border-white hover:bg-black/20 backdrop-blur-sm">
-                  Découvrir les offres
+                <Link
+                  href="/pricing"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-3 text-sm font-medium text-gray-900 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-600"
+                >
+                  Voir les tarifs entreprise
                 </Link>
               </div>
+              <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
+                Installation en moins de 2 minutes • Sans carte bancaire • Support dédié
+              </p>
             </div>
           </Container>
         </section>
@@ -511,4 +545,3 @@ export default function Home() {
     </div>
   )
 }
-
