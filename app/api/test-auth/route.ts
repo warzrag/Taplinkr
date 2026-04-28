@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         environment: {
           NEXTAUTH_URL: process.env.NEXTAUTH_URL,
           NEXTAUTH_SECRET: !!process.env.NEXTAUTH_SECRET,
-          DATABASE_URL: !!process.env.DATABASE_URL,
+          FIREBASE_SERVICE_ACCOUNT_JSON: !!process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
           NODE_ENV: process.env.NODE_ENV
         }
       }
@@ -77,7 +77,7 @@ export async function GET() {
       environment: {
         NEXTAUTH_URL: process.env.NEXTAUTH_URL,
         hasSecret: !!process.env.NEXTAUTH_SECRET,
-        hasDatabase: !!process.env.DATABASE_URL
+        hasFirebase: !!process.env.FIREBASE_SERVICE_ACCOUNT_JSON
       }
     });
   } catch (error: any) {

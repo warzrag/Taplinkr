@@ -50,11 +50,11 @@ export default function QuickAddClicks() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Ajout rapide de clics (sans Prisma)</h1>
+        <h1 className="text-3xl font-bold mb-8">Ajout rapide de clics</h1>
         
         <div className="bg-gray-800 p-6 rounded-lg">
           <p className="text-yellow-400 mb-4">
-            ⚠️ Cette page utilise l'API REST Supabase directement pour éviter les erreurs du pooler
+            Cette page met a jour les compteurs via Firestore.
           </p>
           
           <div className="space-y-4">
@@ -115,7 +115,7 @@ export default function QuickAddClicks() {
             onClick={() => router.push('/admin/db')}
             className="px-6 py-2 bg-blue-700 hover:bg-blue-600 rounded"
           >
-            Admin DB (avec Prisma)
+            Admin DB
           </button>
         </div>
       </div>

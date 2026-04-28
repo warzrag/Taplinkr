@@ -64,9 +64,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="TapLinkr" />
 
-        {/* Préconnexion Supabase pour images */}
-        <link rel="preconnect" href="https://dkwgorynhgnmldzbhhrb.supabase.co" />
-        <link rel="dns-prefetch" href="https://dkwgorynhgnmldzbhhrb.supabase.co" />
 
         {/* Préchargement des routes critiques */}
         <link rel="prefetch" href="/dashboard" as="document" />

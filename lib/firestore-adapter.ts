@@ -45,6 +45,8 @@ const COLL: Record<string, string> = {
   teamAuditLog: 'teamAuditLogs',
 }
 
+const MODEL_BY_COLL = Object.fromEntries(Object.entries(COLL).map(([model, coll]) => [coll, model]))
+
 // Models that use a "natural" doc ID instead of the generated one
 const DOC_ID_FIELD: Record<string, string> = {
   userProfile: 'userId',
@@ -73,6 +75,9 @@ const RELATIONS: Record<string, Record<string, Relation>> = {
   },
   link: {
     user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
+    originalOwner: { coll: 'users', fk: 'id', kind: 'one', localKey: 'originalOwnerId' },
+    assignedTo: { coll: 'users', fk: 'id', kind: 'one', localKey: 'assignedToUserId' },
+    lastModifier: { coll: 'users', fk: 'id', kind: 'one', localKey: 'lastModifiedBy' },
     multiLinks: { coll: 'multiLinks', fk: 'parentLinkId', kind: 'many' },
     folder: { coll: 'folders', fk: 'id', kind: 'one', localKey: 'folderId' },
     team: { coll: 'teams', fk: 'id', kind: 'one', localKey: 'teamId' },
@@ -97,6 +102,7 @@ const RELATIONS: Record<string, Record<string, Relation>> = {
   },
   multiLink: {
     parentLink: { coll: 'links', fk: 'id', kind: 'one', localKey: 'parentLinkId' },
+    link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'parentLinkId' },
   },
   notification: {
     user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
@@ -104,6 +110,9 @@ const RELATIONS: Record<string, Record<string, Relation>> = {
   passwordProtection: {
     link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
     user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
+  },
+  passwordAttempt: {
+    link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
   },
   linkSchedule: {
     link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
@@ -119,6 +128,13 @@ const RELATIONS: Record<string, Record<string, Relation>> = {
   },
   analyticsEvent: {
     link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
+    user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
+  },
+  analyticsSummary: {
+    link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
+    user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
+  },
+  customDomain: {
     user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
   },
   teamAuditLog: {
@@ -251,38 +267,39 @@ function chunk<T>(values: T[], size: number): T[][] {
 }
 
 // ------- Build query -------
-async function runQuery(coll: string, args: any = {}): Promise<any[]> {
+async function runQuery(coll: string, args: any = {}, modelName = MODEL_BY_COLL[coll]): Promise<any[]> {
   let q: Query = db.collection(coll)
+  const { where: plainWhere, relationFilters } = splitRelationWhere(modelName, args.where)
 
   // Handle OR by running parallel queries and merging
-  if (args.where?.OR && Array.isArray(args.where.OR)) {
-    const baseWhere = { ...args.where }
+  if (plainWhere?.OR && Array.isArray(plainWhere.OR)) {
+    const baseWhere = { ...plainWhere }
     delete baseWhere.OR
-    const results = await Promise.all(args.where.OR.map((or: any) =>
-      runQuery(coll, { ...args, where: { ...baseWhere, ...or } })
+    const results = await Promise.all(plainWhere.OR.map((or: any) =>
+      runQuery(coll, { ...args, where: { ...baseWhere, ...or } }, modelName)
     ))
     const seen = new Set<string>()
     const merged: any[] = []
     for (const arr of results) for (const r of arr) {
       if (!seen.has(r.id)) { seen.add(r.id); merged.push(r) }
     }
-    return applySortLimit(merged, args)
+    return applyRelationFilters(modelName, applySortLimit(merged, args), relationFilters)
   }
 
-  const largeIn = findLargeInFilter(args.where)
+  const largeIn = findLargeInFilter(plainWhere)
   if (largeIn) {
     const results = await Promise.all(chunk(largeIn.values, 30).map(values =>
-      runQuery(coll, { ...args, where: replaceLargeInFilter(args.where, largeIn.field, values) })
+      runQuery(coll, { ...args, where: replaceLargeInFilter(plainWhere, largeIn.field, values) }, modelName)
     ))
     const seen = new Set<string>()
     const merged: any[] = []
     for (const arr of results) for (const r of arr) {
       if (!seen.has(r.id)) { seen.add(r.id); merged.push(r) }
     }
-    return applySortLimit(merged, args)
+    return applyRelationFilters(modelName, applySortLimit(merged, args), relationFilters)
   }
 
-  if (args.where) q = applyWhere(q, args.where)
+  if (plainWhere) q = applyWhere(q, plainWhere)
 
   if (args.orderBy) {
     const orders = Array.isArray(args.orderBy) ? args.orderBy : [args.orderBy]
@@ -310,7 +327,7 @@ async function runQuery(coll: string, args: any = {}): Promise<any[]> {
         : v.includes(String(c.value))
     }))
   }
-  return results
+  return applyRelationFilters(modelName, results, relationFilters)
 }
 
 function applySortLimit(arr: any[], args: any): any[] {
@@ -330,6 +347,161 @@ function applySortLimit(arr: any[], args: any): any[] {
   if (args.skip) arr = arr.slice(args.skip)
   if (args.take) arr = arr.slice(0, args.take)
   return arr
+}
+
+type RelationFilter = { field: string; where: any; rel: Relation }
+
+function splitRelationWhere(model: string | undefined, where: any): { where: any; relationFilters: RelationFilter[] } {
+  if (!model || !where || typeof where !== 'object' || Array.isArray(where)) {
+    return { where, relationFilters: [] }
+  }
+
+  const rels = RELATIONS[model] || {}
+  const out: any = {}
+  const relationFilters: RelationFilter[] = []
+
+  for (const [field, value] of Object.entries(where)) {
+    const rel = rels[field]
+    if (rel && value && typeof value === 'object' && !(value instanceof Date)) {
+      relationFilters.push({ field, where: value, rel })
+    } else {
+      out[field] = value
+    }
+  }
+
+  return {
+    where: Object.keys(out).length ? out : undefined,
+    relationFilters,
+  }
+}
+
+function matchesValue(value: any, condition: any): boolean {
+  if (condition && typeof condition === 'object' && !(condition instanceof Date) && !Array.isArray(condition)) {
+    if ('equals' in condition) return value === condition.equals
+    if ('in' in condition) return Array.isArray(condition.in) && condition.in.includes(value)
+    if ('notIn' in condition) return Array.isArray(condition.notIn) && !condition.notIn.includes(value)
+    if ('not' in condition) return value !== condition.not
+    if ('gt' in condition && !(value > condition.gt)) return false
+    if ('gte' in condition && !(value >= condition.gte)) return false
+    if ('lt' in condition && !(value < condition.lt)) return false
+    if ('lte' in condition && !(value <= condition.lte)) return false
+    if ('contains' in condition) {
+      if (typeof value !== 'string') return false
+      const needle = String(condition.contains)
+      return condition.mode === 'insensitive'
+        ? value.toLowerCase().includes(needle.toLowerCase())
+        : value.includes(needle)
+    }
+    return JSON.stringify(value) === JSON.stringify(condition)
+  }
+  return value === condition
+}
+
+function matchesPlainWhere(item: any, where: any): boolean {
+  if (!where) return true
+  if (where.OR && Array.isArray(where.OR)) return where.OR.some((w: any) => matchesPlainWhere(item, w))
+  if (where.AND && Array.isArray(where.AND)) return where.AND.every((w: any) => matchesPlainWhere(item, w))
+  return Object.entries(where).every(([field, condition]) => matchesValue(item?.[field], condition))
+}
+
+async function fetchRelationItem(item: any, rel: Relation): Promise<any | null> {
+  const localKey = rel.localKey || rel.fk
+  if (rel.fk === 'id' && rel.localKey) {
+    const id = item?.[localKey]
+    if (!id) return null
+    return snapToObj(await db.collection(rel.coll).doc(String(id)).get())
+  }
+  const related = await runQuery(rel.coll, { where: { [rel.fk]: item.id }, take: 1 }, MODEL_BY_COLL[rel.coll])
+  return related[0] || null
+}
+
+async function fetchRelationItems(item: any, rel: Relation, args: any = {}): Promise<any[]> {
+  const where = { ...(args.where || {}), [rel.fk]: item.id }
+  return runQuery(rel.coll, { ...args, where }, MODEL_BY_COLL[rel.coll])
+}
+
+async function relationFilterMatches(item: any, filter: RelationFilter): Promise<boolean> {
+  const relationWhere = filter.where?.is || filter.where?.some || filter.where
+  if (filter.rel.kind === 'one') {
+    const related = await fetchRelationItem(item, filter.rel)
+    if (filter.where?.is === null) return related === null
+    if (filter.where?.isNot === null) return related !== null
+    if (!related) return false
+    return matchesPlainWhere(related, relationWhere)
+  }
+
+  const related = await fetchRelationItems(item, filter.rel)
+  if (filter.where?.none) return !related.some(child => matchesPlainWhere(child, filter.where.none))
+  if (filter.where?.every) return related.every(child => matchesPlainWhere(child, filter.where.every))
+  return related.some(child => matchesPlainWhere(child, relationWhere))
+}
+
+async function applyRelationFilters(model: string | undefined, rows: any[], filters: RelationFilter[]): Promise<any[]> {
+  if (!model || !filters.length || !rows.length) return rows
+  const result: any[] = []
+  for (const row of rows) {
+    let keep = true
+    for (const filter of filters) {
+      if (!(await relationFilterMatches(row, filter))) {
+        keep = false
+        break
+      }
+    }
+    if (keep) result.push(row)
+  }
+  return result
+}
+
+async function countRelation(item: any, rel: Relation): Promise<number> {
+  if (rel.kind === 'one') return (await fetchRelationItem(item, rel)) ? 1 : 0
+  return (await fetchRelationItems(item, rel)).length
+}
+
+async function applySelect(model: string, item: any, select?: any): Promise<any> {
+  if (!select || !item) return item
+  const rels = RELATIONS[model] || {}
+  const out: any = {}
+
+  for (const [field, value] of Object.entries(select)) {
+    if (!value) continue
+    if (field === '_count' && typeof value === 'object') {
+      out._count = {}
+      const countSelect = (value as any).select || {}
+      for (const relationName of Object.keys(countSelect)) {
+        const rel = rels[relationName]
+        if (rel) out._count[relationName] = await countRelation(item, rel)
+      }
+      continue
+    }
+
+    const rel = rels[field]
+    if (rel && typeof value === 'object') {
+      const subModel = MODEL_BY_COLL[rel.coll]
+      if (rel.kind === 'one') {
+        const related = await fetchRelationItem(item, rel)
+        out[field] = related && subModel ? await applySelect(subModel, related, (value as any).select) : related
+      } else {
+        const related = await fetchRelationItems(item, rel, {
+          where: (value as any).where,
+          orderBy: (value as any).orderBy,
+          take: (value as any).take,
+        })
+        out[field] = subModel
+          ? await Promise.all(related.map(child => applySelect(subModel, child, (value as any).select)))
+          : related
+      }
+      continue
+    }
+
+    if (value === true) out[field] = item[field]
+  }
+
+  return out
+}
+
+async function applySelectMany(model: string, items: any[], select?: any): Promise<any[]> {
+  if (!select) return items
+  return Promise.all(items.map(item => applySelect(model, item, select)))
 }
 
 // ------- Hydrate `include` (manual joins) -------
@@ -355,7 +527,7 @@ async function hydrateIncludes(model: string, items: any[], include: any): Promi
       } else {
         // one-to-one inverse: fetch by foreignKey
         for (const it of items) {
-          const r = await runQuery(rel.coll, { where: { [rel.fk]: it.id }, take: 1 })
+          const r = await runQuery(rel.coll, { where: { [rel.fk]: it.id }, take: 1 }, MODEL_BY_COLL[rel.coll])
           it[field] = r[0] || null
         }
       }
@@ -365,7 +537,7 @@ async function hydrateIncludes(model: string, items: any[], include: any): Promi
         const args: any = { where: { [rel.fk]: it.id } }
         if (subWhere) args.where = { ...args.where, ...subWhere }
         if (subOrder) args.orderBy = subOrder
-        const r = await runQuery(rel.coll, args)
+        const r = await runQuery(rel.coll, args, MODEL_BY_COLL[rel.coll])
         if (subInclude) {
           // recurse - need to find sub-model name by collection
           const subModel = Object.keys(COLL).find(k => COLL[k] === rel.coll) || ''
@@ -396,22 +568,22 @@ function modelProxy(model: string) {
         const snap = await db.collection(collection).doc(String(where.id)).get()
         const obj = snapToObj(snap)
         if (obj && args.include) await hydrateIncludes(model, [obj], args.include)
-        return obj
+        return applySelect(model, obj, args.select)
       }
       // by natural unique field (email, slug, etc.) — query then take first
-      const r = await runQuery(collection, { where, take: 1 })
+      const r = await runQuery(collection, { where, take: 1 }, model)
       if (r[0] && args.include) await hydrateIncludes(model, [r[0]], args.include)
-      return r[0] || null
+      return r[0] ? applySelect(model, r[0], args.select) : null
     },
     async findFirst(args: any = {}) {
-      const r = await runQuery(collection, { ...args, take: 1 })
+      const r = await runQuery(collection, { ...args, take: 1 }, model)
       if (r[0] && args.include) await hydrateIncludes(model, [r[0]], args.include)
-      return r[0] || null
+      return r[0] ? applySelect(model, r[0], args.select) : null
     },
     async findMany(args: any = {}) {
-      const r = await runQuery(collection, args)
+      const r = await runQuery(collection, args, model)
       if (args.include) await hydrateIncludes(model, r, args.include)
-      return r
+      return applySelectMany(model, r, args.select)
     },
     async create(args: { data: any; include?: any }) {
       const now = new Date()
@@ -421,12 +593,12 @@ function modelProxy(model: string) {
       await db.collection(collection).doc(id).set(toFirestore(data))
       const obj = { ...data }
       if (args.include) await hydrateIncludes(model, [obj], args.include)
-      return obj
+      return applySelect(model, obj, (args as any).select)
     },
     async update(args: { where: any; data: any; include?: any }) {
       let id = args.where.id
       if (!id) {
-        const r = await runQuery(collection, { where: args.where, take: 1 })
+        const r = await runQuery(collection, { where: args.where, take: 1 }, model)
         if (!r[0]) throw new Error(`Record to update not found in ${model}`)
         id = r[0].id
       }
@@ -443,7 +615,7 @@ function modelProxy(model: string) {
       await db.collection(collection).doc(String(id)).set(toFirestore(data), { merge: true })
       const fresh = snapToObj(await db.collection(collection).doc(String(id)).get())
       if (fresh && args.include) await hydrateIncludes(model, [fresh], args.include)
-      return fresh
+      return applySelect(model, fresh, (args as any).select)
     },
     async upsert(args: { where: any; create: any; update: any; include?: any }) {
       const found = await this.findUnique({ where: args.where })
@@ -453,7 +625,7 @@ function modelProxy(model: string) {
     async delete(args: { where: any }) {
       let id = args.where.id
       if (!id) {
-        const r = await runQuery(collection, { where: args.where, take: 1 })
+        const r = await runQuery(collection, { where: args.where, take: 1 }, model)
         if (!r[0]) throw new Error(`Record to delete not found in ${model}`)
         id = r[0].id
       }
@@ -462,21 +634,21 @@ function modelProxy(model: string) {
       return before
     },
     async deleteMany(args: { where?: any } = {}) {
-      const r = await runQuery(collection, { where: args.where || {} })
+      const r = await runQuery(collection, { where: args.where || {} }, model)
       const batch = db.batch()
       r.forEach(d => batch.delete(db.collection(collection).doc(String(d.id))))
       if (r.length) await batch.commit()
       return { count: r.length }
     },
     async updateMany(args: { where?: any; data: any }) {
-      const r = await runQuery(collection, { where: args.where || {} })
+      const r = await runQuery(collection, { where: args.where || {} }, model)
       const batch = db.batch()
       r.forEach(d => batch.set(db.collection(collection).doc(String(d.id)), toFirestore({ ...args.data, updatedAt: new Date() }), { merge: true }))
       if (r.length) await batch.commit()
       return { count: r.length }
     },
     async count(args: any = {}) {
-      const r = await runQuery(collection, args)
+      const r = await runQuery(collection, args, model)
       return r.length
     },
     async createMany(args: { data: any[] }) {
@@ -492,7 +664,7 @@ function modelProxy(model: string) {
       return { count: args.data.length }
     },
     async aggregate(args: any = {}) {
-      const r = await runQuery(collection, { where: args.where || {} })
+      const r = await runQuery(collection, { where: args.where || {} }, model)
       const out: any = {}
       if (args._count) {
         if (args._count === true) out._count = r.length
@@ -527,7 +699,7 @@ function modelProxy(model: string) {
       return out
     },
     async groupBy(args: any) {
-      const r = await runQuery(collection, { where: args.where || {} })
+      const r = await runQuery(collection, { where: args.where || {} }, model)
       const by: string[] = Array.isArray(args.by) ? args.by : [args.by]
       const groups = new Map<string, any[]>()
       for (const item of r) {

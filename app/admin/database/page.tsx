@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,17 +48,13 @@ export default function DatabasePage() {
     setLoading(true);
     setError(null);
     try {
-      const from = page * pageSize;
-      const to = from + pageSize - 1;
-      
-      const { data: tableData, error: fetchError, count } = await supabase
-        .from(tableName)
-        .select('*', { count: 'exact' })
-        .range(from, to)
-        .order('created_at', { ascending: false, nullsFirst: false })
-        .limit(pageSize);
+      const response = await fetch(`/api/admin/database?table=${encodeURIComponent(tableName)}&page=${page}&pageSize=${pageSize}`);
+      const result = await response.json();
 
-      if (fetchError) throw fetchError;
+      if (!response.ok) throw new Error(result.error || 'Erreur chargement Firestore');
+
+      const tableData = result.data || [];
+      const count = result.count || 0;
 
       if (tableData && tableData.length > 0) {
         setColumns(Object.keys(tableData[0]));
@@ -111,7 +106,7 @@ export default function DatabasePage() {
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
         <Database className="w-8 h-8" />
-        Base de données Supabase
+        Base de donnees Firestore
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

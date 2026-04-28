@@ -1,73 +1,107 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { createLinkDB, createMultiLinksDB } from '@/lib/db-direct-v2'
 import { nanoid } from 'nanoid'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { validateURL } from '@/lib/url-validator'
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
     }
 
     const body = await request.json()
-    
-    // Créer le lien principal avec la structure adaptée
-    const linkData = {
-      id: nanoid(),
-      userId: session.user.id,
-      title: body.title || 'Mon lien',
-      slug: body.slug || nanoid(10),
-      description: body.description || body.bio || '',
-      bio: body.bio || body.description || '',
-      directUrl: body.directUrl || null,
-      isDirect: body.isDirect || false,
-      isActive: true,
-      shieldEnabled: body.shieldEnabled || false,
-      isUltraLink: body.isUltraLink || false,
-      clicks: 0,
-      views: 0,
-      order: 0,
-      primaryColor: body.primaryColor || '#3b82f6',
-      icon: body.icon || '',
-      profileImage: body.profileImage || null,
-      profileStyle: body.profileStyle || 'circle',
-      coverImage: body.coverImage || null,
-      instagramUrl: body.instagramUrl || null,
-      tiktokUrl: body.tiktokUrl || null,
-      twitterUrl: body.twitterUrl || null,
-      youtubeUrl: body.youtubeUrl || null,
-      animation: body.animation || 'none',
-      borderRadius: body.borderRadius || 'rounded-xl',
-      fontFamily: body.fontFamily || 'system',
-      backgroundColor: body.backgroundColor || '#ffffff',
-      textColor: body.textColor || '#1f2937'
+    const slug = body.slug || nanoid(10)
+
+    const existingLink = await prisma.link.findUnique({ where: { slug } })
+    if (existingLink) {
+      return NextResponse.json({ error: 'Cette URL personnalisee est deja utilisee' }, { status: 400 })
     }
 
-    // Créer le lien dans PostgreSQL
-    const newLink = await createLinkDB(linkData)
-
-    // Si c'est un multi-lien, créer les sous-liens
-    console.log('🔍 API Check - isDirect:', body.isDirect, 'multiLinks count:', body.multiLinks?.length)
-    if (!body.isDirect && body.multiLinks && body.multiLinks.length > 0) {
-      console.log('✅ Appel createMultiLinksDB')
-      const createdMultiLinks = await createMultiLinksDB(newLink.id, body.multiLinks)
-      console.log('✅ createMultiLinksDB terminé, retour:', createdMultiLinks.length)
-      newLink.multiLinks = createdMultiLinks
-    } else {
-      console.log('❌ Condition non remplie - pas de création de multiLinks')
-      newLink.multiLinks = []
+    if (body.isDirect && body.directUrl && !validateURL(body.directUrl)) {
+      return NextResponse.json({ error: 'URL de redirection invalide' }, { status: 400 })
     }
-    
-    return NextResponse.json(newLink)
-    
+
+    if (!body.isDirect && Array.isArray(body.multiLinks)) {
+      for (const link of body.multiLinks) {
+        if (link?.url && !validateURL(link.url)) {
+          return NextResponse.json({ error: `URL invalide ou dangereuse: ${link.url}` }, { status: 400 })
+        }
+      }
+    }
+
+    const maxOrder = await prisma.link.findFirst({
+      where: { userId: session.user.id },
+      orderBy: { order: 'desc' },
+      select: { order: true },
+    })
+
+    const newLink = await prisma.link.create({
+      data: {
+        userId: session.user.id,
+        title: body.title || 'Mon lien',
+        internalName: body.internalName || null,
+        slug,
+        description: body.description || body.bio || '',
+        bio: body.bio || body.description || '',
+        directUrl: body.isDirect ? (body.directUrl || null) : null,
+        isDirect: !!body.isDirect,
+        isActive: true,
+        shieldEnabled: !!body.shieldEnabled,
+        isUltraLink: !!body.isUltraLink,
+        clicks: 0,
+        views: 0,
+        order: (maxOrder?.order || 0) + 1,
+        color: body.color || body.primaryColor || '#3b82f6',
+        icon: body.icon || '',
+        profileImage: body.profileImage || null,
+        profileStyle: body.profileStyle || 'circle',
+        coverImage: body.coverImage || null,
+        fontFamily: body.fontFamily || 'system',
+        borderRadius: body.borderRadius || 'rounded-xl',
+        backgroundColor: body.backgroundColor || '#ffffff',
+        textColor: body.textColor || '#1f2937',
+        instagramUrl: body.instagramUrl || null,
+        tiktokUrl: body.tiktokUrl || null,
+        twitterUrl: body.twitterUrl || null,
+        youtubeUrl: body.youtubeUrl || null,
+        animation: body.animation || 'none',
+        isOnline: !!body.isOnline,
+        city: body.city || null,
+        country: body.country || null,
+      },
+    })
+
+    let multiLinks: any[] = []
+    if (!body.isDirect && Array.isArray(body.multiLinks) && body.multiLinks.length > 0) {
+      multiLinks = await Promise.all(
+        body.multiLinks.map((subLink: any, index: number) =>
+          prisma.multiLink.create({
+            data: {
+              parentLinkId: newLink.id,
+              title: subLink.title || `Lien ${index + 1}`,
+              url: subLink.url,
+              description: subLink.description || null,
+              icon: subLink.icon || '',
+              iconImage: subLink.iconImage || subLink.icon || '',
+              animation: subLink.animation || null,
+              order: typeof subLink.order === 'number' ? subLink.order : index,
+              clicks: 0,
+            },
+          })
+        )
+      )
+    }
+
+    return NextResponse.json({ ...newLink, multiLinks })
   } catch (error: any) {
-    console.error('❌ Erreur création lien FINAL:', error)
-    return NextResponse.json({ 
-      error: 'Erreur lors de la création',
-      message: error.message 
+    console.error('Erreur creation lien FINAL:', error)
+    return NextResponse.json({
+      error: 'Erreur lors de la creation',
+      message: error.message,
     }, { status: 500 })
   }
 }

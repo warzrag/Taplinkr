@@ -1,6 +1,5 @@
-import { promises as fs } from 'fs'
-import path from 'path'
 import { nanoid } from 'nanoid'
+import { getDefaultBucket } from '@/lib/firebase-admin'
 
 export interface UploadResult {
   id: string
@@ -12,81 +11,51 @@ export interface UploadResult {
 }
 
 export class FileUploadService {
-  private uploadDir = path.join(process.cwd(), 'public/uploads')
-
-  constructor() {
-    this.ensureUploadDir()
-  }
-
-  private async ensureUploadDir() {
-    try {
-      await fs.access(this.uploadDir)
-    } catch {
-      await fs.mkdir(this.uploadDir, { recursive: true })
-    }
-  }
-
   async uploadFile(file: File, userId: string): Promise<UploadResult> {
     const fileId = nanoid()
-    const extension = this.getFileExtension(file.name)
-    const filename = `${fileId}${extension}`
-    const filePath = path.join(this.uploadDir, filename)
-    
-    // Convert File to Buffer
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    
-    // Use original buffer (no optimization for now)
-    let finalBuffer = buffer
-    
-    // Write file
-    await fs.writeFile(filePath, finalBuffer)
-    
+    const extension = this.getFileExtension(file.name, file.type)
+    const filename = `uploads/${userId}/files/${fileId}${extension}`
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const token = nanoid(32)
+    const bucket = getDefaultBucket()
+
+    await bucket.file(filename).save(buffer, {
+      resumable: false,
+      metadata: {
+        contentType: file.type,
+        cacheControl: 'public, max-age=31536000, immutable',
+        metadata: {
+          firebaseStorageDownloadTokens: token,
+          ownerId: userId,
+          originalName: file.name,
+        },
+      },
+    })
+
     return {
       id: fileId,
       filename,
       originalName: file.name,
-      url: `/uploads/${filename}`,
+      url: `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media&token=${token}`,
       mimeType: file.type,
-      size: finalBuffer.length
+      size: buffer.length,
     }
   }
 
-  async deleteFile(filename: string): Promise<void> {
-    const filePath = path.join(this.uploadDir, filename)
-    try {
-      await fs.unlink(filePath)
-    } catch (error) {
-      console.error('Error deleting file:', error)
-    }
+  async deleteFile(fileId: string, userId: string): Promise<void> {
+    const bucket = getDefaultBucket()
+    const [files] = await bucket.getFiles({ prefix: `uploads/${userId}/files/${fileId}` })
+    await Promise.all(files.map(file => file.delete().catch(() => undefined)))
   }
-
-  // Image optimization removed for now
-  // private async optimizeImage(buffer: Buffer): Promise<Buffer> {
-  //   return buffer
-  // }
-
-  private isImage(mimeType: string): boolean {
-    return mimeType.startsWith('image/')
-  }
-
-  private getFileExtension(filename: string): string {
-    return path.extname(filename).toLowerCase()
-  }
-
-  // Thumbnail generation removed for now
-  // async generateThumbnail(imageBuffer: Buffer, size: number = 200): Promise<Buffer> {
-  //   return imageBuffer
-  // }
 
   validateFile(file: File): { valid: boolean; error?: string } {
-    const maxSize = 10 * 1024 * 1024 // 10MB
+    const maxSize = 10 * 1024 * 1024
     const allowedTypes = [
       'image/jpeg',
       'image/png',
       'image/gif',
       'image/webp',
-      'image/svg+xml'
+      'image/svg+xml',
     ]
 
     if (file.size > maxSize) {
@@ -98,6 +67,17 @@ export class FileUploadService {
     }
 
     return { valid: true }
+  }
+
+  private getFileExtension(filename: string, mimeType: string): string {
+    const ext = filename.match(/\.[a-z0-9]+$/i)?.[0]
+    if (ext) return ext.toLowerCase()
+    if (mimeType === 'image/jpeg') return '.jpg'
+    if (mimeType === 'image/png') return '.png'
+    if (mimeType === 'image/gif') return '.gif'
+    if (mimeType === 'image/webp') return '.webp'
+    if (mimeType === 'image/svg+xml') return '.svg'
+    return '.bin'
   }
 }
 

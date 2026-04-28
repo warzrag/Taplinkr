@@ -12,9 +12,6 @@ import {
   Smartphone,
   Monitor,
   Tablet,
-  Chrome,
-  Safari,
-  Firefox,
   MapPin,
   Calendar,
   Clock,
@@ -151,15 +148,6 @@ export default function LinkAnalyticsPage() {
       case 'mobile': return Smartphone
       case 'tablet': return Tablet
       default: return Monitor
-    }
-  }
-
-  const getBrowserIcon = (browser: string) => {
-    switch (browser.toLowerCase()) {
-      case 'chrome': return Chrome
-      case 'safari': return Safari
-      case 'firefox': return Firefox
-      default: return Globe
     }
   }
 

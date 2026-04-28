@@ -16,7 +16,7 @@ export async function GET() {
       env: {
         hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
         hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        hasFirebaseServiceAccount: !!process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
         nextAuthUrl: process.env.NEXTAUTH_URL,
         nodeEnv: process.env.NODE_ENV,
       },
