@@ -56,8 +56,8 @@ export default function CoverImageUpload({
       return
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('L\'image ne doit pas dépasser 10MB')
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error('L\'image ne doit pas dépasser 4MB')
       return
     }
 
@@ -166,7 +166,7 @@ export default function CoverImageUpload({
 
             {/* Info text */}
             <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-              Format recommandé : 16:9 (paysage) ou 9:16 (portrait) • Max 10MB
+              Format recommandé : 16:9 (paysage) ou 9:16 (portrait) • Max 4MB
             </p>
           </motion.div>
         ) : (

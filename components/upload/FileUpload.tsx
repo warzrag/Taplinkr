@@ -24,7 +24,7 @@ interface FileUploadProps {
 export default function FileUpload({ 
   onFileUploaded, 
   accept = "image/*", 
-  maxSize = 10 * 1024 * 1024,
+  maxSize = 4 * 1024 * 1024,
   className = "",
   children 
 }: FileUploadProps) {

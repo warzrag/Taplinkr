@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nanoid } from 'nanoid'
 import sharp from 'sharp'
+import { put } from '@vercel/blob'
 import { authOptions } from '@/lib/auth'
-import { getDefaultBucket } from '@/lib/firebase-admin'
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024
+const MAX_FILE_SIZE = 4 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
 const IMAGE_TYPES = new Set(['avatar', 'banner', 'cover', 'icon', 'profile'])
+
+export const runtime = 'nodejs'
 
 function extensionFor(contentType: string, originalName: string) {
   if (contentType === 'image/jpeg' || contentType === 'image/jpg') return '.jpg'
@@ -85,7 +87,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'Fichier trop volumineux (max 10MB)' }, { status: 400 })
+      return NextResponse.json({ error: 'Fichier trop volumineux (max 4MB)' }, { status: 400 })
     }
 
     const rawBuffer = Buffer.from(await file.arrayBuffer())
@@ -97,41 +99,30 @@ export async function POST(request: NextRequest) {
       console.warn('Image optimization skipped:', error)
     }
 
-    const bucket = getDefaultBucket()
-    const token = nanoid(32)
     const fileId = nanoid()
     const extension = extensionFor(uploaded.contentType, file.name)
-    const storagePath = `uploads/${session.user.id}/${type}/${fileId}${extension}`
+    const pathname = `uploads/${session.user.id}/${type}/${fileId}${extension}`
 
-    await bucket.file(storagePath).save(uploaded.buffer, {
-      resumable: false,
-      metadata: {
-        contentType: uploaded.contentType,
-        cacheControl: 'public, max-age=31536000, immutable',
-        metadata: {
-          firebaseStorageDownloadTokens: token,
-          ownerId: session.user.id,
-          originalName: file.name,
-          uploadType: type,
-        },
-      },
+    const blob = await put(pathname, uploaded.buffer, {
+      access: 'public',
+      contentType: uploaded.contentType,
+      cacheControlMaxAge: 31536000,
+      allowOverwrite: false,
     })
-
-    const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(storagePath)}?alt=media&token=${token}`
 
     return NextResponse.json({
       id: fileId,
-      url,
-      filename: storagePath,
-      path: storagePath,
+      url: blob.url,
+      filename: blob.pathname,
+      path: blob.pathname,
       originalName: file.name,
       mimeType: uploaded.contentType,
       size: uploaded.buffer.length,
     })
   } catch (error: any) {
     console.error('Erreur upload:', error)
-    const message = error?.code === 404 || error?.message?.includes('No such object')
-      ? 'Firebase Storage bucket introuvable. Active Firebase Storage puis renseigne FIREBASE_STORAGE_BUCKET si besoin.'
+    const message = error?.message?.includes('BLOB_READ_WRITE_TOKEN')
+      ? 'Vercel Blob n\'est pas configure. Verifie BLOB_READ_WRITE_TOKEN dans Vercel.'
       : 'Erreur lors de l upload'
     return NextResponse.json({ error: message, details: error?.message }, { status: 500 })
   }

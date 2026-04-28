@@ -64,8 +64,8 @@ export default function ImageUpload({
     }
 
     // Vérifier la taille
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('L\'image ne doit pas dépasser 10MB')
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error('L\'image ne doit pas dépasser 4MB')
       return
     }
 
@@ -274,7 +274,7 @@ export default function ImageUpload({
                     {isDragging ? 'Déposez l\'image ici' : 'Cliquez ou glissez une image'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    JPG, PNG, GIF, WebP • Max 10MB
+                    JPG, PNG, GIF, WebP • Max 4MB
                   </p>
                 </>
               )}

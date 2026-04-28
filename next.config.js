@@ -37,6 +37,12 @@ const nextConfig = {
   // Optimisations images
   images: {
     domains: ['dkwgorynhgnmldzbhhrb.supabase.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+      },
+    ],
     formats: ['image/webp'], // Seulement WebP pour vitesse maximale
     deviceSizes: [640, 750, 828], // Réduire nombre de tailles
     imageSizes: [32, 64, 96], // Réduire nombre de tailles

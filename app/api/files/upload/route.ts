@@ -25,8 +25,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(uploadedFile)
   } catch (error: any) {
     console.error('File upload error:', error)
+    const message = error?.message?.includes('BLOB_READ_WRITE_TOKEN')
+      ? 'Vercel Blob n\'est pas configure. Verifie BLOB_READ_WRITE_TOKEN dans Vercel.'
+      : 'Erreur lors de l upload'
     return NextResponse.json({
-      error: 'Erreur lors de l upload',
+      error: message,
       details: error?.message,
     }, { status: 500 })
   }
