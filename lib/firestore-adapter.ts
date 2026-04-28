@@ -427,8 +427,86 @@ function modelProxy(model: string) {
       if (args.data.length) await batch.commit()
       return { count: args.data.length }
     },
-    async aggregate() { throw new Error('aggregate() not supported') },
-    async groupBy() { throw new Error('groupBy() not supported') },
+    async aggregate(args: any = {}) {
+      const r = await runQuery(collection, { where: args.where || {} })
+      const out: any = {}
+      if (args._count) {
+        if (args._count === true) out._count = r.length
+        else if (typeof args._count === 'object') {
+          out._count = {}
+          for (const f of Object.keys(args._count)) {
+            out._count[f] = r.filter(x => x[f] !== null && x[f] !== undefined).length
+          }
+        }
+      }
+      if (args._sum) {
+        out._sum = {}
+        for (const f of Object.keys(args._sum)) {
+          out._sum[f] = r.reduce((s, x) => s + (Number(x[f]) || 0), 0)
+        }
+      }
+      if (args._avg) {
+        out._avg = {}
+        for (const f of Object.keys(args._avg)) {
+          const nums = r.map(x => Number(x[f])).filter(n => !isNaN(n))
+          out._avg[f] = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null
+        }
+      }
+      if (args._min) {
+        out._min = {}
+        for (const f of Object.keys(args._min)) out._min[f] = r.length ? r.reduce((m, x) => x[f] < m ? x[f] : m, r[0][f]) : null
+      }
+      if (args._max) {
+        out._max = {}
+        for (const f of Object.keys(args._max)) out._max[f] = r.length ? r.reduce((m, x) => x[f] > m ? x[f] : m, r[0][f]) : null
+      }
+      return out
+    },
+    async groupBy(args: any) {
+      const r = await runQuery(collection, { where: args.where || {} })
+      const by: string[] = Array.isArray(args.by) ? args.by : [args.by]
+      const groups = new Map<string, any[]>()
+      for (const item of r) {
+        const key = by.map(f => JSON.stringify(item[f] ?? null)).join('|')
+        if (!groups.has(key)) groups.set(key, [])
+        groups.get(key)!.push(item)
+      }
+      const result: any[] = []
+      for (const [, items] of groups) {
+        const out: any = {}
+        for (const f of by) out[f] = items[0][f]
+        if (args._count) {
+          if (args._count === true) out._count = items.length
+          else if (typeof args._count === 'object') {
+            out._count = {}
+            for (const f of Object.keys(args._count)) {
+              out._count[f] = items.filter(x => x[f] !== null && x[f] !== undefined).length
+            }
+          }
+        }
+        if (args._sum) {
+          out._sum = {}
+          for (const f of Object.keys(args._sum)) out._sum[f] = items.reduce((s, x) => s + (Number(x[f]) || 0), 0)
+        }
+        result.push(out)
+      }
+      if (args.orderBy) {
+        const orders = Array.isArray(args.orderBy) ? args.orderBy : [args.orderBy]
+        result.sort((a, b) => {
+          for (const o of orders) {
+            const [f, dir] = Object.entries(o)[0] as [string, 'asc' | 'desc']
+            const av = (typeof a[f] === 'object' ? Object.values(a[f])[0] : a[f]) as any
+            const bv = (typeof b[f] === 'object' ? Object.values(b[f])[0] : b[f]) as any
+            if (av === bv) continue
+            const cmp = av < bv ? -1 : 1
+            return dir === 'desc' ? -cmp : cmp
+          }
+          return 0
+        })
+      }
+      if (args.take) return result.slice(0, args.take)
+      return result
+    },
   }
 }
 
