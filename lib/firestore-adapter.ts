@@ -121,6 +121,16 @@ const RELATIONS: Record<string, Record<string, Relation>> = {
     link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
     user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
   },
+  teamAuditLog: {
+    team: { coll: 'teams', fk: 'id', kind: 'one', localKey: 'teamId' },
+    user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
+    link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
+  },
+  teamLinkHistory: {
+    team: { coll: 'teams', fk: 'id', kind: 'one', localKey: 'teamId' },
+    user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
+    link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
+  },
   teamInvitation: {
     team: { coll: 'teams', fk: 'id', kind: 'one', localKey: 'teamId' },
     invitedBy: { coll: 'users', fk: 'id', kind: 'one', localKey: 'invitedById' },
@@ -200,10 +210,49 @@ function applyWhere(q: Query, where: any): Query {
   return q
 }
 
+function findLargeInFilter(where: any): { field: string; values: any[] } | null {
+  if (!where || typeof where !== 'object') return null
+  for (const [field, value] of Object.entries(where)) {
+    if (field === 'AND' && Array.isArray(value)) {
+      for (const sub of value) {
+        const found = findLargeInFilter(sub)
+        if (found) return found
+      }
+      continue
+    }
+    if (field === 'OR' || field === 'NOT') continue
+    if (value && typeof value === 'object' && !(value instanceof Date)) {
+      const v: any = value
+      if (Array.isArray(v.in) && v.in.length > 30) return { field, values: v.in }
+    }
+  }
+  return null
+}
+
+function replaceLargeInFilter(where: any, field: string, values: any[]): any {
+  if (!where || typeof where !== 'object') return where
+  const out: any = Array.isArray(where) ? [] : {}
+  for (const [key, value] of Object.entries(where)) {
+    if (key === 'AND' && Array.isArray(value)) {
+      out[key] = value.map(sub => replaceLargeInFilter(sub, field, values))
+    } else if (key === field && value && typeof value === 'object' && !(value instanceof Date) && Array.isArray((value as any).in)) {
+      out[key] = { ...(value as any), in: values }
+    } else {
+      out[key] = value
+    }
+  }
+  return out
+}
+
+function chunk<T>(values: T[], size: number): T[][] {
+  const chunks: T[][] = []
+  for (let i = 0; i < values.length; i += size) chunks.push(values.slice(i, i + size))
+  return chunks
+}
+
 // ------- Build query -------
 async function runQuery(coll: string, args: any = {}): Promise<any[]> {
   let q: Query = db.collection(coll)
-  if (args.where) q = applyWhere(q, args.where)
 
   // Handle OR by running parallel queries and merging
   if (args.where?.OR && Array.isArray(args.where.OR)) {
@@ -219,6 +268,21 @@ async function runQuery(coll: string, args: any = {}): Promise<any[]> {
     }
     return applySortLimit(merged, args)
   }
+
+  const largeIn = findLargeInFilter(args.where)
+  if (largeIn) {
+    const results = await Promise.all(chunk(largeIn.values, 30).map(values =>
+      runQuery(coll, { ...args, where: replaceLargeInFilter(args.where, largeIn.field, values) })
+    ))
+    const seen = new Set<string>()
+    const merged: any[] = []
+    for (const arr of results) for (const r of arr) {
+      if (!seen.has(r.id)) { seen.add(r.id); merged.push(r) }
+    }
+    return applySortLimit(merged, args)
+  }
+
+  if (args.where) q = applyWhere(q, args.where)
 
   if (args.orderBy) {
     const orders = Array.isArray(args.orderBy) ? args.orderBy : [args.orderBy]
@@ -494,9 +558,19 @@ function modelProxy(model: string) {
         const orders = Array.isArray(args.orderBy) ? args.orderBy : [args.orderBy]
         result.sort((a, b) => {
           for (const o of orders) {
-            const [f, dir] = Object.entries(o)[0] as [string, 'asc' | 'desc']
-            const av = (typeof a[f] === 'object' ? Object.values(a[f])[0] : a[f]) as any
-            const bv = (typeof b[f] === 'object' ? Object.values(b[f])[0] : b[f]) as any
+            const [f, rawDir] = Object.entries(o)[0] as [string, any]
+            let av = a[f] as any
+            let bv = b[f] as any
+            let dir: 'asc' | 'desc' = rawDir === 'desc' ? 'desc' : 'asc'
+            if (rawDir && typeof rawDir === 'object') {
+              const [nestedField, nestedDir] = Object.entries(rawDir)[0] as [string, 'asc' | 'desc']
+              av = av?.[nestedField]
+              bv = bv?.[nestedField]
+              dir = nestedDir === 'desc' ? 'desc' : 'asc'
+            } else if (typeof av === 'object') {
+              av = Object.values(av)[0]
+              bv = Object.values(bv)[0]
+            }
             if (av === bv) continue
             const cmp = av < bv ? -1 : 1
             return dir === 'desc' ? -cmp : cmp

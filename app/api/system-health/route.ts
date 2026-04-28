@@ -1,47 +1,42 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import os from 'os'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    
-    // Vérifier si l'utilisateur est admin
+
     if (!session || session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+      return NextResponse.json({ error: 'Non autorise' }, { status: 403 })
     }
 
-    // 1. Santé de la base de données
     let dbStatus = 'error'
-    let dbStats = {}
+    let dbStats: Record<string, any> = {}
     try {
-      // Tester la connexion d'abord
-      await prisma.$queryRaw`SELECT 1`
-      
-      // Ensuite récupérer les stats une par une pour éviter les erreurs
-      const userCount = await prisma.user.count().catch(() => 0)
-      const linkCount = await prisma.link.count().catch(() => 0)
-      const clickCount = await prisma.click.count().catch(() => 0)
-      const folderCount = await prisma.folder.count().catch(() => 0)
-      
+      const [userCount, linkCount, clickCount, folderCount] = await Promise.all([
+        prisma.user.count().catch(() => 0),
+        prisma.link.count().catch(() => 0),
+        prisma.click.count().catch(() => 0),
+        prisma.folder.count().catch(() => 0),
+      ])
+
       dbStatus = 'healthy'
       dbStats = {
         users: userCount,
         links: linkCount,
         clicks: clickCount,
-        folders: folderCount
+        folders: folderCount,
       }
-    } catch (error) {
+    } catch (error: any) {
       dbStatus = 'error'
-      dbStats = { 
+      dbStats = {
         error: error.message,
-        hint: 'Database connection issue - may need to restart the app'
+        hint: 'Firestore connection issue. Check FIREBASE_SERVICE_ACCOUNT_JSON.',
       }
     }
 
-    // 2. Informations système
     const systemInfo = {
       platform: os.platform(),
       arch: os.arch(),
@@ -51,90 +46,74 @@ export async function GET(request: Request) {
         total: os.totalmem(),
         free: os.freemem(),
         used: os.totalmem() - os.freemem(),
-        usage: ((os.totalmem() - os.freemem()) / os.totalmem() * 100).toFixed(2) + '%'
+        usage: `${(((os.totalmem() - os.freemem()) / os.totalmem()) * 100).toFixed(2)}%`,
       },
       cpu: {
         model: os.cpus()[0]?.model || 'Unknown',
         cores: os.cpus().length,
-        speed: os.cpus()[0]?.speed || 0
-      }
+        speed: os.cpus()[0]?.speed || 0,
+      },
     }
 
-    // 3. Variables d'environnement (sans les secrets)
     const envStatus = {
-      database: !!process.env.DATABASE_URL,
+      firebase: !!process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
       nextAuth: !!process.env.NEXTAUTH_SECRET,
-      supabase: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
       email: !!process.env.RESEND_API_KEY,
       stripe: !!process.env.STRIPE_SECRET_KEY,
       nodeEnv: process.env.NODE_ENV,
-      vercel: !!process.env.VERCEL
+      vercel: !!process.env.VERCEL,
     }
 
-    // 4. Performance récente
-    const recentStats = await prisma.analyticsEvent.groupBy({
-      by: ['createdAt'],
+    const recentEvents = await prisma.analyticsEvent.count({
       where: {
         createdAt: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Dernières 24h
-        }
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        },
       },
-      _count: true,
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-
-    // 5. Erreurs récentes (si vous avez un système de logs)
-    const recentErrors = [] // À implémenter selon votre système de logs
-
-    // 6. État des services externes
-    const externalServices = {
-      supabase: await checkSupabase(),
-      stripe: await checkStripe(),
-      email: await checkEmail()
-    }
+    }).catch(() => 0)
 
     return NextResponse.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
       database: {
         status: dbStatus,
-        stats: dbStats
+        stats: dbStats,
       },
       system: systemInfo,
       environment: envStatus,
       performance: {
-        last24h: recentStats.length,
-        avgResponseTime: 'N/A' // À implémenter
+        last24h: recentEvents,
+        avgResponseTime: 'N/A',
       },
-      services: externalServices,
-      errors: recentErrors
+      services: {
+        firebase: checkFirebase(),
+        stripe: checkStripe(),
+        email: checkEmail(),
+      },
+      errors: [],
     })
-  } catch (error) {
-    return NextResponse.json({ 
+  } catch (error: any) {
+    return NextResponse.json({
       status: 'error',
-      error: error.message 
+      error: error.message,
     }, { status: 500 })
   }
 }
 
-async function checkSupabase() {
-  try {
-    // Test simple de connexion
-    const user = await prisma.user.findFirst()
-    return { status: 'healthy', latency: 'N/A' }
-  } catch (error) {
-    return { status: 'error', error: error.message }
-  }
+function checkFirebase() {
+  return process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+    ? { status: 'configured' }
+    : { status: 'missing_env', env: 'FIREBASE_SERVICE_ACCOUNT_JSON' }
 }
 
-async function checkStripe() {
-  // À implémenter selon votre config Stripe
-  return { status: 'not_configured' }
+function checkStripe() {
+  return process.env.STRIPE_SECRET_KEY
+    ? { status: 'configured' }
+    : { status: 'not_configured' }
 }
 
-async function checkEmail() {
-  // À implémenter selon votre config email
-  return { status: 'not_configured' }
+function checkEmail() {
+  return process.env.RESEND_API_KEY
+    ? { status: 'configured' }
+    : { status: 'not_configured' }
 }
