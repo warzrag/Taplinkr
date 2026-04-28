@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-  // Créer une nouvelle instance pour avoir les données fraîches
-  const prisma = new PrismaClient()
   
   try {
     const session = await getServerSession(authOptions)
@@ -112,17 +110,19 @@ export async function GET() {
       .sort((a, b) => b.totalScore - a.totalScore)
       .slice(0, 5)
 
-    // Données pour le graphique (30 derniers jours) - basé sur la table Click pour TOUS les user IDs
-    const dailyClicks = await prisma.$queryRaw`
-      SELECT 
-        DATE("createdAt") as date,
-        COUNT(*) as count
-      FROM "Click"
-      WHERE "userId" = ANY(${allUserIds}::text[])
-        AND "createdAt" >= ${thirtyDaysAgo}
-      GROUP BY DATE("createdAt")
-      ORDER BY date ASC
-    ` as any[]
+    // Daily clicks aggregated client-side (Firestore has no GROUP BY)
+    const recentClicks = await prisma.click.findMany({
+      where: { userId: { in: allUserIds }, createdAt: { gte: thirtyDaysAgo } },
+    })
+    const dailyClicksMap = new Map<string, number>()
+    for (const c of recentClicks) {
+      const d = c.createdAt instanceof Date ? c.createdAt : new Date(c.createdAt)
+      const key = d.toISOString().slice(0, 10)
+      dailyClicksMap.set(key, (dailyClicksMap.get(key) || 0) + 1)
+    }
+    const dailyClicks = Array.from(dailyClicksMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({ date, count }))
 
     return NextResponse.json({
       totalLinks,
@@ -147,8 +147,5 @@ export async function GET() {
   } catch (error) {
     console.error('Erreur lors de la récupération des stats dashboard:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
-  } finally {
-    // Toujours déconnecter pour libérer les ressources
-    await prisma.$disconnect()
   }
 }
