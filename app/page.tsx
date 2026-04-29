@@ -29,55 +29,55 @@ import { Container } from '@/components/ui/Container'
 const features = [
   {
     icon: ExternalLink,
-    title: 'Pages de liens rapides',
-    description: 'Publiez une page mobile élégante avec vos contenus, offres, réseaux et liens importants.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Analytics lisibles',
-    description: 'Suivez les vues, clics, visiteurs, appareils et pays sans vous perdre dans des rapports lourds.',
+    title: 'Pages publiques mobile-first',
+    description: 'Publiez une page premium pensée pour Instagram, TikTok, X, Reddit et les visiteurs pressés.',
   },
   {
     icon: Shield,
-    title: 'Protection intégrée',
-    description: 'Ajoutez des étapes de vérification, des liens directs et des protections adaptées aux liens sensibles.',
+    title: 'Liens directs et Shield',
+    description: 'Ajoutez des redirections propres, des étapes de vérification et des protections pour les liens sensibles.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Analytics de conversion',
+    description: 'Comprenez les vues, clics, pays, appareils et sources qui transforment vraiment votre audience.',
   },
   {
     icon: Palette,
-    title: 'Identité maîtrisée',
-    description: 'Personnalisez les visuels, couvertures, icônes et styles pour garder une page cohérente.',
+    title: 'Identité créateur',
+    description: 'Gardez une page cohérente avec vos visuels, couvertures, icônes, couleurs et appels à l’action.',
   },
   {
     icon: Folder,
-    title: 'Organisation claire',
-    description: 'Classez vos liens par dossiers, campagnes ou clients pour garder un espace de travail propre.',
+    title: 'Campagnes organisées',
+    description: 'Classez vos pages, liens, dossiers et lancements pour savoir ce qui marche sans fouiller partout.',
   },
   {
     icon: Users,
-    title: 'Travail en équipe',
-    description: 'Invitez des membres, partagez des liens et gardez la visibilité sur les performances.',
+    title: 'Équipes et agences',
+    description: 'Invitez des membres, gérez plusieurs pages et gardez une vue claire sur les performances clients.',
   },
 ]
 
 const workflow = [
   'Créez votre page',
-  'Ajoutez vos liens',
-  'Partagez votre URL',
-  'Mesurez les clics',
+  'Ajoutez vos offres',
+  'Protégez vos liens',
+  'Suivez les clics',
 ]
 
 const useCases = [
   {
     title: 'Créateurs',
-    text: 'Une seule URL pour vos contenus, offres, réseaux et pages privées.',
+    text: 'Une page claire pour transformer vos followers en visiteurs, abonnés ou clients.',
+  },
+  {
+    title: 'Pages sensibles',
+    text: 'Des redirections mieux contrôlées quand vos liens demandent plus de prudence.',
   },
   {
     title: 'Agences',
-    text: 'Des pages propres pour chaque client, campagne ou lancement.',
-  },
-  {
-    title: 'Indépendants',
-    text: 'Un hub simple pour présenter votre travail et suivre ce qui convertit.',
+    text: 'Un espace pour gérer plusieurs créateurs, campagnes et performances au même endroit.',
   },
 ]
 
@@ -160,15 +160,15 @@ export default function Home() {
             >
               <div className="mx-auto mb-6 flex w-full max-w-[18rem] items-center justify-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-center text-xs font-medium text-white/80 backdrop-blur sm:inline-flex sm:max-w-full sm:px-4 sm:text-sm">
                 <Sparkles className="h-4 w-4 flex-shrink-0 text-cyan-300" />
-                <span className="min-w-0 whitespace-normal break-words">Lien bio, analytics et pages publiques pour créateurs et équipes</span>
+                <span className="min-w-0 whitespace-normal break-words">Link-in-bio pour créateurs, agences et pages sensibles</span>
               </div>
 
               <h1 className="mx-auto max-w-[18rem] break-words text-3xl font-semibold leading-[1.08] text-white xs:text-4xl sm:max-w-4xl sm:text-5xl lg:text-6xl">
-                Le hub de liens qui donne une vraie direction à votre audience
+                Transformez votre lien bio en page qui convertit vos fans
               </h1>
 
               <p className="mx-auto mt-6 max-w-[18rem] text-base leading-7 text-white/70 sm:max-w-2xl sm:text-lg">
-                Créez une page publique rapide, organisez vos liens, mesurez les clics et gardez une présentation premium sur mobile comme sur desktop.
+                Créez une page mobile premium, protégez vos redirections et voyez quels liens transforment vraiment votre audience en clics.
               </p>
 
               <div className="mx-auto mt-8 w-full max-w-[18rem] overflow-hidden rounded-2xl border border-white/12 bg-white/10 p-3 text-left shadow-2xl shadow-black/20 backdrop-blur-xl sm:max-w-2xl sm:p-4">
@@ -225,8 +225,11 @@ export default function Home() {
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-600">Produit</p>
               <h2 className="mt-3 text-3xl font-semibold text-neutral-950 dark:text-white sm:text-4xl">
-                Tout ce qu’il faut pour publier, suivre et améliorer vos liens
+                Bien plus qu’une liste de liens dans votre bio
               </h2>
+              <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-neutral-600 dark:text-white/60">
+                TapLinkr se concentre sur ce qui manque aux pages génériques : conversion, protection, suivi clair et gestion multi-pages.
+              </p>
             </div>
 
             <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -248,10 +251,10 @@ export default function Home() {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-600">Cas d’usage</p>
               <h2 className="mt-3 text-3xl font-semibold text-neutral-950 dark:text-white sm:text-4xl">
-                Un seul outil pour la page publique et le pilotage interne
+                Pensé pour les créateurs qui vivent de leurs clics
               </h2>
               <p className="mt-4 text-sm leading-7 text-neutral-600 dark:text-white/60">
-                TapLinkr doit rester simple côté visiteur et précis côté dashboard. Le site est pensé pour cette séparation : une page rapide à partager, un espace de travail propre pour décider quoi améliorer.
+                TapLinkr doit rester simple côté visiteur et précis côté dashboard : une page rapide à partager, un pilotage clair pour décider quoi pousser, protéger ou améliorer.
               </p>
             </div>
 
@@ -273,12 +276,12 @@ export default function Home() {
                 <div>
                   <div className="mb-4 flex flex-wrap gap-2 text-xs text-white/65">
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1"><Globe2 className="h-3.5 w-3.5" /> Page publique</span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1"><MousePointerClick className="h-3.5 w-3.5" /> Tracking</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1"><MousePointerClick className="h-3.5 w-3.5" /> Conversion</span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1"><Lock className="h-3.5 w-3.5" /> Protection</span>
                   </div>
-                  <h2 className="text-3xl font-semibold sm:text-4xl">Prêt à rendre votre lien principal plus sérieux ?</h2>
+                  <h2 className="text-3xl font-semibold sm:text-4xl">Faites mieux qu’une simple page de liens</h2>
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">
-                    Réservez votre URL, créez votre première page et commencez à mesurer les clics dès aujourd’hui.
+                    Réservez votre URL, créez votre première page et commencez à comprendre quels liens méritent vraiment la première place.
                   </p>
                 </div>
                 <button
