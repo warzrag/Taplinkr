@@ -304,28 +304,28 @@ export default function Dashboard() {
       icon: Plus,
       onClick: handleCreateClick,
       gradient: 'from-blue-500 to-cyan-500',
-      description: 'Lancez-vous en 2 clics ✨'
+      description: 'Publier une nouvelle page'
     },
     {
       label: 'Analytics',
       icon: Activity,
-      href: '/dashboard/analytics',
+      href: '/dashboard/visitors',
       gradient: 'from-purple-500 to-pink-500',
-      description: 'Vos stats en temps réel 📊'
+      description: 'Comprendre les performances'
     },
     {
       label: 'Mes liens',
       icon: Link2,
       href: '/dashboard/links',
       gradient: 'from-emerald-500 to-teal-500',
-      description: 'Votre univers digital 🌐'
+      description: 'Gérer les URLs publiques'
     },
     {
       label: userProfile?.plan === 'free' ? 'Passer Pro' : 'Abonnement',
       icon: userProfile?.plan === 'free' ? Crown : Zap,
       href: '/dashboard/billing',
       gradient: userProfile?.plan === 'free' ? 'from-yellow-500 to-orange-500' : 'from-gray-500 to-gray-600',
-      description: userProfile?.plan === 'free' ? 'Débloquez la puissance Pro 🚀' : 'Gérez votre plan Premium ⚡'
+      description: userProfile?.plan === 'free' ? 'Activer les options avancées' : 'Gérer votre abonnement'
     }
   ]
 
@@ -340,8 +340,8 @@ export default function Dashboard() {
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1.5 sm:mb-2">
-                Bonjour {userProfile?.name || session?.user?.email?.split('@')[0]} ! 👋
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-gray-100 mb-1.5 sm:mb-2">
+                Bonjour, {userProfile?.name || session?.user?.email?.split('@')[0]}
               </h1>
               <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400">
                 {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -352,7 +352,7 @@ export default function Dashboard() {
             {((session?.user as any)?.role === 'admin' || (session?.user as any)?.role === 'manager') && (
               <motion.button
                 onClick={() => router.push('/admin/users')}
-                className="bg-gradient-to-r from-red-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition-all"
+                className="border border-gray-200 bg-white px-5 py-2.5 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-xl font-semibold flex items-center gap-2 hover:border-gray-300 dark:hover:border-gray-600 transition-all"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -452,7 +452,6 @@ export default function Dashboard() {
                 )}
               </div>
               <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                {console.log('🔍 dashboardStats:', dashboardStats) || ''}
                 {dashboardStats?.totalClicks || 0}
               </p>
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Total clics</p>
@@ -583,7 +582,7 @@ export default function Dashboard() {
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Top liens
               </h2>
-              <FastLink href="/dashboard/analytics" prefetch={true}>
+              <FastLink href="/dashboard/visitors" prefetch={true}>
                 <span className="text-sm text-brand-600 hover:underline flex items-center gap-1">
                   Voir tout
                   <ChevronRight className="w-4 h-4" />
@@ -858,7 +857,7 @@ export default function Dashboard() {
             </div>
 
             {/* Recommandations */}
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+            <div className="rounded-2xl border border-gray-200 bg-gray-900 p-6 text-white shadow-sm dark:border-gray-700">
               <h2 className="text-xl font-bold mb-4">
                 Recommandations
               </h2>

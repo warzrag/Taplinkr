@@ -35,26 +35,26 @@ interface FormData {
 const benefits = [
   {
     icon: BarChart3,
-    title: 'Analytics en temps réel',
-    description: 'Tableaux de bord intuitifs pour mesurer vos performances et optimiser votre ROI'
+    title: 'Analytics exploitables',
+    description: 'Tableaux de bord clairs pour mesurer les vues, clics et visiteurs'
   },
   {
     icon: Shield,
-    title: 'Sécurité enterprise',
-    description: 'Chiffrement SSL 256-bit, authentification 2FA et conformité RGPD garantie'
+    title: 'Accès sécurisé',
+    description: 'Sessions protégées, données serveur et accès privé au dashboard'
   },
   {
     icon: Users,
-    title: 'Collaboration avancée',
-    description: 'Gestion d\'équipe avec rôles granulaires et workflows collaboratifs sécurisés'
+    title: 'Collaboration',
+    description: 'Gestion d’équipe pour partager les liens et suivre les performances'
   },
 ]
 
 const metrics = [
-  { value: '500K+', label: 'Professionnels', icon: Users },
-  { value: '99.9%', label: 'Uptime', icon: TrendingUp },
-  { value: '2.4Mds', label: 'Interactions/an', icon: Globe },
-  { value: '<200ms', label: 'Temps réponse', icon: Zap },
+  { value: 'Liens', label: 'Pages publiques', icon: Users },
+  { value: 'Stats', label: 'Clics et vues', icon: TrendingUp },
+  { value: 'Geo', label: 'Pays et appareils', icon: Globe },
+  { value: 'Teams', label: 'Travail en équipe', icon: Zap },
 ]
 
 export default function SignIn() {
@@ -69,7 +69,6 @@ export default function SignIn() {
   // Rediriger si déjà connecté
   useEffect(() => {
     if (status === 'authenticated' && session) {
-      console.log('✅ Déjà connecté, redirection vers /dashboard')
       router.push('/dashboard')
     }
   }, [status, session, router])
@@ -101,8 +100,6 @@ export default function SignIn() {
   const onSubmit = async (data: FormData) => {
     setLoading(true)
 
-    console.log('🔐 Tentative de connexion...', { email: data.email })
-
     try {
       // Déterminer l'URL de callback
       const inviteToken = searchParams.get('invite')
@@ -120,10 +117,7 @@ export default function SignIn() {
         redirect: false,
       })
 
-      console.log('📊 Résultat signIn:', result)
-
       if (result?.error) {
-        console.log('❌ Erreur:', result.error)
         if (result.error === 'EMAIL_NOT_VERIFIED') {
           toast.error('Veuillez vérifier votre email avant de vous connecter', { duration: 5000 })
         } else if (result.error === 'RATE_LIMIT_EXCEEDED') {
@@ -136,7 +130,6 @@ export default function SignIn() {
       }
 
       if (result?.ok) {
-        console.log('✅ Connexion réussie, redirection vers:', callbackUrl)
         toast.success('Connexion réussie !')
         // Forcer un rechargement complet de la page pour réinitialiser le SessionProvider
         window.location.href = callbackUrl
@@ -424,7 +417,7 @@ export default function SignIn() {
             {/* Support Link */}
             <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
               Besoin d'aide ?{' '}
-              <Link href="/support" className="font-medium text-brand-600 hover:text-brand-500 transition-colors">
+              <Link href="mailto:hello@taplinkr.com" className="font-medium text-brand-600 hover:text-brand-500 transition-colors">
                 Contactez notre support
               </Link>
             </p>

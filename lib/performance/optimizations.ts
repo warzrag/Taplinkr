@@ -4,8 +4,8 @@
 export const criticalRoutes = [
   '/dashboard',
   '/dashboard/links',
-  '/dashboard/analytics',
-  '/settings'
+  '/dashboard/visitors',
+  '/dashboard/profile'
 ]
 
 // 2. Configuration du prefetch pour les images

@@ -521,7 +521,7 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
           )}
         </div>
 
-        {/* Social Media Icons and LinkTracker Badge */}
+        {/* Social Media Icons and TapLinkr Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -635,7 +635,7 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
               </motion.div>
             )}
 
-            {/* Bottom Section: LinkTracker Badge */}
+            {/* Bottom Section: TapLinkr Badge */}
             <motion.div
               className="flex items-center justify-center"
               initial={{ opacity: 0 }}
@@ -646,7 +646,7 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
                   <div className="w-2 h-2 bg-gray-900 rounded-full" />
                 </div>
-                <span className="text-white text-xs font-medium" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>LinkTracker</span>
+                <span className="text-white text-xs font-medium" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>TapLinkr</span>
               </div>
             </motion.div>
             </div>

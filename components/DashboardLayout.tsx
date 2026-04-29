@@ -8,7 +8,6 @@ import {
   LogOut,
   BarChart3,
   Shield,
-  Settings,
   Menu,
   X,
   CreditCard,
@@ -23,7 +22,6 @@ import {
   Database
 } from 'lucide-react'
 import Logo from '@/components/Logo'
-import LivePhonePreview from '@/components/LivePhonePreview'
 import { LinkUpdateProvider } from '@/contexts/LinkUpdateContext'
 import { ProfileProvider } from '@/contexts/ProfileContext'
 import { LinksProvider } from '@/contexts/LinksContext'
@@ -69,34 +67,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     if (session) {
       fetchLinks()
-      // Rafraîchir les liens toutes les 5 secondes pour la prévisualisation live
-      const interval = setInterval(fetchLinks, 5000)
+      // Keep the preview fresh without polling aggressively.
+      const interval = setInterval(fetchLinks, 30000)
       return () => clearInterval(interval)
     }
   }, [session])
 
-  // Control Panel Section
   const controlPanelItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-    { icon: ExternalLink, label: 'Links', href: '/dashboard/links' },
+    { icon: LayoutDashboard, label: 'Tableau de bord', href: '/dashboard' },
+    { icon: ExternalLink, label: 'Liens', href: '/dashboard/links' },
     { icon: Folder, label: 'Dossiers', href: '/dashboard/folders' },
-    { icon: BarChart3, label: 'Social Analytics', href: '/dashboard/analytics' },
+    { icon: BarChart3, label: 'Analytics', href: '/dashboard/visitors' },
     { icon: Activity, label: 'Visiteurs', href: '/dashboard/visitors' },
-    { icon: Users, label: 'Teams', href: '/dashboard/team' },
+    { icon: Users, label: 'Équipe', href: '/dashboard/team' },
   ]
 
-  // Account Section
   const accountItems = [
-    { icon: User, label: 'Profile', href: '/dashboard/profile' },
-    { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
+    { icon: User, label: 'Profil', href: '/dashboard/profile' },
+    { icon: CreditCard, label: 'Facturation', href: '/dashboard/billing' },
     { icon: Gift, label: 'Tarifs', href: '/dashboard/pricing' },
-    { icon: Settings, label: 'Settings', href: '/settings' },
   ]
 
-  // Help Section
   const helpItems = [
     { icon: HelpCircle, label: 'FAQ', href: '/dashboard/faq' },
-    { icon: Map, label: 'Roadmap', href: '/dashboard/roadmap' },
+    { icon: Map, label: 'Feuille de route', href: '/dashboard/roadmap' },
     { icon: MessageCircle, label: 'Support', href: '/dashboard/support' },
   ]
   
@@ -150,7 +144,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Control Panel Section */}
           <div>
             <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
-              Control Panel
+              Espace de travail
             </h3>
             <div className="space-y-1">
               {controlPanelItems.map((item) => {
@@ -176,7 +170,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Account Section */}
           <div>
             <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
-              Account
+              Compte
             </h3>
             <div className="space-y-1">
               {accountItems.map((item) => {
@@ -203,7 +197,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {(
             <div>
               <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
-                Help
+                Aide
               </h3>
               <div className="space-y-1">
                 {helpItems.map((item) => {

@@ -22,7 +22,7 @@ interface SendEmailOptions {
 export async function sendEmail({ to, subject, html }: SendEmailOptions) {
   try {
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || '"LinkTracker" <noreply@linktracker.com>',
+      from: process.env.EMAIL_FROM || '"TapLinkr" <hello@taplinkr.com>',
       to,
       subject,
       html
@@ -122,7 +122,7 @@ export function getVerificationEmailTemplate(username: string, verificationUrl: 
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Vérification de votre compte LinkTracker</title>
+      <title>Vérification de votre compte TapLinkr</title>
     </head>
     <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
@@ -132,7 +132,7 @@ export function getVerificationEmailTemplate(username: string, verificationUrl: 
               <!-- Header -->
               <tr>
                 <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 32px;">LinkTracker</h1>
+                  <h1 style="color: #ffffff; margin: 0; font-size: 32px;">TapLinkr</h1>
                   <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px;">Vérification de votre compte</p>
                 </td>
               </tr>
@@ -143,7 +143,7 @@ export function getVerificationEmailTemplate(username: string, verificationUrl: 
                   <h2 style="color: #333333; margin: 0 0 20px 0;">Bonjour ${username} ! 👋</h2>
                   
                   <p style="color: #666666; line-height: 1.6; margin: 0 0 20px 0;">
-                    Merci de vous être inscrit sur LinkTracker ! Pour activer votre compte et commencer à créer vos liens personnalisés, veuillez confirmer votre adresse email.
+                    Merci de vous être inscrit sur TapLinkr ! Pour activer votre compte et commencer à créer vos liens personnalisés, veuillez confirmer votre adresse email.
                   </p>
                   
                   <div style="text-align: center; margin: 30px 0;">
@@ -172,7 +172,7 @@ export function getVerificationEmailTemplate(username: string, verificationUrl: 
                     Vous n'avez pas créé de compte ? Ignorez cet email.
                   </p>
                   <p style="color: #999999; margin: 0; font-size: 14px;">
-                    © 2024 LinkTracker. Tous droits réservés.
+                    © 2026 TapLinkr. Tous droits réservés.
                   </p>
                 </td>
               </tr>

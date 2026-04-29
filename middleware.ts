@@ -3,6 +3,28 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  const hiddenPublicRoutes = [
+    '/admin-login',
+    '/debug',
+    '/diagnostic',
+    '/emergency-data',
+    '/emergency-links',
+    '/emergency-reset',
+    '/system-check',
+    '/test',
+    '/test-config',
+    '/test-login',
+    '/test-slug',
+  ]
+
+  if (
+    process.env.NODE_ENV === 'production' &&
+    hiddenPublicRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`))
+  ) {
+    return new NextResponse('Not found', { status: 404 })
+  }
+
   const response = NextResponse.next()
 
   // Headers de performance et sécurité
@@ -37,7 +59,6 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/admin') ||
-    pathname.startsWith('/debug') ||
     pathname.startsWith('/link/') ||
     pathname.startsWith('/redirect/') ||
     pathname.startsWith('/shield/') ||
@@ -68,8 +89,7 @@ export const config = {
      * - auth (auth pages)
      * - dashboard (dashboard pages)
      * - admin (admin pages)
-     * - debug (debug pages)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|auth|dashboard|admin|debug).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|auth|dashboard|admin).*)',
   ],
 }

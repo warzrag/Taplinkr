@@ -10,7 +10,7 @@ const sections = [
     items: [
       { label: 'Fonctionnalités', href: '/#features' },
       { label: 'Tarifs', href: '/pricing' },
-      { label: 'Témoignages', href: '/#temoignages' },
+      { label: 'Cas d’usage', href: '/#cas-usages' },
     ],
   },
   {

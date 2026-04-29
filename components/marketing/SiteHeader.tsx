@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils'
 const links = [
   { label: 'Fonctionnalités', href: '/#features' },
   { label: 'Tarifs', href: '/pricing' },
-  { label: 'Témoignages', href: '/#temoignages' },
+  { label: 'Cas d’usage', href: '/#cas-usages' },
 ]
 
 export function SiteHeader() {

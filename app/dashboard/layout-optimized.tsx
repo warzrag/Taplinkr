@@ -111,7 +111,7 @@ export default function OptimizedDashboardLayout({
             // Précharger les routes au ralenti
             if ('requestIdleCallback' in window) {
               requestIdleCallback(() => {
-                const routes = ['/dashboard/links', '/dashboard/analytics', '/settings'];
+                const routes = ['/dashboard/links', '/dashboard/visitors', '/dashboard/profile'];
                 routes.forEach(route => {
                   const link = document.createElement('link');
                   link.rel = 'prefetch';

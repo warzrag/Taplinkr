@@ -1,254 +1,219 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { ArrowRight, Check, Sparkles } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { toast } from 'react-hot-toast'
+import { ArrowRight, Check, HelpCircle, Loader2 } from 'lucide-react'
 
-import { SiteHeader } from '@/components/marketing/SiteHeader'
 import { SiteFooter } from '@/components/marketing/SiteFooter'
-import { Container } from '@/components/ui/Container'
+import { SiteHeader } from '@/components/marketing/SiteHeader'
 import { Button } from '@/components/ui/button'
+import { Container } from '@/components/ui/Container'
 
 const plans = [
   {
     id: 'free',
-    name: 'Starter',
-    description: 'Idéal pour découvrir TapLinkr et publier une première page.',
-    priceMonthly: 0,
-    priceYearly: 0,
+    name: 'Gratuit',
+    price: '0€',
+    period: 'pour toujours',
+    description: 'Pour lancer une première page et tester le produit.',
+    cta: 'Créer mon compte',
     features: [
-      '1 page de liens personnalisable',
-      '10 liens actifs avec statistiques de base',
-      'Templates essentiels responsives',
-      'Tracking UTM et exports simples',
+      '1 page publique',
+      '5 liens actifs',
+      'Statistiques essentielles',
+      'Personnalisation de base',
     ],
-    highlight: false,
-    badge: 'Commencez gratuitement',
   },
   {
-    id: 'pro',
-    name: 'Pro',
-    description: 'Toutes les fonctionnalités pour optimiser votre audience.',
-    priceMonthly: 12,
-    priceYearly: 10,
+    id: 'standard',
+    name: 'Standard',
+    price: '9,99€',
+    period: '/ mois',
+    description: 'Pour les créateurs qui publient et optimisent régulièrement.',
+    cta: 'Choisir Standard',
+    highlighted: true,
     features: [
-      'Pages et liens illimités',
-      'Analytics avancés et heatmaps',
-      'Protection par mot de passe et domaines custom',
-      'Automations Zapier & intégrations premium',
-      'Recommandations IA et A/B testing',
+      'Pages et liens étendus',
+      'Liens directs',
+      'Shield Protection',
+      'Analytics avancées',
+      'Équipe jusqu’à 10 membres',
     ],
-    highlight: true,
-    badge: 'Le plus populaire',
   },
   {
-    id: 'business',
-    name: 'Business',
-    description: 'Pensé pour les équipes, agences et marques exigeantes.',
-    priceMonthly: 29,
-    priceYearly: 24,
+    id: 'premium',
+    name: 'Premium',
+    price: '24,99€',
+    period: '/ mois',
+    description: 'Pour les pros qui veulent tout centraliser avec le maximum de contrôle.',
+    cta: 'Choisir Premium',
     features: [
-      'Gestion d’équipes (10 membres)',
-      'Rapports personnalisés & exports CRM',
-      'SLA 99.9%, support prioritaire 24/7',
-      'Espaces collaboratifs & approbations',
-      'Onboarding dédié et white-label complet',
+      'Liens illimités',
+      'Icônes et thèmes personnalisés',
+      'ULTRA LINK',
+      'Analytics temps réel',
+      'Support prioritaire',
     ],
-    highlight: false,
-    badge: 'Pour les équipes',
   },
 ] as const
 
 const faqs = [
   {
-    question: 'Puis-je changer de plan à tout moment ?',
-    answer: 'Oui. La mise à niveau est instantanée et la facturation est ajustée au prorata. Vous pouvez également rétrograder ou annuler quand vous le souhaitez.'
+    question: 'Puis-je commencer gratuitement ?',
+    answer: 'Oui. Le plan gratuit permet de créer une première page et de vérifier que TapLinkr correspond à votre usage.',
   },
   {
-    question: 'Proposez-vous un essai gratuit ?',
-    answer: 'Vous pouvez créer un compte gratuitement et tester toutes les fonctionnalités Pro pendant 14 jours, sans carte bancaire. Ensuite, choisissez le plan qui vous convient.'
+    question: 'Comment fonctionne le paiement ?',
+    answer: 'Les paiements payants passent par Stripe Checkout. Vous pouvez gérer votre abonnement depuis le dashboard.',
   },
   {
-    question: 'Comment fonctionne la facturation annuelle ?',
-    answer: 'Le paiement annuel vous fait économiser environ 20% par rapport au paiement mensuel. Le montant est prélevé en une seule fois et couvre 12 mois.'
+    question: 'Les liens directs sont-ils inclus ?',
+    answer: 'Oui, à partir du plan Standard. Le plan Premium ajoute les options les plus avancées.',
   },
-  {
-    question: 'Offrez-vous des réductions pour les associations ou étudiants ?',
-    answer: 'Oui, contactez notre équipe à hello@taplinkr.com avec une preuve de votre statut et nous appliquerons une remise personnalisée.'
-  }
 ]
 
 export default function PricingPage() {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(0)
   const router = useRouter()
+  const { data: session } = useSession()
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
-  const handleSelectPlan = (planId: string) => {
+  const handleSelectPlan = async (planId: string) => {
     if (planId === 'free') {
       router.push('/auth/signup')
-    } else {
-      router.push(`/checkout?plan=${planId}&billing=${billingCycle}`)
+      return
+    }
+
+    if (!session?.user) {
+      router.push(`/auth/signup?plan=${planId}`)
+      return
+    }
+
+    setLoadingPlan(planId)
+
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || 'Impossible de créer la session Stripe')
+      }
+
+      window.location.href = data.url
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur de paiement')
+    } finally {
+      setLoadingPlan(null)
     }
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white">
       <SiteHeader />
 
       <main>
-        <section className="relative overflow-hidden bg-[hsl(var(--surface))] py-24">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-brand-500/25 via-brand-500/10 to-transparent blur-3xl" />
-          </div>
-          <Container className="relative z-10 flex flex-col items-center gap-8 text-center">
-            <span className="badge-pill bg-[hsl(var(--surface))]/85 text-brand-600 shadow-sm">
-              <Sparkles className="h-4 w-4 text-brand-500" />
-              Tarifs transparents, croissance illimitée
-            </span>
-            <div className="space-y-6">
-              <h1 className="text-4xl font-semibold sm:text-5xl">Choisissez le plan adapté à votre rythme</h1>
-              <p className="mx-auto max-w-2xl text-foreground/65">
-                Commencez gratuitement, développez-vous avec le plan Pro et accompagnez vos équipes avec Business. Les fonctionnalités avancées sont à portée de clic.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center rounded-full border border-border/60 bg-[hsl(var(--surface))]/75 p-1 shadow-sm backdrop-blur">
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition-all ${
-                  billingCycle === 'monthly'
-                    ? 'bg-brand-500 text-white shadow-brand'
-                    : 'text-foreground/70 hover:text-foreground'
-                }`}
-              >
-                Mensuel
-              </button>
-              <button
-                onClick={() => setBillingCycle('yearly')}
-                className={`ml-1 inline-flex items-center gap-2 rounded-full px-6 py-2 text-sm font-medium transition-all ${
-                  billingCycle === 'yearly'
-                    ? 'bg-brand-500 text-white shadow-brand'
-                    : 'text-foreground/70 hover:text-foreground'
-                }`}
-              >
-                Annuel
-                <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-600">
-                  -20%
-                </span>
-              </button>
-            </div>
-
-            <p className="text-xs text-foreground/50">
-              Les prix affichés sont en EUR. Les taxes peuvent s’appliquer en fonction de votre pays.
+        <section className="border-b border-neutral-200 bg-neutral-50 py-10 dark:border-white/10 dark:bg-white/[0.03] sm:py-12">
+          <Container className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-600">
+              Tarifs
             </p>
-          </Container>
-        </section>
+            <h1 className="mx-auto mt-3 max-w-2xl text-3xl font-semibold leading-tight text-neutral-950 dark:text-white sm:text-4xl">
+              Choisissez un plan simple, aligné avec votre usage réel
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-neutral-600 dark:text-white/60">
+              Commencez gratuitement, puis passez à Standard ou Premium quand vos liens, vos analytics ou votre équipe ont besoin de plus de marge.
+            </p>
+            <div className="mx-auto mt-10 grid max-w-6xl gap-5 text-left lg:grid-cols-3">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                className={`relative flex h-full flex-col rounded-2xl border p-6 shadow-sm ${
+                  plan.highlighted
+                    ? 'border-neutral-950 bg-neutral-950 text-white dark:border-white dark:bg-white dark:text-neutral-950'
+                    : 'border-neutral-200 bg-white dark:border-white/10 dark:bg-white/5'
+                }`}
+              >
+                {plan.highlighted && (
+                  <span className="mb-5 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white dark:bg-neutral-950/10 dark:text-neutral-950">
+                    Le plus choisi
+                  </span>
+                )}
 
-        <section className="section-default">
-          <Container className="grid gap-8 lg:grid-cols-3">
-            {plans.map((plan, index) => {
-              const monthly = plan.priceMonthly
-              const yearly = plan.priceYearly
-              const price = billingCycle === 'monthly' ? monthly : yearly
-              const isFree = price === 0
+                <div>
+                  <h2 className={`text-xl font-semibold ${plan.highlighted ? 'text-white dark:text-neutral-950' : 'text-neutral-950 dark:text-white'}`}>
+                    {plan.name}
+                  </h2>
+                  <p className={`mt-2 text-sm leading-6 ${plan.highlighted ? 'text-white/70 dark:text-neutral-600' : 'text-neutral-600 dark:text-white/60'}`}>
+                    {plan.description}
+                  </p>
+                </div>
 
-              return (
-                <motion.div
-                  key={plan.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`relative flex h-full flex-col gap-6 rounded-3xl border p-8 shadow-soft transition-transform hover:-translate-y-1 ${
-                    plan.highlight
-                      ? 'border-brand-500 bg-[hsl(var(--surface))] shadow-brand'
-                      : 'border-border bg-[hsl(var(--surface))]/85'
+                <div className="mt-6 flex items-baseline gap-2">
+                  <span className="text-4xl font-semibold">{plan.price}</span>
+                  <span className={plan.highlighted ? 'text-white/60 dark:text-neutral-500' : 'text-neutral-500 dark:text-white/50'}>
+                    {plan.period}
+                  </span>
+                </div>
+
+                <Button
+                  fullWidth
+                  onClick={() => handleSelectPlan(plan.id)}
+                  disabled={loadingPlan !== null}
+                  className={`mt-6 rounded-xl shadow-none ${
+                    plan.highlighted
+                      ? 'bg-white !text-neutral-950 hover:bg-white/90 dark:bg-neutral-950 dark:!text-white dark:hover:bg-neutral-900'
+                      : 'bg-neutral-950 !text-white hover:bg-neutral-800 dark:bg-white dark:!text-neutral-950 dark:hover:bg-white/90'
                   }`}
                 >
-                  {plan.badge && (
-                    <span className="absolute -top-4 left-6 rounded-full bg-brand-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-brand">
-                      {plan.badge}
-                    </span>
-                  )}
+                  {loadingPlan === plan.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                  {plan.cta}
+                </Button>
 
-                  <div className="space-y-2">
-                    <h2 className="text-xl font-semibold text-foreground">{plan.name}</h2>
-                    <p className="text-sm text-foreground/60">{plan.description}</p>
-                  </div>
-
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-semibold text-foreground">
-                      {isFree ? 'Gratuit' : `${price}€`}
-                    </span>
-                    {!isFree && (
-                      <span className="text-sm text-foreground/50">
-                        / {billingCycle === 'monthly' ? 'mois' : 'mois (facturation annuelle)'}
+                <div className="mt-6 space-y-3">
+                  {plan.features.map((feature) => (
+                    <div key={feature} className="flex items-start gap-3 text-sm">
+                      <Check className={`mt-0.5 h-4 w-4 flex-shrink-0 ${plan.highlighted ? 'text-emerald-300 dark:text-emerald-600' : 'text-emerald-600'}`} />
+                      <span className={plan.highlighted ? 'text-white/75 dark:text-neutral-700' : 'text-neutral-700 dark:text-white/65'}>
+                        {feature}
                       </span>
-                    )}
-                  </div>
-
-                  <Button
-                    fullWidth
-                    variant={plan.highlight ? 'primary' : 'secondary'}
-                    onClick={() => handleSelectPlan(plan.id)}
-                  >
-                    {plan.id === 'free' ? 'Créer mon compte' : 'Choisir ce plan'}
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-
-                  <div className="space-y-3">
-                    {plan.features.map((feature) => (
-                      <div key={feature} className="flex items-start gap-3 text-sm text-foreground/70">
-                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {!isFree && billingCycle === 'yearly' && (
-                    <p className="text-xs text-emerald-600">
-                      Économisez {(plan.priceMonthly - plan.priceYearly) * 12}€ par an comparé au mensuel.
-                    </p>
-                  )}
-                </motion.div>
-              )
-            })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            </div>
           </Container>
         </section>
 
-        <section className="section-default bg-[hsl(var(--surface))]">
-          <Container className="grid gap-10 lg:grid-cols-[0.8fr_1fr] lg:items-start">
-            <div className="space-y-5">
-              <span className="badge-pill">Questions fréquentes</span>
-              <h2 className="text-3xl font-semibold sm:text-4xl">Tout ce qu’il faut savoir avant de vous lancer</h2>
-              <p className="text-foreground/65">
-                Notre équipe vous accompagne à chaque étape. Si vous ne trouvez pas la réponse, contactez-nous et nous vous répondons sous 24h.
+        <section className="border-t border-neutral-200 bg-neutral-50 py-14 dark:border-white/10 dark:bg-white/[0.03]">
+          <Container className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-neutral-950 text-white dark:bg-white dark:text-neutral-950">
+                <HelpCircle className="h-5 w-5" />
+              </div>
+              <h2 className="text-3xl font-semibold text-neutral-950 dark:text-white">Questions fréquentes</h2>
+              <p className="mt-3 text-sm leading-7 text-neutral-600 dark:text-white/60">
+                Les plans restent volontairement courts : le bon plan est celui qui correspond à votre volume de liens et à votre besoin d’analytics.
               </p>
-              <Link href="mailto:hello@taplinkr.com" className="btn-secondary w-fit">
-                Contacter un conseiller
+              <Link href="mailto:hello@taplinkr.com" className="mt-5 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-500">
+                Contacter le support
               </Link>
             </div>
 
-            <div className="space-y-4">
-              {faqs.map((faq, index) => {
-                const isOpen = expandedFaq === index
-                return (
-                  <div key={faq.question} className="rounded-2xl border border-border/60 bg-[hsl(var(--surface))]/85 p-5 shadow-sm">
-                    <button
-                      onClick={() => setExpandedFaq(isOpen ? null : index)}
-                      className="flex w-full items-center justify-between text-left"
-                    >
-                      <span className="text-sm font-semibold text-foreground">{faq.question}</span>
-                      <span className="text-xs text-foreground/50">{isOpen ? '−' : '+'}</span>
-                    </button>
-                    {isOpen && (
-                      <p className="mt-3 text-sm text-foreground/65">{faq.answer}</p>
-                    )}
-                  </div>
-                )
-              })}
+            <div className="space-y-3">
+              {faqs.map((faq) => (
+                <div key={faq.question} className="rounded-2xl border border-neutral-200 bg-white p-5 dark:border-white/10 dark:bg-neutral-950">
+                  <h3 className="font-semibold text-neutral-950 dark:text-white">{faq.question}</h3>
+                  <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-white/60">{faq.answer}</p>
+                </div>
+              ))}
             </div>
           </Container>
         </section>
@@ -258,4 +223,3 @@ export default function PricingPage() {
     </div>
   )
 }
-

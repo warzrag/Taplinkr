@@ -492,7 +492,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => {
-                        setShowDirectLinkComingSoon(true)
+                        setLinkType('direct')
+                        setShowDirectLinkComingSoon(false)
+                        setStep(5)
                       }}
                       className="relative p-8 rounded-2xl border-2 border-gray-200 hover:border-purple-500 bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 transition-all duration-300 group overflow-hidden"
                     >
@@ -502,8 +504,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.6, type: "spring" }}
                       >
-                        <span className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full font-semibold shadow-lg">
-                          Bientôt
+                        <span className="text-xs bg-emerald-600 text-white px-2 py-1 rounded-full font-semibold shadow-lg">
+                          Disponible
                         </span>
                       </motion.div>
 
@@ -1592,7 +1594,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                 </span>
                               </div>
                               <p className="text-xs text-gray-600 mt-1">
-                                Protection maximale avec contenu adaptatif, rotation de domaines, obfuscation JavaScript avancée et IA anti-détection
+                                Protection renforcée avec page intermédiaire, délai contrôlé et suivi des actions
                               </p>
                             </div>
                             <input
@@ -1611,7 +1613,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             className="p-3 bg-amber-50 border border-amber-200 rounded-lg"
                           >
                             <p className="text-xs text-amber-800">
-                              <strong>Note :</strong> {isUltraLink ? 'ULTRA LINK offre une protection maximale avec 95%+ de taux de réussite contre les bannissements.' : 'Le Shield offre une protection efficace à 92% contre les détections automatiques.'}
+                              <strong>Note :</strong> {isUltraLink ? 'ULTRA LINK active les options de protection les plus strictes pour les liens sensibles.' : 'Le Shield ajoute une étape de vérification avant la redirection.'}
                             </p>
                           </motion.div>
                         )}

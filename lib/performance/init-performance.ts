@@ -8,8 +8,8 @@ export function initPerformanceOptimizations() {
   const criticalRoutes = [
     '/dashboard',
     '/dashboard/links',
-    '/dashboard/analytics',
-    '/settings'
+    '/dashboard/visitors',
+    '/dashboard/profile'
   ]
 
   // Utiliser requestIdleCallback pour ne pas bloquer le thread principal

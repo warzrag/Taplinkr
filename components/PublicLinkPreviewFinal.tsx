@@ -1,563 +1,280 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowUpRight, Check, ExternalLink, ShieldAlert } from 'lucide-react'
 
 interface PublicLinkPreviewProps {
   link: any
 }
 
+function normalizeUrl(url: string) {
+  if (!url) return '#'
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  return `https://${url}`
+}
+
+function getSessionId() {
+  const key = 'taplinkr_visit_session'
+  const timeout = 30 * 60 * 1000
+  const now = Date.now()
+
+  try {
+    const existing = localStorage.getItem(key)
+    if (existing) {
+      const parsed = JSON.parse(existing)
+      if (parsed?.id && now - parsed.lastActivity < timeout) {
+        localStorage.setItem(key, JSON.stringify({ ...parsed, lastActivity: now }))
+        return parsed.id as string
+      }
+    }
+  } catch {}
+
+  const id = `${now}-${Math.random().toString(36).slice(2, 10)}`
+  localStorage.setItem(key, JSON.stringify({ id, lastActivity: now }))
+  return id
+}
+
+function isAgeRestricted(item: any, parent: any) {
+  const url = String(item?.url || '').toLowerCase()
+  return Boolean(
+    item?.requiresAgeConfirmation ||
+      item?.ageRestricted ||
+      item?.isAdult ||
+      item?.nsfw ||
+      parent?.requiresAgeConfirmation ||
+      parent?.ageRestricted ||
+      url.includes('onlyfans.com')
+  )
+}
+
 export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps) {
+  const [sessionId, setSessionId] = useState('')
   const [clickedLinks, setClickedLinks] = useState<string[]>([])
-  const [clickId, setClickId] = useState<string | null>(null)
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
-  const [showBrowserPrompt, setShowBrowserPrompt] = useState(false)
-  const [sessionId, setSessionId] = useState<string>('')
 
-  // 🔥 GÉNÉRER SESSION ID UNIQUE (comme GetMySocial avec timeout 30 min)
+  const profileImage = link?.profileImage || null
+  const coverImage = link?.coverImage || null
+  const backgroundImage = link?.profileStyle === 'beacon' ? profileImage : coverImage
+  const title = link?.title || link?.user?.name || link?.user?.username || 'Mes liens'
+  const bio = link?.description || link?.user?.bio || null
+  const multiLinks = useMemo(() => {
+    return Array.isArray(link?.multiLinks)
+      ? [...link.multiLinks].sort((a: any, b: any) => (a.order ?? 999) - (b.order ?? 999))
+      : []
+  }, [link?.multiLinks])
+
   useEffect(() => {
-    const SESSION_TIMEOUT = 30 * 60 * 1000 // 30 minutes (standard industrie)
-
-    // Récupérer la session depuis localStorage
-    const sessionData = localStorage.getItem('VISIT_SESSION')
-
-    let currentSessionId: string
-
-    if (sessionData) {
-      try {
-        const { id, lastActivity } = JSON.parse(sessionData)
-        const timeSinceLastActivity = Date.now() - lastActivity
-
-        // Vérifier si la session a expiré (> 30 min)
-        if (timeSinceLastActivity > SESSION_TIMEOUT) {
-          console.log('⏰ Session expirée (> 30 min) - Nouvelle session créée')
-          // Session expirée, créer une nouvelle
-          currentSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-        } else {
-          // Session valide, réutiliser
-          currentSessionId = id
-          console.log('✅ Session valide (< 30 min)')
-        }
-      } catch (e) {
-        // Erreur de parsing, créer nouvelle session
-        currentSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      }
-    } else {
-      // Pas de session existante, en créer une
-      currentSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      console.log('🆕 Nouvelle session créée')
-    }
-
-    // Sauvegarder avec timestamp
-    localStorage.setItem('VISIT_SESSION', JSON.stringify({
-      id: currentSessionId,
-      lastActivity: Date.now()
-    }))
-
-    setSessionId(currentSessionId)
-    console.log('📊 Session ID:', currentSessionId)
+    setSessionId(getSessionId())
   }, [])
 
-  // 🔥 TECHNIQUE GETMYSOCIAL : Redirection automatique vers navigateur externe
-  useEffect(() => {
-    const userAgent = navigator.userAgent || ''
-    const isInstagram = userAgent.includes('Instagram')
-    const isFacebook = userAgent.includes('FBAN') || userAgent.includes('FBAV')
-    const isTikTok = userAgent.includes('TikTok')
-    const isInAppBrowser = isInstagram || isFacebook || isTikTok
-
-    if (isInAppBrowser) {
-      console.log('🚨 Navigateur in-app détecté')
-
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent)
-      const isAndroid = /Android/.test(userAgent)
-      const currentUrl = window.location.href
-
-      // Redirection après 500ms pour montrer la page
-      setTimeout(() => {
-        if (isIOS) {
-          const safariUrl = `x-safari-https://${currentUrl.replace(/^https?:\/\//, '')}`
-          console.log('🍎 iOS - Redirection Safari')
-          window.location.href = safariUrl
-        } else if (isAndroid) {
-          const host = currentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
-          const intentUrl = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;end`
-          console.log('🤖 Android - Redirection Chrome')
-          window.location.href = intentUrl
-        }
-      }, 500)
-    }
-  }, [])
-
-  // Tracker la vue avec protection contre les multiples appels
   useEffect(() => {
     if (!link?.id) return
 
-    // Protection: une seule fois par session navigateur
-    const tracked = sessionStorage.getItem(`tracked_session_${link.id}`)
-    if (tracked) {
-      console.log('Déjà tracké dans cette session')
-      return
-    }
-
-    // Marquer comme tracké AVANT l'appel API
-    sessionStorage.setItem(`tracked_session_${link.id}`, 'true')
-
-    const trackingData = {
-      linkId: link.id,
-      referrer: document.referrer,
-      userAgent: navigator.userAgent,
-      screenResolution: `${window.screen.width}x${window.screen.height}`,
-      language: navigator.language || 'en',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      timestamp: new Date().toISOString()
-    }
+    const key = `taplinkr_tracked_${link.id}`
+    if (sessionStorage.getItem(key)) return
+    sessionStorage.setItem(key, 'true')
 
     fetch('/api/track-link-view', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(trackingData)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        linkId: link.id,
+        referrer: document.referrer,
+        userAgent: navigator.userAgent,
+        screenResolution: `${window.screen.width}x${window.screen.height}`,
+        language: navigator.language || 'fr',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      }),
+      keepalive: true,
+    }).catch(() => {
+      sessionStorage.removeItem(key)
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Tracking enregistré:', data)
-        if (data.clickId) {
-          setClickId(data.clickId)
-        }
-      })
-      .catch(error => {
-        console.error('Erreur tracking:', error)
-        // En cas d'erreur, permettre un nouveau tracking
-        sessionStorage.removeItem(`tracked_session_${link.id}`)
-      })
   }, [link?.id])
 
-  if (!link) {
-    return <div className="min-h-screen bg-gray-900" />
-  }
+  const trackAndOpen = async (item: any) => {
+    const itemId = item?.id
+    const itemUrl = normalizeUrl(item?.url || '#')
+    if (!itemId || itemUrl === '#') return
 
-  const handleLinkClick = async (id: string, url: string) => {
-    // Si pas encore confirmé, demander confirmation
-    if (!confirmedLinks.includes(id)) {
-      setConfirmingLink(id)
+    const ageRestricted = isAgeRestricted(item, link)
+    if (ageRestricted && !confirmedLinks.includes(itemId)) {
+      setConfirmingLink(itemId)
       return
     }
 
-    // Si déjà confirmé, ouvrir directement
-    // Marquer comme cliqué visuellement
-    if (!clickedLinks.includes(id)) {
-      setClickedLinks([...clickedLinks, id])
-    }
-    
-    // ⚡ Mettre à jour lastActivity au clic (GetMySocial style)
-    const sessionData = localStorage.getItem('VISIT_SESSION')
-    if (sessionData) {
-      try {
-        const session = JSON.parse(sessionData)
-        session.lastActivity = Date.now()
-        localStorage.setItem('VISIT_SESSION', JSON.stringify(session))
-      } catch (e) {
-        console.error('Erreur mise à jour session:', e)
-      }
-    }
+    setClickedLinks((current) => (current.includes(itemId) ? current : [...current, itemId]))
 
-    // Enregistrer le clic dans la base de données avec sessionId
+    const openedWindow = window.open('about:blank', '_blank')
+    if (openedWindow) openedWindow.opener = null
+
     try {
       await fetch('/api/track-multilink-click', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          multiLinkId: id,
-          sessionId: sessionId, // 🔥 Envoyer sessionId pour déduplication
+          multiLinkId: itemId,
+          sessionId,
           screenResolution: `${window.screen.width}x${window.screen.height}`,
-          language: navigator.language || 'en',
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        })
+          language: navigator.language || 'fr',
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }),
+        keepalive: true,
       })
-    } catch (error) {
-      console.error('Erreur tracking clic:', error)
+    } catch {}
+
+    if (openedWindow) {
+      openedWindow.location.href = itemUrl
+    } else {
+      window.location.href = itemUrl
     }
-
-    // Ouvrir le lien
-    window.open(url, '_blank')
   }
 
-  const confirmAge = (id: string) => {
-    setConfirmedLinks([...confirmedLinks, id])
-    setConfirmingLink(null)
+  if (!link) {
+    return <main className="min-h-screen bg-neutral-950" />
   }
-
-  const cancelConfirm = () => {
-    setConfirmingLink(null)
-  }
-
-  const profileImage = link?.profileImage || null
-  const profileStyle = link?.profileStyle || 'circle'
-  const coverImage = link?.coverImage || null
-  const title = link?.title || 'Mes liens'
-  const bio = link?.description || null
-  const multiLinks = link?.multiLinks || []
-  const clicks = link?.clicks || 0
-  const borderRadius = link?.borderRadius || 'rounded-2xl' // Forme des boutons
-
-  // 🔍 DEBUG: Vérifier les multiLinks côté client
-  useEffect(() => {
-    console.log('🔍 [PublicLinkPreviewFinal] Received link:', {
-      id: link?.id,
-      slug: link?.slug,
-      title: link?.title,
-      multiLinksCount: link?.multiLinks?.length || 0,
-      multiLinks: link?.multiLinks
-    })
-  }, [link])
-
-  // En mode beacon, utiliser profileImage comme background
-  const backgroundImage = profileStyle === 'beacon' ? profileImage : coverImage
-
-  console.log('🔍 PublicLinkPreviewFinal - link:', link)
-  console.log('🔍 PublicLinkPreviewFinal - multiLinks:', multiLinks)
 
   return (
-    <div className="min-h-screen relative bg-gray-900">
-      {/* L'auto-click se fait dans le useEffect, pas besoin d'overlay visible */}
+    <main className="relative min-h-screen overflow-hidden bg-neutral-950 text-white">
+      <div className="absolute inset-0">
+        {backgroundImage ? (
+          <img
+            src={backgroundImage}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="eager"
+          />
+        ) : (
+          <div className="h-full w-full bg-[radial-gradient(circle_at_top,#334155_0%,#020617_52%,#000_100%)]" />
+        )}
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/80 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/45 to-transparent" />
+      </div>
 
-      {/* 🔥 OVERLAY: Prompt pour ouvrir dans navigateur externe */}
-      {showBrowserPrompt && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl border border-white/10 p-8 shadow-2xl">
-            <div className="text-center space-y-6">
-              {/* Icon */}
-              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </div>
-
-              {/* Titre */}
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Ouvre dans ton navigateur
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  Pour une meilleure expérience, ouvre cette page dans Safari ou Chrome
-                </p>
-              </div>
-
-              {/* Instructions */}
-              <div className="bg-white/5 rounded-2xl p-4 text-left space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    1
-                  </div>
-                  <p className="text-white text-sm">
-                    Appuie sur les <span className="font-bold">3 points</span> ou <span className="font-bold">···</span> en haut
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    2
-                  </div>
-                  <p className="text-white text-sm">
-                    Sélectionne <span className="font-bold">"Ouvrir dans Safari"</span> ou <span className="font-bold">"Ouvrir dans Chrome"</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Copier le lien */}
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href)
-                  alert('Lien copié ! Colle-le dans Safari ou Chrome')
-                }}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all"
-              >
-                📋 Copier le lien
-              </button>
-
-              {/* Bouton fermer */}
-              <button
-                onClick={() => setShowBrowserPrompt(false)}
-                className="text-gray-400 text-sm hover:text-white transition-colors"
-              >
-                Continuer quand même
-              </button>
+      <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-[304px] flex-col justify-end px-0 pb-8 pt-16 sm:max-w-[430px] sm:px-6">
+        <div className="mb-7 text-center">
+          {profileImage && link?.profileStyle !== 'beacon' && (
+            <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border border-white/35 bg-white/10 shadow-2xl">
+              <img src={profileImage} alt="" className="h-full w-full object-cover" />
             </div>
-          </div>
+          )}
+
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+            TapLinkr
+          </p>
+          <h1 className="mx-auto max-w-sm break-words text-3xl font-semibold leading-tight text-white drop-shadow">
+            {title}
+          </h1>
+          {bio && (
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-white/75">
+              {bio}
+            </p>
+          )}
         </div>
-      )}
 
-      {/* Background flouté pour desktop */}
-      <div className="hidden md:block fixed inset-0 z-0">
-        {backgroundImage ? (
-          <div className="w-full h-full blur-3xl scale-110 relative">
-            <Image
-              src={backgroundImage}
-              alt=""
-              fill
-              loading="lazy"
-              className="object-cover"
-              sizes="100vw"
-            />
-            {/* Plus sombre en mode beacon pour contraste avec le cadre */}
-            <div className={`absolute inset-0 ${profileStyle === 'beacon' ? 'bg-black/80' : 'bg-black/60'}`} />
-          </div>
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900">
-            <div className="absolute inset-0 bg-black/50" />
-          </div>
-        )}
-      </div>
+        <div className="space-y-3">
+          {multiLinks.length > 0 ? (
+            multiLinks.map((item: any) => {
+              const itemId = item?.id || item?.url || item?.title
+              const itemTitle = item?.title || 'Ouvrir le lien'
+              const itemIcon = item?.iconImage || item?.icon || null
+              const ageRestricted = isAgeRestricted(item, link)
+              const isConfirmed = confirmedLinks.includes(itemId)
+              const isClicked = clickedLinks.includes(itemId)
 
-      {/* Background pour mobile */}
-      <div className="md:hidden fixed inset-0 z-0">
-        {backgroundImage ? (
-          <div className="w-full h-full relative">
-            <Image
-              src={backgroundImage}
-              alt=""
-              fill
-              loading="eager"
-              quality={60}
-              className="object-cover"
-              sizes="100vw"
-              placeholder="blur"
-              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-            />
-            {/* Gradients noirs en mode beacon - EXACTEMENT comme LivePhonePreview */}
-            {profileStyle === 'beacon' ? (
-              <>
-                {/* Dégradé noir professionnel style premium - remonté */}
-                <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
-
-                {/* Couche supplémentaire pour intensifier le noir */}
-                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black via-black/90 to-transparent" />
-
-                {/* Dégradé du haut pour la lisibilité de la barre de statut */}
-                <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/50 to-transparent" />
-              </>
-            ) : (
-              <div className="absolute inset-0 bg-black/40" />
-            )}
-          </div>
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900" />
-        )}
-      </div>
-
-      {/* Conteneur format téléphone centré sur desktop */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center md:py-8 md:px-4">
-        <div className="w-full md:w-[390px] md:max-h-[844px] md:rounded-[3rem] md:shadow-2xl md:overflow-hidden md:bg-black/10 md:backdrop-blur-xl">
-          {/* Background image pour desktop (dans le cadre) */}
-          <div className="hidden md:block absolute inset-0 z-0 rounded-[3rem] overflow-hidden">
-            {backgroundImage ? (
-              <div className="w-full h-full relative">
-                <Image
-                  src={backgroundImage}
-                  alt=""
-                  fill
-                  loading="lazy"
-                  className="object-cover"
-                  sizes="390px"
-                />
-                {/* Gradients noirs en mode beacon - EXACTEMENT comme LivePhonePreview */}
-                {profileStyle === 'beacon' ? (
-                  <>
-                    {/* Dégradé noir professionnel style premium - remonté */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/80 via-black/40 to-transparent" />
-
-                    {/* Couche supplémentaire pour intensifier le noir */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black via-black/90 to-transparent" />
-
-                    {/* Dégradé du haut pour la lisibilité de la barre de statut */}
-                    <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/50 to-transparent" />
-                  </>
-                ) : (
-                  <div className="absolute inset-0 bg-black/40" />
-                )}
-              </div>
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900" />
-            )}
-          </div>
-
-          {/* Contenu */}
-          <div className="relative z-10 min-h-screen md:min-h-0 md:h-[844px] flex flex-col justify-end overflow-y-auto">
-            <div className="w-full px-6 pb-20 pt-12">
-          
-          {/* Header avec profil */}
-          <div className="text-center mb-8">
-            {/* Photo de profil en rond - seulement en mode circle */}
-            {profileImage && profileStyle === 'circle' && (
-              <div className="mb-4 relative w-24 h-24 mx-auto">
-                <Image
-                  src={profileImage}
-                  alt="Profile"
-                  width={96}
-                  height={96}
-                  loading="eager"
-                  quality={75}
-                  className="rounded-full border-4 border-white/30 shadow-2xl object-cover"
-                />
-              </div>
-            )}
-
-            <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-              {title}
-            </h1>
-
-            {bio && (
-              <p className="text-white/80 text-sm max-w-md mx-auto mb-4 px-4">
-                {bio}
-              </p>
-            )}
-          </div>
-
-          {/* Liste des liens */}
-          <div className="space-y-3">
-            {multiLinks.length > 0 ? (
-              multiLinks.map((item: any) => {
-                const linkId = item?.id || Math.random().toString()
-                const linkTitle = item?.title || 'Lien'
-                const linkUrl = item?.url || '#'
-                const linkIcon = item?.iconImage || item?.icon || null
-                const isClicked = clickedLinks.includes(linkId)
-                
-                if (confirmingLink === linkId) {
-                  // Afficher la confirmation dans le bouton
-                  return (
-                    <div
-                      key={linkId}
-                      className={`w-full bg-red-900 bg-opacity-20 backdrop-blur-md border border-red-500 border-opacity-40 ${borderRadius} p-4 transform transition-all duration-200`}
-                    >
-                      <div className="text-center">
-                        <p className="text-white text-sm mb-3">⚠️ Contenu réservé aux +18 ans</p>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => cancelConfirm()}
-                            className="flex-1 px-3 py-2 bg-black bg-opacity-20 hover:bg-opacity-30 rounded-lg text-white text-sm font-medium transition-all"
-                          >
-                            Annuler
-                          </button>
-                          <button
-                            onClick={() => {
-                              confirmAge(linkId)
-                              // Marquer comme cliqué
-                              if (!clickedLinks.includes(linkId)) {
-                                setClickedLinks([...clickedLinks, linkId])
-                              }
-                              // Enregistrer le clic
-                              fetch('/api/track-multilink-click', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ 
-                                  multiLinkId: linkId,
-                                  screenResolution: `${window.screen.width}x${window.screen.height}`,
-                                  language: navigator.language || 'en',
-                                  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-                                })
-                              }).catch(console.error)
-                              // Ouvrir le lien immédiatement
-                              window.open(linkUrl, '_blank')
-                            }}
-                            className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-all"
-                          >
-                            J'ai +18 ans
-                          </button>
-                        </div>
+              if (confirmingLink === itemId) {
+                return (
+                  <div
+                    key={itemId}
+                    className="rounded-2xl border border-rose-300/35 bg-rose-950/55 p-4 shadow-2xl backdrop-blur-xl"
+                  >
+                    <div className="flex items-start gap-3">
+                      <ShieldAlert className="mt-0.5 h-5 w-5 flex-shrink-0 text-rose-100" />
+                      <div className="min-w-0 flex-1 text-left">
+                        <p className="font-semibold text-white">Contenu réservé aux adultes</p>
+                        <p className="mt-1 text-sm leading-5 text-white/70">
+                          Confirmez que vous avez l'âge requis avant d'ouvrir ce lien.
+                        </p>
                       </div>
                     </div>
-                  )
-                }
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setConfirmingLink(null)}
+                        className="rounded-xl border border-white/15 px-3 py-2 text-sm font-medium text-white/85 transition hover:bg-white/10"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        onClick={() => {
+                          setConfirmedLinks((current) => [...current, itemId])
+                          setConfirmingLink(null)
+                          setTimeout(() => trackAndOpen(item), 0)
+                        }}
+                        className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
+                      >
+                        Confirmer
+                      </button>
+                    </div>
+                  </div>
+                )
+              }
 
-                return (
-                  <button
-                    key={linkId}
-                    onClick={() => handleLinkClick(linkId, linkUrl)}
-                    className={`w-full bg-white/90 hover:bg-white/95 backdrop-blur-sm ${borderRadius} py-3 px-4 shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-2 group`}
-                  >
-                    {linkIcon && (
-                      <div className="relative w-10 h-10 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
-                        {linkIcon.startsWith('http') || linkIcon.startsWith('/') || linkIcon.startsWith('data:') ? (
-                          <Image
-                            src={linkIcon}
-                            alt=""
-                            width={40}
-                            height={40}
-                            loading="lazy"
-                            className="rounded-lg object-cover"
-                            onError={(e: any) => {
-                              e.currentTarget.style.display = 'none'
-                            }}
-                          />
-                        ) : (
-                          <span className="text-xl">{linkIcon}</span>
-                        )}
-                      </div>
+              return (
+                <button
+                  key={itemId}
+                  onClick={() => trackAndOpen(item)}
+                  className="group flex min-h-[64px] w-full items-center gap-2 rounded-2xl border border-white/15 bg-white/90 px-3 py-3 text-left text-neutral-950 shadow-2xl shadow-black/15 backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:bg-white focus:outline-none focus:ring-4 focus:ring-white/25"
+                >
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-neutral-100 text-lg">
+                    {itemIcon ? (
+                      String(itemIcon).startsWith('http') ||
+                      String(itemIcon).startsWith('/') ||
+                      String(itemIcon).startsWith('data:') ? (
+                        <img src={itemIcon} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <span>{itemIcon}</span>
+                      )
+                    ) : (
+                      <ExternalLink className="h-5 w-5 text-neutral-500" />
                     )}
+                  </span>
 
-                    <span className="flex-1 text-center text-gray-900 font-semibold text-xs whitespace-nowrap px-1" style={{ minWidth: 0 }}>
-                      {linkTitle}
+                  <span className="min-w-0 flex-1">
+                    <span className="block break-words text-[13px] font-semibold leading-4 text-neutral-950 sm:text-sm sm:leading-5">
+                      {itemTitle}
                     </span>
-
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {!confirmedLinks.includes(linkId) && (
-                        <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded whitespace-nowrap">
-                          18+
-                        </span>
-                      )}
-
+                    <span className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-neutral-500">
+                      {ageRestricted && !isConfirmed && <span>18+</span>}
                       {isClicked && (
-                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 text-emerald-600">
+                          <Check className="h-3 w-3" />
                           Visité
                         </span>
                       )}
+                    </span>
+                  </span>
 
-                      <svg
-                        className="w-5 h-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </div>
-                  </button>
-                )
-              })
-            ) : (
-              <div className="text-center py-8 text-white text-opacity-60">
-                Aucun lien disponible
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="mt-12 text-center pb-6">
-            <a
-              href="https://www.taplinkr.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white text-opacity-50 text-sm hover:text-opacity-70 transition-opacity"
-            >
-              Créé avec TapLinkr
-            </a>
-          </div>
+                  <ArrowUpRight className="h-5 w-5 flex-shrink-0 text-neutral-400 transition group-hover:text-neutral-900" />
+                </button>
+              )
+            })
+          ) : (
+            <div className="rounded-2xl border border-white/12 bg-white/10 p-6 text-center text-sm text-white/70 backdrop-blur">
+              Aucun lien disponible pour le moment.
             </div>
-          </div>
+          )}
         </div>
-      </div>
-    </div>
+
+        <a
+          href="https://www.taplinkr.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mx-auto mt-8 inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/20 px-4 py-2 text-xs font-medium text-white/55 backdrop-blur transition hover:text-white"
+        >
+          Créé avec TapLinkr
+        </a>
+      </section>
+    </main>
   )
 }

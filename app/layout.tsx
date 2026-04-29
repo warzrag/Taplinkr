@@ -27,8 +27,8 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata = {
-  title: 'TapLinkr - Tap Into Your Digital World',
-  description: 'Create a beautiful mobile-first bio page to share all your social links with just one tap',
+  title: 'TapLinkr - Pages de liens rapides et analytics claires',
+  description: 'Créez une page mobile propre, partagez vos liens importants et suivez vos clics depuis un dashboard simple.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -57,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`h-full ${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="fr" className={`h-full ${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/final.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -68,7 +68,7 @@ export default function RootLayout({
         {/* Préchargement des routes critiques */}
         <link rel="prefetch" href="/dashboard" as="document" />
         <link rel="prefetch" href="/dashboard/links" as="document" />
-        <link rel="prefetch" href="/dashboard/analytics" as="document" />
+        <link rel="prefetch" href="/dashboard/visitors" as="document" />
       </head>
       <body className="h-full bg-gray-50 dark:bg-gray-900 antialiased transition-colors duration-300">
         <WebVitals />
@@ -85,7 +85,7 @@ export default function RootLayout({
             />
             </Providers>
           </ThemeProvider>
-          <DebugConsole />
+          {process.env.NODE_ENV === 'development' && <DebugConsole />}
         </ErrorBoundary>
         
         {/* Service Worker Registration */}
@@ -94,13 +94,7 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch(function(registrationError) {
-                      console.log('SW registration failed: ', registrationError);
-                    });
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
                 });
               }
             `,

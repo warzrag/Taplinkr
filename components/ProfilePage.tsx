@@ -279,7 +279,7 @@ export default function ProfilePage({ user }: ProfilePageProps) {
             }}>
               G
             </div>
-            <span>LinkTracker</span>
+            <span>TapLinkr</span>
           </div>
         </div>
       </div>
