@@ -28,7 +28,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata = {
   title: 'TapLinkr - Pages de liens rapides et analytics claires',
-  description: 'Créez une page mobile propre, partagez vos liens importants et suivez vos clics depuis un dashboard simple.',
+  description: 'Cr\u00e9ez une page mobile propre, partagez vos liens importants et suivez vos clics depuis un dashboard simple.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -60,6 +60,7 @@ export default function RootLayout({
     <html lang="fr" className={`h-full ${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/final.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="TapLinkr" />
