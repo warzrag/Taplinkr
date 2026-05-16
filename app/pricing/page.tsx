@@ -15,45 +15,45 @@ const plans = [
   {
     id: 'free',
     name: 'Gratuit',
-    price: '0€',
+    price: '0 EUR',
     period: 'pour toujours',
-    description: 'Pour publier une page propre et valider votre premier tunnel social.',
+    description: 'Pour lancer une page createur propre, vos premiers liens et des stats essentielles.',
     cta: 'Créer mon compte',
     features: [
       '1 page publique',
       '5 liens actifs',
-      'Stats essentielles',
-      'Personnalisation de base',
+      'Stats vues et clics',
+      'Branding de base',
     ],
   },
   {
     id: 'standard',
     name: 'Standard',
-    price: '9,99€',
+    price: '9,99 EUR',
     period: '/ mois',
-    description: 'Pour convertir plus de fans avec des liens directs, du tracking et une protection solide.',
+    description: 'Pour convertir plus de fans avec deeplinks, garde 18+, analytics avances et campagnes mieux suivies.',
     cta: 'Choisir Standard',
     highlighted: true,
     features: [
-      'Pages et liens étendus',
-      'Liens directs',
-      'Shield Protection',
-      'Analytics avancées',
-      'Équipe jusqu’à 10 membres',
+      'Pages et liens etendus',
+      'Deeplinks propres',
+      'Protection 18+ et avertissements',
+      'Analytics avances',
+      'Equipe jusqu a 10 membres',
     ],
   },
   {
     id: 'premium',
     name: 'Premium',
-    price: '24,99€',
+    price: '24,99 EUR',
     period: '/ mois',
-    description: 'Pour les agences et créateurs qui pilotent plusieurs pages, offres et campagnes.',
+    description: 'Pour les agences et createurs qui pilotent plusieurs pages, domaines, offres et campagnes.',
     cta: 'Choisir Premium',
     features: [
       'Liens illimités',
-      'Icônes et thèmes personnalisés',
-      'ULTRA LINK',
-      'Analytics temps réel',
+      'Themes, icones et domaines custom',
+      'Deeplinks premium',
+      'Analytics temps reel',
       'Support prioritaire',
     ],
   },
@@ -64,15 +64,15 @@ type PlanId = (typeof plans)[number]['id']
 const faqs = [
   {
     question: 'Puis-je commencer gratuitement ?',
-    answer: 'Oui. Le plan gratuit permet de créer une première page, partager quelques liens et vérifier que TapLinkr correspond à votre audience.',
+    answer: 'Oui. Le plan gratuit permet de creer une premiere page, partager quelques liens et verifier que Taplinkr correspond a votre audience.',
   },
   {
     question: 'Comment fonctionne le paiement ?',
-    answer: 'Les paiements payants passent par Stripe Checkout. Vous pouvez gérer votre abonnement depuis le dashboard.',
+    answer: 'Les plans payants passent par Stripe Checkout. Vous pouvez gerer votre abonnement depuis le dashboard.',
   },
   {
     question: 'Les liens directs sont-ils inclus ?',
-    answer: 'Oui, à partir du plan Standard. Le plan Premium ajoute les options les plus avancées pour les pages sensibles, les agences et les gros volumes.',
+    answer: 'Oui, a partir du plan Standard. Premium ajoute les options avancees pour pages sensibles, domaines custom, agences et gros volumes.',
   },
 ]
 
@@ -104,7 +104,7 @@ export default function PricingPage() {
       const data = await response.json()
 
       if (!response.ok || !data.url) {
-        throw new Error(data.error || 'Impossible de créer la session Stripe')
+        throw new Error(data.error || 'Impossible de creer la session Stripe')
       }
 
       window.location.href = data.url
@@ -126,10 +126,10 @@ export default function PricingPage() {
               Tarifs
             </p>
             <h1 className="mx-auto mt-3 w-full max-w-[18rem] break-words text-2xl font-semibold leading-tight text-neutral-950 dark:text-white sm:max-w-3xl sm:text-4xl">
-              Choisissez le plan qui convertit vraiment vos clics
+              Choisissez le plan qui transforme vos clics en revenus
             </h1>
             <p className="mx-auto mt-4 w-full max-w-[18rem] text-sm leading-7 text-neutral-600 dark:text-white/60 sm:max-w-2xl">
-              Commencez gratuitement, puis passez à Standard ou Premium quand vos pages, vos protections et vos analytics doivent suivre le rythme.
+              Commencez gratuitement, puis passez a Standard ou Premium quand vos deeplinks, protections 18+, domaines et analytics doivent suivre le rythme.
             </p>
 
             <div className="mx-auto mt-8 grid w-full max-w-[18rem] gap-4 text-left sm:max-w-xl md:max-w-2xl lg:max-w-6xl lg:grid-cols-3">
@@ -144,7 +144,7 @@ export default function PricingPage() {
                 >
                   {plan.highlighted && (
                     <span className="mb-5 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white dark:bg-neutral-950/10 dark:text-neutral-950">
-                      Le plus choisi
+                      Pour createurs actifs
                     </span>
                   )}
 
@@ -205,10 +205,10 @@ export default function PricingPage() {
                 <HelpCircle className="h-5 w-5" />
               </div>
               <h2 className="max-w-[18rem] break-words text-3xl font-semibold text-neutral-950 dark:text-white sm:max-w-none">
-                Questions fréquentes
+                Questions frequentes
               </h2>
               <p className="mt-3 max-w-[18rem] text-sm leading-7 text-neutral-600 dark:text-white/60 sm:max-w-xl">
-                Les plans restent courts : le bon plan est celui qui correspond à votre volume de liens, à votre besoin de protection et à votre niveau d’analytics.
+                Le bon plan depend de votre volume de liens, de vos besoins de protection 18+, de vos domaines et de votre niveau d analytics.
               </p>
               <Link href="mailto:hello@taplinkr.com" className="mt-5 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-500">
                 Contacter le support

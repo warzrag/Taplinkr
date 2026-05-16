@@ -11,15 +11,11 @@ import {
   Menu,
   X,
   CreditCard,
-  Users,
   ExternalLink,
-  Gift,
-  HelpCircle,
-  Map,
   MessageCircle,
-  Activity,
-  Folder,
-  Database
+  Database,
+  Palette,
+  Globe2
 } from 'lucide-react'
 import Logo from '@/components/Logo'
 import { LinkUpdateProvider } from '@/contexts/LinkUpdateContext'
@@ -74,23 +70,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [session])
 
   const controlPanelItems = [
-    { icon: LayoutDashboard, label: 'Tableau de bord', href: '/dashboard' },
-    { icon: ExternalLink, label: 'Liens', href: '/dashboard/links' },
-    { icon: Folder, label: 'Dossiers', href: '/dashboard/folders' },
+    { icon: LayoutDashboard, label: 'Accueil', href: '/dashboard' },
+    { icon: ExternalLink, label: 'Mes pages', href: '/dashboard/pages' },
+    { icon: Palette, label: 'Apparence', href: '/dashboard/pages' },
     { icon: BarChart3, label: 'Analytics', href: '/dashboard/visitors' },
-    { icon: Activity, label: 'Visiteurs', href: '/dashboard/visitors' },
-    { icon: Users, label: 'Équipe', href: '/dashboard/team' },
+    { icon: Shield, label: 'Protection', href: '/dashboard/protection' },
+    { icon: Globe2, label: 'Domaines', href: '/dashboard/billing' },
   ]
 
   const accountItems = [
     { icon: User, label: 'Profil', href: '/dashboard/profile' },
-    { icon: CreditCard, label: 'Facturation', href: '/dashboard/billing' },
-    { icon: Gift, label: 'Tarifs', href: '/dashboard/pricing' },
+    { icon: CreditCard, label: 'Abonnement', href: '/dashboard/billing' },
   ]
 
   const helpItems = [
-    { icon: HelpCircle, label: 'FAQ', href: '/dashboard/faq' },
-    { icon: Map, label: 'Feuille de route', href: '/dashboard/roadmap' },
     { icon: MessageCircle, label: 'Support', href: '/dashboard/support' },
   ]
   

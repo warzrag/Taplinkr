@@ -35,26 +35,26 @@ interface FormData {
 const benefits = [
   {
     icon: BarChart3,
-    title: 'Analytics exploitables',
-    description: 'Tableaux de bord clairs pour mesurer les vues, clics et visiteurs'
+    title: 'Analytics createur',
+    description: 'Tableaux de bord clairs pour mesurer vues, clics, sources et conversions'
   },
   {
     icon: Shield,
-    title: 'Accès sécurisé',
-    description: 'Sessions protégées, données serveur et accès privé au dashboard'
+    title: 'Acces securise',
+    description: 'Sessions protegees, donnees serveur et acces prive au dashboard createur'
   },
   {
     icon: Users,
     title: 'Collaboration',
-    description: 'Gestion d’équipe pour partager les liens et suivre les performances'
+    description: 'Gestion d equipe pour piloter plusieurs pages, campagnes et domaines'
   },
 ]
 
 const metrics = [
-  { value: 'Liens', label: 'Pages publiques', icon: Users },
+  { value: 'Pages', label: 'Hubs createurs', icon: Users },
   { value: 'Stats', label: 'Clics et vues', icon: TrendingUp },
-  { value: 'Geo', label: 'Pays et appareils', icon: Globe },
-  { value: 'Teams', label: 'Travail en équipe', icon: Zap },
+  { value: 'Geo', label: 'Sources et appareils', icon: Globe },
+  { value: 'Teams', label: 'Agences', icon: Zap },
 ]
 
 export default function SignIn() {
@@ -183,15 +183,15 @@ export default function SignIn() {
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-1.5 text-sm font-medium">
                   <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-gray-700 dark:text-gray-300">Plateforme professionnelle</span>
+                  <span className="text-gray-700 dark:text-gray-300">Plateforme createur</span>
                 </div>
 
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
-                  Accédez à votre dashboard
+                  Pilotez votre hub createur
                 </h1>
 
                 <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Centralisez vos liens, analysez vos performances et collaborez avec votre équipe en toute sécurité.
+                  Retrouvez vos pages, deeplinks, protections 18+, domaines custom et analytics dans un dashboard unique.
                 </p>
               </div>
             </div>
@@ -266,7 +266,7 @@ export default function SignIn() {
                   href="/auth/signup"
                   className="text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
                 >
-                  Créer un compte
+                  Creer un compte
                 </Link>
               </div>
 
@@ -280,7 +280,7 @@ export default function SignIn() {
                     Bon retour
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Connectez-vous pour accéder à votre dashboard
+                    Connectez-vous pour gerer vos pages, deeplinks et analytics
                   </p>
                 </div>
               </div>
@@ -290,7 +290,7 @@ export default function SignIn() {
                 {/* Email Field */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-900 dark:text-white">
-                    Adresse email professionnelle
+                    Adresse email
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -331,7 +331,7 @@ export default function SignIn() {
                       href="/auth/forgot-password"
                       className="text-xs font-medium text-brand-600 hover:text-brand-500 transition-colors"
                     >
-                      Mot de passe oublié ?
+                      Mot de passe oublie ?
                     </Link>
                   </div>
                   <div className="relative">
@@ -393,7 +393,7 @@ export default function SignIn() {
                 href="/auth/signup"
                 className="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
               >
-                Créer un compte gratuit
+                Creer un compte gratuit
               </Link>
 
               {/* Security Badge */}
@@ -404,10 +404,10 @@ export default function SignIn() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-gray-900 dark:text-white">
-                      Connexion sécurisée SSL 256-bit
+                      Connexion securisee SSL 256-bit
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Vos données sont protégées et conformes RGPD
+                      Vos donnees, pages et analytics restent proteges
                     </p>
                   </div>
                 </div>

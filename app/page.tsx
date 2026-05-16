@@ -29,55 +29,55 @@ import { Container } from '@/components/ui/Container'
 const features = [
   {
     icon: ExternalLink,
-    title: 'Pages publiques mobile-first',
-    description: 'Publiez une page premium pensée pour Instagram, TikTok, X, Reddit et les visiteurs pressés.',
+    title: 'Pages createurs mobile-first',
+    description: 'Publiez une vitrine rapide pour Instagram, TikTok, X, Reddit et toutes les audiences qui arrivent depuis votre bio.',
   },
   {
     icon: Shield,
-    title: 'Liens directs et Shield',
-    description: 'Ajoutez des redirections propres, des étapes de vérification et des protections pour les liens sensibles.',
+    title: 'Deeplinks et garde 18+',
+    description: 'Envoyez chaque fan vers la bonne destination avec des redirections propres, des avertissements et une protection pour les contenus sensibles.',
   },
   {
     icon: BarChart3,
-    title: 'Analytics de conversion',
-    description: 'Comprenez les vues, clics, pays, appareils et sources qui transforment vraiment votre audience.',
+    title: 'Analytics exploitables',
+    description: 'Comprenez les vues, clics, sources, pays et appareils qui transforment vraiment votre audience en abonnements ou ventes.',
   },
   {
     icon: Palette,
-    title: 'Identité créateur',
-    description: 'Gardez une page cohérente avec vos visuels, couvertures, icônes, couleurs et appels à l’action.',
+    title: 'Identite de marque',
+    description: 'Gardez une page coherente avec vos visuels, vos couleurs, vos icones, vos offres et vos appels a l action.',
   },
   {
     icon: Folder,
-    title: 'Campagnes organisées',
-    description: 'Classez vos pages, liens, dossiers et lancements pour savoir ce qui marche sans fouiller partout.',
+    title: 'Campagnes organisees',
+    description: 'Classez vos pages, liens, lancements et offres pour savoir quoi pousser sans fouiller partout.',
   },
   {
     icon: Users,
-    title: 'Équipes et agences',
-    description: 'Invitez des membres, gérez plusieurs pages et gardez une vue claire sur les performances clients.',
+    title: 'Domaines et agences',
+    description: 'Pilotez plusieurs createurs, connectez vos domaines custom et gardez une vue claire sur les performances clients.',
   },
 ]
 
 const workflow = [
-  'Créez votre page',
-  'Ajoutez vos offres',
-  'Protégez vos liens',
+  'Creez votre page',
+  'Ajoutez vos deeplinks',
+  'Activez la garde 18+',
   'Suivez les clics',
 ]
 
 const useCases = [
   {
-    title: 'Créateurs',
-    text: 'Une page claire pour transformer vos followers en visiteurs, abonnés ou clients.',
+    title: 'Createurs',
+    text: 'Une page claire pour transformer vos followers en visiteurs, abonnes ou clients.',
   },
   {
     title: 'Pages sensibles',
-    text: 'Des redirections mieux contrôlées quand vos liens demandent plus de prudence.',
+    text: 'Des redirections mieux controlees quand vos liens demandent un avertissement, une verification ou plus de prudence.',
   },
   {
     title: 'Agences',
-    text: 'Un espace pour gérer plusieurs créateurs, campagnes et performances au même endroit.',
+    text: 'Un espace pour gerer plusieurs createurs, campagnes, domaines et performances au meme endroit.',
   },
 ]
 
@@ -113,7 +113,7 @@ export default function Home() {
           setAvailable(Boolean(data.available))
           if (!data.available && data.error) setError(data.error)
         } catch {
-          setError('Vérification indisponible pour le moment')
+          setError('Verification indisponible pour le moment')
         } finally {
           setChecking(false)
         }
@@ -160,15 +160,15 @@ export default function Home() {
             >
               <div className="mx-auto mb-6 flex w-full max-w-[18rem] items-center justify-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-center text-xs font-medium text-white/80 backdrop-blur sm:inline-flex sm:max-w-full sm:px-4 sm:text-sm">
                 <Sparkles className="h-4 w-4 flex-shrink-0 text-cyan-300" />
-                <span className="min-w-0 whitespace-normal break-words">Link-in-bio pour créateurs, agences et pages sensibles</span>
+                <span className="min-w-0 whitespace-normal break-words">Pages createurs, deeplinks et protection 18+</span>
               </div>
 
               <h1 className="mx-auto max-w-[18rem] break-words text-3xl font-semibold leading-[1.08] text-white xs:text-4xl sm:max-w-4xl sm:text-5xl lg:text-6xl">
-                Transformez votre lien bio en page qui convertit vos fans
+                Vendez plus avec une page createur qui guide chaque fan au bon lien
               </h1>
 
               <p className="mx-auto mt-6 max-w-[18rem] text-base leading-7 text-white/70 sm:max-w-2xl sm:text-lg">
-                Créez une page mobile premium, protégez vos redirections et voyez quels liens transforment vraiment votre audience en clics.
+                Taplinkr rassemble vos offres, contenus et deeplinks dans une page mobile rapide, avec garde 18+, domaines custom et analytics lisibles.
               </p>
 
               <div className="mx-auto mt-8 w-full max-w-[18rem] overflow-hidden rounded-2xl border border-white/12 bg-white/10 p-3 text-left shadow-2xl shadow-black/20 backdrop-blur-xl sm:max-w-2xl sm:p-4">
@@ -201,8 +201,8 @@ export default function Home() {
 
                 <div className="min-h-[24px] pt-2 text-xs">
                   {error && <span className="text-rose-200">{error}</span>}
-                  {available === true && <span className="text-emerald-200">Disponible. Vous pouvez le réserver maintenant.</span>}
-                  {available === false && !error && <span className="text-rose-200">Ce nom est déjà pris.</span>}
+                  {available === true && <span className="text-emerald-200">Disponible. Vous pouvez le reserver maintenant.</span>}
+                  {available === false && !error && <span className="text-rose-200">Ce nom est deja pris.</span>}
                 </div>
               </div>
 
@@ -225,10 +225,10 @@ export default function Home() {
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-600">Produit</p>
               <h2 className="mt-3 text-3xl font-semibold text-neutral-950 dark:text-white sm:text-4xl">
-                Bien plus qu’une liste de liens dans votre bio
+                Bien plus qu une simple liste de liens dans votre bio
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-neutral-600 dark:text-white/60">
-                TapLinkr se concentre sur ce qui manque aux pages génériques : conversion, protection, suivi clair et gestion multi-pages.
+                Taplinkr se concentre sur ce qui manque aux pages generiques : conversion, deeplinks, protection 18+, domaines custom et suivi clair.
               </p>
             </div>
 
@@ -251,10 +251,10 @@ export default function Home() {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-600">Cas d’usage</p>
               <h2 className="mt-3 text-3xl font-semibold text-neutral-950 dark:text-white sm:text-4xl">
-                Pensé pour les créateurs qui vivent de leurs clics
+                Pense pour les createurs qui vivent de leurs clics
               </h2>
               <p className="mt-4 text-sm leading-7 text-neutral-600 dark:text-white/60">
-                TapLinkr doit rester simple côté visiteur et précis côté dashboard : une page rapide à partager, un pilotage clair pour décider quoi pousser, protéger ou améliorer.
+                Cote visiteur, tout doit etre fluide. Cote dashboard, vous voyez quoi mettre en avant, quels deeplinks proteger et quelles campagnes meritent un domaine dedie.
               </p>
             </div>
 
@@ -279,9 +279,9 @@ export default function Home() {
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1"><MousePointerClick className="h-3.5 w-3.5" /> Conversion</span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1"><Lock className="h-3.5 w-3.5" /> Protection</span>
                   </div>
-                  <h2 className="text-3xl font-semibold sm:text-4xl">Faites mieux qu’une simple page de liens</h2>
+                  <h2 className="text-3xl font-semibold sm:text-4xl">Passez d un lien bio a un vrai hub createur</h2>
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">
-                    Réservez votre URL, créez votre première page et commencez à comprendre quels liens méritent vraiment la première place.
+                    Reservez votre URL, creez votre premiere page et voyez quels liens meritent vraiment la premiere place.
                   </p>
                 </div>
                 <button
@@ -289,7 +289,7 @@ export default function Home() {
                   onClick={handleGetStarted}
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-neutral-950 shadow-none transition hover:bg-white/90"
                 >
-                  Créer mon TapLinkr
+                  Creer mon Taplinkr
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>

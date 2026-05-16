@@ -33,24 +33,24 @@ interface FormData {
 const benefits = [
   {
     icon: Shield,
-    title: 'Sécurité et confiance',
-    description: 'Contrôlez vos liens, définissez des accès privés et collaborez en toute sérénité.'
+    title: 'Protection et confiance',
+    description: 'Controlez vos deeplinks, activez une garde 18+ et gardez vos pages sous votre marque.'
   },
   {
     icon: UserPlus,
-    title: 'Personnalisation totale',
-    description: 'Composez une page fidèle à votre identité et adaptez-la à chaque campagne.'
+    title: 'Pages qui vendent',
+    description: 'Composez une page fidele a votre identite, adaptee a chaque offre, reseau et campagne.'
   },
   {
     icon: Mail,
-    title: 'Onboarding assisté',
-    description: 'Notre équipe vous accompagne pour configurer vos premiers liens et vos analytics.'
+    title: 'Mise en ligne rapide',
+    description: 'Creez votre compte, branchez vos liens importants et commencez a lire vos analytics.'
   },
 ]
 
 const steps = [
-  { label: 'Votre profil', description: 'Présentez-vous en quelques mots' },
-  { label: 'Sécurité', description: 'Créez votre mot de passe' },
+  { label: 'Votre profil', description: 'Presentez votre marque createur' },
+  { label: 'Securite', description: 'Creez votre mot de passe' },
 ]
 
 export default function SignUp() {
@@ -117,10 +117,10 @@ export default function SignUp() {
             className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-[hsl(var(--surface))] p-10 shadow-card lg:flex"
           >
             <div className="space-y-4">
-              <span className="badge-pill bg-brand-500/10 text-brand-600">Décollage en quelques minutes</span>
-              <h2 className="text-3xl font-semibold">Construisez une présence qui vous ressemble</h2>
+              <span className="badge-pill bg-brand-500/10 text-brand-600">Votre hub en quelques minutes</span>
+              <h2 className="text-3xl font-semibold">Construisez une page createur prete a convertir</h2>
               <p className="text-sm text-foreground/65">
-                Centralisez vos liens, vos offres et vos contenus dans une page fluide, responsive et optimisée pour la conversion.
+                Centralisez vos offres, contenus, deeplinks et protections dans une page rapide, claire et mesurable.
               </p>
             </div>
 
@@ -157,7 +157,7 @@ export default function SignUp() {
                 href="/auth/signin"
                 className="text-foreground/70 transition-colors hover:text-foreground"
               >
-                J'ai déjà un compte
+                J'ai deja un compte
               </Link>
             </div>
 
@@ -165,11 +165,11 @@ export default function SignUp() {
               <div className="flex justify-center">
                 <Logo size="md" showText={false} />
               </div>
-              <h1 className="text-2xl font-semibold">Créez votre compte</h1>
+              <h1 className="text-2xl font-semibold">Creez votre compte</h1>
               <p className="text-sm text-foreground/60">
                 {suggestedUsername
-                  ? `Votre URL réservée : taplinkr.com/${suggestedUsername}`
-                  : 'Rejoignez des milliers de créateurs inspirants.'}
+                  ? `Votre URL reservee : taplinkr.com/${suggestedUsername}`
+                  : 'Lancez votre page createur, vos deeplinks et vos analytics.'}
               </p>
             </div>
 
@@ -282,10 +282,10 @@ export default function SignUp() {
                           type={showPassword ? 'text' : 'password'}
                           {...register('password', {
                             required: 'Le mot de passe est requis',
-                            minLength: { value: 8, message: 'Au moins 8 caractères' },
+                            minLength: { value: 8, message: 'Au moins 8 caracteres' },
                           })}
                           className="input pl-12 pr-12"
-                          placeholder="Créer un mot de passe"
+                          placeholder="Creer un mot de passe"
                         />
                         <button
                           type="button"
@@ -310,7 +310,7 @@ export default function SignUp() {
                     </div>
 
                     <Button type="submit" fullWidth loading={loading}>
-                      Créer mon compte
+                      Creer mon compte
                       <UserPlus className="h-4 w-4" />
                     </Button>
 
@@ -319,7 +319,7 @@ export default function SignUp() {
                       onClick={() => setStep(0)}
                       className="w-full text-sm text-foreground/50 transition-colors hover:text-foreground/70"
                     >
-                      Retour à l'étape précédente
+                      Retour a l'etape precedente
                     </button>
                   </motion.div>
                 )}
@@ -329,7 +329,7 @@ export default function SignUp() {
             <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
               <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Conseil</p>
               <p className="mt-2 text-sm text-foreground/70">
-                Une fois inscrit, personnalisez votre page avec nos templates premium et activez l'analytics avancé en 1 clic.
+                Une fois inscrit, ajoutez vos deeplinks, activez la garde 18+ si besoin et suivez les clics des la premiere campagne.
               </p>
             </div>
           </motion.div>
