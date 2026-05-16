@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Upload, X, Loader2, ImageIcon } from 'lucide-react'
+import { Upload, X, Loader2, ImageIcon, Smartphone } from 'lucide-react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
@@ -138,40 +138,63 @@ export default function CoverImageUpload({
             className="space-y-3"
           >
             {/* Container simple avec aspect ratio fixe */}
-            <div className="relative aspect-[9/16] sm:aspect-[16/9] w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800">
-              <Image
-                src={preview}
-                alt="Cover"
-                fill
-                className="object-cover"
-                priority
-              />
+            <div className="relative rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-950">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Apercu couverture mobile</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Zone visible en haut de la page publique.</p>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                  <Smartphone className="h-3.5 w-3.5" />
+                  Mobile
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-[1.5rem] bg-gray-950 p-2">
+                <div className="overflow-hidden rounded-[1.1rem] bg-white">
+                  <div className="relative h-32 w-full overflow-hidden sm:h-36">
+                    <Image
+                      src={preview}
+                      alt="Cover"
+                      fill
+                      className="object-cover object-center"
+                      priority
+                    />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white/85 to-transparent" />
+                    <div className="pointer-events-none absolute bottom-2 left-1/2 h-16 w-16 -translate-x-1/2 translate-y-1/2 rounded-full border-4 border-white bg-white/70 shadow-lg" />
+                  </div>
+                  <div className="h-20 bg-white" />
+                </div>
+              </div>
               
               {/* Actions overlay */}
-              <div className="absolute top-3 right-3 flex items-center gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="p-2 bg-black/20 backdrop-blur-md rounded-lg hover:bg-black/30 transition-colors shadow-lg"
-                >
-                  <Upload className="w-4 h-4 text-white" />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleRemove}
-                  disabled={isUploading}
-                  className="p-2 bg-black/20 backdrop-blur-md rounded-lg hover:bg-black/30 transition-colors shadow-lg"
-                >
-                  <X className="w-4 h-4 text-white" />
-                </motion.button>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <p className="text-xs text-gray-500 dark:text-gray-400">L'image est centree comme dans le telephone.</p>
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="rounded-xl border border-gray-200 bg-white p-2 text-gray-600 shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                  >
+                    <Upload className="w-4 h-4" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleRemove}
+                    disabled={isUploading}
+                    className="rounded-xl border border-gray-200 bg-white p-2 text-gray-600 shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                  >
+                    <X className="w-4 h-4" />
+                  </motion.button>
+                </div>
               </div>
 
               {/* Loading overlay */}
               {isUploading && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <div className="absolute inset-3 bg-black/45 flex items-center justify-center rounded-2xl">
                   <Loader2 className="w-8 h-8 text-white animate-spin" />
                 </div>
               )}
