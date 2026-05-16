@@ -15,14 +15,51 @@ const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
 
 import { useState } from 'react'
 
+const hexToRgb = (color?: string | null) => {
+  if (!color || !color.startsWith('#')) return null
+  const value = color.replace('#', '')
+  const normalized = value.length === 3
+    ? value.split('').map((char) => `${char}${char}`).join('')
+    : value
+  if (normalized.length !== 6) return null
+  const parsed = Number.parseInt(normalized, 16)
+  if (Number.isNaN(parsed)) return null
+  return {
+    r: (parsed >> 16) & 255,
+    g: (parsed >> 8) & 255,
+    b: parsed & 255,
+  }
+}
+
+const getRelativeLuminance = (color?: string | null) => {
+  const rgb = hexToRgb(color)
+  if (!rgb) return null
+  const channel = (value: number) => {
+    const normalized = value / 255
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : Math.pow((normalized + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * channel(rgb.r) + 0.7152 * channel(rgb.g) + 0.0722 * channel(rgb.b)
+}
+
+const getContrastRatio = (first?: string | null, second?: string | null) => {
+  const firstLum = getRelativeLuminance(first)
+  const secondLum = getRelativeLuminance(second)
+  if (firstLum === null || secondLum === null) return null
+  const lighter = Math.max(firstLum, secondLum)
+  const darker = Math.min(firstLum, secondLum)
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
 const getPreviewTextColor = (backgroundColor?: string | null, textColor?: string | null) => {
-  if (textColor && textColor.toLowerCase() !== '#ffffff' && textColor.toLowerCase() !== 'white') {
-    return textColor
-  }
-  if (!backgroundColor || backgroundColor.toLowerCase() === '#ffffff' || backgroundColor.toLowerCase() === 'white') {
-    return '#111827'
-  }
-  return textColor || '#111827'
+  const background = backgroundColor || '#ffffff'
+  const preferred = textColor || '#111827'
+  const contrast = getContrastRatio(background, preferred)
+  if (contrast === null || contrast >= 4.5) return preferred
+  const darkContrast = getContrastRatio(background, '#111827') || 0
+  const lightContrast = getContrastRatio(background, '#ffffff') || 0
+  return darkContrast >= lightContrast ? '#111827' : '#ffffff'
 }
 
 function PhonePreview({ page }: { page: any }) {
