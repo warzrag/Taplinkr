@@ -377,4 +377,60 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Dark-mode safety net for older screens that predate the design refresh.
+     It only targets utilities that do not already provide an explicit dark: variant. */
+  .dark .bg-white:not([class*="dark:bg-"]),
+  .dark .bg-gray-50:not([class*="dark:bg-"]),
+  .dark .bg-slate-50:not([class*="dark:bg-"]) {
+    background-color: hsl(var(--card));
+  }
+
+  .dark .from-white:not([class*="dark:from-"]),
+  .dark .from-gray-50:not([class*="dark:from-"]),
+  .dark .from-blue-50:not([class*="dark:from-"]),
+  .dark .from-purple-50:not([class*="dark:from-"]) {
+    --tw-gradient-from: hsl(var(--background)) var(--tw-gradient-from-position);
+    --tw-gradient-to: hsl(var(--background) / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .dark .via-white:not([class*="dark:via-"]),
+  .dark .via-gray-50:not([class*="dark:via-"]) {
+    --tw-gradient-to: hsl(var(--background) / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), hsl(var(--surface)) var(--tw-gradient-via-position), var(--tw-gradient-to);
+  }
+
+  .dark .to-white:not([class*="dark:to-"]),
+  .dark .to-blue-50:not([class*="dark:to-"]),
+  .dark .to-purple-50:not([class*="dark:to-"]),
+  .dark .to-pink-50:not([class*="dark:to-"]) {
+    --tw-gradient-to: hsl(var(--surface-muted)) var(--tw-gradient-to-position);
+  }
+
+  .dark .border-white:not([class*="dark:border-"]),
+  .dark .border-gray-200:not([class*="dark:border-"]),
+  .dark .border-gray-300:not([class*="dark:border-"]) {
+    border-color: hsl(var(--border));
+  }
+
+  .dark .text-gray-900:not([class*="dark:text-"]),
+  .dark .text-slate-900:not([class*="dark:text-"]),
+  .dark .text-gray-800:not([class*="dark:text-"]) {
+    color: hsl(var(--foreground));
+  }
+
+  .dark .text-gray-700:not([class*="dark:text-"]),
+  .dark .text-gray-600:not([class*="dark:text-"]),
+  .dark .text-gray-500:not([class*="dark:text-"]) {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .dark input:not([class*="dark:bg-"]),
+  .dark textarea:not([class*="dark:bg-"]),
+  .dark select:not([class*="dark:bg-"]) {
+    background-color: hsl(var(--surface));
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--border));
+  }
 }
