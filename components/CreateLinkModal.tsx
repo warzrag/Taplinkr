@@ -1,12 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Link2, Plus, Sparkles, ArrowRight, ExternalLink, Layers, Shield, Zap, Smartphone, Eye, Camera, User, Sparkle, Check, AlertCircle, Loader2, Instagram, Twitter, Youtube, Info, Bell, ArrowLeft, Rocket, TrendingUp, BarChart3 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import {
+  AlertCircle,
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  GripVertical,
+  Image as ImageIcon,
+  Link2,
+  Loader2,
+  Plus,
+  Sparkles,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { Link as LinkType } from '@/types'
-import { usePermissions } from '@/hooks/usePermissions'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
 import IconUpload from './upload/IconUpload'
@@ -19,18 +32,7 @@ interface CreateLinkModalProps {
   editingLink?: LinkType | null
 }
 
-interface FormData {
-  title: string
-  internalName?: string
-  slug?: string
-  description?: string
-  instagramUrl?: string
-  tiktokUrl?: string
-  twitterUrl?: string
-  youtubeUrl?: string
-}
-
-interface MultiLinkData {
+interface PageLink {
   title: string
   url: string
   description?: string
@@ -38,1768 +40,635 @@ interface MultiLinkData {
   iconImage?: string
 }
 
-export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
-  const { hasPermission, requirePermission } = usePermissions()
-  const [loading, setLoading] = useState(false)
-  const [step, setStepOriginal] = useState(editingLink ? 6 : 1) // Si on édite, on passe directement à l'étape finale
+const defaultLinks: PageLink[] = [
+  { title: 'Instagram', url: '', description: '', icon: '', iconImage: '' },
+  { title: 'Telegram', url: '', description: '', icon: '', iconImage: '' },
+]
 
-  // Wrapper pour tracer les changements d'étape
-  const setStep = (newStep: number) => {
-    setStepOriginal(newStep)
+const themes = [
+  { label: 'Clean', backgroundColor: '#ffffff', textColor: '#111827', accent: '#6366f1' },
+  { label: 'Dark', backgroundColor: '#0f172a', textColor: '#f8fafc', accent: '#22c55e' },
+  { label: 'Rose', backgroundColor: '#fff1f2', textColor: '#881337', accent: '#f43f5e' },
+  { label: 'Mint', backgroundColor: '#ecfdf5', textColor: '#064e3b', accent: '#10b981' },
+]
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48)
+}
+
+function inferTitleFromUrl(url: string) {
+  try {
+    const host = new URL(url.startsWith('http') ? url : `https://${url}`).hostname.replace(/^www\./, '')
+    const name = host.split('.')[0]
+    return name ? name.charAt(0).toUpperCase() + name.slice(1) : ''
+  } catch {
+    return ''
   }
+}
 
-  const [linkType, setLinkType] = useState<'direct' | 'multi' | null>(
-    editingLink?.isDirect ? 'direct' : editingLink ? 'multi' : null
-  )
-  const [directUrl, setDirectUrl] = useState(editingLink?.directUrl || '')
-  const [shieldEnabled, setShieldEnabled] = useState(editingLink?.shieldEnabled || false)
-  const [isUltraLink, setIsUltraLink] = useState(editingLink?.isUltraLink || false)
-  const [showDirectLinkComingSoon, setShowDirectLinkComingSoon] = useState(false)
-  const [multiLinks, setMultiLinks] = useState<MultiLinkData[]>(
-    editingLink?.multiLinks && editingLink.multiLinks.length > 0
-      ? editingLink.multiLinks.map(ml => ({
-          title: ml.title,
-          url: ml.url,
-          description: ml.description || '',
-          icon: ml.icon,
-          iconImage: ml.iconImage
-        }))
-      : [{ title: 'Mon Instagram', url: 'https://instagram.com/moncompte', description: '', icon: '', iconImage: '' }]
-  )
-  const [profileImage, setProfileImage] = useState(editingLink?.profileImage || '')
-  const [profileStyle, setProfileStyle] = useState<'circle' | 'beacon'>(editingLink?.profileStyle || 'circle')
-  const [coverImage, setCoverImage] = useState(editingLink?.coverImage || '')
-  const [showPreview, setShowPreview] = useState(editingLink ? true : false)
+export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
+  const [loading, setLoading] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
-  const [slugTimer, setSlugTimer] = useState<NodeJS.Timeout | null>(null)
-  
-  // États pour la personnalisation
-  const [linkAnimation, setLinkAnimation] = useState(editingLink?.animation || 'none')
-  const [borderRadius, setBorderRadius] = useState(editingLink?.borderRadius || 'rounded-xl')
-  const [fontFamily, setFontFamily] = useState(editingLink?.fontFamily || 'system')
-  const [backgroundColor, setBackgroundColor] = useState(editingLink?.backgroundColor || '#ffffff')
-  const [textColor, setTextColor] = useState(editingLink?.textColor || '#1f2937')
-  
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>({
-    defaultValues: editingLink ? {
-      title: editingLink.title,
-      slug: editingLink.slug,
-      description: editingLink.description || '',
-      instagramUrl: editingLink.instagramUrl || '',
-      tiktokUrl: editingLink.tiktokUrl || '',
-      twitterUrl: editingLink.twitterUrl || '',
-      youtubeUrl: editingLink.youtubeUrl || ''
-    } : {
-      title: '',
-      slug: '',
-      description: '',
-      instagramUrl: '',
-      tiktokUrl: '',
-      twitterUrl: '',
-      youtubeUrl: ''
-    }
-  })
 
-  const watchedSlug = watch('slug')
-  const watchedTitle = watch('title')
-  const watchedDescription = watch('description')
-  const watchedInstagram = watch('instagramUrl')
-  const watchedTwitter = watch('twitterUrl')
-  const watchedYoutube = watch('youtubeUrl')
-  const watchedTiktok = watch('tiktokUrl')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [slug, setSlug] = useState('')
+  const [profileImage, setProfileImage] = useState('')
+  const [coverImage, setCoverImage] = useState('')
+  const [links, setLinks] = useState<PageLink[]>(defaultLinks)
+  const [instagramUrl, setInstagramUrl] = useState('')
+  const [tiktokUrl, setTiktokUrl] = useState('')
+  const [twitterUrl, setTwitterUrl] = useState('')
+  const [youtubeUrl, setYoutubeUrl] = useState('')
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff')
+  const [textColor, setTextColor] = useState('#111827')
+  const [accentColor, setAccentColor] = useState('#6366f1')
+  const [borderRadius, setBorderRadius] = useState('rounded-2xl')
+  const [customSlugTouched, setCustomSlugTouched] = useState(false)
 
-
-  // Vérifier la disponibilité du slug
   useEffect(() => {
-    if (slugTimer) {
-      clearTimeout(slugTimer)
-    }
+    if (!isOpen) return
 
-    if (!watchedSlug || watchedSlug === editingLink?.slug) {
+    if (editingLink) {
+      setTitle(editingLink.title || '')
+      setDescription(editingLink.description || editingLink.bio || '')
+      setSlug(editingLink.slug || '')
+      setProfileImage(editingLink.profileImage || '')
+      setCoverImage(editingLink.coverImage || '')
+      setLinks(
+        editingLink.multiLinks?.length
+          ? editingLink.multiLinks.map(link => ({
+              title: link.title || '',
+              url: link.url || '',
+              description: link.description || '',
+              icon: link.icon || '',
+              iconImage: link.iconImage || '',
+            }))
+          : [{ title: '', url: '', description: '', icon: '', iconImage: '' }]
+      )
+      setInstagramUrl(editingLink.instagramUrl || '')
+      setTiktokUrl(editingLink.tiktokUrl || '')
+      setTwitterUrl(editingLink.twitterUrl || '')
+      setYoutubeUrl(editingLink.youtubeUrl || '')
+      setBackgroundColor(editingLink.backgroundColor || '#ffffff')
+      setTextColor(editingLink.textColor || '#111827')
+      setAccentColor(editingLink.color || '#6366f1')
+      setBorderRadius(editingLink.borderRadius || 'rounded-2xl')
+      setCustomSlugTouched(true)
+    } else {
+      setTitle('')
+      setDescription('')
+      setSlug('')
+      setProfileImage('')
+      setCoverImage('')
+      setLinks(defaultLinks)
+      setInstagramUrl('')
+      setTiktokUrl('')
+      setTwitterUrl('')
+      setYoutubeUrl('')
+      setBackgroundColor('#ffffff')
+      setTextColor('#111827')
+      setAccentColor('#6366f1')
+      setBorderRadius('rounded-2xl')
+      setCustomSlugTouched(false)
+      setShowAdvanced(false)
+    }
+  }, [isOpen, editingLink])
+
+  useEffect(() => {
+    if (!customSlugTouched) {
+      setSlug(slugify(title))
+    }
+  }, [title, customSlugTouched])
+
+  useEffect(() => {
+    if (!slug || slug === editingLink?.slug) {
       setSlugAvailable(null)
       setCheckingSlug(false)
       return
     }
 
     setCheckingSlug(true)
-    setSlugAvailable(null)
-
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/links/check-slug?slug=${encodeURIComponent(watchedSlug)}${editingLink ? `&linkId=${editingLink.id}` : ''}`)
-        if (!response.ok) {
-          console.error('Erreur API:', response.status)
-          setSlugAvailable(null)
-          return
-        }
+        const response = await fetch(`/api/links/check-slug?slug=${encodeURIComponent(slug)}${editingLink ? `&linkId=${editingLink.id}` : ''}`)
         const data = await response.json()
-        setSlugAvailable(data.available)
-      } catch (error) {
-        console.error('Erreur vérification slug:', error)
+        setSlugAvailable(Boolean(data.available))
+      } catch {
         setSlugAvailable(null)
       } finally {
         setCheckingSlug(false)
       }
-    }, 500) // Debounce de 500ms
+    }, 400)
 
-    setSlugTimer(timer)
+    return () => clearTimeout(timer)
+  }, [slug, editingLink])
 
-    return () => {
-      if (timer) clearTimeout(timer)
+  const validLinks = useMemo(
+    () => links.filter(link => link.title.trim() && link.url.trim()),
+    [links]
+  )
+
+  const previewLink = useMemo(() => ({
+    id: editingLink?.id || 'preview',
+    slug: slug || 'votre-page',
+    title: title || 'Votre nom',
+    description,
+    profileImage,
+    profileStyle: 'circle',
+    coverImage,
+    isDirect: false,
+    isActive: true,
+    instagramUrl,
+    tiktokUrl,
+    twitterUrl,
+    youtubeUrl,
+    animation: 'none',
+    borderRadius,
+    fontFamily: 'system',
+    backgroundColor,
+    textColor,
+    color: accentColor,
+    multiLinks: links.map((link, index) => ({
+      id: `${index}`,
+      parentLinkId: '',
+      title: link.title || inferTitleFromUrl(link.url) || `Lien ${index + 1}`,
+      url: link.url || '#',
+      description: link.description || '',
+      icon: link.icon || '',
+      iconImage: link.iconImage || '',
+      animation: '',
+      order: index,
+      clicks: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })),
+    userId: '',
+    directUrl: '',
+    shieldEnabled: false,
+    isUltraLink: false,
+    isOnline: false,
+    order: 0,
+    clicks: 0,
+    views: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }), [accentColor, backgroundColor, borderRadius, coverImage, description, editingLink?.id, instagramUrl, links, profileImage, slug, textColor, tiktokUrl, title, twitterUrl, youtubeUrl])
+
+  const updateLink = (index: number, field: keyof PageLink, value: string) => {
+    setLinks(current => {
+      const next = [...current]
+      const updated = { ...next[index], [field]: value }
+      if (field === 'url' && !updated.title.trim()) {
+        updated.title = inferTitleFromUrl(value)
+      }
+      next[index] = updated
+      return next
+    })
+  }
+
+  const addLink = () => {
+    setLinks(current => [...current, { title: '', url: '', description: '', icon: '', iconImage: '' }])
+  }
+
+  const removeLink = (index: number) => {
+    setLinks(current => current.length > 1 ? current.filter((_, i) => i !== index) : current)
+  }
+
+  const handleCopyPreviewUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/${slug || 'votre-page'}`)
+      toast.success('URL copiee')
+    } catch {
+      toast.error('Impossible de copier le lien')
     }
-  }, [watchedSlug, editingLink])
-
-  const handleClose = () => {
-    if (!loading) {
-      setStep(editingLink ? 3 : 1)
-      setLinkType(editingLink?.isDirect ? 'direct' : editingLink ? 'multi' : null)
-      setDirectUrl('')
-      setShieldEnabled(false)
-      setIsUltraLink(false)
-      setShowDirectLinkComingSoon(false)
-      setMultiLinks([{ title: '', url: '' }])
-      setProfileImage('')
-      setCoverImage('')
-      setShowPreview(false)
-      reset()
-      onClose()
-    }
   }
 
-  const addMultiLink = () => {
-    const newLinks = [...multiLinks, { title: '', url: '', description: '', icon: '', iconImage: '' }]
-    setMultiLinks(newLinks)
-  }
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
 
-  const removeMultiLink = (index: number) => {
-    if (multiLinks.length > 1) {
-      setMultiLinks(multiLinks.filter((_, i) => i !== index))
-    }
-  }
-
-  const updateMultiLink = (index: number, field: 'title' | 'url' | 'icon' | 'iconImage', value: string) => {
-    const updated = [...multiLinks]
-    updated[index][field] = value
-    setMultiLinks(updated)
-  }
-
-  const onSubmit = async (data: FormData) => {
-    // Vérifier la disponibilité du slug
-    if (data.slug && slugAvailable === false) {
-      toast.error('Cette URL est déjà utilisée')
+    if (!title.trim()) {
+      toast.error('Ajoutez un nom pour votre page')
       return
     }
 
-    // Validation selon le type de lien
-    if (linkType === 'direct') {
-      // Vérifier si l'utilisateur peut créer des liens directs
-      if (!hasPermission('hasCustomThemes')) {
-        requirePermission('hasCustomThemes')
-        return
-      }
-      
-      if (!directUrl) {
-        toast.error('L\'URL de redirection est requise')
-        return
-      }
-    } else {
-      // Vérifier qu'au moins un lien est rempli
-      const validLinks = multiLinks.filter(link => link.title && link.url)
-      if (validLinks.length === 0) {
-        toast.error('Ajoutez au moins un lien')
-        return
-      }
+    if (!slug.trim()) {
+      toast.error('Choisissez une URL publique')
+      return
+    }
+
+    if (slugAvailable === false) {
+      toast.error('Cette URL est deja utilisee')
+      return
+    }
+
+    if (validLinks.length === 0) {
+      toast.error('Ajoutez au moins un lien avec un titre et une URL')
+      return
     }
 
     setLoading(true)
-    
+
     try {
-      const url = editingLink ? `/api/links/${editingLink.id}` : '/api/links-create-final'
-      const method = editingLink ? 'PUT' : 'POST'
-      
-      const filteredMultiLinks = linkType === 'multi' ? multiLinks.filter(link => link.title || link.url) : []
-      console.log('🔍 MultiLinks à envoyer:', filteredMultiLinks)
-
       const requestBody = {
-        ...data,
-        isDirect: linkType === 'direct',
-        directUrl: linkType === 'direct' ? directUrl : null,
-        shieldEnabled: linkType === 'direct' ? shieldEnabled : false,
-        isUltraLink: linkType === 'direct' ? isUltraLink : false,
-        multiLinks: filteredMultiLinks,
+        title: title.trim(),
+        internalName: null,
+        slug: slug.trim(),
+        description: description.trim() || null,
+        bio: description.trim() || null,
+        isDirect: false,
+        directUrl: null,
+        shieldEnabled: false,
+        isUltraLink: false,
+        multiLinks: validLinks.map((link, index) => ({
+          title: link.title.trim(),
+          url: link.url.trim(),
+          description: link.description?.trim() || null,
+          icon: link.icon || '',
+          iconImage: link.iconImage || '',
+          order: index,
+        })),
         profileImage: profileImage || null,
-        profileStyle: profileStyle || 'circle',
-        coverImage: profileStyle === 'beacon' ? (profileImage || null) : (coverImage || null),
-        description: data.description || null,
-        instagramUrl: data.instagramUrl || null,
-        tiktokUrl: data.tiktokUrl || null,
-        twitterUrl: data.twitterUrl || null,
-        youtubeUrl: data.youtubeUrl || null,
-        animation: linkAnimation || 'none',
-        borderRadius: borderRadius || 'rounded-xl',
-        fontFamily: fontFamily || 'system',
-        backgroundColor: backgroundColor || '#ffffff',
-        textColor: textColor || '#1f2937'
+        profileStyle: 'circle',
+        coverImage: coverImage || null,
+        color: accentColor,
+        backgroundColor,
+        textColor,
+        borderRadius,
+        fontFamily: 'system',
+        instagramUrl: instagramUrl || null,
+        tiktokUrl: tiktokUrl || null,
+        twitterUrl: twitterUrl || null,
+        youtubeUrl: youtubeUrl || null,
+        animation: 'none',
       }
-      
-      console.log('📤 Requête:', method, url, '| MultiLinks:', requestBody.multiLinks?.length || 0)
 
-      const response = await fetch(url, {
-        method,
+      const response = await fetch(editingLink ? `/api/links/${editingLink.id}` : '/api/links-create-final', {
+        method: editingLink ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('API Error:', errorData)
         throw new Error(errorData.message || errorData.error || 'Erreur lors de la sauvegarde')
       }
 
-      const newLink = await response.json()
-      console.log('✅ Réponse API - MultiLinks créés:', newLink.multiLinks?.length || 0)
-      toast.success(editingLink ? 'Lien modifié avec succès' : 'Lien créé avec succès')
-      onSuccess(newLink)
-      handleClose()
+      const savedLink = await response.json()
+      toast.success(editingLink ? 'Page mise a jour' : 'Page publiee')
+      onSuccess(savedLink)
+      onClose()
     } catch (error) {
-      console.error('Erreur:', error)
       toast.error(error instanceof Error ? error.message : 'Une erreur est survenue')
     } finally {
       setLoading(false)
     }
   }
 
-  const goToStep2 = () => {
-    const title = watch('title')
-    if (!title) {
-      toast.error('Le titre est requis')
-      return
-    }
-    setStep(2)
-  }
-
-  if (!isOpen) {
-    return null
-  }
+  if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-end sm:items-center justify-center min-h-screen">
-        {/* Backdrop */}
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm">
+      <div className="min-h-screen px-0 sm:px-6 py-0 sm:py-8">
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={handleClose}
-        />
-
-        {/* Modal */}
-        <motion.div
-          initial={{ opacity: 0, y: window.innerWidth < 640 ? '100%' : 0, scale: window.innerWidth < 640 ? 1 : 0.95 }}
+          initial={{ opacity: 0, y: 24, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: window.innerWidth < 640 ? '100%' : 0, scale: window.innerWidth < 640 ? 1 : 0.95 }}
-          className="relative bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg lg:max-w-xl max-h-[100vh] sm:max-h-[90vh] overflow-hidden flex flex-col"
+          className="relative mx-auto w-full max-w-5xl min-h-screen sm:min-h-0 bg-white dark:bg-gray-950 sm:rounded-3xl shadow-2xl overflow-hidden"
         >
-          {/* Header - Fixed */}
-          <div className="flex items-center justify-between p-4 sm:p-6 lg:p-8 pb-0">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center">
-                <Link2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-4">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2">
+                <Sparkles className="w-3.5 h-3.5" />
+                Page createur
               </div>
-              <div>
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
-                  {editingLink ? 'Modifier le lien' : 'Créer un nouveau lien'}
-                </h2>
-                <p className="text-xs sm:text-sm text-gray-500">
-                  Étape {step} sur {linkType === 'multi' ? '6' : '2'}
-                </p>
-              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-950 dark:text-white">
+                {editingLink ? 'Modifier ma page' : 'Creer ma page Taplinkr'}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Ajoutez vos infos, collez vos liens, publiez. Rien de plus complique.
+              </p>
             </div>
             <button
-              onClick={handleClose}
-              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg sm:rounded-xl transition-colors"
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+              <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
 
-          {/* Form - Scrollable */}
-          <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
-            <div className="space-y-6">
-            {showDirectLinkComingSoon ? (
-                /* Page Bientôt disponible - Lien Direct */
-                <div className="flex flex-col items-center text-center py-8">
-                  {/* Icon Animation */}
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', duration: 0.6 }}
-                    className="mb-6"
-                  >
-                    <div className="relative">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-                        className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-xl opacity-20"
-                      />
-                      <div className="relative bg-gradient-to-br from-purple-600 to-pink-600 p-6 rounded-2xl shadow-xl">
-                        <Zap className="w-12 h-12 text-white" />
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Title */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="mb-6"
-                  >
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                      <Sparkles className="w-5 h-5 text-yellow-500" />
-                      <span className="text-xs font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 uppercase tracking-wider">
-                        Bientôt disponible
-                      </span>
-                      <Sparkles className="w-5 h-5 text-yellow-500" />
-                    </div>
-                    <h3 className="text-3xl font-bold text-gray-900 mb-3">
-                      Lien Direct
-                    </h3>
-                    <p className="text-gray-600 max-w-md mx-auto">
-                      Créez des redirections instantanées avec tracking avancé
-                    </p>
-                  </motion.div>
-
-                  {/* Features */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="grid grid-cols-1 gap-4 mb-6 w-full max-w-sm"
-                  >
-                    {[
-                      { icon: Rocket, title: 'Redirection ultra-rapide' },
-                      { icon: TrendingUp, title: 'Analytics détaillées' },
-                      { icon: BarChart3, title: 'Tracking personnalisé' }
-                    ].map((feature, index) => (
-                      <motion.div
-                        key={feature.title}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
-                        className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-xl"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center flex-shrink-0">
-                          <feature.icon className="w-4 h-4 text-white" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-900">{feature.title}</span>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-
-                  {/* Back Button */}
-                  <motion.button
-                    type="button"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                    onClick={() => setShowDirectLinkComingSoon(false)}
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Retour au choix du type
-                  </motion.button>
-                </div>
-              ) : step === 1 ? (
-                /* Étape 1: Choix du type de lien */
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center min-h-[400px] py-8"
-                >
-                  <motion.h3
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-2xl font-bold text-gray-900 mb-8 text-center"
-                  >
-                    Quel type de lien souhaitez-vous créer ?
-                  </motion.h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
-                    {/* Multi-liens */}
-                    <motion.button
-                      type="button"
-                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        delay: 0.2,
-                        type: "spring",
-                        stiffness: 100,
-                        damping: 10
-                      }}
-                      whileHover={{
-                        scale: 1.05,
-                        y: -5,
-                        transition: { duration: 0.2 }
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        setLinkType('multi')
-                        setShowPreview(true)
-                        setStep(2)
-                      }}
-                      className="relative p-8 rounded-2xl border-2 border-gray-200 hover:border-indigo-500 bg-white hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 transition-all duration-300 group overflow-hidden"
-                    >
-                      <motion.div
-                        className="absolute top-4 right-4"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.5, type: "spring" }}
-                      >
-                        <span className="text-xs bg-indigo-600 text-white px-2 py-1 rounded-full font-semibold shadow-lg">
-                          Recommandé
-                        </span>
-                      </motion.div>
-
-                      <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
-                        <Layers className="w-10 h-10 text-white" />
-                      </div>
-
-                      <h4 className="text-xl font-bold text-gray-900 mb-2">Multi-liens</h4>
-                      <p className="text-gray-600 text-sm">
-                        Page avec plusieurs liens, parfait pour partager tous vos réseaux
-                      </p>
-                    </motion.button>
-
-                    {/* Lien direct */}
-                    <motion.button
-                      type="button"
-                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        delay: 0.3,
-                        type: "spring",
-                        stiffness: 100,
-                        damping: 10
-                      }}
-                      whileHover={{
-                        scale: 1.05,
-                        y: -5,
-                        transition: { duration: 0.2 }
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        setLinkType('direct')
-                        setShowDirectLinkComingSoon(false)
-                        setStep(5)
-                      }}
-                      className="relative p-8 rounded-2xl border-2 border-gray-200 hover:border-purple-500 bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 transition-all duration-300 group overflow-hidden"
-                    >
-                      <motion.div
-                        className="absolute top-4 right-4"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.6, type: "spring" }}
-                      >
-                        <span className="text-xs bg-emerald-600 text-white px-2 py-1 rounded-full font-semibold shadow-lg">
-                          Disponible
-                        </span>
-                      </motion.div>
-
-                      <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-xl">
-                        <Zap className="w-10 h-10 text-white" />
-                      </div>
-
-                      <h4 className="text-xl font-bold text-gray-900 mb-2">Lien direct</h4>
-                      <p className="text-gray-600 text-sm">
-                        Redirection instantanée vers une URL unique
-                      </p>
-                    </motion.button>
+          <form onSubmit={handleSubmit} className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div className="max-h-[calc(100vh-92px)] overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
+              <section className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-24 shrink-0">
+                    <ImageUpload
+                      value={profileImage}
+                      onChange={setProfileImage}
+                      type="avatar"
+                      className="w-24"
+                    />
                   </div>
-                </motion.div>
-              ) : step === 2 && linkType === 'multi' ? (
-                /* Étape 2: Choix du style d'affichage (uniquement pour multi-liens) */
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center min-h-[400px] py-8"
-                >
-                  <motion.h3
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-2xl font-bold text-gray-900 mb-2 text-center"
-                  >
-                    Choisissez votre style d'affichage
-                  </motion.h3>
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-gray-600 mb-8 text-center"
-                  >
-                    Choisissez comment votre profil sera affiché
-                  </motion.p>
-
-                  {/* Sélecteur de style */}
-                  <div className="flex gap-6 justify-center">
-                    {/* Style Minimal */}
-                    <motion.button
-                      type="button"
-                      onClick={() => setProfileStyle('circle')}
-                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        delay: 0.3,
-                        type: "spring",
-                        stiffness: 100,
-                        damping: 10
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`relative p-6 rounded-xl border-2 transition-all ${
-                        profileStyle === 'circle'
-                          ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-lg'
-                          : 'border-gray-200 bg-white hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-inner">
-                          <div className="w-16 h-16 rounded-full bg-white shadow-md" />
-                        </div>
-                        <div className="text-center">
-                          <span className="text-lg font-bold block">Minimal</span>
-                          <span className="text-xs text-gray-500">Photo ronde classique</span>
-                        </div>
-                      </div>
-                      {profileStyle === 'circle' && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center"
-                        >
-                          <Check className="w-3 h-3 text-white" />
-                        </motion.div>
-                      )}
-                    </motion.button>
-
-                    {/* Style Immersif */}
-                    <motion.button
-                      type="button"
-                      onClick={() => {
-                        setProfileStyle('beacon')
-                      }}
-                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        delay: 0.4,
-                        type: "spring",
-                        stiffness: 100,
-                        damping: 10
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`relative p-6 rounded-xl border-2 transition-all ${
-                        profileStyle === 'beacon'
-                          ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-lg'
-                          : 'border-gray-200 bg-white hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-purple-200 via-pink-200 to-blue-200 flex items-center justify-end flex-col overflow-hidden shadow-inner">
-                          <div className="w-14 h-14 rounded-full bg-white mb-2 shadow-md" />
-                        </div>
-                        <div className="text-center">
-                          <span className="text-lg font-bold block">Immersif</span>
-                          <span className="text-xs text-gray-500">Grande image de fond</span>
-                        </div>
-                      </div>
-                      {profileStyle === 'beacon' && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center"
-                        >
-                          <Check className="w-3 h-3 text-white" />
-                        </motion.div>
-                      )}
-                    </motion.button>
-                  </div>
-
-                  {/* Boutons d'action */}
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                    className="flex gap-3 mt-8"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
-                    >
-                      Retour
-                    </button>
-                    <motion.button
-                      type="button"
-                      onClick={() => setStep(3)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700"
-                    >
-                      Continuer
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              ) : step === 3 && linkType === 'multi' ? (
-                /* Étape 3: Upload de photo de profil */
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-start min-h-[400px] pt-4 pb-8"
-                >
-                  <motion.h3
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-2xl font-bold text-gray-900 mb-2 text-center"
-                  >
-                    Ajoutez votre photo de profil
-                  </motion.h3>
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-gray-600 mb-4 text-center"
-                  >
-                    Une photo de profil rend votre page plus personnelle et professionnelle
-                  </motion.p>
-
-                  {/* Zone d'upload centrale avec animations */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      delay: 0.3,
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 15
-                    }}
-                    className="relative w-full"
-                  >
-                    {/* Zone d'upload et affichage */}
-                    <div className="relative w-full flex justify-center">
-                      {!profileImage ? (
-                        <>
-                          {/* Zone d'upload SANS contrainte de taille */}
-                          <div className="w-full">
-                            <ImageUpload
-                              value={profileImage}
-                              onChange={setProfileImage}
-                              type="profile"
-                              className="w-full"
-                            />
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {/* Image uploadée - Zone réduite mais photo complète */}
-                          <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="relative inline-block"
-                          >
-                            {/* Image complète avec taille réduite */}
-                            <img
-                              src={profileImage}
-                              alt="Photo de profil"
-                              className="max-w-xs h-auto rounded-lg shadow-xl"
-                              style={{ maxHeight: '300px', objectFit: 'contain' }}
-                            />
-
-                            {/* Bouton pour changer la photo */}
-                            <button
-                              type="button"
-                              onClick={() => setProfileImage('')}
-                              className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur rounded-full shadow-lg hover:bg-white transition-colors"
-                            >
-                              <Camera className="w-4 h-4 text-gray-700" />
-                            </button>
-
-                            {/* Badge de succès */}
-                            <motion.div
-                              initial={{ scale: 0, rotate: -180 }}
-                              animate={{ scale: 1, rotate: 0 }}
-                              transition={{ delay: 0.3, type: "spring" }}
-                              className="absolute -bottom-2 -right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg z-20"
-                            >
-                              <Sparkles className="w-6 h-6 text-white" />
-                            </motion.div>
-                          </motion.div>
-                        </>
-                      )}
-                    </div>
-                  </motion.div>
-
-                  {/* Message d'encouragement */}
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="text-sm text-gray-500 mt-6 text-center max-w-sm"
-                  >
-                    {profileImage
-                      ? "Parfait ! Votre photo est superbe 🎉"
-                      : "Les profils avec photo reçoivent 3x plus de clics"}
-                  </motion.p>
-
-                  {/* Option pour passer sans photo */}
-                  {!profileImage && (
-                    <motion.button
-                      type="button"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.6 }}
-                      onClick={() => setStep(4)}
-                      className="text-sm text-gray-500 hover:text-gray-700 underline mt-4"
-                    >
-                      Continuer sans photo
-                    </motion.button>
-                  )}
-
-                  {/* Boutons d'action */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                    className="flex gap-3 mt-8"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setStep(2)}
-                      className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
-                    >
-                      Retour
-                    </button>
-                    <motion.button
-                      type="button"
-                      onClick={() => setStep(4)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                        profileImage
-                          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                      }`}
-                    >
-                      Continuer
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              ) : step === 4 && linkType === 'multi' ? (
-                /* Étape 4: Liens sociaux */
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-6"
-                >
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center mb-8"
-                  >
-                    <motion.h3
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-2xl font-bold text-gray-900 mb-2"
-                    >
-                      Connectez vos réseaux sociaux
-                    </motion.h3>
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.1 }}
-                      className="text-gray-600"
-                    >
-                      Ajoutez vos profils pour faciliter le suivi (optionnel)
-                    </motion.p>
-                  </motion.div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Instagram */}
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 }}
-                      whileHover={{ scale: 1.02 }}
-                      className="group"
-                    >
-                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <motion.div
-                          whileHover={{ rotate: 360 }}
-                          transition={{ duration: 0.5 }}
-                          className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-500 rounded-lg flex items-center justify-center"
-                        >
-                          <Instagram className="w-4 h-4 text-white" />
-                        </motion.div>
-                        Instagram
-                      </label>
-                      <input
-                        type="text"
-                        {...register('instagramUrl')}
-                        placeholder="@votrecompte"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-                      />
-                    </motion.div>
-
-                    {/* TikTok */}
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 }}
-                      whileHover={{ scale: 1.02 }}
-                      className="group"
-                    >
-                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <motion.div
-                          whileHover={{ rotate: 360 }}
-                          transition={{ duration: 0.5 }}
-                          className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center"
-                        >
-                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
-                          </svg>
-                        </motion.div>
-                        TikTok
-                      </label>
-                      <input
-                        type="text"
-                        {...register('tiktokUrl')}
-                        placeholder="@votrecompte"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-500/20 focus:border-gray-700 transition-all"
-                      />
-                    </motion.div>
-
-                    {/* Twitter */}
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      className="group"
-                    >
-                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <motion.div
-                          whileHover={{ rotate: 360 }}
-                          transition={{ duration: 0.5 }}
-                          className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center"
-                        >
-                          <Twitter className="w-4 h-4 text-white" />
-                        </motion.div>
-                        Twitter
-                      </label>
-                      <input
-                        type="text"
-                        {...register('twitterUrl')}
-                        placeholder="@votrecompte"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                      />
-                    </motion.div>
-
-                    {/* YouTube */}
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 }}
-                      whileHover={{ scale: 1.02 }}
-                      className="group"
-                    >
-                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <motion.div
-                          whileHover={{ rotate: 360 }}
-                          transition={{ duration: 0.5 }}
-                          className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center"
-                        >
-                          <Youtube className="w-4 h-4 text-white" />
-                        </motion.div>
-                        YouTube
-                      </label>
-                      <input
-                        type="text"
-                        {...register('youtubeUrl')}
-                        placeholder="@votrecompte"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all"
-                      />
-                    </motion.div>
-                  </div>
-
-                  {/* Note informative avec animation */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="bg-blue-50 border border-blue-200 rounded-xl p-4"
-                  >
-                    <motion.div
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="flex items-start gap-3"
-                    >
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Info className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-blue-800 font-medium mb-1">
-                          Astuce Pro
-                        </p>
-                        <p className="text-xs text-blue-700">
-                          Les icônes de réseaux sociaux apparaîtront en bas de votre page pour un accès rapide à vos profils
-                        </p>
-                      </div>
-                    </motion.div>
-                  </motion.div>
-
-                  {/* Boutons d'action */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex gap-3 mt-8"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setStep(3)}
-                      className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
-                    >
-                      Retour
-                    </button>
-                    <motion.button
-                      type="button"
-                      onClick={() => setStep(5)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center gap-2"
-                    >
-                      Continuer
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              ) : step === 6 && linkType === 'multi' ? (
-                /* Étape 6: Personnalisation des liens (dernière étape) */
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-6"
-                >
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center mb-8"
-                  >
-                    <motion.h3 
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-2xl font-bold text-gray-900 mb-2"
-                    >
-                      Personnalisez vos liens
-                    </motion.h3>
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.1 }}
-                      className="text-gray-600"
-                    >
-                      Donnez du style à vos liens pour les rendre uniques
-                    </motion.p>
-                  </motion.div>
-
-                  {/* Animation des liens */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Animation des liens
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {[
-                        { value: 'none', label: 'Aucune', icon: '⚪' },
-                        { value: 'pulse', label: 'Pulse', icon: '💗' },
-                        { value: 'rotate', label: 'Rotate', icon: '🔄' },
-                        { value: 'lift', label: 'Lift', icon: '🚀' }
-                      ].map((anim) => (
-                        <motion.button
-                          key={anim.value}
-                          type="button"
-                          onClick={() => setLinkAnimation(anim.value)}
-                          className={`p-3 rounded-xl border-2 transition-all ${
-                            linkAnimation === anim.value
-                              ? 'border-indigo-500 bg-indigo-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <div className="text-2xl mb-1">{anim.icon}</div>
-                          <div className="text-xs font-medium">{anim.label}</div>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  {/* Forme des liens */}
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Forme des liens
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { value: 'rounded', label: 'Léger', preview: 'rounded' },
-                        { value: 'rounded-xl', label: 'Moyen', preview: 'rounded-xl' },
-                        { value: 'rounded-2xl', label: 'Arrondi', preview: 'rounded-2xl' },
-                        { value: 'rounded-3xl', label: 'Très arrondi', preview: 'rounded-3xl' },
-                        { value: 'rounded-full', label: 'Pilule', preview: 'rounded-full' },
-                        { value: 'rounded-none', label: 'Carré', preview: 'rounded-none' }
-                      ].map((shape) => (
-                        <motion.button
-                          key={shape.value}
-                          type="button"
-                          onClick={() => setBorderRadius(shape.value)}
-                          className={`p-4 border-2 transition-all ${
-                            borderRadius === shape.value
-                              ? 'border-indigo-500 bg-indigo-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <div className={`w-full h-8 bg-gradient-to-r from-indigo-400 to-purple-400 ${shape.preview}`} />
-                          <div className="text-xs font-medium mt-2">{shape.label}</div>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  {/* Typographie */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Police de caractères
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { value: 'system', label: 'Système', className: 'font-sans' },
-                        { value: 'inter', label: 'Inter', className: 'font-inter' },
-                        { value: 'roboto', label: 'Roboto', className: 'font-roboto' },
-                        { value: 'poppins', label: 'Poppins', className: 'font-poppins' },
-                        { value: 'montserrat', label: 'Montserrat', className: 'font-montserrat' },
-                        { value: 'playfair', label: 'Playfair', className: 'font-playfair' },
-                        { value: 'mono', label: 'Mono', className: 'font-mono' }
-                      ].map((font) => (
-                        <motion.button
-                          key={font.value}
-                          type="button"
-                          onClick={() => setFontFamily(font.value)}
-                          className={`p-4 border-2 transition-all ${
-                            fontFamily === font.value
-                              ? 'border-indigo-500 bg-indigo-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          } ${font.className}`}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <div className="text-lg font-bold">Aa</div>
-                          <div className="text-xs mt-1">{font.label}</div>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  {/* Couleurs */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                  >
-                    {/* Couleur de fond */}
+                  <div className="flex-1 space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Couleur de fond des liens
+                      <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                        Nom affiche
                       </label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="color"
-                          value={backgroundColor}
-                          onChange={(e) => setBackgroundColor(e.target.value)}
-                          className="w-16 h-16 rounded-lg border-2 border-gray-300 cursor-pointer"
-                        />
-                        <input
-                          type="text"
-                          value={backgroundColor}
-                          onChange={(e) => setBackgroundColor(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          placeholder="#ffffff"
-                        />
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        {['#ffffff', '#f3f4f6', '#e5e7eb', '#fef3c7', '#dbeafe', '#e9d5ff', '#fecaca'].map((color) => (
-                          <button
-                            key={color}
-                            type="button"
-                            onClick={() => setBackgroundColor(color)}
-                            className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:scale-110 transition-transform"
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Couleur du texte */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Couleur du texte
-                      </label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="color"
-                          value={textColor}
-                          onChange={(e) => setTextColor(e.target.value)}
-                          className="w-16 h-16 rounded-lg border-2 border-gray-300 cursor-pointer"
-                        />
-                        <input
-                          type="text"
-                          value={textColor}
-                          onChange={(e) => setTextColor(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          placeholder="#1f2937"
-                        />
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        {['#1f2937', '#374151', '#6b7280', '#0f172a', '#7c3aed', '#2563eb', '#dc2626'].map((color) => (
-                          <button
-                            key={color}
-                            type="button"
-                            onClick={() => setTextColor(color)}
-                            className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:scale-110 transition-transform"
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Boutons d'action */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex gap-3 mt-8"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setStep(5)}
-                      className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
-                    >
-                      Retour
-                    </button>
-                    <motion.button
-                      type="submit"
-                      disabled={loading}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {loading ? (
-                        <>
-                          <motion.div
-                            className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          />
-                          Création...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-5 h-5" />
-                          {editingLink ? 'Enregistrer' : 'Créer'}
-                        </>
-                      )}
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              ) : step === 5 && linkType === 'multi' ? (
-                /* Étape 5: Détails du lien */
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ 
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 15
-                  }}
-                  className="space-y-6"
-                >
-                  {/* Titre avec animation */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <div className="relative">
-                      <motion.div
-                        className="absolute -top-3 -left-3"
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                      >
-                        <Sparkle className="w-5 h-5 text-yellow-500" />
-                      </motion.div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Donnez un titre à votre page
-                      </label>
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <input
-                          type="text"
-                          {...register('title', { required: true })}
-                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base font-medium"
-                          placeholder="Ex: Mes liens favoris ✨"
-                          autoFocus
-                        />
-                      </motion.div>
-                      {errors.title && (
-                        <motion.p
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-red-500 text-sm mt-1"
-                        >
-                          Le titre est requis
-                        </motion.p>
-                      )}
-                      {/* Suppression de tout aperçu potentiel */}
-                      {false && watchedTitle && (
-                        <div style={{ display: 'none' }}>
-                          {/* Aperçu supprimé */}
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-
-                  {/* Nom interne (dashboard) avec animation */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 }}
-                  >
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nom interne (optionnel)
-                    </label>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
                       <input
-                        type="text"
-                        {...register('internalName')}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base"
-                        placeholder="Ex: Laura Twitter 🐦 (visible uniquement dans votre dashboard)"
+                        value={title}
+                        onChange={(event) => setTitle(event.target.value)}
+                        placeholder="Florent, ta marque, ton pseudo..."
+                        className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                       />
-                    </motion.div>
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                      className="text-xs text-gray-500 mt-1 flex items-center gap-1"
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      Pour vous organiser dans le dashboard (invisible pour vos visiteurs)
-                    </motion.p>
-                  </motion.div>
-
-                  {/* URL personnalisée avec animation */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 }}
-                  >
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Personnalisez votre URL
-                    </label>
-                    <div className="relative">
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="relative"
-                      >
-                        <div className="flex items-center">
-                          <span className="text-gray-500 text-sm mr-2 font-medium">taplinkr.com/</span>
-                          <input
-                            type="text"
-                            {...register('slug', {
-                              pattern: {
-                                value: /^[a-zA-Z0-9-]+$/,
-                                message: 'Seuls les lettres, chiffres et tirets sont autorisés'
-                              }
-                            })}
-                            className={`flex-1 px-4 py-3 pr-12 border-2 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all text-base ${
-                              slugAvailable === false
-                                ? 'border-red-400 focus:border-red-500'
-                                : slugAvailable === true
-                                ? 'border-green-400 focus:border-green-500'
-                                : 'border-gray-300 focus:border-indigo-500'
-                            }`}
-                            placeholder="mon-lien-unique"
-                            onChange={(e) => {
-                              // Nettoyer automatiquement les caractères non autorisés
-                              e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
-                              register('slug').onChange(e)
-                            }}
-                          />
-                          
-                          {/* Indicateur de statut */}
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <AnimatePresence mode="wait">
-                              {checkingSlug && (
-                                <motion.div
-                                  key="checking"
-                                  initial={{ opacity: 0, scale: 0 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0 }}
-                                >
-                                  <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
-                                </motion.div>
-                              )}
-                              {!checkingSlug && slugAvailable === true && watchedSlug && (
-                                <motion.div
-                                  key="available"
-                                  initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                                  exit={{ opacity: 0, scale: 0 }}
-                                  transition={{ type: "spring", stiffness: 200 }}
-                                  className="bg-green-500 rounded-full p-1.5 shadow-lg"
-                                >
-                                  <Check className="w-4 h-4 text-white" />
-                                </motion.div>
-                              )}
-                              {!checkingSlug && slugAvailable === false && (
-                                <motion.div
-                                  key="unavailable"
-                                  initial={{ opacity: 0, scale: 0 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0 }}
-                                  transition={{ type: "spring", stiffness: 200 }}
-                                  className="bg-red-500 rounded-full p-1.5 shadow-lg"
-                                >
-                                  <X className="w-4 h-4 text-white" />
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </div>
-                      </motion.div>
-                      
-                      <AnimatePresence mode="wait">
-                        {!watchedSlug && (
-                          <motion.p 
-                            key="empty"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="text-xs text-gray-500 mt-1 flex items-center gap-1"
-                          >
-                            <Sparkles className="w-3 h-3" />
-                            Laissez vide pour une URL magique automatique
-                          </motion.p>
-                        )}
-                        {slugAvailable === true && watchedSlug && (
-                          <motion.div
-                            key="available-msg"
-                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                            transition={{ type: "spring", stiffness: 150 }}
-                            className="mt-2 bg-green-50 border border-green-200 rounded-lg p-2"
-                          >
-                            <div className="text-sm text-green-700 flex items-center gap-2 font-medium">
-                              <motion.div
-                                animate={{ scale: [1, 1.2, 1] }}
-                                transition={{ duration: 0.5 }}
-                              >
-                                <Check className="w-4 h-4" />
-                              </motion.div>
-                              Super ! Cette URL est disponible
-                            </div>
-                          </motion.div>
-                        )}
-                        {slugAvailable === false && (
-                          <motion.div
-                            key="unavailable-msg"
-                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                            transition={{ type: "spring", stiffness: 150 }}
-                            className="mt-2 bg-red-50 border border-red-200 rounded-lg p-2"
-                          >
-                            <div className="text-sm text-red-700 flex items-center gap-2 font-medium">
-                              <motion.div
-                                animate={{ rotate: [0, -10, 10, -10, 0] }}
-                                transition={{ duration: 0.5 }}
-                              >
-                                <AlertCircle className="w-4 h-4" />
-                              </motion.div>
-                              Oops ! Cette URL est déjà prise
-                            </div>
-                            <p className="text-xs text-red-600 mt-1 ml-6">
-                              Essayez d'ajouter des chiffres ou des tirets
-                            </p>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </div>
-                  </motion.div>
-
-                  {/* Description avec animation */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.35 }}
-                  >
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description (optionnel)
-                    </label>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                        Bio courte
+                      </label>
                       <textarea
-                        {...register('description')}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base resize-none"
-                        placeholder="Décrivez votre page en quelques mots..."
+                        value={description}
+                        onChange={(event) => setDescription(event.target.value)}
+                        placeholder="Ce que les visiteurs doivent comprendre en 2 secondes."
                         rows={3}
+                        className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                       />
-                    </motion.div>
-                    <motion.p 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      className="text-xs text-gray-500 mt-1"
-                    >
-                      Une bonne description aide vos visiteurs à comprendre votre contenu
-                    </motion.p>
-                  </motion.div>
+                    </div>
+                  </div>
+                </div>
+              </section>
 
-                  {/* Contenu selon le type */}
-                  {linkType === 'direct' ? (
-                    /* Lien direct */
-                    <div className="space-y-3">
-                      <label className="block text-sm font-medium text-gray-700">
-                        URL de redirection
-                      </label>
-                      <input
-                        type="url"
-                        value={directUrl}
-                        onChange={(e) => setDirectUrl(e.target.value)}
-                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
-                        placeholder="https://example.com"
-                        required
-                      />
-                      <p className="text-xs text-gray-500">
-                        Les visiteurs seront redirigés directement vers cette URL
-                      </p>
+              <section className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5">
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-950 dark:text-white">Mes liens</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Collez vos destinations importantes. La preview se met a jour en direct.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addLink}
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Ajouter
+                  </button>
+                </div>
 
-                      {/* Options de protection */}
-                      <div className="space-y-3 pt-4 border-t">
-                        <h4 className="text-sm font-medium text-gray-700">Options de protection</h4>
-                        
-                        {/* Shield Niveau 2 */}
-                        <div 
-                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                            shieldEnabled && !isUltraLink
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 bg-white hover:border-gray-300'
-                          } ${isUltraLink ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          onClick={() => {
-                            if (!isUltraLink) {
-                              setShieldEnabled(!shieldEnabled)
-                            }
-                          }}
-                        >
-                          <div className="flex items-start gap-3">
-                            <Shield className={`w-5 h-5 mt-0.5 ${
-                              shieldEnabled && !isUltraLink ? 'text-blue-600' : 'text-gray-400'
-                            }`} />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h5 className="font-medium text-sm">Shield Protection</h5>
-                                <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
-                                  Niveau 2
-                                </span>
-                              </div>
-                              <p className="text-xs text-gray-600 mt-1">
-                                Protection standard avec page intermédiaire, timer de 3 secondes et détection basique des crawlers
-                              </p>
-                            </div>
-                            <input
-                              type="checkbox"
-                              checked={shieldEnabled && !isUltraLink}
-                              onChange={() => {}}
-                              className="w-4 h-4 text-blue-600 rounded"
-                              disabled={isUltraLink}
-                            />
-                          </div>
+                <div className="space-y-3">
+                  {links.map((link, index) => (
+                    <div key={index} className="rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-3">
+                      <div className="flex gap-3">
+                        <div className="pt-1">
+                          <IconUpload
+                            value={link.iconImage || link.icon}
+                            onChange={(value) => updateLink(index, 'iconImage', value)}
+                          />
                         </div>
-
-                        {/* ULTRA LINK Niveau 3 */}
-                        <div 
-                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                            isUltraLink
-                              ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50'
-                              : 'border-gray-200 bg-white hover:border-gray-300'
-                          }`}
-                          onClick={() => {
-                            setIsUltraLink(!isUltraLink)
-                            if (!isUltraLink) {
-                              setShieldEnabled(false)
-                            }
-                          }}
-                        >
-                          <div className="flex items-start gap-3">
-                            <Zap className={`w-5 h-5 mt-0.5 ${
-                              isUltraLink ? 'text-purple-600' : 'text-gray-400'
-                            }`} />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h5 className="font-medium text-sm bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                  ULTRA LINK
-                                </h5>
-                                <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full">
-                                  Niveau 3 MAX
-                                </span>
-                              </div>
-                              <p className="text-xs text-gray-600 mt-1">
-                                Protection renforcée avec page intermédiaire, délai contrôlé et suivi des actions
-                              </p>
-                            </div>
-                            <input
-                              type="checkbox"
-                              checked={isUltraLink}
-                              onChange={() => {}}
-                              className="w-4 h-4 text-purple-600 rounded"
-                            />
-                          </div>
+                        <div className="flex-1 grid sm:grid-cols-2 gap-3">
+                          <input
+                            value={link.title}
+                            onChange={(event) => updateLink(index, 'title', event.target.value)}
+                            placeholder="Titre du bouton"
+                            className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                          <input
+                            value={link.url}
+                            onChange={(event) => updateLink(index, 'url', event.target.value)}
+                            placeholder="https://..."
+                            className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                          <input
+                            value={link.description || ''}
+                            onChange={(event) => updateLink(index, 'description', event.target.value)}
+                            placeholder="Description optionnelle"
+                            className="sm:col-span-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
                         </div>
-
-                        {(shieldEnabled || isUltraLink) && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="p-3 bg-amber-50 border border-amber-200 rounded-lg"
+                        <div className="flex flex-col items-center gap-2">
+                          <GripVertical className="w-4 h-4 text-gray-300 mt-3" />
+                          <button
+                            type="button"
+                            onClick={() => removeLink(index)}
+                            disabled={links.length === 1}
+                            className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
                           >
-                            <p className="text-xs text-amber-800">
-                              <strong>Note :</strong> {isUltraLink ? 'ULTRA LINK active les options de protection les plus strictes pour les liens sensibles.' : 'Le Shield ajoute une étape de vérification avant la redirection.'}
-                            </p>
-                          </motion.div>
-                        )}
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  ) : null}
+                  ))}
+                </div>
+              </section>
 
-                  {/* Ajout des liens directement dans l'étape 5 */}
-                  {linkType === 'multi' && (
-                    <>
-                      <div className="pt-4 border-t">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Vos liens</h3>
-                        <div className="space-y-3">
-                          {multiLinks.map((link, index) => (
-                            <div key={index} className="bg-gray-50 rounded-xl p-4 space-y-3">
-                              <div className="flex gap-3">
-                                <IconUpload
-                                  value={link.iconImage || link.icon}
-                                  onChange={(iconUrl) => updateMultiLink(index, 'iconImage', iconUrl)}
-                                />
-                                <div className="flex-1 space-y-3">
-                                  <input
-                                    type="text"
-                                    value={link.title}
-                                    onChange={(e) => updateMultiLink(index, 'title', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-base"
-                                    placeholder="Titre du lien"
-                                  />
-                                  <input
-                                    type="url"
-                                    value={link.url}
-                                    onChange={(e) => updateMultiLink(index, 'url', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-base"
-                                    placeholder="https://example.com"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={link.description || ''}
-                                    onChange={(e) => updateMultiLink(index, 'description', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-base text-sm"
-                                    placeholder="Description courte (optionnel)"
-                                  />
-                                </div>
-                              </div>
-                              {multiLinks.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => removeMultiLink(index)}
-                                  className="text-red-500 text-sm hover:text-red-700"
-                                >
-                                  Supprimer
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={addMultiLink}
-                          className="w-full mt-4 py-3 border-2 border-dashed border-indigo-300 bg-indigo-50 rounded-xl text-indigo-600 hover:bg-indigo-100 transition-all flex items-center justify-center gap-2 font-medium"
-                        >
-                          <Plus className="w-5 h-5" />
-                          Ajouter un lien
+              <section className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5">
+                <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-4">Apparence rapide</h3>
+                <div className="grid sm:grid-cols-4 gap-3 mb-5">
+                  {themes.map(theme => (
+                    <button
+                      key={theme.label}
+                      type="button"
+                      onClick={() => {
+                        setBackgroundColor(theme.backgroundColor)
+                        setTextColor(theme.textColor)
+                        setAccentColor(theme.accent)
+                      }}
+                      className="rounded-2xl border border-gray-200 dark:border-gray-800 p-3 text-left hover:border-indigo-400 transition-colors"
+                    >
+                      <div className="h-16 rounded-xl mb-3 border" style={{ backgroundColor: theme.backgroundColor }}>
+                        <div className="w-10 h-2 rounded-full m-3" style={{ backgroundColor: theme.accent }} />
+                        <div className="w-16 h-2 rounded-full mx-3 opacity-60" style={{ backgroundColor: theme.textColor }} />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{theme.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-3">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Fond
+                    <input type="color" value={backgroundColor} onChange={(event) => setBackgroundColor(event.target.value)} className="mt-2 h-11 w-full rounded-xl" />
+                  </label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Texte
+                    <input type="color" value={textColor} onChange={(event) => setTextColor(event.target.value)} className="mt-2 h-11 w-full rounded-xl" />
+                  </label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Accent
+                    <input type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} className="mt-2 h-11 w-full rounded-xl" />
+                  </label>
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-gray-200 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="w-full flex items-center justify-between px-4 sm:px-5 py-4 text-left"
+                >
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-950 dark:text-white">Options avancees</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">URL publique, socials, couverture et style de boutons.</p>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showAdvanced && (
+                  <div className="px-4 sm:px-5 pb-5 space-y-5">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                        URL publique
+                      </label>
+                      <div className="flex rounded-xl border border-gray-300 dark:border-gray-700 overflow-hidden focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10">
+                        <span className="hidden sm:flex items-center bg-gray-50 dark:bg-gray-900 px-3 text-sm text-gray-500">taplinkr.com/</span>
+                        <input
+                          value={slug}
+                          onChange={(event) => {
+                            setCustomSlugTouched(true)
+                            setSlug(slugify(event.target.value))
+                          }}
+                          className="min-w-0 flex-1 bg-white dark:bg-gray-950 px-3 py-3 text-gray-950 dark:text-white outline-none"
+                          placeholder="mon-pseudo"
+                        />
+                        <button type="button" onClick={handleCopyPreviewUrl} className="px-3 text-gray-500 hover:text-indigo-600">
+                          <Copy className="w-4 h-4" />
                         </button>
                       </div>
-
-                      {profileStyle !== 'beacon' && (
-                        <div className="pt-4 border-t">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Photo de couverture (optionnel)
-                          </label>
-                          <CoverImageUpload
-                            value={coverImage}
-                            onChange={setCoverImage}
-                          />
-                        </div>
-                      )}
-
-                      {/* Toggle isActive */}
-                      <div className="pt-4 border-t">
-                        <label className="flex items-center justify-between cursor-pointer">
-                          <div>
-                            <span className="text-sm font-medium text-gray-700">Lien actif</span>
-                            <p className="text-xs text-gray-500">Désactivez pour créer un brouillon</p>
-                          </div>
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              checked={linkType === 'multi' ? true : true}
-                              className="sr-only peer"
-                              disabled
-                            />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                          </div>
-                        </label>
-                        <p className="text-xs text-gray-500 mt-2">
-                          💡 Les liens sont actifs par défaut. Vous pourrez les désactiver plus tard.
-                        </p>
+                      <div className="mt-2 min-h-5 text-xs">
+                        {checkingSlug && <span className="inline-flex items-center gap-1 text-gray-500"><Loader2 className="w-3 h-3 animate-spin" /> Verification...</span>}
+                        {!checkingSlug && slugAvailable === true && <span className="inline-flex items-center gap-1 text-green-600"><Check className="w-3 h-3" /> URL disponible</span>}
+                        {!checkingSlug && slugAvailable === false && <span className="inline-flex items-center gap-1 text-red-600"><AlertCircle className="w-3 h-3" /> URL deja prise</span>}
                       </div>
-                    </>
-                  )}
+                    </div>
 
-                  {/* Boutons d'action */}
-                  <div className="flex gap-2 sm:gap-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setStep(linkType === 'multi' ? 4 : 1)}
-                      className="flex-1 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 text-base"
-                    >
-                      Retour
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setStep(6)}
-                      className="flex-1 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg sm:rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg text-base"
-                    >
-                      <ArrowRight className="w-5 h-5" />
-                      Suivant
-                    </button>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Photo de couverture</label>
+                      <CoverImageUpload value={coverImage} onChange={setCoverImage} />
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <input value={instagramUrl} onChange={(event) => setInstagramUrl(event.target.value)} placeholder="Instagram URL" className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm outline-none focus:border-indigo-500" />
+                      <input value={tiktokUrl} onChange={(event) => setTiktokUrl(event.target.value)} placeholder="TikTok URL" className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm outline-none focus:border-indigo-500" />
+                      <input value={twitterUrl} onChange={(event) => setTwitterUrl(event.target.value)} placeholder="X / Twitter URL" className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm outline-none focus:border-indigo-500" />
+                      <input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} placeholder="YouTube URL" className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm outline-none focus:border-indigo-500" />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Style des boutons</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          ['rounded-lg', 'Soft'],
+                          ['rounded-2xl', 'Round'],
+                          ['rounded-full', 'Pill'],
+                        ].map(([value, label]) => (
+                          <button
+                            type="button"
+                            key={value}
+                            onClick={() => setBorderRadius(value)}
+                            className={`py-2.5 px-3 border text-sm font-semibold ${value} ${borderRadius === value ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300'}`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </motion.div>
-              ) : (
-                /* Dernière étape alternative si pas multi */
-                null
-              )}
+                )}
+              </section>
+            </div>
+
+            <aside className="hidden lg:block border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 p-5">
+              <div className="sticky top-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Apercu live</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Comme sur mobile</p>
+                  </div>
+                  <a href={`/${slug || ''}`} target="_blank" rel="noreferrer" className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-500 hover:text-indigo-600">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+
+                <div className="rounded-[2rem] bg-gray-950 p-3 shadow-2xl">
+                  <div className="rounded-[1.5rem] overflow-hidden bg-white">
+                    <div className="aspect-[9/16] overflow-hidden">
+                      <div className="h-full overflow-y-auto" style={{ backgroundColor, color: textColor }}>
+                        {coverImage ? (
+                          <img src={coverImage} alt="" className="h-32 w-full object-cover" />
+                        ) : (
+                          <div className="h-24" style={{ background: `linear-gradient(135deg, ${accentColor}33, transparent)` }} />
+                        )}
+                        <div className="-mt-10 px-5 pb-8 text-center">
+                          <div className="mx-auto h-20 w-20 rounded-full border-4 border-white bg-gray-100 overflow-hidden shadow-lg">
+                            {profileImage ? <img src={profileImage} alt="" className="h-full w-full object-cover" /> : <ImageIcon className="m-6 h-8 w-8 text-gray-400" />}
+                          </div>
+                          <h4 className="mt-3 text-xl font-bold">{title || 'Votre nom'}</h4>
+                          <p className="mt-1 text-sm opacity-75">{description || 'Votre bio apparaîtra ici.'}</p>
+                          <div className="mt-5 space-y-3">
+                            {links.map((link, index) => (
+                              <div key={index} className={`flex items-center justify-between px-4 py-3 shadow-sm ${borderRadius}`} style={{ backgroundColor: accentColor, color: '#fff' }}>
+                                <span className="truncate text-sm font-semibold">{link.title || inferTitleFromUrl(link.url) || 'Nouveau lien'}</span>
+                                <ArrowRight className="w-4 h-4 shrink-0" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <div className="lg:hidden sticky bottom-0 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur px-4 py-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white disabled:opacity-60"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {editingLink ? 'Mettre a jour' : 'Publier ma page'}
+              </button>
+            </div>
+
+            <div className="hidden lg:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-2xl dark:border-gray-800 dark:bg-gray-950">
+              <div className="text-sm text-gray-500">
+                {validLinks.length} lien{validLinks.length > 1 ? 's' : ''} pret{validLinks.length > 1 ? 's' : ''}
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {editingLink ? 'Mettre a jour' : 'Publier ma page'}
+              </button>
             </div>
           </form>
         </motion.div>
       </div>
 
-
-      {/* Preview avec EditPhonePreview pour affichage automatique sur grand écran */}
       <EditPhonePreview
-        isVisible={(showPreview || step >= 5) && linkType === 'multi'}
-        user={{
-          name: step >= 5 ? (watchedTitle || '') : '',
-          bio: step >= 5 ? (watchedDescription || '') : '',
-          image: profileImage || ''
-        }}
-        links={[{
-          id: Date.now().toString(),
-          slug: watch('slug') || 'preview',
-          title: watchedTitle || '',
-          description: step >= 5 ? (watchedDescription || '') : '',
-          profileImage: profileImage || '',
-          profileStyle: profileStyle || 'circle',
-          coverImage: step >= 5 ? coverImage : '',
-          isDirect: false,
-          isActive: true,
-          instagramUrl: watchedInstagram || '',
-          tiktokUrl: watchedTiktok || '',
-          twitterUrl: watchedTwitter || '',
-          youtubeUrl: watchedYoutube || '',
-          animation: step >= 6 ? linkAnimation : 'none',
-          borderRadius: step >= 6 ? borderRadius : 'rounded-xl',
-          fontFamily: step >= 6 ? fontFamily : 'system',
-          backgroundColor: step >= 6 ? backgroundColor : '#ffffff',
-          textColor: step >= 6 ? textColor : '#1f2937',
-          multiLinks: step >= 5 ? (
-            multiLinks.map((ml, index) => ({
-              id: index.toString(),
-              parentLinkId: '',
-              title: ml.title || '',
-              url: ml.url || '#',
-              description: '',
-              icon: ml.icon || '',
-              iconImage: ml.iconImage || '',
-              animation: '',
-              order: index,
-              clicks: 0,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }))
-          ) : [],
-          userId: '',
-          directUrl: '',
-          shieldEnabled: false,
-          isUltraLink: false,
-          isOnline: false,
-          order: 0,
-          clicks: 0,
-          views: 0,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }]}
+        isVisible={false}
+        user={{ name: title, bio: description, image: profileImage }}
+        links={[previewLink]}
       />
     </div>
   )
-}// Force redeploy at Sat, Sep 20, 2025  9:11:54 PM
+}

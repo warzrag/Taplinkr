@@ -200,7 +200,7 @@ export default function LinksPage() {
                   Mes liens
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {personalLinks.length} {personalLinks.length > 1 ? 'liens personnels' : 'lien personnel'}
+                  {personalLinks.length} {personalLinks.length > 1 ? 'pages personnelles' : 'page personnelle'}
                   {teamLinks.length > 0 && ` • ${teamLinks.length} ${teamLinks.length > 1 ? 'liens d\'équipe' : 'lien d\'équipe'}`}
                 </p>
               </div>
@@ -245,7 +245,7 @@ export default function LinksPage() {
                 className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-xl font-medium shadow-lg shadow-brand-500/20 hover:shadow-xl hover:shadow-brand-500/25 transition-all"
               >
                 <Plus className="w-4 h-4" />
-                <span>Créer un lien</span>
+                <span>Créer ma page</span>
               </motion.button>
             </div>
           </div>
@@ -417,7 +417,7 @@ export default function LinksPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  Mes liens personnels
+                  Mes pages personnelles
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {personalLinks.length} lien{personalLinks.length > 1 ? 's' : ''} créé{personalLinks.length > 1 ? 's' : ''}
@@ -729,12 +729,12 @@ export default function LinksPage() {
                 <Link2 className="w-12 h-12 text-brand-600" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                {searchTerm || filterType !== 'all' ? 'Aucun lien trouvé' : 'Créez votre premier lien'}
+                {searchTerm || filterType !== 'all' ? 'Aucune page trouvée' : 'Créez votre première page'}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">
                 {searchTerm || filterType !== 'all' 
                   ? 'Essayez de modifier vos critères de recherche'
-                  : 'Commencez à partager vos liens avec le monde entier'
+                  : 'Ajoutez vos liens importants et partagez une page claire avec votre audience'
                 }
               </p>
               {!searchTerm && filterType === 'all' && (
@@ -744,7 +744,7 @@ export default function LinksPage() {
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-500/20 hover:shadow-xl hover:shadow-brand-500/25 transition-all"
                   >
                     <Sparkles className="w-5 h-5" />
-                    Créer mon premier lien
+                    Créer ma page
                   </button>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Ou importez vos liens depuis une autre plateforme
