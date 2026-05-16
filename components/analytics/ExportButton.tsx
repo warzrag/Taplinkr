@@ -124,38 +124,38 @@ export default function ExportButton({ data, type, linkId }: ExportButtonProps) 
           initial={{ opacity: 0, y: 10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.95 }}
-          className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50"
+          className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50"
         >
           <button
             onClick={exportToCSV}
-            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+            className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-3 transition-colors"
           >
             <FileSpreadsheet className="w-4 h-4 text-green-600" />
             <div>
-              <p className="font-medium text-gray-900">CSV</p>
-              <p className="text-xs text-gray-500">Pour Excel/Google Sheets</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">CSV</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Pour Excel/Google Sheets</p>
             </div>
           </button>
 
           <button
             onClick={exportToPDF}
-            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+            className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-3 transition-colors"
           >
             <FileText className="w-4 h-4 text-red-600" />
             <div>
-              <p className="font-medium text-gray-900">PDF</p>
-              <p className="text-xs text-gray-500">Rapport complet</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">PDF</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Rapport complet</p>
             </div>
           </button>
 
           <button
             onClick={exportToJSON}
-            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 transition-colors border-t border-gray-100"
+            className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-3 transition-colors border-t border-gray-100 dark:border-gray-800"
           >
             <BarChart3 className="w-4 h-4 text-blue-600" />
             <div>
-              <p className="font-medium text-gray-900">JSON</p>
-              <p className="text-xs text-gray-500">Données brutes</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">JSON</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Données brutes</p>
             </div>
           </button>
         </motion.div>

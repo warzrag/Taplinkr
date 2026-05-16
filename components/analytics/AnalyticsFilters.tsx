@@ -98,12 +98,12 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
       {/* Bouton d'ouverture des filtres */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all shadow-sm"
+        className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <Filter className="w-4 h-4 text-gray-600" />
-        <span className="text-gray-700 font-medium">Filtres</span>
+        <Filter className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+        <span className="text-gray-700 dark:text-gray-200 font-medium">Filtres</span>
         {activeFiltersCount > 0 && (
           <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
             {activeFiltersCount}
@@ -127,19 +127,19 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 overflow-y-auto"
+              className="fixed top-0 right-0 h-full w-96 bg-white dark:bg-gray-900 shadow-2xl z-50 overflow-y-auto"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">Filtres avancés</h3>
-                  <p className="text-sm text-gray-600 mt-1">Personnalisez vos analyses</p>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Filtres avancés</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Personnalisez vos analyses</p>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5 text-gray-500" />
+                  <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                 </button>
               </div>
 
@@ -147,14 +147,14 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
               <div className="p-6 space-y-6">
                 {/* Période */}
                 <div>
-                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-3">
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <Calendar className="w-4 h-4" />
                     <span>Période</span>
                   </label>
                   <select
                     value={filters.dateRange}
                     onChange={(e) => updateFilter('dateRange', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {dateRangeOptions.map(option => (
                       <option key={option.value} value={option.value}>
@@ -166,14 +166,14 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
 
                 {/* Pays */}
                 <div>
-                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-3">
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <Globe className="w-4 h-4" />
                     <span>Pays</span>
                   </label>
                   <select
                     value={filters.country}
                     onChange={(e) => updateFilter('country', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {countryOptions.map(option => (
                       <option key={option.value} value={option.value}>
@@ -185,7 +185,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
 
                 {/* Appareil */}
                 <div>
-                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-3">
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <Smartphone className="w-4 h-4" />
                     <span>Appareil</span>
                   </label>
@@ -197,7 +197,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
                         className={`px-3 py-2 text-sm rounded-lg border transition-all ${
                           filters.device === option.value
                             ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                       >
                         {option.label}
@@ -208,14 +208,14 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
 
                 {/* Navigateur */}
                 <div>
-                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-3">
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <Chrome className="w-4 h-4" />
                     <span>Navigateur</span>
                   </label>
                   <select
                     value={filters.browser}
                     onChange={(e) => updateFilter('browser', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {browserOptions.map(option => (
                       <option key={option.value} value={option.value}>
@@ -227,14 +227,14 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
 
                 {/* Heure de la journée */}
                 <div>
-                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-3">
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <Clock className="w-4 h-4" />
                     <span>Moment de la journée</span>
                   </label>
                   <select
                     value={filters.timeOfDay}
                     onChange={(e) => updateFilter('timeOfDay', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {timeOfDayOptions.map(option => (
                       <option key={option.value} value={option.value}>
@@ -246,7 +246,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
 
                 {/* Clics minimum */}
                 <div>
-                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-3">
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <TrendingUp className="w-4 h-4" />
                     <span>Clics minimum</span>
                   </label>
@@ -255,17 +255,17 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
                     value={filters.minClicks}
                     onChange={(e) => updateFilter('minClicks', e.target.value)}
                     placeholder="Ex: 10"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="border-t border-gray-200 p-6">
+              <div className="border-t border-gray-200 dark:border-gray-800 p-6">
                 <div className="flex space-x-3">
                   <button
                     onClick={resetFilters}
-                    className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     Réinitialiser
                   </button>
@@ -278,7 +278,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
                 </div>
                 
                 {activeFiltersCount > 0 && (
-                  <p className="text-xs text-gray-500 mt-2 text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
                     {activeFiltersCount} filtre(s) actif(s)
                   </p>
                 )}

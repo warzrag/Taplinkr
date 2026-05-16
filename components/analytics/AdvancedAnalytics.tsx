@@ -136,8 +136,8 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-          <p className="font-semibold text-gray-900">{label}</p>
+        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800">
+          <p className="font-semibold text-gray-900 dark:text-gray-100">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: {entry.value}
@@ -153,14 +153,14 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
     <div className="space-y-6">
       {/* Header avec filtres et contrôles */}
       <motion.div 
-        className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6"
+        className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-800 p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Analyses Avancées</h2>
-            <p className="text-gray-600 mt-1">Vue d'ensemble complète et insights détaillés</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Analyses Avancées</h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">Vue d'ensemble complète et insights détaillés</p>
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
@@ -168,7 +168,7 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(Number(e.target.value))}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
               <option value={7}>7 jours</option>
               <option value={30}>30 jours</option>
@@ -177,22 +177,22 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
             </select>
 
             {/* Type de graphique */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <button
                 onClick={() => setChartType('line')}
-                className={`p-2 rounded ${chartType === 'line' ? 'bg-white shadow' : ''}`}
+                className={`p-2 rounded ${chartType === 'line' ? 'bg-white dark:bg-gray-700 shadow' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 <LineChartIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setChartType('area')}
-                className={`p-2 rounded ${chartType === 'area' ? 'bg-white shadow' : ''}`}
+                className={`p-2 rounded ${chartType === 'area' ? 'bg-white dark:bg-gray-700 shadow' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 <BarChart3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setChartType('bar')}
-                className={`p-2 rounded ${chartType === 'bar' ? 'bg-white shadow' : ''}`}
+                className={`p-2 rounded ${chartType === 'bar' ? 'bg-white dark:bg-gray-700 shadow' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 <PieChartIcon className="w-4 h-4" />
               </button>
@@ -212,7 +212,7 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
             />
 
             {/* Actions */}
-            <button className="p-2 text-gray-600 hover:text-gray-900">
+            <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
               <RefreshCw className="w-5 h-5" />
             </button>
           </div>
@@ -223,7 +223,7 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
       {advancedStats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <motion.div
-            className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-lg"
+            className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/40 dark:to-blue-900/20 rounded-2xl p-6 shadow-lg"
             whileHover={{ scale: 1.02 }}
           >
             <div className="flex items-center justify-between mb-2">
@@ -235,16 +235,16 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
                 {Math.abs(advancedStats.growthRate)}%
               </span>
             </div>
-            <h3 className="text-3xl font-bold text-gray-900">{advancedStats.totalClicks.toLocaleString()}</h3>
-            <p className="text-gray-600 text-sm mt-1">Clics totaux</p>
-            <div className="mt-4 text-xs text-gray-500">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{advancedStats.totalClicks.toLocaleString()}</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Clics totaux</p>
+            <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
               <p>Moy: {advancedStats.avgClicks}/jour</p>
               <p>Max: {advancedStats.maxClicks} | Min: {advancedStats.minClicks}</p>
             </div>
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-lg"
+            className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/40 dark:to-purple-900/20 rounded-2xl p-6 shadow-lg"
             whileHover={{ scale: 1.02 }}
           >
             <div className="flex items-center justify-between mb-2">
@@ -254,16 +254,16 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
                 {advancedStats.engagementRate}%
               </span>
             </div>
-            <h3 className="text-3xl font-bold text-gray-900">{advancedStats.totalViews.toLocaleString()}</h3>
-            <p className="text-gray-600 text-sm mt-1">Vues totales</p>
-            <div className="mt-4 text-xs text-gray-500">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{advancedStats.totalViews.toLocaleString()}</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Vues totales</p>
+            <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
               <p>Taux d'engagement: {advancedStats.engagementRate}%</p>
               <p>Moy: {advancedStats.avgViews}/jour</p>
             </div>
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-lg"
+            className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/40 dark:to-green-900/20 rounded-2xl p-6 shadow-lg"
             whileHover={{ scale: 1.02 }}
           >
             <div className="flex items-center justify-between mb-2">
@@ -273,27 +273,27 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
                 Peak
               </span>
             </div>
-            <h3 className="text-3xl font-bold text-gray-900">{advancedStats.peakDay.clicks}</h3>
-            <p className="text-gray-600 text-sm mt-1">Record de clics</p>
-            <div className="mt-4 text-xs text-gray-500">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{advancedStats.peakDay.clicks}</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Record de clics</p>
+            <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
               <p>Date: {advancedStats.peakDay.date}</p>
               <p>Tendance: {advancedStats.recentTrend > 0 ? '+' : ''}{advancedStats.recentTrend}%</p>
             </div>
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 shadow-lg"
+            className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/40 dark:to-orange-900/20 rounded-2xl p-6 shadow-lg"
             whileHover={{ scale: 1.02 }}
           >
             <div className="flex items-center justify-between mb-2">
               <Users className="w-8 h-8 text-orange-600" />
               <Info className="w-4 h-4 text-orange-600" />
             </div>
-            <h3 className="text-3xl font-bold text-gray-900">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               {data?.stats?.topCountries?.length || 0}
             </h3>
-            <p className="text-gray-600 text-sm mt-1">Pays actifs</p>
-            <div className="mt-4 text-xs text-gray-500">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Pays actifs</p>
+            <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
               <p>Appareils: {data?.stats?.topDevices?.length || 0}</p>
               <p>Navigateurs: {data?.stats?.topBrowsers?.length || 0}</p>
             </div>
@@ -303,20 +303,20 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
 
       {/* Graphique principal avec options */}
       <motion.div 
-        className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6"
+        className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-800 p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Évolution des performances</h3>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Évolution des performances</h3>
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedMetric('clicks')}
               className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
                 selectedMetric === 'clicks' 
                   ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               Clics
@@ -326,7 +326,7 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
               className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
                 selectedMetric === 'views' 
                   ? 'bg-purple-600 text-white' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               Vues
@@ -336,7 +336,7 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
               className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
                 selectedMetric === 'engagement' 
                   ? 'bg-green-600 text-white' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               Engagement
@@ -432,12 +432,12 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Distribution horaire avec heatmap */}
         <motion.div 
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6"
+          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-800 p-6"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
             <Clock className="w-5 h-5 mr-2 text-blue-600" />
             Activité par heure
           </h3>
@@ -463,12 +463,12 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
 
         {/* Répartition par appareil */}
         <motion.div 
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6"
+          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-800 p-6"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
             <Smartphone className="w-5 h-5 mr-2 text-purple-600" />
             Appareils & Croissance
           </h3>
@@ -490,12 +490,12 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
 
         {/* Top pays avec carte */}
         <motion.div 
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6"
+          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-800 p-6"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4 }}
         >
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
             <Globe className="w-5 h-5 mr-2 text-green-600" />
             Répartition géographique
           </h3>
@@ -527,12 +527,12 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
 
         {/* Taux d'engagement */}
         <motion.div 
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6"
+          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-800 p-6"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
             <Activity className="w-5 h-5 mr-2 text-orange-600" />
             Métriques d'engagement
           </h3>
@@ -558,12 +558,12 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
 
         {/* Prédictions et tendances */}
         <motion.div 
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 lg:col-span-2"
+          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-800 p-6 lg:col-span-2"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6 }}
         >
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
             <TrendingUp className="w-5 h-5 mr-2 text-red-600" />
             Prédictions & Tendances
           </h3>
@@ -592,52 +592,52 @@ export default function AdvancedAnalytics({ data, type }: AdvancedAnalyticsProps
 
       {/* Insights et recommandations */}
       <motion.div 
-        className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-xl border border-white/20 p-6"
+        className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-xl border border-white/20 dark:border-gray-800 p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
       >
-        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
           <Zap className="w-6 h-6 mr-2 text-yellow-600" />
           Insights & Recommandations
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4">
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4">
             <div className="flex items-start space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
                 <TrendingUp className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900">Tendance positive</h4>
-                <p className="text-sm text-gray-600 mt-1">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100">Tendance positive</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Croissance de {advancedStats?.recentTrend}% sur les 7 derniers jours
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4">
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4">
             <div className="flex items-start space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <Clock className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900">Pic d'activité</h4>
-                <p className="text-sm text-gray-600 mt-1">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100">Pic d'activité</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Meilleure performance entre 14h et 18h
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4">
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4">
             <div className="flex items-start space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <Target className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900">Optimisation mobile</h4>
-                <p className="text-sm text-gray-600 mt-1">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100">Optimisation mobile</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   65% du trafic provient d'appareils mobiles
                 </p>
               </div>
