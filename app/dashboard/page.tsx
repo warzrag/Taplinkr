@@ -15,12 +15,26 @@ const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
 
 import { useState } from 'react'
 
+const getPreviewTextColor = (backgroundColor?: string | null, textColor?: string | null) => {
+  if (textColor && textColor.toLowerCase() !== '#ffffff' && textColor.toLowerCase() !== 'white') {
+    return textColor
+  }
+  if (!backgroundColor || backgroundColor.toLowerCase() === '#ffffff' || backgroundColor.toLowerCase() === 'white') {
+    return '#111827'
+  }
+  return textColor || '#111827'
+}
+
 function PhonePreview({ page }: { page: any }) {
   const links = page?.multiLinks || []
+  const previewBackground = page?.backgroundColor || '#ffffff'
+  const previewText = getPreviewTextColor(previewBackground, page?.textColor)
+  const mutedPreviewText = previewText === '#111827' ? '#4b5563' : previewText
+
   return (
     <div className="mx-auto w-full max-w-[290px] rounded-[2rem] bg-gray-950 p-3 shadow-2xl">
       <div className="aspect-[9/16] overflow-hidden rounded-[1.5rem] bg-white">
-        <div className="h-full overflow-y-auto" style={{ backgroundColor: page?.backgroundColor || '#ffffff', color: page?.textColor || '#111827' }}>
+        <div className="h-full overflow-y-auto" style={{ backgroundColor: previewBackground, color: previewText }}>
           {page?.coverImage ? (
             <img src={page.coverImage} alt="" className="h-28 w-full object-cover" />
           ) : (
@@ -36,8 +50,8 @@ function PhonePreview({ page }: { page: any }) {
                 </div>
               )}
             </div>
-            <h3 className="mt-3 text-xl font-bold">{page?.title || 'Ma page Taplinkr'}</h3>
-            <p className="mt-1 text-sm opacity-70">{page?.description || 'Tous mes liens importants en un seul endroit.'}</p>
+            <h3 className="mt-3 text-xl font-bold" style={{ color: previewText }}>{page?.title || 'Ma page Taplinkr'}</h3>
+            <p className="mt-1 text-sm" style={{ color: mutedPreviewText }}>{page?.description || 'Tous mes liens importants en un seul endroit.'}</p>
             <div className="mt-5 space-y-3">
               {(links.length ? links : [{ title: 'Instagram' }, { title: 'Telegram' }, { title: 'Mon contenu' }]).slice(0, 5).map((item: any, index: number) => (
                 <div key={index} className="rounded-2xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white">
