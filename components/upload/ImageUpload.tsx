@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Upload, X, Camera, Image as ImageIcon, Loader2, Crop } from 'lucide-react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -14,6 +14,7 @@ interface ImageUploadProps {
   className?: string
   aspectRatio?: 'square' | 'wide' | 'cover'
   compact?: boolean
+  onUploadingChange?: (isUploading: boolean) => void
 }
 
 export default function ImageUpload({ 
@@ -22,7 +23,8 @@ export default function ImageUpload({
   type = 'avatar',
   className = '',
   aspectRatio = 'square',
-  compact = false
+  compact = false,
+  onUploadingChange
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -30,6 +32,14 @@ export default function ImageUpload({
   const [tempImage, setTempImage] = useState<string | null>(null)
   const [showCropper, setShowCropper] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setPreview(value || null)
+  }, [value])
+
+  useEffect(() => {
+    onUploadingChange?.(isUploading)
+  }, [isUploading, onUploadingChange])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -76,6 +86,7 @@ export default function ImageUpload({
     reader.onloadend = async () => {
       const imageDataUrl = reader.result as string
       setPreview(imageDataUrl)
+      onChange(imageDataUrl)
       setIsUploading(true)
 
       try {
@@ -102,6 +113,7 @@ export default function ImageUpload({
         console.error('Erreur upload:', error)
         toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
         setPreview(value || null)
+        onChange(value || '')
       } finally {
         setIsUploading(false)
       }
@@ -112,6 +124,7 @@ export default function ImageUpload({
   const handleCropComplete = async (croppedImageUrl: string) => {
     setShowCropper(false)
     setPreview(croppedImageUrl)
+    onChange(croppedImageUrl)
     setIsUploading(true)
 
     try {
@@ -142,6 +155,7 @@ export default function ImageUpload({
       console.error('Erreur upload:', error)
       toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
       setPreview(value || null)
+      onChange(value || '')
     } finally {
       setIsUploading(false)
       setTempImage(null)

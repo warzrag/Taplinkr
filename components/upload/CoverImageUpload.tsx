@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Upload, X, Loader2, ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,18 +10,28 @@ interface CoverImageUploadProps {
   value?: string
   onChange: (url: string) => void
   className?: string
+  onUploadingChange?: (isUploading: boolean) => void
 }
 
 export default function CoverImageUpload({ 
   value, 
   onChange,
-  className = ''
+  className = '',
+  onUploadingChange
 }: CoverImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [preview, setPreview] = useState<string | null>(value || null)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setPreview(value || null)
+  }, [value])
+
+  useEffect(() => {
+    onUploadingChange?.(isUploading)
+  }, [isUploading, onUploadingChange])
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -64,7 +74,9 @@ export default function CoverImageUpload({
     // Preview immédiat
     const reader = new FileReader()
     reader.onloadend = () => {
-      setPreview(reader.result as string)
+      const imageDataUrl = reader.result as string
+      setPreview(imageDataUrl)
+      onChange(imageDataUrl)
     }
     reader.readAsDataURL(file)
 
@@ -92,6 +104,7 @@ export default function CoverImageUpload({
       console.error('Erreur upload:', error)
       toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
       setPreview(value || null)
+      onChange(value || '')
     } finally {
       setIsUploading(false)
     }

@@ -74,6 +74,7 @@ function inferTitleFromUrl(url: string) {
 
 export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
   const [loading, setLoading] = useState(false)
+  const [imageUploading, setImageUploading] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
@@ -313,6 +314,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       return
     }
 
+    if (imageUploading) {
+      toast.error("Laissez l'image finir son upload")
+      return
+    }
+
     if (validLinks.length === 0) {
       toast.error('Ajoutez au moins un lien avec un titre et une URL')
       return
@@ -507,6 +513,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       onChange={setProfileImage}
                       type="avatar"
                       compact
+                      onUploadingChange={setImageUploading}
                     />
                   </div>
                   <div className="space-y-4">
@@ -679,11 +686,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   <button type="button" onClick={() => setActivePanel('links')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Retour</button>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || imageUploading}
                     className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-60"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    {editingLink ? 'Mettre a jour' : 'Publier ma page'}
+                    {loading || imageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {imageUploading ? 'Upload en cours' : editingLink ? 'Mettre a jour' : 'Publier ma page'}
                   </button>
                 </div>
               </section>
@@ -731,7 +738,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Photo de couverture</label>
-                      <CoverImageUpload value={coverImage} onChange={setCoverImage} />
+                      <CoverImageUpload value={coverImage} onChange={setCoverImage} onUploadingChange={setImageUploading} />
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-3">
@@ -812,11 +819,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               {activePanel === 'style' ? (
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || imageUploading}
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white disabled:opacity-60"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {editingLink ? 'Mettre a jour' : 'Publier ma page'}
+                  {loading || imageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {imageUploading ? 'Upload en cours' : editingLink ? 'Mettre a jour' : 'Publier ma page'}
                 </button>
               ) : (
                 <button
@@ -844,11 +851,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || imageUploading}
                 className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {editingLink ? 'Mettre a jour' : 'Publier ma page'}
+                {loading || imageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {imageUploading ? 'Upload en cours' : editingLink ? 'Mettre a jour' : 'Publier ma page'}
               </button>
             </div>
           </form>
