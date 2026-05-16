@@ -71,8 +71,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const controlPanelItems = [
     { icon: LayoutDashboard, label: 'Accueil', href: '/dashboard' },
-    { icon: ExternalLink, label: 'Mes pages', href: '/dashboard/pages' },
-    { icon: Palette, label: 'Apparence', href: '/dashboard/pages' },
+    { icon: ExternalLink, label: 'Mes pages', href: '/dashboard/links' },
+    { icon: Palette, label: 'Apparence', href: '/dashboard/links' },
     { icon: BarChart3, label: 'Analytics', href: '/dashboard/visitors' },
     { icon: Shield, label: 'Protection', href: '/dashboard/protection' },
     { icon: Globe2, label: 'Domaines', href: '/dashboard/billing' },

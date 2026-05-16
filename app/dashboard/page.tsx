@@ -91,7 +91,7 @@ export default function Dashboard() {
               <Plus className="h-4 w-4" />
               Nouvelle page
             </button>
-            <Link href="/dashboard/pages" className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-semibold text-gray-800 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100">
+            <Link href="/dashboard/links" className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-semibold text-gray-800 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100">
               Mes pages
             </Link>
           </div>
@@ -125,7 +125,7 @@ export default function Dashboard() {
                     <ExternalLink className="h-4 w-4" />
                     Voir
                   </a>
-                  <Link href="/dashboard/pages" className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
+                  <Link href="/dashboard/links" className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
                     <Palette className="h-4 w-4" />
                     Modifier
                   </Link>
@@ -163,7 +163,7 @@ export default function Dashboard() {
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <Link href="/dashboard/pages" className="rounded-2xl border border-gray-200 bg-white p-5 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900">
+          <Link href="/dashboard/links" className="rounded-2xl border border-gray-200 bg-white p-5 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900">
             <ExternalLink className="mb-4 h-6 w-6 text-indigo-500" />
             <h3 className="font-bold">Gérer mes pages</h3>
             <p className="mt-1 text-sm text-gray-500">Créer, dupliquer, activer et modifier vos landing pages.</p>
