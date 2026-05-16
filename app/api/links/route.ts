@@ -181,10 +181,10 @@ export async function POST(request: NextRequest) {
       if (!directUrl) {
         return NextResponse.json({ error: 'URL de redirection requise pour un lien direct' }, { status: 400 })
       }
-      try {
-        new URL(directUrl)
-      } catch {
-        return NextResponse.json({ error: `URL de redirection invalide: ${directUrl}` }, { status: 400 })
+      if (!validateURL(directUrl)) {
+        return NextResponse.json({
+          error: `URL de redirection invalide ou dangereuse: ${directUrl}. Seuls http:// et https:// sont autorisÃ©s.`
+        }, { status: 400 })
       }
     } else {
       // Pour un multi-liens, on vérifie les sous-liens

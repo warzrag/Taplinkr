@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient({
-  datasourceUrl: "postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:5432/postgres"
+  datasourceUrl: process.env.DATABASE_URL
 })
 
 async function fixAnimationColumn() {

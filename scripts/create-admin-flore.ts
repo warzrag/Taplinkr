@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function createAdmin() {
   try {
     const email = 'admin@taplinkr.com';
-    const password = 'Admin123!'; // Vous pouvez changer ce mot de passe
+    const password = process.env.ADMIN_PASSWORD || ''; // Vous pouvez changer ce mot de passe
     const hashedPassword = await hash(password, 12);
 
     // Vérifier si l'utilisateur existe déjà

@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient({
-  datasourceUrl: "postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:5432/postgres"
+  datasourceUrl: process.env.DATABASE_URL
 })
 
 async function fixAdminAccount() {
@@ -10,7 +10,7 @@ async function fixAdminAccount() {
     console.log('🔧 Correction du compte admin en production...')
     
     const email = 'admin@taplinkr.com'
-    const password = 'Admin123!'
+    const password = process.env.ADMIN_PASSWORD || ''
     const hashedPassword = await bcrypt.hash(password, 10)
     
     // Vérifier si le compte existe

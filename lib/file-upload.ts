@@ -46,7 +46,6 @@ export class FileUploadService {
       'image/png',
       'image/gif',
       'image/webp',
-      'image/svg+xml',
     ]
 
     if (file.size > maxSize) {
@@ -67,7 +66,6 @@ export class FileUploadService {
     if (mimeType === 'image/png') return '.png'
     if (mimeType === 'image/gif') return '.gif'
     if (mimeType === 'image/webp') return '.webp'
-    if (mimeType === 'image/svg+xml') return '.svg'
     return '.bin'
   }
 }

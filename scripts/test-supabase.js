@@ -3,7 +3,7 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: 'postgresql://postgres.dkwgorynhgnmldzbhhrb:FlO1998florent1998@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true'
+      url: process.env.DATABASE_URL
     }
   }
 })

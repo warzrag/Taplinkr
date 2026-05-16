@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
 
 // Utiliser l'URL de production
-const DATABASE_URL = 'postgresql://postgres:FlO1998florent1998@db.dkwgorynhgnmldzbhhrb.supabase.co:5432/postgres'
+const DATABASE_URL = process.env.DATABASE_URL
 
 const prisma = new PrismaClient({
   datasources: {
@@ -31,7 +31,7 @@ async function main() {
   } catch (error) {
     console.error('❌ Erreur :', error.message)
     console.log('\n💡 Solution : Vous devez d\'abord synchroniser votre schéma Prisma avec Supabase.')
-    console.log('Exécutez : DATABASE_URL="postgresql://..." npx prisma db push')
+    console.log('Exécutez : DATABASE_URL=process.env.DATABASE_URL npx prisma db push')
   } finally {
     await prisma.$disconnect()
   }

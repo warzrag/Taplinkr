@@ -36,7 +36,6 @@ const nextConfig = {
   },
   // Optimisations images
   images: {
-    domains: ['dkwgorynhgnmldzbhhrb.supabase.co'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -47,7 +46,7 @@ const nextConfig = {
     deviceSizes: [640, 750, 828], // Réduire nombre de tailles
     imageSizes: [32, 64, 96], // Réduire nombre de tailles
     minimumCacheTTL: 3600, // Cache long pour performance
-    dangerouslyAllowSVG: true,
+    dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   eslint: {

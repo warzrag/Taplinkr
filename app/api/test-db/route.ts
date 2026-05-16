@@ -1,20 +1,9 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-  try {
-    const userCount = await prisma.user.count()
+  return new NextResponse('Not found', { status: 404 })
+}
 
-    return NextResponse.json({
-      status: 'connected',
-      users: userCount,
-      timestamp: new Date().toISOString(),
-    })
-  } catch (error: any) {
-    return NextResponse.json({
-      status: 'error',
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    }, { status: 500 })
-  }
+export async function POST() {
+  return new NextResponse('Not found', { status: 404 })
 }

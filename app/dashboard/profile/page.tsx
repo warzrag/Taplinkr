@@ -45,6 +45,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [profile, setProfile] = useState<ProfileData>({
     name: '',
     username: '',
@@ -72,17 +73,37 @@ export default function ProfilePage() {
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
     } else if (status === 'authenticated' && session) {
-      setProfile({
-        name: session.user.name || '',
-        username: session.user.username || '',
-        email: session.user.email || '',
-        image: session.user.image || '',
-        plan: session.user.plan || 'free',
-        planExpiresAt: session.user.planExpiresAt?.toString(),
-        emailVerified: true,
-        createdAt: new Date().toISOString()
-      })
-      setLoading(false)
+      const loadProfile = async () => {
+        try {
+          const response = await fetch('/api/profile', { cache: 'no-store' })
+          if (!response.ok) throw new Error('Erreur lors du chargement du profil')
+          const data = await response.json()
+          setProfile({
+            name: data.name || '',
+            username: data.username || session.user.username || '',
+            email: data.email || session.user.email || '',
+            image: data.image || '',
+            plan: data.plan || session.user.plan || 'free',
+            planExpiresAt: data.planExpiresAt || session.user.planExpiresAt?.toString(),
+            emailVerified: Boolean(data.emailVerified),
+            createdAt: data.createdAt || new Date().toISOString()
+          })
+        } catch {
+          setProfile({
+            name: session.user.name || '',
+            username: session.user.username || '',
+            email: session.user.email || '',
+            image: session.user.image || '',
+            plan: session.user.plan || 'free',
+            planExpiresAt: session.user.planExpiresAt?.toString(),
+            emailVerified: true,
+            createdAt: new Date().toISOString()
+          })
+        } finally {
+          setLoading(false)
+        }
+      }
+      loadProfile()
     }
   }, [status, session, router])
 
@@ -108,15 +129,67 @@ export default function ProfilePage() {
       setSaving(false)
     }
   }
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      // TODO: Implémenter l'upload d'image
-      toast.success('Upload d\'image à implémenter')
+    if (!file) return
+
+    setUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', 'avatar')
+
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      const uploadData = await uploadResponse.json()
+
+      if (!uploadResponse.ok || !uploadData.url) {
+        throw new Error(uploadData.error || 'Erreur lors de l upload')
+      }
+
+      const updateResponse = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: uploadData.url })
+      })
+
+      if (!updateResponse.ok) {
+        throw new Error('Erreur lors de la sauvegarde')
+      }
+
+      setProfile(prev => ({ ...prev, image: uploadData.url }))
+      toast.success('Photo de profil mise a jour')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de l upload')
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ''
     }
   }
 
+  const handleImageDelete = async () => {
+    setUploadingImage(true)
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: '' })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression')
+      }
+
+      setProfile(prev => ({ ...prev, image: '' }))
+      toast.success('Photo supprimee')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la suppression')
+    } finally {
+      setUploadingImage(false)
+    }
+  }
   if (loading || status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -190,28 +263,25 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="flex gap-3">
-                  <label>
+                  <label className={`px-4 py-2 bg-blue-600 text-white rounded-xl flex items-center gap-2 font-medium cursor-pointer ${uploadingImage ? 'opacity-60 pointer-events-none' : ''}`}>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
                       className="hidden"
                       onChange={handleImageUpload}
+                      disabled={uploadingImage}
                     />
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-xl flex items-center gap-2 font-medium"
-                      onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                    >
-                      <Upload className="w-4 h-4" />
-                      Télécharger
-                    </motion.button>
+                    <Upload className="w-4 h-4" />
+                    {uploadingImage ? 'Chargement...' : 'Telecharger'}
                   </label>
                   
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    type="button"
+                    onClick={handleImageDelete}
+                    disabled={uploadingImage || !profile.image}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Supprimer
                   </motion.button>

@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient({
-  datasourceUrl: "postgresql://postgres.dkwgorynhgnmldzbhhrb:Fortnite95!!@aws-0-eu-west-3.pooler.supabase.com:5432/postgres"
+  datasourceUrl: process.env.DATABASE_URL
 })
 
 async function verifyAdmin() {
@@ -38,11 +38,11 @@ async function verifyAdmin() {
     })
     
     if (adminUser) {
-      const testPassword = 'Admin123!'
+      const testPassword = process.env.ADMIN_PASSWORD || ''
       const isValid = await bcrypt.compare(testPassword, adminUser.password)
       
       console.log(`   ✅ Compte trouvé`)
-      console.log(`   Mot de passe Admin123! valide: ${isValid ? '✅' : '❌'}`)
+      console.log(`   Mot de passe ADMIN_PASSWORD valide: ${isValid ? '✅' : '❌'}`)
       
       if (!isValid) {
         console.log('\n🔧 Réparation du mot de passe...')
@@ -59,7 +59,7 @@ async function verifyAdmin() {
       }
     } else {
       console.log('   ❌ Compte non trouvé - Création...')
-      const hashedPassword = await bcrypt.hash('Admin123!', 10)
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || '', 10)
       await prisma.user.create({
         data: {
           email: 'admin@taplinkr.com',
@@ -75,7 +75,7 @@ async function verifyAdmin() {
     console.log('\n✅ Vérification terminée!')
     console.log('\n📝 Vous pouvez vous connecter avec:')
     console.log('   Email: admin@taplinkr.com')
-    console.log('   Mot de passe: Admin123!')
+    console.log('   Mot de passe: variable ADMIN_PASSWORD')
     console.log('   URL: https://www.taplinkr.com/auth/signin')
     
   } catch (error) {

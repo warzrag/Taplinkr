@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function createAdmin() {
   try {
     const adminEmail = "admin@linktracker.app";
-    const adminPassword = "Admin123!"; // Mot de passe par défaut - À CHANGER EN PRODUCTION
+    const adminPassword = process.env.ADMIN_PASSWORD || ""; // Mot de passe par défaut - À CHANGER EN PRODUCTION
 
     // Vérifier si l'admin existe déjà
     const existingAdmin = await prisma.user.findUnique({

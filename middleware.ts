@@ -17,10 +17,24 @@ export function middleware(request: NextRequest) {
     '/test-login',
     '/test-slug',
   ]
+  const hiddenApiRoutes = [
+    '/api/auth-debug',
+    '/api/test',
+    '/api/test-auth',
+    '/api/test-db',
+    '/api/test-email',
+    '/api/test-geo',
+    '/api/test-login',
+    '/api/test-register',
+    '/api/test-route',
+    '/api/links/test',
+    '/api/teams/test',
+    '/api/analytics/test-simple',
+  ]
 
   if (
     process.env.NODE_ENV === 'production' &&
-    hiddenPublicRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`))
+    [...hiddenPublicRoutes, ...hiddenApiRoutes].some((route) => pathname === route || pathname.startsWith(`${route}/`))
   ) {
     return new NextResponse('Not found', { status: 404 })
   }
@@ -32,13 +46,10 @@ export function middleware(request: NextRequest) {
   response.headers.set('X-Frame-Options', 'SAMEORIGIN')
   response.headers.set('X-Content-Type-Options', 'nosniff')
 
-  // Headers performance additionnels pour pages publiques
-  if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/admin')) {
-    response.headers.set('Link', '<https://dkwgorynhgnmldzbhhrb.supabase.co>; rel=preconnect')
-  }
-
   // Cache intelligent selon le type de route
-  if (pathname.startsWith('/_next/static')) {
+  if (pathname.startsWith('/api/')) {
+    response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate')
+  } else if (pathname.startsWith('/_next/static')) {
     // Assets statiques - cache long immutable
     response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
   } else if (pathname.match(/\.(jpg|jpeg|png|gif|svg|ico|woff2)$/)) {
@@ -54,7 +65,6 @@ export function middleware(request: NextRequest) {
 
   // Ignorer les routes API, static files et les routes Next.js
   if (
-    pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/dashboard') ||
@@ -82,7 +92,6 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
@@ -90,6 +99,6 @@ export const config = {
      * - dashboard (dashboard pages)
      * - admin (admin pages)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|auth|dashboard|admin).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }
