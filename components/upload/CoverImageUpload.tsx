@@ -152,12 +152,19 @@ export default function CoverImageUpload({
 
               <div className="overflow-hidden rounded-[1.5rem] bg-gray-950 p-2">
                 <div className="overflow-hidden rounded-[1.1rem] bg-white">
-                  <div className="relative h-32 w-full overflow-hidden sm:h-36">
+                  <div className="relative h-28 w-full overflow-hidden sm:h-32">
+                    <Image
+                      src={preview}
+                      alt=""
+                      fill
+                      className="scale-110 object-cover blur-xl opacity-45"
+                      priority
+                    />
                     <Image
                       src={preview}
                       alt="Cover"
                       fill
-                      className="object-cover object-center"
+                      className="object-contain"
                       priority
                     />
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white/85 to-transparent" />

@@ -789,7 +789,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <div className="aspect-[9/16] overflow-hidden">
                       <div className="h-full overflow-y-auto" style={{ backgroundColor, color: textColor }}>
                         {coverImage ? (
-                          <img src={coverImage} alt="" className="h-32 w-full object-cover" />
+                          <div className="relative h-28 w-full overflow-hidden bg-gray-100">
+                            <img src={coverImage} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-45" />
+                            <img src={coverImage} alt="" className="relative h-full w-full object-contain" />
+                            <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white/90 to-transparent" />
+                          </div>
                         ) : (
                           <div className="h-24" style={{ background: `linear-gradient(135deg, ${accentColor}33, transparent)` }} />
                         )}
