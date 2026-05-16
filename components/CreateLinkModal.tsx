@@ -77,7 +77,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
-  const [activePanel, setActivePanel] = useState<'identity' | 'links' | 'style'>('identity')
+  const [activePanel, setActivePanel] = useState<'start' | 'identity' | 'links' | 'style'>('start')
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -141,7 +141,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setBorderRadius('rounded-2xl')
       setCustomSlugTouched(false)
       setShowAdvanced(false)
-      setActivePanel('identity')
+      setActivePanel('start')
     }
   }, [isOpen, editingLink])
 
@@ -252,6 +252,34 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       return [...current, preset]
     })
     setActivePanel('links')
+  }
+
+  const applyStarter = (kind: 'creator' | 'premium' | 'social') => {
+    if (kind === 'creator') {
+      setDescription(description || 'Tous mes contenus, reseaux et offres au meme endroit.')
+      setLinks([
+        { title: 'Instagram', url: 'https://instagram.com/', description: '', icon: '', iconImage: '' },
+        { title: 'Telegram', url: 'https://t.me/', description: '', icon: '', iconImage: '' },
+        { title: 'Mon contenu', url: '', description: '', icon: '', iconImage: '' },
+      ])
+    }
+    if (kind === 'premium') {
+      setDescription(description || 'Accedez a mes contenus, offres privees et nouveautes.')
+      setLinks([
+        { title: 'Mon contenu premium', url: '', description: '', icon: '', iconImage: '' },
+        { title: 'Telegram prive', url: 'https://t.me/', description: '', icon: '', iconImage: '' },
+        { title: 'Me contacter', url: '', description: '', icon: '', iconImage: '' },
+      ])
+    }
+    if (kind === 'social') {
+      setDescription(description || 'Retrouvez-moi sur toutes mes plateformes.')
+      setLinks([
+        { title: 'Instagram', url: 'https://instagram.com/', description: '', icon: '', iconImage: '' },
+        { title: 'TikTok', url: 'https://tiktok.com/@', description: '', icon: '', iconImage: '' },
+        { title: 'YouTube', url: 'https://youtube.com/', description: '', icon: '', iconImage: '' },
+      ])
+    }
+    setActivePanel('identity')
   }
 
   const removeLink = (index: number) => {
@@ -365,13 +393,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 Page createur
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-950 dark:text-white">
-                {editingLink ? 'Modifier ma page' : 'Creer ma page Taplinkr'}
+                {editingLink ? 'Modifier ma page' : 'Assistant de creation Taplinkr'}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                3 etapes simples : votre profil, vos liens, puis le style.
+                Choisissez un depart, Taplinkr prepare la structure, puis vous ajustez.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {[
+                  ['start', 'Depart'],
                   ['identity', '1. Profil'],
                   ['links', '2. Liens'],
                   ['style', '3. Style'],
@@ -403,6 +432,68 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
           <form onSubmit={handleSubmit} className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="max-h-[calc(100vh-140px)] overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
+              <section className={`${activePanel === 'start' ? 'block' : 'hidden'} rounded-3xl border border-indigo-200 bg-indigo-50/70 p-5 dark:border-indigo-500/20 dark:bg-indigo-500/10 sm:p-6`}>
+                <div className="max-w-2xl">
+                  <p className="text-sm font-bold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Nouveau</p>
+                  <h3 className="mt-2 text-3xl font-bold leading-tight text-gray-950 dark:text-white">
+                    On part de quoi ?
+                  </h3>
+                  <p className="mt-2 text-base text-gray-600 dark:text-gray-300">
+                    Choisissez le type de page. Les boutons de base seront pre-remplis, vous n'aurez plus qu'a remplacer les URLs.
+                  </p>
+                </div>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => applyStarter('creator')}
+                    className="rounded-2xl border border-white bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-950"
+                  >
+                    <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-indigo-600 text-white">
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-bold text-gray-950 dark:text-white">Createur</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Instagram, Telegram, contenu principal.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyStarter('premium')}
+                    className="rounded-2xl border border-white bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-950"
+                  >
+                    <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-gray-950 text-white dark:bg-white dark:text-gray-950">
+                      <Link2 className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-bold text-gray-950 dark:text-white">Premium</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Offre privee, Telegram, contact.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyStarter('social')}
+                    className="rounded-2xl border border-white bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-950"
+                  >
+                    <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-cyan-500 text-white">
+                      <ExternalLink className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-bold text-gray-950 dark:text-white">Reseaux</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Instagram, TikTok, YouTube.</p>
+                  </button>
+                </div>
+
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 dark:bg-gray-950">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Vous pouvez aussi partir de zero.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setActivePanel('identity')}
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"
+                  >
+                    Commencer sans modele
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </section>
+
               <section className={`${activePanel === 'identity' ? 'block' : 'hidden'} rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5`}>
                 <div className="mb-5">
                   <p className="text-sm font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Etape 1</p>
@@ -718,14 +809,25 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             </aside>
 
             <div className="lg:hidden sticky bottom-0 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur px-4 py-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white disabled:opacity-60"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {editingLink ? 'Mettre a jour' : 'Publier ma page'}
-              </button>
+              {activePanel === 'style' ? (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white disabled:opacity-60"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {editingLink ? 'Mettre a jour' : 'Publier ma page'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setActivePanel(activePanel === 'start' ? 'identity' : activePanel === 'identity' ? 'links' : 'style')}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white"
+                >
+                  Continuer
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             <div className="hidden lg:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-2xl dark:border-gray-800 dark:bg-gray-950">
