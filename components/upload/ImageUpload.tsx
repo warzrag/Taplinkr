@@ -13,6 +13,7 @@ interface ImageUploadProps {
   type?: 'avatar' | 'banner' | 'cover' | 'profile'
   className?: string
   aspectRatio?: 'square' | 'wide' | 'cover'
+  compact?: boolean
 }
 
 export default function ImageUpload({ 
@@ -20,7 +21,8 @@ export default function ImageUpload({
   onChange, 
   type = 'avatar',
   className = '',
-  aspectRatio = 'square'
+  aspectRatio = 'square',
+  compact = false
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -237,6 +239,28 @@ export default function ImageUpload({
               </div>
             )}
           </motion.div>
+        ) : compact ? (
+          <motion.button
+            key="compact-upload"
+            type="button"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            onClick={() => fileInputRef.current?.click()}
+            className="flex w-full items-center gap-3 rounded-2xl border border-gray-300 bg-white p-3 text-left transition hover:border-indigo-400 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+          >
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-gray-100 dark:bg-gray-800">
+              {isUploading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+              ) : (
+                <Camera className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ajouter une photo</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Optionnel, modifiable plus tard</p>
+            </div>
+          </motion.button>
         ) : (
           <motion.div
             key="upload"

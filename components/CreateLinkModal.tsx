@@ -77,6 +77,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
+  const [activePanel, setActivePanel] = useState<'identity' | 'links' | 'style'>('identity')
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -140,6 +141,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setBorderRadius('rounded-2xl')
       setCustomSlugTouched(false)
       setShowAdvanced(false)
+      setActivePanel('identity')
     }
   }, [isOpen, editingLink])
 
@@ -237,6 +239,19 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
   const addLink = () => {
     setLinks(current => [...current, { title: '', url: '', description: '', icon: '', iconImage: '' }])
+  }
+
+  const addPresetLink = (preset: PageLink) => {
+    setLinks(current => {
+      const emptyIndex = current.findIndex(link => !link.title.trim() && !link.url.trim())
+      if (emptyIndex >= 0) {
+        const next = [...current]
+        next[emptyIndex] = preset
+        return next
+      }
+      return [...current, preset]
+    })
+    setActivePanel('links')
   }
 
   const removeLink = (index: number) => {
@@ -343,7 +358,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           animate={{ opacity: 1, y: 0, scale: 1 }}
           className="relative mx-auto w-full max-w-5xl min-h-screen sm:min-h-0 bg-white dark:bg-gray-950 sm:rounded-3xl shadow-2xl overflow-hidden"
         >
-          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-4">
+          <div className="flex items-start justify-between border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-4">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -353,8 +368,28 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 {editingLink ? 'Modifier ma page' : 'Creer ma page Taplinkr'}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Ajoutez vos infos, collez vos liens, publiez. Rien de plus complique.
+                3 etapes simples : votre profil, vos liens, puis le style.
               </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {[
+                  ['identity', '1. Profil'],
+                  ['links', '2. Liens'],
+                  ['style', '3. Style'],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setActivePanel(value as typeof activePanel)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                      activePanel === value
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
             <button
               type="button"
@@ -367,18 +402,23 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           </div>
 
           <form onSubmit={handleSubmit} className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="max-h-[calc(100vh-92px)] overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
-              <section className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5">
-                <div className="flex items-start gap-4">
-                  <div className="w-24 shrink-0">
+            <div className="max-h-[calc(100vh-140px)] overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
+              <section className={`${activePanel === 'identity' ? 'block' : 'hidden'} rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5`}>
+                <div className="mb-5">
+                  <p className="text-sm font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Etape 1</p>
+                  <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Qui voit-on sur la page ?</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Mettez juste le nom et la phrase que vos visiteurs doivent comprendre en premier.</p>
+                </div>
+                <div className="grid gap-4">
+                  <div>
                     <ImageUpload
                       value={profileImage}
                       onChange={setProfileImage}
                       type="avatar"
-                      className="w-24"
+                      compact
                     />
                   </div>
-                  <div className="flex-1 space-y-4">
+                  <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
                         Nom affiche
@@ -386,7 +426,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       <input
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
-                        placeholder="Florent, ta marque, ton pseudo..."
+                        placeholder="Ex : Florent, Taplinkr, votre pseudo..."
                         className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                       />
                     </div>
@@ -397,20 +437,31 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       <textarea
                         value={description}
                         onChange={(event) => setDescription(event.target.value)}
-                        placeholder="Ce que les visiteurs doivent comprendre en 2 secondes."
+                        placeholder="Ex : Retrouvez tous mes contenus, offres et reseaux ici."
                         rows={3}
                         className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                       />
                     </div>
                   </div>
                 </div>
+                <div className="mt-5 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setActivePanel('links')}
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"
+                  >
+                    Continuer vers les liens
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
               </section>
 
-              <section className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5">
+              <section className={`${activePanel === 'links' ? 'block' : 'hidden'} rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5`}>
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-950 dark:text-white">Mes liens</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Collez vos destinations importantes. La preview se met a jour en direct.</p>
+                    <p className="text-sm font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Etape 2</p>
+                    <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Ajoutez vos boutons</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Un titre + une URL. C'est tout. Taplinkr fera la page autour.</p>
                   </div>
                   <button
                     type="button"
@@ -420,6 +471,24 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <Plus className="w-4 h-4" />
                     Ajouter
                   </button>
+                </div>
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {[
+                    { title: 'Instagram', url: 'https://instagram.com/', description: '', icon: '', iconImage: '' },
+                    { title: 'Telegram', url: 'https://t.me/', description: '', icon: '', iconImage: '' },
+                    { title: 'TikTok', url: 'https://tiktok.com/@', description: '', icon: '', iconImage: '' },
+                    { title: 'Mon contenu', url: '', description: '', icon: '', iconImage: '' },
+                  ].map(preset => (
+                    <button
+                      key={preset.title}
+                      type="button"
+                      onClick={() => addPresetLink(preset)}
+                      className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 text-xs font-bold text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-indigo-500/10"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      {preset.title}
+                    </button>
+                  ))}
                 </div>
 
                 <div className="space-y-3">
@@ -467,10 +536,19 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </div>
                   ))}
                 </div>
+                <div className="mt-5 flex justify-between">
+                  <button type="button" onClick={() => setActivePanel('identity')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Retour</button>
+                  <button type="button" onClick={() => setActivePanel('style')} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700">
+                    Choisir le style
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
               </section>
 
-              <section className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5">
-                <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-4">Apparence rapide</h3>
+              <section className={`${activePanel === 'style' ? 'block' : 'hidden'} rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5`}>
+                <p className="text-sm font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Etape 3</p>
+                <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Choisissez l'ambiance</h3>
+                <p className="mb-4 mt-1 text-sm text-gray-500 dark:text-gray-400">Vous pourrez modifier le style plus tard. Le plus important est de publier une page claire.</p>
                 <div className="grid sm:grid-cols-4 gap-3 mb-5">
                   {themes.map(theme => (
                     <button
@@ -505,6 +583,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     Accent
                     <input type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} className="mt-2 h-11 w-full rounded-xl" />
                   </label>
+                </div>
+                <div className="mt-5 flex justify-between">
+                  <button type="button" onClick={() => setActivePanel('links')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Retour</button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-60"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {editingLink ? 'Mettre a jour' : 'Publier ma page'}
+                  </button>
                 </div>
               </section>
 
