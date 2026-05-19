@@ -54,14 +54,14 @@ export default function PagesDashboard() {
               <Sparkles className="h-3.5 w-3.5" />
               Pages & deeplinks
             </p>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Mes pages</h1>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Ma page</h1>
             <p className="mt-2 max-w-2xl text-gray-600 dark:text-gray-400">
-              Chaque page est une landing page partageable avec ses boutons, son design, ses protections et ses analytics.
+              Construisez votre page publique comme un vrai profil mobile : profil, boutons, design et publication.
             </p>
           </div>
           <button onClick={() => setShowCreateModal(true)} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">
             <Plus className="h-4 w-4" />
-            Nouvelle page
+            Ouvrir le studio
           </button>
         </header>
 
@@ -117,7 +117,7 @@ export default function PagesDashboard() {
                       Copier
                     </button>
                     <button onClick={() => setEditingPage(page)} className="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-gray-800">
-                      Modifier
+                      Studio
                     </button>
                     <button onClick={() => togglePage(page)} className="rounded-xl border border-gray-200 px-3 py-2.5 hover:border-indigo-300 dark:border-gray-800">
                       {page.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -147,10 +147,10 @@ export default function PagesDashboard() {
             </div>
             <h2 className="text-2xl font-bold">Créez votre première page de conversion</h2>
             <p className="mx-auto mt-2 max-w-md text-gray-500">
-              Ajoutez vos contenus, partagez une seule URL et suivez les performances de chaque bouton.
+              Choisissez un modele, ajoutez vos boutons, regardez le rendu mobile et publiez.
             </p>
             <button onClick={() => setShowCreateModal(true)} className="mt-6 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700">
-              Nouvelle page
+              Ouvrir le studio
             </button>
           </div>
         )}

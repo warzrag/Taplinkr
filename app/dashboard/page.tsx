@@ -140,7 +140,7 @@ export default function Dashboard() {
           <div className="flex flex-wrap gap-3">
             <button onClick={() => setShowCreateModal(true)} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">
               <Plus className="h-4 w-4" />
-              Nouvelle page
+              Ouvrir le studio
             </button>
             <Link href="/dashboard/links" className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-semibold text-gray-800 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100">
               Mes pages
@@ -178,13 +178,13 @@ export default function Dashboard() {
                   </a>
                   <Link href="/dashboard/links" className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
                     <Palette className="h-4 w-4" />
-                    Modifier
+                    Studio
                   </Link>
                 </>
               ) : (
                 <button onClick={() => setShowCreateModal(true)} className="sm:col-span-3 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-700">
                   <Plus className="h-4 w-4" />
-                  Créer ma première page
+                  Ouvrir le studio
                 </button>
               )}
             </div>

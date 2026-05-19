@@ -385,24 +385,24 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm">
-      <div className="min-h-screen px-0 sm:px-6 py-0 sm:py-8">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-50 text-gray-950 dark:bg-gray-950 dark:text-white">
+      <div className="min-h-screen px-0">
         <motion.div
-          initial={{ opacity: 0, y: 24, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="relative mx-auto w-full max-w-5xl min-h-screen sm:min-h-0 bg-white dark:bg-gray-950 sm:rounded-3xl shadow-2xl overflow-hidden"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative min-h-screen overflow-hidden bg-gray-50 dark:bg-gray-950"
         >
-          <div className="flex items-start justify-between border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-4">
+          <div className="sticky top-0 z-20 flex items-start justify-between border-b border-gray-200 bg-white/95 px-4 py-4 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95 sm:px-6">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2">
                 <Sparkles className="w-3.5 h-3.5" />
-                Page createur
+                Studio Taplinkr
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-950 dark:text-white">
-                {editingLink ? 'Modifier ma page' : 'Assistant de creation Taplinkr'}
+                {editingLink ? 'Modifier ma page' : 'Construire ma page'}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Choisissez un depart, Taplinkr prepare la structure, puis vous ajustez.
+                Profil, boutons, design et publication au meme endroit.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {[
@@ -430,14 +430,40 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
             >
               <X className="w-5 h-5 text-gray-500" />
+              <span className="hidden sm:inline">Fermer</span>
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="max-h-[calc(100vh-140px)] overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
+          <form onSubmit={handleSubmit} className="mx-auto grid w-full max-w-7xl lg:grid-cols-[220px_minmax(0,1fr)_380px]">
+            <aside className="hidden border-r border-gray-200 bg-white px-4 py-6 dark:border-gray-800 dark:bg-gray-950 lg:block">
+              <div className="sticky top-28 space-y-2">
+                {[
+                  ['start', 'Modele', 'Choisir une base'],
+                  ['identity', 'Profil', 'Nom, bio, photo'],
+                  ['links', 'Boutons', 'Liens a publier'],
+                  ['style', 'Design', 'Couleurs et rendu'],
+                ].map(([value, label, helper]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setActivePanel(value as typeof activePanel)}
+                    className={`w-full rounded-2xl px-4 py-3 text-left transition ${
+                      activePanel === value
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-900'
+                    }`}
+                  >
+                    <span className="block text-sm font-bold">{label}</span>
+                    <span className={`mt-0.5 block text-xs ${activePanel === value ? 'text-indigo-100' : 'text-gray-400'}`}>{helper}</span>
+                  </button>
+                ))}
+              </div>
+            </aside>
+
+            <div className="px-4 sm:px-6 py-6 space-y-6">
               <section className={`${activePanel === 'start' ? 'block' : 'hidden'} rounded-3xl border border-indigo-200 bg-indigo-50/70 p-5 dark:border-indigo-500/20 dark:bg-indigo-500/10 sm:p-6`}>
                 <div className="max-w-2xl">
                   <p className="text-sm font-bold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Nouveau</p>
