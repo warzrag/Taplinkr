@@ -35,12 +35,16 @@ export class PasswordProtectionService {
       return { success: true } // No protection set
     }
 
-    // Check if locked
-    if (protection.lockedUntil && protection.lockedUntil > new Date()) {
+    const windowStart = new Date(Date.now() - protection.lockoutDuration * 1000)
+    const failedAttempts = await prisma.passwordAttempt.count({
+      where: { linkId, ip, success: false, createdAt: { gte: windowStart } }
+    })
+
+    if (failedAttempts >= protection.maxAttempts) {
       return {
         success: false,
         error: 'Too many failed attempts. Try again later.',
-        lockedUntil: protection.lockedUntil
+        lockedUntil: new Date(Date.now() + protection.lockoutDuration * 1000)
       }
     }
 
@@ -57,36 +61,20 @@ export class PasswordProtectionService {
     })
 
     if (isValid) {
-      // Reset attempts on success
-      await prisma.passwordProtection.update({
-        where: { linkId },
-        data: {
-          attempts: 0,
-          lockedUntil: null
-        }
-      })
       return { success: true }
     } else {
-      // Increment attempts
-      const newAttempts = protection.attempts + 1
+      const newAttempts = failedAttempts + 1
       const shouldLock = newAttempts >= protection.maxAttempts
-      
-      const update: any = { attempts: newAttempts }
-      if (shouldLock) {
-        update.lockedUntil = new Date(Date.now() + protection.lockoutDuration * 1000)
-      }
-
-      await prisma.passwordProtection.update({
-        where: { linkId },
-        data: update
-      })
+      const lockedUntil = shouldLock
+        ? new Date(Date.now() + protection.lockoutDuration * 1000)
+        : undefined
 
       return {
         success: false,
         error: shouldLock 
           ? `Too many failed attempts. Locked for ${Math.round(protection.lockoutDuration / 60)} minutes.`
           : `Invalid password. ${protection.maxAttempts - newAttempts} attempts remaining.`,
-        lockedUntil: shouldLock ? update.lockedUntil : undefined
+        lockedUntil
       }
     }
   }

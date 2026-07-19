@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nanoid } from 'nanoid'
 import sharp from 'sharp'
-import { put } from '@vercel/blob'
 import { authOptions } from '@/lib/auth'
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024
@@ -20,7 +19,7 @@ function extensionFor(contentType: string, originalName: string) {
   return ext?.toLowerCase() || '.bin'
 }
 
-async function optimizeImage(buffer: Buffer, type: string, mimeType: string) {
+async function optimizeImage(buffer: Buffer, type: string, mimeType: string): Promise<{ buffer: Buffer; contentType: string }> {
   if (mimeType === 'image/gif') {
     return { buffer, contentType: mimeType }
   }
@@ -73,6 +72,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
     }
 
+    const { put } = await import('@vercel/blob')
+
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const requestedType = String(formData.get('type') || 'image')
@@ -91,12 +92,12 @@ export async function POST(request: NextRequest) {
     }
 
     const rawBuffer = Buffer.from(await file.arrayBuffer())
-    let uploaded = { buffer: rawBuffer, contentType: file.type }
+    let uploaded: { buffer: Buffer; contentType: string } = { buffer: rawBuffer, contentType: file.type }
 
     try {
       uploaded = await optimizeImage(rawBuffer, type, file.type)
-    } catch (error) {
-      console.warn('Image optimization skipped:', error)
+    } catch {
+      return NextResponse.json({ error: 'Contenu image invalide' }, { status: 400 })
     }
 
     const fileId = nanoid()

@@ -13,7 +13,6 @@ import {
   CreditCard,
   ExternalLink,
   MessageCircle,
-  Database,
   Palette,
   Globe2
 } from 'lucide-react'
@@ -90,8 +89,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Admin section (if applicable)
   const adminItems = (session?.user?.role === 'admin' || session?.user?.role === 'manager')
     ? [
-        { icon: Shield, label: 'Admin', href: '/admin/users' },
-        { icon: Database, label: 'Base de données', href: '/admin/database' }
+        { icon: Shield, label: 'Admin', href: '/admin/users' }
       ]
     : []
 

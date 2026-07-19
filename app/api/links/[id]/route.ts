@@ -4,11 +4,10 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/redis-cache'
 import { revalidatePath } from 'next/cache'
+import { validateURL } from '@/lib/url-validator'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
 
@@ -39,10 +38,8 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     
@@ -96,6 +93,32 @@ export async function PUT(
       return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
     }
 
+    const effectiveIsDirect = isDirect ?? existingLink.isDirect
+    const effectiveDirectUrl = directUrl ?? existingLink.directUrl
+    if (effectiveIsDirect && (!effectiveDirectUrl || !validateURL(effectiveDirectUrl))) {
+      return NextResponse.json({ error: 'URL de redirection invalide. Seuls http:// et https:// sont autorisés.' }, { status: 400 })
+    }
+
+    if (multiLinks !== undefined) {
+      if (!Array.isArray(multiLinks) || (!effectiveIsDirect && multiLinks.length === 0)) {
+        return NextResponse.json({ error: 'Au moins un sous-lien valide est requis.' }, { status: 400 })
+      }
+      for (const item of multiLinks) {
+        if (!item?.title || !item?.url || !validateURL(item.url)) {
+          return NextResponse.json({ error: 'Chaque sous-lien doit avoir un titre et une URL http(s) valide.' }, { status: 400 })
+        }
+      }
+    }
+
+    if (slug !== undefined) {
+      const normalizedSlug = String(slug).trim().toLowerCase()
+      if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(normalizedSlug)) {
+        return NextResponse.json({ error: 'Le slug doit contenir 3 à 50 caractères alphanumériques ou tirets.' }, { status: 400 })
+      }
+      const slugOwner = await prisma.link.findFirst({ where: { slug: normalizedSlug, id: { not: params.id } } })
+      if (slugOwner) return NextResponse.json({ error: 'Cette URL personnalisée est déjà utilisée.' }, { status: 409 })
+    }
+
     // Pas de validation d'URL car c'est un multi-link
 
     // Mettre à jour les multiLinks d'abord s'ils sont fournis
@@ -127,7 +150,7 @@ export async function PUT(
       data: {
         ...(title !== undefined && { title }),
         ...(internalName !== undefined && { internalName: internalName || null }),
-        ...(slug !== undefined && { slug }),
+        ...(slug !== undefined && { slug: String(slug).trim().toLowerCase() }),
         ...(description !== undefined && { description: description || null }),
         ...(color !== undefined && { color: color || null }),
         ...(icon !== undefined && { icon: icon || null }),
@@ -190,10 +213,8 @@ export async function PUT(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
 
@@ -240,10 +261,8 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     

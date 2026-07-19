@@ -4,7 +4,7 @@ import Stripe from 'stripe'
 const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_disabled'
 
 export const stripe = new Stripe(STRIPE_KEY, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2025-06-30.basil',
   typescript: true,
 })
 

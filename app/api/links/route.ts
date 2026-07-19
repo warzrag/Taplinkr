@@ -12,9 +12,8 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    // Si pas de session, retourner un objet avec un tableau vide au lieu d'une erreur
     if (!session?.user?.id) {
-      return NextResponse.json({ links: [] })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Récupérer d'abord l'utilisateur avec son équipe

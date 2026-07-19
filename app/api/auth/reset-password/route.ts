@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Valider la longueur du mot de passe
-    if (password.length < 8) {
+    if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
       return NextResponse.json(
         { error: 'Le mot de passe doit contenir au moins 8 caractères' },
         { status: 400 }
@@ -54,18 +54,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Hasher le nouveau mot de passe
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Mettre à jour le mot de passe de l'utilisateur
-    await prisma.user.update({
-      where: { id: verificationToken.userId },
-      data: { password: hashedPassword }
-    })
-
-    // Supprimer le token utilisé
-    await prisma.verificationToken.delete({
-      where: { id: verificationToken.id }
-    })
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: verificationToken.userId },
+        data: { password: hashedPassword, sessionVersion: { increment: 1 } }
+      }),
+      prisma.verificationToken.deleteMany({
+        where: { userId: verificationToken.userId, type: 'password_reset' }
+      })
+    ])
 
     return NextResponse.json({
       message: 'Mot de passe réinitialisé avec succès'

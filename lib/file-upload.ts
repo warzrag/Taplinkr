@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import { del, list, put } from '@vercel/blob'
+import sharp from 'sharp'
 
 export interface UploadResult {
   id: string
@@ -12,10 +12,16 @@ export interface UploadResult {
 
 export class FileUploadService {
   async uploadFile(file: File, userId: string): Promise<UploadResult> {
+    const { put } = await import('@vercel/blob')
     const fileId = nanoid()
     const extension = this.getFileExtension(file.name, file.type)
     const filename = `uploads/${userId}/files/${fileId}${extension}`
     const buffer = Buffer.from(await file.arrayBuffer())
+    const metadata = await sharp(buffer, { limitInputPixels: 40_000_000 }).metadata()
+    const allowedFormats = new Set(['jpeg', 'png', 'gif', 'webp'])
+    if (!metadata.format || !allowedFormats.has(metadata.format) || !metadata.width || !metadata.height) {
+      throw new Error('Invalid image content')
+    }
 
     const blob = await put(filename, buffer, {
       access: 'public',
@@ -35,6 +41,7 @@ export class FileUploadService {
   }
 
   async deleteFile(fileId: string, userId: string): Promise<void> {
+    const { del, list } = await import('@vercel/blob')
     const { blobs } = await list({ prefix: `uploads/${userId}/files/${fileId}` })
     await Promise.all(blobs.map(blob => del(blob.url).catch(() => undefined)))
   }
@@ -60,8 +67,6 @@ export class FileUploadService {
   }
 
   private getFileExtension(filename: string, mimeType: string): string {
-    const ext = filename.match(/\.[a-z0-9]+$/i)?.[0]
-    if (ext) return ext.toLowerCase()
     if (mimeType === 'image/jpeg') return '.jpg'
     if (mimeType === 'image/png') return '.png'
     if (mimeType === 'image/gif') return '.gif'

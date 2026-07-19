@@ -5,6 +5,7 @@
       "dom.iterable",
       "esnext"
     ],
+    "target": "ES2020",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -33,6 +34,10 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "scripts",
+    "diagnostic-complete.ts",
+    "reset-admin-password.ts",
+    "test-auth.ts"
   ]
 }

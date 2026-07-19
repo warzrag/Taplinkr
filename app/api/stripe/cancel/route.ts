@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true,
       cancel_at_period_end: subscription.cancel_at_period_end,
-      current_period_end: subscription.current_period_end
+      current_period_end: subscription.items.data[0]?.current_period_end ?? null
     })
   } catch (error) {
     console.error('Erreur lors de l\'annulation:', error)

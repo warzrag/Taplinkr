@@ -1,148 +1,93 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { FieldValue } from 'firebase-admin/firestore'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/firebase-admin'
+
+function asDate(value: unknown): Date | null {
+  if (!value) return null
+  if (typeof value === 'object' && value !== null && 'toDate' in value) {
+    return (value as { toDate(): Date }).toDate()
+  }
+  const date = new Date(value as string | number | Date)
+  return Number.isNaN(date.getTime()) ? null : date
+}
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Non authentifié' },
-        { status: 401 }
-      )
+    if (!session?.user?.id) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+
+    const code = String((await request.json()).code || '').trim().toUpperCase()
+    if (!/^[A-Z0-9_-]{3,40}$/.test(code)) {
+      return NextResponse.json({ error: 'Code promo invalide' }, { status: 400 })
     }
 
-    const { code } = await request.json()
+    const promoQuery = await db.collection('promoCodes').where('code', '==', code).limit(1).get()
+    if (promoQuery.empty) return NextResponse.json({ error: 'Code promo invalide' }, { status: 400 })
 
-    if (!code) {
-      return NextResponse.json(
-        { error: 'Code promo manquant' },
-        { status: 400 }
-      )
-    }
+    const promoRef = promoQuery.docs[0].ref
+    const userRef = db.collection('users').doc(session.user.id)
+    const redemptionRef = db.collection('promoRedemptions').doc(`${promoRef.id}_${session.user.id}`)
 
-    // Commencer une transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Rechercher le code promo avec verrouillage
-      const promoCode = await tx.promoCode.findUnique({
-        where: { code: code.toUpperCase() },
-        include: {
-          promoRedemptions: {
-            where: { userId: session.user.id }
-          }
-        }
+    const result = await db.runTransaction(async (transaction) => {
+      const [promoSnap, userSnap, redemptionSnap] = await Promise.all([
+        transaction.get(promoRef),
+        transaction.get(userRef),
+        transaction.get(redemptionRef),
+      ])
+
+      if (!promoSnap.exists) throw new Error('Code promo invalide')
+      if (!userSnap.exists) throw new Error('Utilisateur introuvable')
+      if (redemptionSnap.exists) throw new Error('Code déjà utilisé')
+
+      const promo = promoSnap.data()!
+      const user = userSnap.data()!
+      const now = new Date()
+      const validFrom = asDate(promo.validFrom)
+      const validUntil = asDate(promo.validUntil)
+      if (!promo.isActive || (validFrom && now < validFrom) || (validUntil && now > validUntil)) {
+        throw new Error('Code promo expiré ou inactif')
+      }
+      if (promo.requiredPlan && user.plan !== promo.requiredPlan) {
+        throw new Error(`Ce code nécessite le plan ${promo.requiredPlan}`)
+      }
+      if (promo.maxUses != null && Number(promo.currentUses || 0) >= Number(promo.maxUses)) {
+        throw new Error("Limite d'utilisation atteinte")
+      }
+
+      let days: number
+      if (promo.discountType === 'fixed_days') days = Number(promo.discountValue)
+      else if (promo.discountType === 'percentage') days = Math.round(Number(promo.discountValue) * 0.3)
+      else throw new Error('Type de promotion invalide')
+      if (!Number.isInteger(days) || days <= 0 || days > 3650) throw new Error('Promotion invalide')
+
+      const currentExpiry = asDate(user.planExpiresAt)
+      const baseDate = user.plan === 'premium' && currentExpiry && currentExpiry > now ? currentExpiry : now
+      const newExpiry = new Date(baseDate)
+      newExpiry.setUTCDate(newExpiry.getUTCDate() + days)
+
+      transaction.set(userRef, { plan: 'premium', planExpiresAt: newExpiry, updatedAt: now }, { merge: true })
+      transaction.create(redemptionRef, {
+        id: redemptionRef.id,
+        promoCodeId: promoRef.id,
+        userId: session.user.id,
+        redeemedAt: now,
       })
-
-      if (!promoCode || !promoCode.isActive) {
-        throw new Error('Code promo invalide ou inactif')
-      }
-
-      // Vérifications (déjà faites dans validate, mais on refait pour sécurité)
-      if (promoCode.validUntil && new Date() > promoCode.validUntil) {
-        throw new Error('Code promo expiré')
-      }
-
-      if (promoCode.promoRedemptions.length > 0) {
-        throw new Error('Code déjà utilisé')
-      }
-
-      // 🔥 RACE CONDITION FIX - Vérifier la limite APRÈS avoir tenté l'incrémentation
-      // Si on vérifie AVANT, deux requêtes simultanées peuvent toutes les deux passer
-      // Incrémenter d'abord (atomique), puis vérifier si on a dépassé
-      if (promoCode.maxUses) {
-        // Vérifier avec marge de sécurité (currentUses + 1 pour la requête actuelle)
-        if (promoCode.currentUses >= promoCode.maxUses) {
-          throw new Error('Limite d\'utilisation atteinte')
-        }
-      }
-
-      // Récupérer l'utilisateur
-      const user = await tx.user.findUnique({
-        where: { id: session.user.id }
-      })
-
-      if (!user) {
-        throw new Error('Utilisateur introuvable')
-      }
-
-      // Appliquer la promotion
-      let updateData: any = {}
-      
-      if (promoCode.discountType === 'fixed_days') {
-        // Ajouter des jours gratuits
-        let baseDate = new Date()
-        
-        // Si l'utilisateur a déjà un plan premium actif, ajouter à partir de la date d'expiration
-        if (user.plan === 'premium' && user.planExpiresAt && new Date(user.planExpiresAt) > new Date()) {
-          baseDate = new Date(user.planExpiresAt)
-        }
-        
-        const newExpiry = new Date(baseDate)
-        newExpiry.setDate(newExpiry.getDate() + promoCode.discountValue)
-        
-        updateData = {
-          plan: 'premium',
-          planExpiresAt: newExpiry
-        }
-      } else if (promoCode.discountType === 'percentage') {
-        // Pour les pourcentages, on devrait normalement intégrer avec Stripe
-        // Pour l'instant, on applique une réduction sur la durée
-        const daysEquivalent = Math.round((promoCode.discountValue / 100) * 30) // 30 jours de base
-        
-        let baseDate = new Date()
-        
-        // Si l'utilisateur a déjà un plan premium actif, ajouter à partir de la date d'expiration
-        if (user.plan === 'premium' && user.planExpiresAt && new Date(user.planExpiresAt) > new Date()) {
-          baseDate = new Date(user.planExpiresAt)
-        }
-        
-        const newExpiry = new Date(baseDate)
-        newExpiry.setDate(newExpiry.getDate() + daysEquivalent)
-        
-        updateData = {
-          plan: 'premium',
-          planExpiresAt: newExpiry
-        }
-      }
-
-      // Mettre à jour l'utilisateur
-      const updatedUser = await tx.user.update({
-        where: { id: session.user.id },
-        data: updateData
-      })
-
-      // Créer l'enregistrement de rédemption
-      await tx.promoRedemption.create({
-        data: {
-          promoCodeId: promoCode.id,
-          userId: session.user.id
-        }
-      })
-
-      // Incrémenter le compteur d'utilisation
-      await tx.promoCode.update({
-        where: { id: promoCode.id },
-        data: { currentUses: { increment: 1 } }
-      })
+      transaction.update(promoRef, { currentUses: FieldValue.increment(1), updatedAt: now })
 
       return {
         success: true,
-        message: promoCode.discountType === 'fixed_days' 
-          ? `${promoCode.discountValue} jours Premium ajoutés à votre compte !`
-          : `Réduction de ${promoCode.discountValue}% appliquée !`,
-        newPlan: updatedUser.plan,
-        newExpiry: updatedUser.planExpiresAt
+        message: `${days} jours Premium ajoutés à votre compte !`,
+        newPlan: 'premium',
+        newExpiry,
       }
     })
 
     return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('Erreur lors de l\'utilisation du code promo:', error)
-    return NextResponse.json(
-      { error: error.message || 'Erreur serveur' },
-      { status: 400 }
-    )
+  } catch (error) {
+    console.error('Erreur lors de l’utilisation du code promo:', error)
+    const message = error instanceof Error ? error.message : 'Erreur serveur'
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 }

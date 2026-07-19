@@ -66,7 +66,7 @@ interface DragDropDashboardProps {
   onToggleLink: (id: string, isActive: boolean) => void
   onEditLink: (link: LinkType) => void
   onDeleteLink: (id: string) => void
-  onMoveLink: (linkId: string, folderId: string | null) => void
+  onMoveLink: (linkId: string, folderId: string | null) => Promise<void>
   onCreateFolder: () => void
   onEditFolder: (folder: Folder) => void
   onDeleteFolder: (folderId: string) => void
@@ -438,8 +438,7 @@ export default function DragDropDashboard({
     console.log('🚀 [DragDropDashboard] Création dossier avec:', {
       name: newFolderName.trim(),
       parentId: parentId || createInParent || 'null',
-      createInParent,
-      parentId
+      createInParent
     })
 
     try {

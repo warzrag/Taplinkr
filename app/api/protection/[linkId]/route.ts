@@ -4,10 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { passwordProtectionService } from '@/lib/password-protection'
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { linkId: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ linkId: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     
@@ -50,10 +48,8 @@ export async function POST(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { linkId: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ linkId: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     
@@ -77,10 +73,8 @@ export async function DELETE(
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { linkId: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ linkId: string }> }) {
+  const params = await props.params;
   try {
     const protection = await passwordProtectionService.getProtectionInfo(params.linkId)
     

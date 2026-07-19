@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getClientIP } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,14 +16,19 @@ export async function POST(request: NextRequest) {
       where: { id: linkId }
     })
 
-    if (!link) {
+    if (!link || !link.isActive) {
       return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
     }
 
     // Récupérer les informations de la requête
-    const ip = request.ip || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const ip = getClientIP(request)
     const userAgent = request.headers.get('user-agent') || ''
     const referer = request.headers.get('referer') || ''
+    const ipAddress = ip.toString().split(',')[0].trim().slice(0, 64)
+    const recentClicks = await prisma.click.count({
+      where: { linkId, ip: ipAddress, createdAt: { gte: new Date(Date.now() - 60_000) } }
+    })
+    if (recentClicks >= 10) return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 })
 
     // Détection simple du device
     const device = userAgent.toLowerCase().includes('mobile') ? 'mobile' : 
@@ -33,7 +39,7 @@ export async function POST(request: NextRequest) {
       data: {
         linkId,
         userId: link.userId,
-        ip: ip.toString().split(',')[0].trim(),
+        ip: ipAddress,
         userAgent,
         referer,
         device

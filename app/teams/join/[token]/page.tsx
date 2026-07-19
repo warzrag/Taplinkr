@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Users, Mail, Lock, Loader2, CheckCircle, XCircle, Eye, EyeOff } from 'lucide-react'
@@ -22,13 +22,14 @@ interface InvitationData {
   isAlreadyMember?: boolean
 }
 
-export default function JoinTeamPage({ params }: { params: { token: string } }) {
+export default function JoinTeamPage(props: { params: Promise<{ token: string }> }) {
+  const params = use(props.params);
   const router = useRouter()
   const [invitation, setInvitation] = useState<InvitationData | null>(null)
   const [loading, setLoading] = useState(true)
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState('')
-  
+
   // Form states
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')

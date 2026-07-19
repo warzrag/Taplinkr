@@ -442,7 +442,7 @@ export default function TeamPage() {
   
   // Déterminer qui est le propriétaire
   const owner = team.members?.find(member => member.teamRole === 'owner')
-  const isOwner = owner?.id === permissions.userId || team.ownerId === permissions.userId
+  const isOwner = owner?.id === permissions.userId || team.owner?.id === permissions.userId
   const userEmail = session?.user?.email || ''
   const userTeamRole = team.members.find(m => m.email === userEmail)?.teamRole || 'viewer'
   const isTeamOwner = isOwner // Pour être plus clair

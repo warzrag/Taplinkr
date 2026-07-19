@@ -18,11 +18,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
     }
 
-    // URLs de redirection - utiliser l'host de la requête pour supporter www et non-www
-    const host = request.headers.get('host') || 'taplinkr.com'
-    const protocol = host.includes('localhost') ? 'http' : 'https'
-    const successUrl = `${protocol}://${host}/dashboard/billing?success=true&plan=${plan}`
-    const cancelUrl = `${protocol}://${host}/pricing`
+    const appUrl = process.env.APP_URL || process.env.NEXTAUTH_URL
+    if (!appUrl) return NextResponse.json({ error: 'Configuration APP_URL manquante' }, { status: 500 })
+    const origin = new URL(appUrl).origin
+    const successUrl = `${origin}/dashboard/billing?success=true&plan=${plan}`
+    const cancelUrl = `${origin}/pricing`
 
     // Créer la session Stripe Checkout
     const checkoutSession = await createCheckoutSession(

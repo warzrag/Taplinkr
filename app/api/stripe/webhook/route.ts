@@ -6,7 +6,11 @@ import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
-  const signature = headers().get('stripe-signature')!
+  const signature = (await headers()).get('stripe-signature')
+
+  if (!signature || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'Webhook configuration missing' }, { status: 400 })
+  }
 
   let event: Stripe.Event
 
@@ -14,7 +18,7 @@ export async function POST(request: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET
     )
   } catch (error) {
     console.error('Webhook signature verification failed:', error)

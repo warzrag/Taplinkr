@@ -31,7 +31,9 @@ export async function GET(request: Request) {
     console.log('API Visiteurs - Liens trouvés:', userLinks.length, 'IDs:', linkIds)
     
     // Créer un map pour accès rapide aux infos des liens
-    const linkMap = new Map(userLinks.map(link => [link.id, link]))
+    const linkMap = new Map<string, { slug: string; title: string }>(
+      (userLinks as Array<{ id: string; slug: string; title: string }>).map(link => [link.id, link])
+    )
 
     // Construire les conditions de filtre
     const whereConditions: any = {
@@ -103,7 +105,7 @@ export async function GET(request: Request) {
       const parsedUA = parseUserAgent(click.userAgent || '')
       
       // Initialiser la localisation
-      let location = {
+      let location: { city: string; region: string; country: string; countryCode: string; latitude?: number; longitude?: number } = {
         city: 'N/A',
         region: 'N/A', 
         country: click.country || 'Unknown',
@@ -122,7 +124,9 @@ export async function GET(request: Request) {
             city: geoData.city || 'N/A',
             region: geoData.region || 'N/A',
             country: geoData.country || click.country || 'Unknown',
-            countryCode: geoData.countryCode || 'XX'
+            countryCode: geoData.countryCode || 'XX',
+            latitude: geoData.lat,
+            longitude: geoData.lon
           }
           
           console.log(`Location finale:`, location)
