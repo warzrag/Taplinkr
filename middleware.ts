@@ -79,8 +79,10 @@ export function middleware(request: NextRequest) {
     // Pages dashboard/admin - pas de cache
     response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate')
   } else if (pathname.startsWith('/')) {
-    // Pages publiques - cache court
-    response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
+    // A public URL can be a page or a direct link. Its response depends on the
+    // calling browser, so it must never be reused for another request.
+    response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate')
+    response.headers.set('Vary', 'User-Agent, Referer')
   }
 
   // Ignorer les routes API, static files et les routes Next.js
