@@ -135,7 +135,7 @@ export default async function LinkPage(props: PageProps) {
       console.error('Erreur lors du suivi du lien direct:', error)
     }
 
-    if (isInAppBrowser(userAgent)) {
+    if (isInAppBrowser(userAgent, requestHeaders.get('referer') || '')) {
       return (
         <PublicDirectRedirect
           destination={destination}
