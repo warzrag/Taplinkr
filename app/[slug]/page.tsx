@@ -2,8 +2,10 @@ import { cache } from 'react'
 import { cookies, headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 
+import PublicDirectRedirect from '@/components/PublicDirectRedirect'
 import PublicLinkPreviewFinal from '@/components/PublicLinkPreviewFinal'
 import PublicPasswordGate from '@/components/PublicPasswordGate'
+import { isInAppBrowser } from '@/lib/external-browser'
 import { prisma } from '@/lib/prisma'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
@@ -99,8 +101,10 @@ export default async function LinkPage(props: PageProps) {
     const destination = normalizeHttpURL(link.directUrl)
     if (!validateURL(destination)) notFound()
 
+    const requestHeaders = await headers()
+    const userAgent = (requestHeaders.get('user-agent') || '').slice(0, 1000)
+
     try {
-      const requestHeaders = await headers()
       const ip = (requestHeaders.get('x-forwarded-for')?.split(',')[0] || requestHeaders.get('x-real-ip') || 'unknown')
         .trim()
         .slice(0, 64)
@@ -109,7 +113,6 @@ export default async function LinkPage(props: PageProps) {
       })
 
       if (recentClicks < 10) {
-        const userAgent = (requestHeaders.get('user-agent') || '').slice(0, 1000)
         await prisma.$transaction([
           prisma.click.create({
             data: {
@@ -130,6 +133,15 @@ export default async function LinkPage(props: PageProps) {
       }
     } catch (error) {
       console.error('Erreur lors du suivi du lien direct:', error)
+    }
+
+    if (isInAppBrowser(userAgent)) {
+      return (
+        <PublicDirectRedirect
+          destination={destination}
+          title={link.title || 'ce lien'}
+        />
+      )
     }
 
     redirect(destination)
