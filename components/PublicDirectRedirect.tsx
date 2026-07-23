@@ -22,14 +22,29 @@ export default function PublicDirectRedirect({ destination, title }: PublicDirec
   }, [externalUrl])
 
   useEffect(() => {
-    const redirectTimer = window.setTimeout(openExternalBrowser, 350)
-    const fallbackTimer = window.setTimeout(() => setShowFallback(true), 1800)
+    const redirectTimer = window.setTimeout(() => {
+      const link = document.createElement('a')
+      link.href = window.location.href
+      link.target = '_blank'
+      link.rel = 'noopener noreferrer external'
+      link.style.display = 'none'
+      document.body.appendChild(link)
+
+      link.dispatchEvent(new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      }))
+
+      window.setTimeout(() => link.remove(), 100)
+    }, 100)
+    const fallbackTimer = window.setTimeout(() => setShowFallback(true), 1500)
 
     return () => {
       window.clearTimeout(redirectTimer)
       window.clearTimeout(fallbackTimer)
     }
-  }, [openExternalBrowser])
+  }, [])
 
   return (
     <main className="min-h-screen bg-[#09090f] px-5 text-white">
