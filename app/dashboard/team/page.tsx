@@ -11,7 +11,6 @@ import {
   Settings,
   Check,
   X,
-  Copy,
   MoreVertical,
   Crown,
   Eye,
@@ -22,7 +21,8 @@ import {
   Building,
   Link2,
   Trophy,
-  Edit3
+  Edit3,
+  RefreshCw
 } from 'lucide-react'
 import { useTeamPermissions } from '@/hooks/useTeamPermissions'
 import { toast } from 'react-hot-toast'
@@ -71,6 +71,7 @@ export default function TeamPage() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState('member')
   const [inviteLoading, setInviteLoading] = useState(false)
+  const [resendingInvitationId, setResendingInvitationId] = useState<string | null>(null)
   
   // États pour la création d'équipe
   const [teamName, setTeamName] = useState('')
@@ -166,6 +167,14 @@ export default function TeamPage() {
       
       if (!response.ok) {
         console.error('Erreur invitation:', data)
+        if (data.invitationCreated) {
+          toast.error(data.error || "L'invitation existe, mais l'email n'a pas été envoyé")
+          setShowInviteModal(false)
+          setInviteEmail('')
+          setInviteRole('member')
+          await fetchTeam()
+          return
+        }
         throw new Error(data.error || 'Erreur lors de l\'invitation')
       }
       
@@ -249,11 +258,24 @@ export default function TeamPage() {
       toast.error('Erreur lors de l\'annulation de l\'invitation')
     }
   }
-  
-  const copyInviteLink = (token: string) => {
-    const link = `${window.location.origin}/invite/${token}`
-    navigator.clipboard.writeText(link)
-    toast.success('Lien d\'invitation copié !')
+
+  const resendInvitation = async (invitationId: string) => {
+    setResendingInvitationId(invitationId)
+    try {
+      const response = await fetch(`/api/teams/invitations/${invitationId}/resend`, {
+        method: 'POST',
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || "Erreur lors du renvoi de l'invitation")
+      }
+      toast.success('Nouvelle invitation envoyée avec un lien valable 7 jours')
+      await fetchTeam()
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors du renvoi de l'invitation")
+    } finally {
+      setResendingInvitationId(null)
+    }
   }
   
   const deleteTeam = async () => {
@@ -443,8 +465,8 @@ export default function TeamPage() {
   // Déterminer qui est le propriétaire
   const owner = team.members?.find(member => member.teamRole === 'owner')
   const isOwner = owner?.id === permissions.userId || team.owner?.id === permissions.userId
-  const userEmail = session?.user?.email || ''
-  const userTeamRole = team.members.find(m => m.email === userEmail)?.teamRole || 'viewer'
+  const userTeamRole = team.members.find(m => m.id === session?.user?.id)?.teamRole || 'viewer'
+  const canManageMembers = isOwner || userTeamRole === 'admin'
   const isTeamOwner = isOwner // Pour être plus clair
   
   // Obtenir la limite selon le plan (10 pour tous sauf gratuit)
@@ -487,7 +509,7 @@ export default function TeamPage() {
               </div>
             </div>
 
-            {isOwner && totalMembers < teamMembersLimit && (
+            {canManageMembers && totalMembers + pendingInvitations < teamMembersLimit && (
               <button
                 onClick={() => setShowInviteModal(true)}
                 className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all flex items-center justify-center gap-2 shadow-lg"
@@ -539,7 +561,7 @@ export default function TeamPage() {
                   Leaderboard
                 </span>
               </button>
-              {isOwner && (
+              {canManageMembers && (
                 <>
                   <button
                     onClick={() => setActiveTab('invitations')}
@@ -551,16 +573,18 @@ export default function TeamPage() {
                   >
                     Invitations ({pendingInvitations})
                   </button>
-                  <button
-                    onClick={() => setActiveTab('settings')}
-                    className={`py-2 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                      activeTab === 'settings'
-                        ? 'border-purple-500 text-purple-600 dark:text-purple-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                    }`}
-                  >
-                    Paramètres
-                  </button>
+                  {isOwner && (
+                    <button
+                      onClick={() => setActiveTab('settings')}
+                      className={`py-2 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                        activeTab === 'settings'
+                          ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      Paramètres
+                    </button>
+                  )}
                 </>
               )}
             </nav>
@@ -620,7 +644,7 @@ export default function TeamPage() {
                         <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">
                           {(member as any).nickname || member.name || member.email}
                         </h3>
-                        {(isOwner || isAdmin()) && (
+                        {canManageMembers && (
                           <button
                             onClick={() => updateNickname(member.id, (member as any).nickname, member.name || member.email)}
                             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors flex-shrink-0"
@@ -647,7 +671,7 @@ export default function TeamPage() {
                         <span className="hidden sm:inline">{getRoleLabel(member.teamRole)}</span>
                       </div>
                     </div>
-                    {isOwner && (
+                    {canManageMembers && (isOwner || member.teamRole !== 'admin') && (
                       <button
                         onClick={() => removeMember(member.id)}
                         className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -694,7 +718,7 @@ export default function TeamPage() {
           </motion.div>
         )}
 
-        {activeTab === 'invitations' && isOwner && (
+        {activeTab === 'invitations' && canManageMembers && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -711,6 +735,11 @@ export default function TeamPage() {
                       <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
                         Invité le {new Date(invitation.createdAt).toLocaleDateString()}
                       </p>
+                      {invitation.expiresAt && (
+                        <p className="mt-1 text-xs text-gray-400">
+                          Expire le {new Date(invitation.expiresAt).toLocaleDateString()}
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                       <div className={`px-2 sm:px-3 py-1 rounded-full text-white text-xs sm:text-sm font-medium ${getRoleColor(invitation.role)}`}>
@@ -719,6 +748,14 @@ export default function TeamPage() {
                           <span className="hidden sm:inline">{getRoleLabel(invitation.role)}</span>
                         </div>
                       </div>
+                      <button
+                        onClick={() => resendInvitation(invitation.id)}
+                        disabled={resendingInvitationId === invitation.id}
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-purple-600 transition-colors hover:bg-purple-50 disabled:opacity-50 dark:text-purple-300 dark:hover:bg-purple-900/20"
+                      >
+                        <RefreshCw className={`h-3.5 w-3.5 ${resendingInvitationId === invitation.id ? 'animate-spin' : ''}`} />
+                        <span className="hidden sm:inline">Renvoyer</span>
+                      </button>
                       <button
                         onClick={() => cancelInvitation(invitation.id)}
                         className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"

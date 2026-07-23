@@ -13,23 +13,25 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    // Vérifier que l'utilisateur est propriétaire de l'équipe
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: { ownedTeam: true }
+      select: { teamId: true, teamRole: true },
     })
-
-    if (!user?.ownedTeam) {
-      return NextResponse.json({ error: 'Vous n\'êtes pas propriétaire d\'une équipe' }, { status: 403 })
-    }
 
     // Vérifier que l'invitation appartient bien à l'équipe
     const invitation = await prisma.teamInvitation.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
+      include: { team: true },
     })
 
-    if (!invitation || invitation.teamId !== user.ownedTeam.id) {
+    if (!invitation) {
       return NextResponse.json({ error: 'Invitation non trouvée' }, { status: 404 })
+    }
+    const canManage = invitation.team.ownerId === session.user.id || (
+      user?.teamId === invitation.teamId && user.teamRole === 'admin'
+    )
+    if (!canManage) {
+      return NextResponse.json({ error: 'Permission refusée' }, { status: 403 })
     }
 
     // Supprimer l'invitation

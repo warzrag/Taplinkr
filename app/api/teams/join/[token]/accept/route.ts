@@ -32,14 +32,29 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
     }
 
     // Vérifier que l'email correspond
-    if (invitation.email !== session.user.email) {
+    if (invitation.email.trim().toLowerCase() !== session.user.email?.trim().toLowerCase()) {
       return NextResponse.json({ 
         error: 'Cette invitation n\'est pas pour votre compte' 
       }, { status: 403 })
     }
 
-    // Vérifier le statut et l'expiration
+    // Une seconde requête après une première acceptation réussie doit rester
+    // idempotente (double clic, nouvelle tentative réseau, React Strict Mode).
     if (invitation.status !== 'pending') {
+      if (invitation.status === 'accepted') {
+        const acceptedUser = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { teamId: true },
+        })
+        if (acceptedUser?.teamId === invitation.teamId) {
+          return NextResponse.json({
+            success: true,
+            alreadyAccepted: true,
+            message: 'Vous êtes déjà membre de cette équipe',
+            teamId: invitation.teamId,
+          })
+        }
+      }
       return NextResponse.json({ error: 'Cette invitation a déjà été utilisée' }, { status: 400 })
     }
 

@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
             },
             invitations: {
               where: { status: 'pending' },
-              select: { id: true, email: true, role: true, createdAt: true }
+              select: { id: true, email: true, role: true, createdAt: true, expiresAt: true }
             }
           }
         },
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
             },
             invitations: {
               where: { status: 'pending' },
-              select: { id: true, email: true, role: true, createdAt: true }
+              select: { id: true, email: true, role: true, createdAt: true, expiresAt: true }
             }
           }
         }
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/teams - Créer une nouvelle équipe (Premium uniquement)
+// POST /api/teams - Créer une nouvelle équipe (Standard ou Premium)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -101,8 +101,8 @@ export async function POST(request: NextRequest) {
     
     if (!hasTeamAccess) {
       return NextResponse.json({ 
-        error: 'Fonctionnalité Premium requise',
-        message: 'Les équipes sont disponibles avec le plan Premium'
+        error: 'Fonctionnalité équipe requise',
+        message: 'Les équipes sont disponibles avec le plan Standard ou Premium'
       }, { status: 403 })
     }
 
@@ -130,6 +130,7 @@ export async function POST(request: NextRequest) {
         description,
         slug,
         ownerId: session.user.id,
+        maxMembers: permissions.plan === 'free' ? 0 : 10,
       },
       include: {
         owner: {
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest) {
         },
         invitations: {
           where: { status: 'pending' },
-          select: { id: true, email: true, role: true, createdAt: true }
+          select: { id: true, email: true, role: true, createdAt: true, expiresAt: true }
         }
       }
     })

@@ -2,71 +2,14 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getUserPermissions, type UserPermissions } from '@/lib/permissions'
+import {
+  hasTeamActionPermission,
+  TeamAction,
+  TeamRole,
+} from '@/lib/team-roles'
 import { NextResponse } from 'next/server'
 
-export enum TeamRole {
-  OWNER = 'owner',
-  ADMIN = 'admin',
-  EDITOR = 'editor',
-  VIEWER = 'viewer'
-}
-
-export enum TeamAction {
-  // Gestion des liens
-  VIEW_LINKS = 'view_links',
-  CREATE_LINK = 'create_link',
-  EDIT_LINK = 'edit_link',
-  DELETE_LINK = 'delete_link',
-  SHARE_LINK = 'share_link',
-
-  // Gestion de l'équipe
-  VIEW_MEMBERS = 'view_members',
-  INVITE_MEMBER = 'invite_member',
-  REMOVE_MEMBER = 'remove_member',
-  CHANGE_ROLE = 'change_role',
-
-  // Gestion des paramètres
-  VIEW_SETTINGS = 'view_settings',
-  EDIT_SETTINGS = 'edit_settings',
-  DELETE_TEAM = 'delete_team',
-
-  // Analytics
-  VIEW_ANALYTICS = 'view_analytics',
-  EXPORT_DATA = 'export_data'
-}
-
-const PERMISSIONS: Record<TeamRole, TeamAction[]> = {
-  [TeamRole.OWNER]: Object.values(TeamAction),
-  [TeamRole.ADMIN]: [
-    TeamAction.VIEW_LINKS,
-    TeamAction.CREATE_LINK,
-    TeamAction.EDIT_LINK,
-    TeamAction.DELETE_LINK,
-    TeamAction.SHARE_LINK,
-    TeamAction.VIEW_MEMBERS,
-    TeamAction.INVITE_MEMBER,
-    TeamAction.REMOVE_MEMBER,
-    TeamAction.VIEW_SETTINGS,
-    TeamAction.EDIT_SETTINGS,
-    TeamAction.VIEW_ANALYTICS,
-    TeamAction.EXPORT_DATA
-  ],
-  [TeamRole.EDITOR]: [
-    TeamAction.VIEW_LINKS,
-    TeamAction.CREATE_LINK,
-    TeamAction.EDIT_LINK,
-    TeamAction.SHARE_LINK,
-    TeamAction.VIEW_MEMBERS,
-    TeamAction.VIEW_SETTINGS,
-    TeamAction.VIEW_ANALYTICS
-  ],
-  [TeamRole.VIEWER]: [
-    TeamAction.VIEW_LINKS,
-    TeamAction.VIEW_MEMBERS,
-    TeamAction.VIEW_SETTINGS,
-    TeamAction.VIEW_ANALYTICS
-  ]
-}
+export { TeamAction, TeamRole } from '@/lib/team-roles'
 
 export async function checkTeamPermissionAction(
   userId: string,
@@ -83,8 +26,7 @@ export async function checkTeamPermissionAction(
       return false
     }
 
-    const role = (user.teamRole || TeamRole.VIEWER) as TeamRole
-    return PERMISSIONS[role].includes(action)
+    return hasTeamActionPermission(user.teamRole || TeamRole.VIEWER, action)
   } catch (error) {
     console.error('Erreur vérification permission:', error)
     return false
