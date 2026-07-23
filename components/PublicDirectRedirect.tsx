@@ -3,19 +3,38 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowUpRight, Loader2 } from 'lucide-react'
 
+import type { DirectRedirectLocale } from '@/lib/external-browser'
+
 interface PublicDirectRedirectProps {
   destination: string
   title: string
   externalBrowserUrl: string | null
+  locale: DirectRedirectLocale
 }
 
 export default function PublicDirectRedirect({
   destination,
   title,
   externalBrowserUrl,
+  locale,
 }: PublicDirectRedirectProps) {
   const [showFallback, setShowFallback] = useState(false)
   const automaticUrl = externalBrowserUrl || destination
+  const copy = locale === 'en'
+    ? {
+        ariaLabel: 'Opening your browser',
+        heading: `Opening ${title}`,
+        description: "We're opening this link in your phone's browser.",
+        button: 'Open in my browser',
+        fallback: 'Continue here if opening is blocked',
+      }
+    : {
+        ariaLabel: 'Ouverture du navigateur',
+        heading: `Ouverture de ${title}`,
+        description: 'Nous ouvrons automatiquement le navigateur de votre téléphone.',
+        button: 'Ouvrir dans mon navigateur',
+        fallback: "Continuer ici si l’ouverture est bloquée",
+      }
 
   const openExternalBrowser = useCallback(() => {
     window.location.href = automaticUrl
@@ -68,7 +87,7 @@ export default function PublicDirectRedirect({
             fontSize: 30,
             fontWeight: 700,
           }}
-          aria-label="Ouverture du navigateur"
+          aria-label={copy.ariaLabel}
         >
           <Loader2 className="h-9 w-9 animate-spin" aria-hidden="true" />
         </div>
@@ -82,13 +101,13 @@ export default function PublicDirectRedirect({
           className="mt-3 text-2xl font-semibold"
           style={{ marginTop: 12, color: '#fff', fontSize: 24, fontWeight: 600 }}
         >
-          Ouverture de {title}
+          {copy.heading}
         </h1>
         <p
           className="mt-3 text-sm leading-6 text-white/60"
           style={{ marginTop: 12, color: 'rgba(255,255,255,.68)', fontSize: 14, lineHeight: 1.7 }}
         >
-          Nous ouvrons automatiquement le navigateur de votre téléphone.
+          {copy.description}
         </p>
         <div
           className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/10"
@@ -119,14 +138,14 @@ export default function PublicDirectRedirect({
               onClick={openExternalBrowser}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-violet-400"
             >
-              Ouvrir dans mon navigateur
+              {copy.button}
               <ArrowUpRight className="h-4 w-4" />
             </button>
             <a
               href={destination}
               className="mt-3 inline-flex text-xs text-white/45 underline decoration-white/20 underline-offset-4"
             >
-              Continuer ici si l’ouverture est bloquée
+              {copy.fallback}
             </a>
           </div>
         )}
