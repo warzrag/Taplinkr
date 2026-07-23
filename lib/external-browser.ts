@@ -1,4 +1,12 @@
 export type MobilePlatform = 'ios' | 'android' | 'other'
+export type DirectRedirectLocale = 'en' | 'fr'
+
+export function getDirectRedirectLocale(country: string | null, acceptLanguage: string | null): DirectRedirectLocale {
+  if (country?.toUpperCase() === 'US') return 'en'
+
+  const primaryLanguage = acceptLanguage?.split(',')[0]?.trim().toLowerCase()
+  return primaryLanguage?.startsWith('en') ? 'en' : 'fr'
+}
 
 export function isInstagramInAppBrowser(userAgent: string, referer = ''): boolean {
   return /Instagram/i.test(userAgent)

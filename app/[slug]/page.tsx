@@ -6,6 +6,7 @@ import PublicDirectRedirect from '@/components/PublicDirectRedirect'
 import PublicLinkPreviewFinal from '@/components/PublicLinkPreviewFinal'
 import PublicPasswordGate from '@/components/PublicPasswordGate'
 import {
+  getDirectRedirectLocale,
   getExternalBrowserUrl,
   getInstagramExternalBrowserUrl,
   getMobilePlatform,
@@ -152,12 +153,17 @@ export default async function LinkPage(props: PageProps) {
       const externalBrowserUrl = isInstagram
         ? getInstagramExternalBrowserUrl(publicUrl)
         : getExternalBrowserUrl(publicUrl, getMobilePlatform(userAgent))
+      const locale = getDirectRedirectLocale(
+        requestHeaders.get('x-vercel-ip-country'),
+        requestHeaders.get('accept-language'),
+      )
 
       return (
         <PublicDirectRedirect
           destination={destination}
-          title={link.title || 'ce lien'}
+          title={link.title || (locale === 'en' ? 'this link' : 'ce lien')}
           externalBrowserUrl={externalBrowserUrl}
+          locale={locale}
         />
       )
     }

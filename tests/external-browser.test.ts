@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  getDirectRedirectLocale,
   getExternalBrowserUrl,
   getInstagramExternalBrowserUrl,
   getMobilePlatform,
@@ -9,6 +10,12 @@ import {
 } from '../lib/external-browser'
 
 describe('external browser redirects', () => {
+  it('uses English for US visitors and English-language browsers', () => {
+    expect(getDirectRedirectLocale('US', 'fr-FR,fr;q=0.9')).toBe('en')
+    expect(getDirectRedirectLocale('FR', 'en-US,en;q=0.9')).toBe('en')
+    expect(getDirectRedirectLocale('FR', 'fr-FR,fr;q=0.9')).toBe('fr')
+  })
+
   it.each([
     'Mozilla/5.0 Instagram 320.0.0 iPhone',
     'Mozilla/5.0 Twitter for iPhone',
