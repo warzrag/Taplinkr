@@ -6,6 +6,16 @@ export function normalizeTeamInviteEmail(email: string): string {
   return email.trim().toLowerCase()
 }
 
+export function normalizeTeamInvitationStatus(status: string | null | undefined): string {
+  // Older Firestore records can have no status because Prisma defaults are not
+  // applied by the custom adapter. Those invitations were created as pending.
+  return status || 'pending'
+}
+
+export function isPendingTeamInvitation(status: string | null | undefined): boolean {
+  return normalizeTeamInvitationStatus(status) === 'pending'
+}
+
 export function buildTeamInviteUrl(token: string, baseUrl = process.env.NEXTAUTH_URL): string {
   const origin = (baseUrl || 'https://www.taplinkr.com').replace(/\/+$/, '')
   return `${origin}/teams/join/${encodeURIComponent(token)}`

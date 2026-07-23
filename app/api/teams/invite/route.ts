@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getTeamAwareUserPermissions, checkTeamLimit } from '@/lib/team-permissions'
 import { nanoid } from 'nanoid'
 import {
+  isPendingTeamInvitation,
   normalizeTeamInviteEmail,
   sendTeamInvitationEmail,
   type TeamInviteRole,
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
           where: { id: effectiveTeamId },
           include: {
             members: true,
-            invitations: { where: { status: 'pending' } },
+            invitations: true,
           },
         })
       : null
@@ -58,7 +59,8 @@ export async function POST(request: NextRequest) {
 
     // Vérifier les limites d'équipe en tenant compte du plan du propriétaire
     const permissions = await getTeamAwareUserPermissions(session.user.id)
-    const currentMemberCount = team.members.length + team.invitations.length
+    const currentMemberCount = team.members.length
+      + team.invitations.filter((invitation) => isPendingTeamInvitation(invitation.status)).length
 
     if (!(await checkTeamLimit(session.user.id, 'maxTeamMembers', currentMemberCount))) {
       const { PLAN_LIMITS } = await import('@/lib/permissions')
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     if (existingInvitation) {
       // Si l'invitation est toujours en attente et non expirée
-      if (existingInvitation.status === 'pending' && new Date(existingInvitation.expiresAt) > new Date()) {
+      if (isPendingTeamInvitation(existingInvitation.status) && new Date(existingInvitation.expiresAt) > new Date()) {
         return NextResponse.json({ error: 'Une invitation est déjà en attente pour cet email' }, { status: 400 })
       }
       
@@ -126,7 +128,8 @@ export async function POST(request: NextRequest) {
           role,
           token,
           invitedById: session.user.id,
-          expiresAt
+          expiresAt,
+          status: 'pending',
         }
       })
       

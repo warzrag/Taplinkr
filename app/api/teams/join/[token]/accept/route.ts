@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { normalizeTeamInvitationStatus } from '@/lib/team-invitations'
 
 // POST /api/teams/join/[token]/accept - Accepter une invitation (utilisateur existant)
 export async function POST(request: NextRequest, props: { params: Promise<{ token: string }> }) {
@@ -40,8 +41,9 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
 
     // Une seconde requête après une première acceptation réussie doit rester
     // idempotente (double clic, nouvelle tentative réseau, React Strict Mode).
-    if (invitation.status !== 'pending') {
-      if (invitation.status === 'accepted') {
+    const invitationStatus = normalizeTeamInvitationStatus(invitation.status)
+    if (invitationStatus !== 'pending') {
+      if (invitationStatus === 'accepted') {
         const acceptedUser = await prisma.user.findUnique({
           where: { id: session.user.id },
           select: { teamId: true },
