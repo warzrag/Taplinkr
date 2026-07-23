@@ -4,6 +4,8 @@ import { nanoid } from 'nanoid'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { checkTeamLimit, checkTeamPermission } from '@/lib/team-permissions'
+import { getTeamLinkCreationFields } from '@/lib/team-links'
+import { hasTeamActionPermission, TeamAction } from '@/lib/team-roles'
 import { getUpgradeMessage } from '@/lib/permissions'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import { RESERVED_USERNAMES } from '@/lib/username'
@@ -19,6 +21,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const slug = String(body.slug || nanoid(10)).trim().toLowerCase()
     const directUrl = body.isDirect ? normalizeHttpURL(body.directUrl || '') : null
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { teamId: true, teamRole: true },
+    })
+
+    if (currentUser?.teamId && !hasTeamActionPermission(currentUser.teamRole, TeamAction.CREATE_LINK)) {
+      return NextResponse.json({ error: 'Vous n’avez pas la permission de créer un lien dans cette équipe' }, { status: 403 })
+    }
 
     if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(slug) || RESERVED_USERNAMES.has(slug)) {
       return NextResponse.json({ error: 'URL publique invalide ou réservée' }, { status: 400 })
@@ -66,6 +76,7 @@ export async function POST(request: NextRequest) {
     const newLink = await prisma.link.create({
       data: {
         userId: session.user.id,
+        ...getTeamLinkCreationFields(session.user.id, currentUser?.teamId),
         title: body.title || 'Mon lien',
         internalName: body.internalName || null,
         slug,
