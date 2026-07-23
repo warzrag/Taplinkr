@@ -23,8 +23,8 @@ const plans = [
     features: [
       '1 page publique',
       '5 liens actifs',
+      'Lien direct inclus',
       'Stats vues et clics',
-      'Branding de base',
     ],
   },
   {
@@ -74,7 +74,7 @@ const faqs = [
   },
   {
     question: 'Les liens directs sont-ils inclus ?',
-    answer: 'Oui, a partir du plan Standard. Premium ajoute les options avancees pour pages sensibles, domaines custom, agences et gros volumes.',
+    answer: 'Oui, des le plan gratuit. Chaque lien direct utilise une URL Taplinkr courte et redirige immediatement vers votre destination. Premium ajoute la protection Shield et les options avancees.',
   },
 ]
 

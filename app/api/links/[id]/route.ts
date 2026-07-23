@@ -4,7 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/redis-cache'
 import { revalidatePath } from 'next/cache'
-import { validateURL } from '@/lib/url-validator'
+import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
+import { checkTeamPermission } from '@/lib/team-permissions'
+import { RESERVED_USERNAMES } from '@/lib/username'
 
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -93,8 +95,18 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
     }
 
+    if (shieldEnabled && !existingLink.shieldEnabled && !(await checkTeamPermission(session.user.id, 'hasShieldLink'))) {
+      return NextResponse.json({ error: 'Shield Protection nécessite le plan Premium' }, { status: 403 })
+    }
+
+    if (isUltraLink && !existingLink.isUltraLink && !(await checkTeamPermission(session.user.id, 'hasUltraLink'))) {
+      return NextResponse.json({ error: 'Ultra Link nécessite le plan Premium' }, { status: 403 })
+    }
+
     const effectiveIsDirect = isDirect ?? existingLink.isDirect
-    const effectiveDirectUrl = directUrl ?? existingLink.directUrl
+    const effectiveDirectUrl = effectiveIsDirect
+      ? normalizeHttpURL(directUrl ?? existingLink.directUrl ?? '')
+      : null
     if (effectiveIsDirect && (!effectiveDirectUrl || !validateURL(effectiveDirectUrl))) {
       return NextResponse.json({ error: 'URL de redirection invalide. Seuls http:// et https:// sont autorisés.' }, { status: 400 })
     }
@@ -112,7 +124,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 
     if (slug !== undefined) {
       const normalizedSlug = String(slug).trim().toLowerCase()
-      if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(normalizedSlug)) {
+      if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(normalizedSlug) || RESERVED_USERNAMES.has(normalizedSlug)) {
         return NextResponse.json({ error: 'Le slug doit contenir 3 à 50 caractères alphanumériques ou tirets.' }, { status: 400 })
       }
       const slugOwner = await prisma.link.findFirst({ where: { slug: normalizedSlug, id: { not: params.id } } })
@@ -163,7 +175,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(textColor !== undefined && { textColor: textColor || null }),
         ...(isActive !== undefined && { isActive }),
         ...(isDirect !== undefined && { isDirect }),
-        ...(directUrl !== undefined && { directUrl: directUrl || null }),
+        ...(directUrl !== undefined && { directUrl: effectiveDirectUrl }),
         ...(shieldEnabled !== undefined && { shieldEnabled: isDirect ? shieldEnabled : false }),
         ...(isUltraLink !== undefined && { isUltraLink: isDirect ? isUltraLink : false }),
         ...(isOnline !== undefined && { isOnline }),

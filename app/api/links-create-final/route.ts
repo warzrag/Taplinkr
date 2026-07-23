@@ -3,7 +3,10 @@ import { getServerSession } from 'next-auth'
 import { nanoid } from 'nanoid'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { validateURL } from '@/lib/url-validator'
+import { checkTeamLimit, checkTeamPermission } from '@/lib/team-permissions'
+import { getUpgradeMessage } from '@/lib/permissions'
+import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
+import { RESERVED_USERNAMES } from '@/lib/username'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,14 +17,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const slug = body.slug || nanoid(10)
+    const slug = String(body.slug || nanoid(10)).trim().toLowerCase()
+    const directUrl = body.isDirect ? normalizeHttpURL(body.directUrl || '') : null
+
+    if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(slug) || RESERVED_USERNAMES.has(slug)) {
+      return NextResponse.json({ error: 'URL publique invalide ou réservée' }, { status: 400 })
+    }
 
     const existingLink = await prisma.link.findUnique({ where: { slug } })
     if (existingLink) {
       return NextResponse.json({ error: 'Cette URL personnalisee est deja utilisee' }, { status: 400 })
     }
 
-    if (body.isDirect && body.directUrl && !validateURL(body.directUrl)) {
+    if (body.isDirect && (!directUrl || !validateURL(directUrl))) {
       return NextResponse.json({ error: 'URL de redirection invalide' }, { status: 400 })
     }
 
@@ -31,6 +39,22 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: `URL invalide ou dangereuse: ${link.url}` }, { status: 400 })
         }
       }
+    }
+
+    const linkCount = await prisma.link.count({ where: { userId: session.user.id } })
+    if (!(await checkTeamLimit(session.user.id, 'maxPages', linkCount))) {
+      return NextResponse.json({
+        error: 'Limite de pages atteinte',
+        message: getUpgradeMessage('maxPages'),
+      }, { status: 403 })
+    }
+
+    if (body.shieldEnabled && !(await checkTeamPermission(session.user.id, 'hasShieldLink'))) {
+      return NextResponse.json({ error: 'Shield Protection nécessite le plan Premium' }, { status: 403 })
+    }
+
+    if (body.isUltraLink && !(await checkTeamPermission(session.user.id, 'hasUltraLink'))) {
+      return NextResponse.json({ error: 'Ultra Link nécessite le plan Premium' }, { status: 403 })
     }
 
     const maxOrder = await prisma.link.findFirst({
@@ -47,7 +71,7 @@ export async function POST(request: NextRequest) {
         slug,
         description: body.description || body.bio || '',
         bio: body.bio || body.description || '',
-        directUrl: body.isDirect ? (body.directUrl || null) : null,
+        directUrl,
         isDirect: !!body.isDirect,
         isActive: true,
         shieldEnabled: !!body.shieldEnabled,

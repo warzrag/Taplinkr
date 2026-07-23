@@ -1,12 +1,12 @@
 import { cache } from 'react'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 
-import PublicDirectRedirect from '@/components/PublicDirectRedirect'
 import PublicLinkPreviewFinal from '@/components/PublicLinkPreviewFinal'
 import PublicPasswordGate from '@/components/PublicPasswordGate'
 import { prisma } from '@/lib/prisma'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
+import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -96,13 +96,43 @@ export default async function LinkPage(props: PageProps) {
       redirect(`/shield/${link.slug}`)
     }
 
-    return (
-      <PublicDirectRedirect
-        linkId={link.id}
-        title={link.title || 'Lien TapLinkr'}
-        url={link.directUrl}
-      />
-    )
+    const destination = normalizeHttpURL(link.directUrl)
+    if (!validateURL(destination)) notFound()
+
+    try {
+      const requestHeaders = await headers()
+      const ip = (requestHeaders.get('x-forwarded-for')?.split(',')[0] || requestHeaders.get('x-real-ip') || 'unknown')
+        .trim()
+        .slice(0, 64)
+      const recentClicks = await prisma.click.count({
+        where: { linkId: link.id, ip, createdAt: { gte: new Date(Date.now() - 60_000) } },
+      })
+
+      if (recentClicks < 10) {
+        const userAgent = (requestHeaders.get('user-agent') || '').slice(0, 1000)
+        await prisma.$transaction([
+          prisma.click.create({
+            data: {
+              linkId: link.id,
+              userId: link.userId,
+              ip,
+              userAgent,
+              referer: (requestHeaders.get('referer') || 'direct').slice(0, 2000),
+              country: requestHeaders.get('x-vercel-ip-country') || 'Unknown',
+              device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
+            },
+          }),
+          prisma.link.update({
+            where: { id: link.id },
+            data: { clicks: { increment: 1 } },
+          }),
+        ])
+      }
+    } catch (error) {
+      console.error('Erreur lors du suivi du lien direct:', error)
+    }
+
+    redirect(destination)
   }
 
   return <PublicLinkPreviewFinal link={toPlainObject(link)} />

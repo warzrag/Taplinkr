@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
-import { BarChart3, Copy, ExternalLink, Eye, EyeOff, MoreVertical, MousePointer, Plus, Sparkles } from 'lucide-react'
+import { BarChart3, Copy, ExternalLink, Eye, EyeOff, MoreVertical, MousePointer, Plus, Sparkles, Zap } from 'lucide-react'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 
@@ -12,6 +12,15 @@ const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
   ssr: false,
   loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-black/50"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" /></div>,
 })
+
+function getDestinationHost(url?: string | null) {
+  if (!url) return 'Destination non définie'
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
+}
 
 export default function PagesDashboard() {
   const { personalLinks, loading, refreshLinks } = useLinks()
@@ -54,14 +63,14 @@ export default function PagesDashboard() {
               <Sparkles className="h-3.5 w-3.5" />
               Pages & deeplinks
             </p>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Ma page</h1>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Pages et liens directs</h1>
             <p className="mt-2 max-w-2xl text-gray-600 dark:text-gray-400">
-              Construisez votre page publique comme un vrai profil mobile : profil, boutons, design et publication.
+              Créez une page complète ou une URL courte qui redirige immédiatement vers votre destination.
             </p>
           </div>
           <button onClick={() => setShowCreateModal(true)} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">
             <Plus className="h-4 w-4" />
-            Ouvrir le studio
+            Créer
           </button>
         </header>
 
@@ -73,16 +82,18 @@ export default function PagesDashboard() {
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {personalLinks.map(page => (
               <article key={page.id} className="group overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
-                <div className="h-28 bg-gradient-to-br from-indigo-500/30 to-cyan-400/10">
-                  {page.coverImage && <img src={page.coverImage} alt="" className="h-full w-full object-cover" />}
+                <div className={`h-28 ${page.isDirect ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-gradient-to-br from-indigo-500/30 to-cyan-400/10'}`}>
+                  {!page.isDirect && page.coverImage && <img src={page.coverImage} alt="" className="h-full w-full object-cover" />}
                 </div>
                 <div className="p-5">
                   <div className="-mt-12 mb-4 flex items-end justify-between">
-                    <div className="h-20 w-20 overflow-hidden rounded-2xl border-4 border-white bg-gray-100 shadow-lg dark:border-gray-900">
-                      {page.profileImage ? (
+                    <div className={`h-20 w-20 overflow-hidden rounded-2xl border-4 border-white shadow-lg dark:border-gray-900 ${page.isDirect ? 'grid place-items-center bg-gray-950 text-amber-400' : 'bg-gray-100'}`}>
+                      {page.isDirect ? (
+                        <Zap className="h-8 w-8" />
+                      ) : page.profileImage ? (
                         <img src={page.profileImage} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <div className="grid h-full w-full place-items-center text-2xl font-bold text-gray-500">{page.title[0]}</div>
+                        <div className="grid h-full w-full place-items-center text-2xl font-bold text-gray-500">{page.title?.[0] || 'T'}</div>
                       )}
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-bold ${page.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'}`}>
@@ -90,8 +101,12 @@ export default function PagesDashboard() {
                     </span>
                   </div>
 
-                  <h2 className="text-xl font-bold">{page.title}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold">{page.title}</h2>
+                    {page.isDirect && <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">Lien direct</span>}
+                  </div>
                   <p className="mt-1 truncate text-sm text-gray-500">taplinkr.com/{page.slug}</p>
+                  {page.isDirect && <p className="mt-2 truncate text-sm font-medium text-gray-700 dark:text-gray-300">→ {getDestinationHost(page.directUrl)}</p>}
 
                   <div className="mt-5 grid grid-cols-3 gap-3">
                     <div className="rounded-2xl bg-gray-50 p-3 dark:bg-gray-950">
@@ -101,8 +116,8 @@ export default function PagesDashboard() {
                     </div>
                     <div className="rounded-2xl bg-gray-50 p-3 dark:bg-gray-950">
                       <ExternalLink className="mb-2 h-4 w-4 text-cyan-500" />
-                      <p className="font-bold">{page.multiLinks?.length || 0}</p>
-                      <p className="text-xs text-gray-500">boutons</p>
+                      <p className="font-bold">{page.isDirect ? 'Direct' : (page.multiLinks?.length || 0)}</p>
+                      <p className="text-xs text-gray-500">{page.isDirect ? 'type' : 'boutons'}</p>
                     </div>
                     <div className="rounded-2xl bg-gray-50 p-3 dark:bg-gray-950">
                       <Eye className="mb-2 h-4 w-4 text-emerald-500" />
@@ -117,7 +132,7 @@ export default function PagesDashboard() {
                       Copier
                     </button>
                     <button onClick={() => setEditingPage(page)} className="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-gray-800">
-                      Studio
+                      Modifier
                     </button>
                     <button onClick={() => togglePage(page)} className="rounded-xl border border-gray-200 px-3 py-2.5 hover:border-indigo-300 dark:border-gray-800">
                       {page.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

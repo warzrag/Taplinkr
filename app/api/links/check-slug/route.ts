@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { RESERVED_USERNAMES } from '@/lib/username'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,16 +20,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Vérifier si le slug existe déjà
+    const normalizedSlug = slug.trim().toLowerCase()
+    if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(normalizedSlug) || RESERVED_USERNAMES.has(normalizedSlug)) {
+      return NextResponse.json({ available: false, error: 'URL invalide ou réservée' })
+    }
+
     const existingLink = await prisma.link.findFirst({
       where: {
-        slug: slug,
+        slug: normalizedSlug,
         id: linkId ? { not: linkId } : undefined
       }
     })
 
     return NextResponse.json({
       available: !existingLink,
-      slug: slug
+      slug: normalizedSlug
     })
 
   } catch (error) {
