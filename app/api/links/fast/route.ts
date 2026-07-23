@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/redis-cache'
-import { uniqueTeamMemberIds } from '@/lib/team-links'
+import { canDeleteLink, uniqueTeamMemberIds } from '@/lib/team-links'
 
 // Version optimisée pour le dashboard - charge uniquement l'essentiel
 export async function GET() {
@@ -28,7 +28,7 @@ export async function GET() {
     // Récupérer l'équipe de l'utilisateur
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { teamId: true }
+      select: { teamId: true, teamRole: true }
     })
     const teamMembers = user?.teamId
       ? await prisma.user.findMany({
@@ -74,6 +74,7 @@ export async function GET() {
         createdAt: true,
         updatedAt: true,
         teamShared: true,
+        teamId: true,
         userId: true,
         assignedToUserId: true,
         assignedTo: {
@@ -96,6 +97,13 @@ export async function GET() {
     // Transformer pour avoir le format attendu
     const formattedLinks = links.map(link => ({
       ...link,
+      canDelete: canDeleteLink({
+        actorUserId: session.user.id,
+        actorTeamId: user?.teamId,
+        actorTeamRole: user?.teamRole,
+        linkUserId: link.userId,
+        linkTeamId: link.teamId,
+      }),
       multiLinksCount: link._count?.multiLinks || 0,
       multiLinks: [] // Pas besoin des détails pour le dashboard
     }))

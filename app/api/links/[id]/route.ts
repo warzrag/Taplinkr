@@ -6,6 +6,7 @@ import { cache } from '@/lib/redis-cache'
 import { revalidatePath } from 'next/cache'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import { checkTeamPermission } from '@/lib/team-permissions'
+import { canDeleteLink } from '@/lib/team-links'
 import { RESERVED_USERNAMES } from '@/lib/username'
 
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -86,9 +87,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       youtubeUrl
     } = body
 
-    // Vérifier que le lien appartient à l'utilisateur
     const existingLink = await prisma.link.findFirst({
-      where: { id: params.id, userId: session.user.id }
+      where: { id: params.id, userId: session.user.id },
     })
 
     if (!existingLink) {
@@ -282,28 +282,78 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    // Vérifier que le lien appartient à l'utilisateur
-    const existingLink = await prisma.link.findFirst({
-      where: { id: params.id, userId: session.user.id }
-    })
+    const [existingLink, currentUser] = await Promise.all([
+      prisma.link.findUnique({
+        where: { id: params.id },
+      }),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { teamId: true, teamRole: true },
+      }),
+    ])
 
     if (!existingLink) {
       return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
     }
 
-    await prisma.link.delete({
-      where: { id: params.id }
+    if (!canDeleteLink({
+      actorUserId: session.user.id,
+      actorTeamId: currentUser?.teamId,
+      actorTeamRole: currentUser?.teamRole,
+      linkUserId: existingLink.userId,
+      linkTeamId: existingLink.teamId,
+    })) {
+      return NextResponse.json({
+        error: 'Vous n’avez pas la permission de supprimer ce lien',
+      }, { status: 403 })
+    }
+
+    const schedule = await prisma.linkSchedule.findFirst({
+      where: { linkId: params.id },
+      select: { id: true },
     })
 
-    // Invalider le cache après suppression
-    await cache.del(`links:user:${session.user.id}`)
-    console.log(`🗑️ Cache invalidé pour user ${session.user.id}`)
+    if (schedule) {
+      await prisma.scheduledJob.deleteMany({
+        where: { scheduleId: schedule.id },
+      })
+    }
 
-    // ⚡ Revalider la page publique (elle n'existera plus)
+    await Promise.all([
+      prisma.multiLink.deleteMany({ where: { parentLinkId: params.id } }),
+      prisma.click.deleteMany({ where: { linkId: params.id } }),
+      prisma.filteredClick.deleteMany({ where: { linkId: params.id } }),
+      prisma.analyticsEvent.deleteMany({ where: { linkId: params.id } }),
+      prisma.analyticsSummary.deleteMany({ where: { linkId: params.id } }),
+      prisma.passwordAttempt.deleteMany({ where: { linkId: params.id } }),
+      prisma.passwordProtection.deleteMany({ where: { linkId: params.id } }),
+      prisma.linkSchedule.deleteMany({ where: { linkId: params.id } }),
+      prisma.teamLinkHistory.deleteMany({ where: { linkId: params.id } }),
+      prisma.teamAuditLog.updateMany({
+        where: { linkId: params.id },
+        data: { linkId: null },
+      }),
+    ])
+
+    await prisma.link.delete({
+      where: { id: params.id },
+    })
+
+    const affectedUsers = existingLink.teamId
+      ? await prisma.user.findMany({
+          where: { teamId: existingLink.teamId },
+          select: { id: true },
+        })
+      : [{ id: session.user.id }]
+
+    await Promise.all(
+      affectedUsers.map(user => cache.del(`links:user:${user.id}`)),
+    )
+
     if (existingLink.slug) {
       revalidatePath(`/${existingLink.slug}`, 'page')
-      console.log(`🔄 Page supprimée du cache: /${existingLink.slug}`)
     }
+    revalidatePath('/dashboard/links')
 
     return NextResponse.json({ message: 'Lien supprimé' })
   } catch (error) {

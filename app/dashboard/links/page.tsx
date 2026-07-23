@@ -12,7 +12,9 @@ import {
   GripVertical,
   LayoutGrid,
   Link2,
+  Loader2,
   Plus,
+  Trash2,
   Zap,
 } from 'lucide-react'
 
@@ -38,6 +40,7 @@ export default function LinksDashboard() {
   const { personalLinks, loading, refreshLinks } = useLinks()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
+  const [deletingLinkId, setDeletingLinkId] = useState<string | null>(null)
 
   const copyUrl = async (slug: string) => {
     await navigator.clipboard.writeText(`${window.location.origin}/${slug}`)
@@ -58,6 +61,36 @@ export default function LinksDashboard() {
 
     toast.success(item.isActive ? 'Lien désactivé' : 'Lien activé')
     await refreshLinks()
+  }
+
+  const deleteLink = async (item: LinkType) => {
+    const confirmed = window.confirm(
+      `Supprimer « ${item.internalName || item.title} » ? Cette action est irréversible.`,
+    )
+    if (!confirmed) return
+
+    setDeletingLinkId(item.id)
+    try {
+      const response = await fetch(`/api/links/${item.id}`, {
+        method: 'DELETE',
+      })
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        toast.error(data.error || 'Impossible de supprimer ce lien')
+        return
+      }
+
+      localStorage.removeItem('links-cache')
+      localStorage.removeItem('dashboard-stats')
+      if (editingLink?.id === item.id) setEditingLink(null)
+      toast.success('Lien supprimé')
+      await refreshLinks()
+    } catch {
+      toast.error('Impossible de supprimer ce lien')
+    } finally {
+      setDeletingLinkId(null)
+    }
   }
 
   return (
@@ -96,7 +129,7 @@ export default function LinksDashboard() {
               {personalLinks.map(item => (
                 <article
                   key={item.id}
-                  className="group grid min-h-[88px] items-center gap-4 rounded-xl border border-[#282835] bg-[#0b0b12] px-4 py-3 transition hover:border-[#3a3a4a] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_140px_54px]"
+                  className="group grid min-h-[88px] items-center gap-4 rounded-xl border border-[#282835] bg-[#0b0b12] px-4 py-3 transition hover:border-[#3a3a4a] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_140px_132px]"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <GripVertical className="hidden h-5 w-5 shrink-0 text-[#5e5e70] sm:block" />
@@ -149,6 +182,19 @@ export default function LinksDashboard() {
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
+                    {item.canDelete !== false && (
+                      <button
+                        onClick={() => deleteLink(item)}
+                        disabled={deletingLinkId === item.id}
+                        className="rounded-lg p-2 text-[#8d8d9f] transition hover:bg-red-500/10 hover:text-red-400 disabled:cursor-wait disabled:opacity-50"
+                        aria-label={`Supprimer ${item.internalName || item.title}`}
+                        title="Supprimer le lien"
+                      >
+                        {deletingLinkId === item.id
+                          ? <Loader2 className="h-4 w-4 animate-spin" />
+                          : <Trash2 className="h-4 w-4" />}
+                      </button>
+                    )}
                   </div>
                 </article>
               ))}

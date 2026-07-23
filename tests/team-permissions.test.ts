@@ -5,7 +5,11 @@ import {
   TeamAction,
   TeamRole,
 } from '../lib/team-roles'
-import { getTeamLinkCreationFields, uniqueTeamMemberIds } from '../lib/team-links'
+import {
+  canDeleteLink,
+  getTeamLinkCreationFields,
+  uniqueTeamMemberIds,
+} from '../lib/team-links'
 
 describe('team member permissions', () => {
   it('allows members to collaborate on links', () => {
@@ -43,5 +47,42 @@ describe('team link workspace', () => {
   it('deduplicates team member ids while retaining the current user', () => {
     expect(uniqueTeamMemberIds('owner-1', ['member-1', 'owner-1', 'member-1']))
       .toEqual(['owner-1', 'member-1'])
+  })
+
+  it('lets creators delete their own links', () => {
+    expect(canDeleteLink({
+      actorUserId: 'member-1',
+      actorTeamId: 'team-1',
+      actorTeamRole: TeamRole.MEMBER,
+      linkUserId: 'member-1',
+      linkTeamId: 'team-1',
+    })).toBe(true)
+  })
+
+  it('lets team admins delete another member link', () => {
+    expect(canDeleteLink({
+      actorUserId: 'admin-1',
+      actorTeamId: 'team-1',
+      actorTeamRole: TeamRole.ADMIN,
+      linkUserId: 'member-1',
+      linkTeamId: 'team-1',
+    })).toBe(true)
+  })
+
+  it('prevents members and outsiders from deleting another user link', () => {
+    expect(canDeleteLink({
+      actorUserId: 'member-2',
+      actorTeamId: 'team-1',
+      actorTeamRole: TeamRole.MEMBER,
+      linkUserId: 'member-1',
+      linkTeamId: 'team-1',
+    })).toBe(false)
+    expect(canDeleteLink({
+      actorUserId: 'admin-2',
+      actorTeamId: 'team-2',
+      actorTeamRole: TeamRole.ADMIN,
+      linkUserId: 'member-1',
+      linkTeamId: 'team-1',
+    })).toBe(false)
   })
 })
