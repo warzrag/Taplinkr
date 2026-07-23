@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { normalizeTeamInvitationStatus } from '@/lib/team-invitations'
 
 // GET /api/teams/join/[token]/check - Vérifier une invitation
 export async function GET(request: NextRequest, props: { params: Promise<{ token: string }> }) {
@@ -35,9 +36,10 @@ export async function GET(request: NextRequest, props: { params: Promise<{ token
     }
 
     // Vérifier le statut
-    if (invitation.status !== 'pending') {
+    const invitationStatus = normalizeTeamInvitationStatus(invitation.status)
+    if (invitationStatus !== 'pending') {
       return NextResponse.json({ 
-        error: invitation.status === 'accepted' 
+        error: invitationStatus === 'accepted'
           ? 'Cette invitation a déjà été acceptée' 
           : 'Cette invitation n\'est plus valide'
       }, { status: 400 })

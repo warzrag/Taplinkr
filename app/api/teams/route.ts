@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getUserPermissions } from '@/lib/permissions'
 import { checkPermission } from '@/lib/permissions'
+import { isPendingTeamInvitation } from '@/lib/team-invitations'
 import { nanoid } from 'nanoid'
 
 // GET /api/teams - Récupérer l'équipe de l'utilisateur
@@ -27,8 +28,7 @@ export async function GET(request: NextRequest) {
               select: { id: true, name: true, nickname: true, email: true, image: true, teamRole: true }
             },
             invitations: {
-              where: { status: 'pending' },
-              select: { id: true, email: true, role: true, createdAt: true, expiresAt: true }
+              select: { id: true, email: true, role: true, status: true, createdAt: true, expiresAt: true }
             }
           }
         },
@@ -38,8 +38,7 @@ export async function GET(request: NextRequest) {
               select: { id: true, name: true, nickname: true, email: true, image: true, teamRole: true }
             },
             invitations: {
-              where: { status: 'pending' },
-              select: { id: true, email: true, role: true, createdAt: true, expiresAt: true }
+              select: { id: true, email: true, role: true, status: true, createdAt: true, expiresAt: true }
             }
           }
         }
@@ -47,8 +46,16 @@ export async function GET(request: NextRequest) {
     })
 
     const team = user?.ownedTeam || user?.team
+    const visibleTeam = team
+      ? {
+          ...team,
+          invitations: team.invitations.filter((invitation) =>
+            isPendingTeamInvitation(invitation.status)
+          ),
+        }
+      : team
 
-    return NextResponse.json({ team }, {
+    return NextResponse.json({ team: visibleTeam }, {
       headers: {
         'Cache-Control': 'no-store, max-age=0, must-revalidate',
         'Pragma': 'no-cache'

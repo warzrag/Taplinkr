@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { normalizeTeamInvitationStatus } from '@/lib/team-invitations'
 import bcrypt from 'bcryptjs'
 
 // POST /api/teams/join/[token] - Accepter une invitation et créer un compte
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
     }
 
     // Vérifier le statut et l'expiration
-    if (invitation.status !== 'pending') {
+    if (normalizeTeamInvitationStatus(invitation.status) !== 'pending') {
       return NextResponse.json({ error: 'Cette invitation a déjà été utilisée' }, { status: 400 })
     }
 
