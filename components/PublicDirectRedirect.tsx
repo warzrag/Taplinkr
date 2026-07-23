@@ -7,14 +7,12 @@ import type { DirectRedirectLocale } from '@/lib/external-browser'
 
 interface PublicDirectRedirectProps {
   destination: string
-  title: string
   externalBrowserUrl: string | null
   locale: DirectRedirectLocale
 }
 
 export default function PublicDirectRedirect({
   destination,
-  title,
   externalBrowserUrl,
   locale,
 }: PublicDirectRedirectProps) {
@@ -23,14 +21,14 @@ export default function PublicDirectRedirect({
   const copy = locale === 'en'
     ? {
         ariaLabel: 'Opening your browser',
-        heading: `Opening ${title}`,
+        heading: 'Opening link',
         description: "We're opening this link in your phone's browser.",
         button: 'Open in my browser',
         fallback: 'Continue here if opening is blocked',
       }
     : {
         ariaLabel: 'Ouverture du navigateur',
-        heading: `Ouverture de ${title}`,
+        heading: 'Ouverture du lien',
         description: 'Nous ouvrons automatiquement le navigateur de votre téléphone.',
         button: 'Ouvrir dans mon navigateur',
         fallback: "Continuer ici si l’ouverture est bloquée",

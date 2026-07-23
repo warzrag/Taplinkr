@@ -13,7 +13,6 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
       select: {
         id: true,
         slug: true,
-        title: true,
         directUrl: true,
         shieldEnabled: true,
         isUltraLink: true,
