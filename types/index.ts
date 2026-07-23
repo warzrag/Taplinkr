@@ -50,6 +50,7 @@ export interface Link {
   updatedAt: string
   folderId?: string
   assignedToUserId?: string
+  canDelete?: boolean
   assignedTo?: {
     id: string
     name?: string

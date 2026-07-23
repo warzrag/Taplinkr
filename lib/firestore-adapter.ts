@@ -636,16 +636,20 @@ function modelProxy(model: string) {
     },
     async deleteMany(args: { where?: any } = {}) {
       const r = await runQuery(collection, { where: args.where || {} }, model)
-      const batch = db.batch()
-      r.forEach(d => batch.delete(db.collection(collection).doc(String(d.id))))
-      if (r.length) await batch.commit()
+      for (const group of chunk(r, 400)) {
+        const batch = db.batch()
+        group.forEach(d => batch.delete(db.collection(collection).doc(String(d.id))))
+        await batch.commit()
+      }
       return { count: r.length }
     },
     async updateMany(args: { where?: any; data: any }) {
       const r = await runQuery(collection, { where: args.where || {} }, model)
-      const batch = db.batch()
-      r.forEach(d => batch.set(db.collection(collection).doc(String(d.id)), toFirestore({ ...args.data, updatedAt: new Date() }), { merge: true }))
-      if (r.length) await batch.commit()
+      for (const group of chunk(r, 400)) {
+        const batch = db.batch()
+        group.forEach(d => batch.set(db.collection(collection).doc(String(d.id)), toFirestore({ ...args.data, updatedAt: new Date() }), { merge: true }))
+        await batch.commit()
+      }
       return { count: r.length }
     },
     async count(args: any = {}) {
