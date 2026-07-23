@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowUpRight, Loader2 } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 
 import { getExternalBrowserUrl, getMobilePlatform } from '@/lib/external-browser'
 
@@ -12,6 +12,7 @@ interface PublicDirectRedirectProps {
 
 export default function PublicDirectRedirect({ destination, title }: PublicDirectRedirectProps) {
   const [showFallback, setShowFallback] = useState(false)
+  const [secondsLeft, setSecondsLeft] = useState(3)
   const externalUrl = useMemo(() => {
     if (typeof window === 'undefined') return null
     return getExternalBrowserUrl(window.location.href, getMobilePlatform(navigator.userAgent || ''))
@@ -22,43 +23,40 @@ export default function PublicDirectRedirect({ destination, title }: PublicDirec
   }, [externalUrl])
 
   useEffect(() => {
-    const redirectTimer = window.setTimeout(() => {
-      const link = document.createElement('a')
-      link.href = window.location.href
-      link.target = '_blank'
-      link.rel = 'noopener noreferrer external'
-      link.style.display = 'none'
-      document.body.appendChild(link)
-
-      link.dispatchEvent(new MouseEvent('click', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-      }))
-
-      window.setTimeout(() => link.remove(), 100)
-    }, 100)
-    const fallbackTimer = window.setTimeout(() => setShowFallback(true), 1500)
+    const startedAt = Date.now()
+    const countdownTimer = window.setInterval(() => {
+      const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000)
+      setSecondsLeft(Math.max(0, 3 - elapsedSeconds))
+    }, 200)
+    const redirectTimer = window.setTimeout(openExternalBrowser, 3000)
+    const fallbackTimer = window.setTimeout(() => setShowFallback(true), 4500)
 
     return () => {
+      window.clearInterval(countdownTimer)
       window.clearTimeout(redirectTimer)
       window.clearTimeout(fallbackTimer)
     }
-  }, [])
+  }, [openExternalBrowser])
 
   return (
     <main className="min-h-screen bg-[#09090f] px-5 text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-sm flex-col items-center justify-center text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-violet-400/25 bg-violet-500/10 shadow-2xl shadow-violet-950/40">
-          <Loader2 className="h-7 w-7 animate-spin text-violet-400" />
+        <div className="flex h-20 w-20 items-center justify-center rounded-full border border-violet-400/30 bg-violet-500/10 text-3xl font-bold text-violet-300 shadow-2xl shadow-violet-950/40">
+          {secondsLeft}
         </div>
         <p className="mt-6 text-xs font-semibold uppercase tracking-[0.22em] text-violet-400">
           TapLinkr Direct
         </p>
-        <h1 className="mt-3 text-2xl font-semibold">Ouverture de {title}</h1>
+        <h1 className="mt-3 text-2xl font-semibold">Redirection vers {title}</h1>
         <p className="mt-3 text-sm leading-6 text-white/60">
-          Nous ouvrons ce lien dans le navigateur de votre téléphone.
+          Vous allez être redirigé vers le navigateur de votre téléphone dans {secondsLeft} seconde{secondsLeft === 1 ? '' : 's'}.
         </p>
+        <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-violet-500 transition-[width] duration-200"
+            style={{ width: `${((3 - secondsLeft) / 3) * 100}%` }}
+          />
+        </div>
 
         {showFallback && (
           <div className="mt-8 w-full rounded-2xl border border-white/10 bg-white/[0.04] p-4">
