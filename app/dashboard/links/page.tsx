@@ -24,7 +24,7 @@ function getDestinationHost(url?: string | null) {
 
 export default function PagesDashboard() {
   const { personalLinks, loading, refreshLinks } = useLinks()
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [editingPage, setEditingPage] = useState<LinkType | null>(null)
 
   const copyPage = async (slug: string) => {
@@ -68,10 +68,16 @@ export default function PagesDashboard() {
               Créez une page complète ou une URL courte qui redirige immédiatement vers votre destination.
             </p>
           </div>
-          <button onClick={() => setShowCreateModal(true)} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">
-            <Plus className="h-4 w-4" />
-            Créer
-          </button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button onClick={() => setCreateMode('landing')} className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-semibold text-gray-800 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900 dark:text-white">
+              <Plus className="h-4 w-4" />
+              Créer une page
+            </button>
+            <button onClick={() => setCreateMode('direct')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600">
+              <Zap className="h-4 w-4" />
+              Créer un lien direct
+            </button>
+          </div>
         </header>
 
         {loading ? (
@@ -160,27 +166,35 @@ export default function PagesDashboard() {
             <div className="mx-auto mb-5 grid h-20 w-20 place-items-center rounded-3xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/10">
               <Plus className="h-9 w-9" />
             </div>
-            <h2 className="text-2xl font-bold">Créez votre première page de conversion</h2>
+            <h2 className="text-2xl font-bold">Que voulez-vous créer ?</h2>
             <p className="mx-auto mt-2 max-w-md text-gray-500">
-              Choisissez un modele, ajoutez vos boutons, regardez le rendu mobile et publiez.
+              Une page regroupe plusieurs boutons. Un lien direct redirige immédiatement vers une seule destination.
             </p>
-            <button onClick={() => setShowCreateModal(true)} className="mt-6 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700">
-              Ouvrir le studio
-            </button>
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <button onClick={() => setCreateMode('landing')} className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-5 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
+                <Plus className="h-4 w-4" />
+                Créer une page
+              </button>
+              <button onClick={() => setCreateMode('direct')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3 font-semibold text-white hover:bg-amber-600">
+                <Zap className="h-4 w-4" />
+                Créer un lien direct
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {(showCreateModal || editingPage) && (
+      {(createMode || editingPage) && (
         <CreateLinkModal
-          isOpen={showCreateModal || Boolean(editingPage)}
+          isOpen={Boolean(createMode) || Boolean(editingPage)}
+          initialMode={createMode || 'landing'}
           editingLink={editingPage}
           onClose={() => {
-            setShowCreateModal(false)
+            setCreateMode(null)
             setEditingPage(null)
           }}
           onSuccess={async () => {
-            setShowCreateModal(false)
+            setCreateMode(null)
             setEditingPage(null)
             await refreshLinks()
           }}

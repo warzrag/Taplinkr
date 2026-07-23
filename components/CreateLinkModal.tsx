@@ -32,6 +32,7 @@ interface CreateLinkModalProps {
   onClose: () => void
   onSuccess: (newLink?: any) => void
   editingLink?: LinkType | null
+  initialMode?: 'landing' | 'direct'
 }
 
 interface PageLink {
@@ -74,7 +75,7 @@ function inferTitleFromUrl(url: string) {
   }
 }
 
-export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
+export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink, initialMode = 'landing' }: CreateLinkModalProps) {
   const [loading, setLoading] = useState(false)
   const [imageUploading, setImageUploading] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -133,7 +134,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setBorderRadius(editingLink.borderRadius || 'rounded-2xl')
       setCustomSlugTouched(true)
     } else {
-      setPageMode('landing')
+      setPageMode(initialMode)
       setDirectUrl('')
       setTitle('')
       setDescription('')
@@ -151,9 +152,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setBorderRadius('rounded-2xl')
       setCustomSlugTouched(false)
       setShowAdvanced(false)
-      setActivePanel('start')
+      setActivePanel(initialMode === 'direct' ? 'identity' : 'start')
     }
-  }, [isOpen, editingLink])
+  }, [isOpen, editingLink, initialMode])
 
   useEffect(() => {
     if (!customSlugTouched) {
@@ -435,12 +436,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2">
                 <Sparkles className="w-3.5 h-3.5" />
-                Studio Taplinkr
+                Création Taplinkr
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-950 dark:text-white">
                 {editingLink
                   ? (pageMode === 'direct' ? 'Modifier mon lien direct' : 'Modifier ma page')
-                  : (pageMode === 'direct' ? 'Créer un lien direct' : 'Construire ma page')}
+                  : (pageMode === 'direct' ? 'Créer un lien direct' : 'Créer une page de liens')}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {pageMode === 'direct'
@@ -501,7 +502,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 <div className="max-w-2xl">
                   <p className="text-sm font-bold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Nouveau</p>
                   <h3 className="mt-2 text-3xl font-bold leading-tight text-gray-950 dark:text-white">
-                    On part de quoi ?
+                    Choisissez un modèle de page
                   </h3>
                   <p className="mt-2 text-base text-gray-600 dark:text-gray-300">
                     Choisissez le type de page. Les boutons de base seront pre-remplis, vous n'aurez plus qu'a remplacer les URLs.
@@ -564,7 +565,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     onClick={() => setActivePanel('identity')}
                     className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"
                   >
-                    Commencer sans modele
+                    Créer une page vide
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>

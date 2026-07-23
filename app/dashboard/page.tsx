@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
-import { BarChart3, Copy, ExternalLink, Eye, MousePointer, Palette, Plus, Shield, Sparkles } from 'lucide-react'
+import { BarChart3, Copy, ExternalLink, Eye, MousePointer, Palette, Plus, Shield, Sparkles, Zap } from 'lucide-react'
 import { useLinks } from '@/contexts/LinksContext'
 import { useProfile } from '@/contexts/ProfileContext'
 
@@ -107,7 +107,7 @@ export default function Dashboard() {
   const { data: session } = useSession()
   const { links, loading, refreshLinks } = useLinks()
   const { profile } = useProfile()
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
 
   const mainPage = links[0]
   const publicUrl = mainPage ? `${typeof window !== 'undefined' ? window.location.origin : 'https://www.taplinkr.com'}/${mainPage.slug}` : ''
@@ -128,7 +128,7 @@ export default function Dashboard() {
           <div>
             <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
               <Sparkles className="h-3.5 w-3.5" />
-              Studio créateur Taplinkr
+              Tableau de bord Taplinkr
             </p>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Bonjour, {profile?.name || session?.user?.email?.split('@')[0] || 'créateur'}
@@ -138,9 +138,13 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button onClick={() => setShowCreateModal(true)} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">
+            <button onClick={() => setCreateMode('landing')} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-semibold text-gray-800 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900 dark:text-white">
               <Plus className="h-4 w-4" />
-              Ouvrir le studio
+              Créer une page
+            </button>
+            <button onClick={() => setCreateMode('direct')} className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600">
+              <Zap className="h-4 w-4" />
+              Créer un lien direct
             </button>
             <Link href="/dashboard/links" className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-semibold text-gray-800 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100">
               Mes pages
@@ -178,14 +182,20 @@ export default function Dashboard() {
                   </a>
                   <Link href="/dashboard/links" className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
                     <Palette className="h-4 w-4" />
-                    Studio
+                    Gérer mes pages
                   </Link>
                 </>
               ) : (
-                <button onClick={() => setShowCreateModal(true)} className="sm:col-span-3 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-700">
-                  <Plus className="h-4 w-4" />
-                  Ouvrir le studio
-                </button>
+                <div className="sm:col-span-3 grid gap-3 sm:grid-cols-2">
+                  <button onClick={() => setCreateMode('landing')} className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
+                    <Plus className="h-4 w-4" />
+                    Créer une page
+                  </button>
+                  <button onClick={() => setCreateMode('direct')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-3 font-semibold text-white hover:bg-amber-600">
+                    <Zap className="h-4 w-4" />
+                    Créer un lien direct
+                  </button>
+                </div>
               )}
             </div>
 
@@ -232,12 +242,13 @@ export default function Dashboard() {
         </section>
       </div>
 
-      {showCreateModal && (
+      {createMode && (
         <CreateLinkModal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
+          isOpen={Boolean(createMode)}
+          initialMode={createMode}
+          onClose={() => setCreateMode(null)}
           onSuccess={async () => {
-            setShowCreateModal(false)
+            setCreateMode(null)
             await refreshLinks()
           }}
         />
