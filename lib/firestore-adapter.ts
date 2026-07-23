@@ -20,6 +20,7 @@ const COLL: Record<string, string> = {
   link: 'links',
   multiLink: 'multiLinks',
   click: 'clicks',
+  filteredClick: 'filteredClicks',
   folder: 'folders',
   file: 'files',
   analyticsEvent: 'analyticsEvents',
@@ -124,6 +125,10 @@ const RELATIONS: Record<string, Record<string, Relation>> = {
     schedule: { coll: 'linkSchedules', fk: 'id', kind: 'one', localKey: 'scheduleId' },
   },
   click: {
+    link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
+    user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
+  },
+  filteredClick: {
     link: { coll: 'links', fk: 'id', kind: 'one', localKey: 'linkId' },
     user: { coll: 'users', fk: 'id', kind: 'one', localKey: 'userId' },
   },

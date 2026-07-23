@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { assessClickRequest, recordFilteredClick } from '@/lib/click-quality'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
@@ -17,28 +18,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
     }
 
-    const ip = (request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown')
-      .trim()
-      .slice(0, 64)
-    const recentClicks = await prisma.click.count({
-      where: { linkId, ip, createdAt: { gte: new Date(Date.now() - 60_000) } },
-    })
-    if (recentClicks >= 10) {
-      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 })
+    const assessment = await assessClickRequest({ request, linkId })
+    if (!assessment.counted) {
+      await recordFilteredClick({ linkId, userId: link.userId, assessment })
+      return NextResponse.json({ success: true, counted: false, reason: assessment.reason })
     }
 
-    const userAgent = (request.headers.get('user-agent') || '').slice(0, 1000)
-    const referer = (request.headers.get('referer') || 'direct').slice(0, 2000)
     const [, updatedLink] = await prisma.$transaction([
       prisma.click.create({
         data: {
           linkId,
           userId: link.userId,
-          ip,
-          userAgent,
-          referer,
+          ip: assessment.visitorHash,
+          userAgent: assessment.userAgent,
+          referer: assessment.referer,
           country: request.headers.get('x-vercel-ip-country') || 'Unknown',
-          device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
+          device: /mobile/i.test(assessment.userAgent) ? 'mobile' : 'desktop',
         },
       }),
       prisma.link.update({
@@ -48,7 +43,12 @@ export async function POST(request: NextRequest) {
       }),
     ])
 
-    return NextResponse.json({ success: true, linkId: updatedLink.id, clicks: updatedLink.clicks })
+    return NextResponse.json({
+      success: true,
+      counted: true,
+      linkId: updatedLink.id,
+      clicks: updatedLink.clicks,
+    })
   } catch (error) {
     console.error('Erreur lors du suivi du clic:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })

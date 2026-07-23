@@ -14,6 +14,7 @@ import {
   isInstagramInAppBrowser,
 } from '@/lib/external-browser'
 import { prisma } from '@/lib/prisma'
+import { assessClickRequest, recordFilteredClick } from '@/lib/click-quality'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 
@@ -112,22 +113,20 @@ export default async function LinkPage(props: PageProps) {
     const userAgent = (requestHeaders.get('user-agent') || '').slice(0, 1000)
 
     try {
-      const ip = (requestHeaders.get('x-forwarded-for')?.split(',')[0] || requestHeaders.get('x-real-ip') || 'unknown')
-        .trim()
-        .slice(0, 64)
-      const recentClicks = await prisma.click.count({
-        where: { linkId: link.id, ip, createdAt: { gte: new Date(Date.now() - 60_000) } },
+      const assessment = await assessClickRequest({
+        request: { headers: requestHeaders },
+        linkId: link.id,
       })
 
-      if (recentClicks < 10) {
+      if (assessment.counted) {
         await prisma.$transaction([
           prisma.click.create({
             data: {
               linkId: link.id,
               userId: link.userId,
-              ip,
-              userAgent,
-              referer: (requestHeaders.get('referer') || 'direct').slice(0, 2000),
+              ip: assessment.visitorHash,
+              userAgent: assessment.userAgent,
+              referer: assessment.referer,
               country: requestHeaders.get('x-vercel-ip-country') || 'Unknown',
               device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
             },
@@ -137,6 +136,12 @@ export default async function LinkPage(props: PageProps) {
             data: { clicks: { increment: 1 } },
           }),
         ])
+      } else {
+        await recordFilteredClick({
+          linkId: link.id,
+          userId: link.userId,
+          assessment,
+        })
       }
     } catch (error) {
       console.error('Erreur lors du suivi du lien direct:', error)
