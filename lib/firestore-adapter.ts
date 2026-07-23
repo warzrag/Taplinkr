@@ -10,8 +10,9 @@
  *  - `orderBy` accepts a single field or an array of objects.
  *  - `include` does N+1 lookups — fine for this app's data volumes.
  */
-import { db, Timestamp, FieldValue } from '@/lib/firebase-admin'
+import { db, FieldValue } from '@/lib/firebase-admin'
 import type { CollectionReference, Query, DocumentData, DocumentSnapshot } from 'firebase-admin/firestore'
+import { fromFirestoreValue, toFirestoreValue } from '@/lib/firestore-values'
 
 // ------- Model → Firestore collection map (matches @@map in schema.prisma) -------
 const COLL: Record<string, string> = {
@@ -164,12 +165,7 @@ function genId(): string {
 // ------- Convert Firestore Timestamps to JS Dates and back -------
 function fromFirestore<T = any>(data: DocumentData | undefined): T | null {
   if (!data) return null
-  const out: any = {}
-  for (const [k, v] of Object.entries(data)) {
-    if (v && typeof v === 'object' && (v as any).toDate) out[k] = (v as any).toDate()
-    else out[k] = v
-  }
-  return out as T
+  return fromFirestoreValue(data) as T
 }
 function snapToObj<T = any>(snap: DocumentSnapshot): T | null {
   if (!snap.exists) return null
@@ -178,15 +174,7 @@ function snapToObj<T = any>(snap: DocumentSnapshot): T | null {
   return data as T
 }
 function toFirestore(data: any): any {
-  if (data === null || data === undefined) return null
-  if (data instanceof Date) return Timestamp.fromDate(data)
-  if (Array.isArray(data)) return data.map(toFirestore)
-  if (typeof data === 'object') {
-    const out: any = {}
-    for (const [k, v] of Object.entries(data)) out[k] = toFirestore(v)
-    return out
-  }
-  return data
+  return toFirestoreValue(data)
 }
 
 // ------- Where clause translator -------
