@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { getUpgradeMessage } from '@/lib/permissions'
 import { createShortPublicSlug } from '@/lib/public-slug'
 import { checkTeamLimit } from '@/lib/team-permissions'
+import { getTeamLinkCreationFields, uniqueTeamMemberIds } from '@/lib/team-links'
+import { hasTeamActionPermission, TeamAction } from '@/lib/team-roles'
 import { validateURL } from '@/lib/url-validator'
 
 export async function GET() {
@@ -44,11 +46,17 @@ export async function GET() {
     // Récupérer les liens partagés de l'équipe (si l'utilisateur fait partie d'une équipe)
     let teamLinks = []
     if (user?.teamId) {
+      const members = await prisma.user.findMany({
+        where: { teamId: user.teamId },
+        select: { id: true },
+      })
+      const memberIds = uniqueTeamMemberIds(session.user.id, members.map(member => member.id))
       teamLinks = await prisma.link.findMany({
         where: {
-          teamId: user.teamId,
-          teamShared: true
-          // On récupère TOUS les liens partagés de l'équipe, y compris ceux du propriétaire
+          OR: [
+            { teamId: user.teamId, teamShared: true },
+            { userId: { in: memberIds } },
+          ]
         },
         orderBy: { order: 'asc' },
         include: {
@@ -103,6 +111,14 @@ export async function POST(request: NextRequest) {
     }
     
     const userId = session.user.id
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { teamId: true, teamRole: true },
+    })
+
+    if (currentUser?.teamId && !hasTeamActionPermission(currentUser.teamRole, TeamAction.CREATE_LINK)) {
+      return NextResponse.json({ error: 'Vous n’avez pas la permission de créer un lien dans cette équipe' }, { status: 403 })
+    }
 
     const body = await request.json()
     console.log('Received body:', body)
@@ -265,6 +281,7 @@ export async function POST(request: NextRequest) {
         animation: body.animation || null,
         order: (maxOrder?.order || 0) + 1,
         userId,
+        ...getTeamLinkCreationFields(userId, currentUser?.teamId),
         isDirect: isDirect || false,
         directUrl: isDirect ? directUrl : null,
         shieldEnabled: isDirect ? (shieldEnabled || false) : false,

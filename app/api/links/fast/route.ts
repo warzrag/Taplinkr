@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/redis-cache'
+import { uniqueTeamMemberIds } from '@/lib/team-links'
 
 // Version optimisée pour le dashboard - charge uniquement l'essentiel
 export async function GET() {
@@ -29,6 +30,16 @@ export async function GET() {
       where: { id: session.user.id },
       select: { teamId: true }
     })
+    const teamMembers = user?.teamId
+      ? await prisma.user.findMany({
+          where: { teamId: user.teamId },
+          select: { id: true },
+        })
+      : []
+    const teamMemberIds = uniqueTeamMemberIds(
+      session.user.id,
+      teamMembers.map(member => member.id),
+    )
 
     // Une seule requête optimisée avec les données essentielles
     // Inclure à la fois les liens personnels ET les liens d'équipe partagés
@@ -39,6 +50,8 @@ export async function GET() {
           ...(user?.teamId ? [{
             teamId: user.teamId,         // Liens de mon équipe
             teamShared: true
+          }, {
+            userId: { in: teamMemberIds }
           }] : [])
         ]
       },
@@ -90,8 +103,8 @@ export async function GET() {
     const response = {
       links: formattedLinks,
       personalLinks: formattedLinks,
-      teamLinks: [],
-      hasTeam: false,
+      teamLinks: formattedLinks.filter(link => link.userId !== session.user.id),
+      hasTeam: !!user?.teamId,
       count: formattedLinks.length
     }
 
