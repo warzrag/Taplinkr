@@ -58,7 +58,10 @@ export function middleware(request: NextRequest) {
   response.headers.set('X-Content-Type-Options', 'nosniff')
 
   // Cache intelligent selon le type de route
-  if (pathname.startsWith('/api/')) {
+  if (pathname === '/sw.js') {
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate')
+    response.headers.set('Clear-Site-Data', '"cache"')
+  } else if (pathname.startsWith('/api/')) {
     response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate')
   } else if (pathname.startsWith('/_next/static')) {
     // Assets statiques - cache long immutable

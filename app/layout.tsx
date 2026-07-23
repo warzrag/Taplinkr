@@ -79,19 +79,6 @@ export default function RootLayout({
             </Providers>
           </ThemeProvider>
         </ErrorBoundary>
-        
-        {/* Service Worker Registration */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function() {});
-                });
-              }
-            `,
-          }}
-        />
       </body>
     </html>
   )
