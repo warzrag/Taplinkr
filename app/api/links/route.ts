@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getUpgradeMessage } from '@/lib/permissions'
+import { createShortPublicSlug } from '@/lib/public-slug'
 import { checkTeamLimit } from '@/lib/team-permissions'
 import { validateURL } from '@/lib/url-validator'
 
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
     
     const { 
       title, 
+      internalName,
       description, 
       color, 
       icon, 
@@ -194,14 +196,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Utiliser le slug personnalisé ou générer un slug unique basé sur le titre
+    // A direct link gets a neutral public identifier. Its private dashboard
+    // name must never become the public URL by default.
     let slug = customSlug || ''
     
     if (!slug) {
-      let baseSlug = title.toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 50)
+      let baseSlug = isDirect
+        ? createShortPublicSlug()
+        : title.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .substring(0, 50)
       
       if (!baseSlug) {
         baseSlug = 'link'
@@ -211,8 +216,13 @@ export async function POST(request: NextRequest) {
       let counter = 1
 
       while (await prisma.link.findUnique({ where: { slug } })) {
-        slug = `${baseSlug}-${counter}`
-        counter++
+        if (isDirect) {
+          baseSlug = createShortPublicSlug()
+          slug = baseSlug
+        } else {
+          slug = `${baseSlug}-${counter}`
+          counter++
+        }
       }
     } else {
       // Vérifier que le slug personnalisé est disponible
@@ -242,6 +252,7 @@ export async function POST(request: NextRequest) {
       data: {
         slug,
         title,
+        internalName: internalName || null,
         description: description || null,
         color: color || null,
         icon: icon || null,

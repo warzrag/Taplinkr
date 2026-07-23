@@ -15,12 +15,14 @@ import {
   Link2,
   Loader2,
   Plus,
+  RefreshCw,
   Sparkles,
   Trash2,
   Zap,
   X,
 } from 'lucide-react'
 import { Link as LinkType } from '@/types'
+import { createShortPublicSlug } from '@/lib/public-slug'
 import { normalizeHttpURL } from '@/lib/url-validator'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
@@ -108,7 +110,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setPageMode(editingLink.isDirect ? 'direct' : 'landing')
       setDirectUrl(editingLink.directUrl || '')
       setActivePanel('identity')
-      setTitle(editingLink.title || '')
+      setTitle(editingLink.isDirect ? (editingLink.internalName || editingLink.title || '') : (editingLink.title || ''))
       setDescription(editingLink.description || editingLink.bio || '')
       setSlug(editingLink.slug || '')
       setProfileImage(editingLink.profileImage || '')
@@ -138,7 +140,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setDirectUrl('')
       setTitle('')
       setDescription('')
-      setSlug('')
+      setSlug(initialMode === 'direct' ? createShortPublicSlug() : '')
       setProfileImage('')
       setCoverImage('')
       setLinks(defaultLinks)
@@ -157,10 +159,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }, [isOpen, editingLink, initialMode])
 
   useEffect(() => {
-    if (!customSlugTouched) {
+    if (!customSlugTouched && pageMode === 'landing') {
       setSlug(slugify(title))
     }
-  }, [title, customSlugTouched])
+  }, [title, customSlugTouched, pageMode])
 
   useEffect(() => {
     if (!slug || slug === editingLink?.slug) {
@@ -308,6 +310,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
   const startDirectLink = () => {
     setPageMode('direct')
+    if (!editingLink) {
+      setSlug(createShortPublicSlug())
+      setCustomSlugTouched(false)
+    }
     setActivePanel('identity')
   }
 
@@ -362,8 +368,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
     try {
       const requestBody = {
-        title: title.trim(),
-        internalName: null,
+        title: pageMode === 'direct' ? 'Direct link' : title.trim(),
+        internalName: pageMode === 'direct' ? title.trim() : null,
         slug: slug.trim(),
         description: description.trim() || null,
         bio: description.trim() || null,
@@ -602,7 +608,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         />
                       </div>
                       <div>
-                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">URL courte Taplinkr</label>
+                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Adresse publique</label>
                         <div className="flex overflow-hidden rounded-xl border border-gray-300 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 dark:border-gray-700">
                           <span className="hidden items-center bg-gray-50 px-3 text-sm text-gray-500 dark:bg-gray-950 sm:flex">taplinkr.com/</span>
                           <input
@@ -614,7 +620,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             placeholder="mon-offre"
                             className="min-w-0 flex-1 bg-white px-3 py-3 text-gray-950 outline-none dark:bg-gray-900 dark:text-white"
                           />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomSlugTouched(true)
+                              setSlug(createShortPublicSlug())
+                            }}
+                            className="border-l border-gray-200 bg-gray-50 px-3 text-gray-500 transition hover:text-indigo-600 dark:border-gray-700 dark:bg-gray-950"
+                            title="Générer une nouvelle adresse"
+                            aria-label="Générer une nouvelle adresse publique"
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                          </button>
                         </div>
+                        <p className="mt-1.5 text-xs text-gray-500">Cette adresse est publique. Elle ne reprend jamais votre nom interne.</p>
                         <div className="mt-2 min-h-5 text-xs">
                           {checkingSlug && <span className="inline-flex items-center gap-1 text-gray-500"><Loader2 className="h-3 w-3 animate-spin" /> Vérification...</span>}
                           {!checkingSlug && slugAvailable === true && <span className="inline-flex items-center gap-1 text-green-600"><Check className="h-3 w-3" /> URL disponible</span>}

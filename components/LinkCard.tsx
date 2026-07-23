@@ -177,7 +177,7 @@ export default function LinkCard({
                 >
                   <Edit3 size={14} className="text-gray-400 hover:text-indigo-600" />
                 </button>
-                {link.internalName && (
+                {link.internalName && !link.isDirect && (
                   <span className="text-xs text-gray-400 dark:text-gray-500 italic truncate">
                     ({link.title})
                   </span>

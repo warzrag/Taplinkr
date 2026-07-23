@@ -8,7 +8,6 @@ import { Shield, Zap, Lock, Clock, ArrowRight, Loader2 } from 'lucide-react'
 interface LinkData {
   id: string
   slug: string
-  title: string
   destinationToken: string
   shieldEnabled: boolean
   isUltraLink: boolean
@@ -331,7 +330,7 @@ export default function ShieldPage() {
                     <span className="font-medium">Redirection automatique...</span>
                   </div>
                   <p className="text-sm text-white/60 mt-2">
-                    Vous allez être redirigé vers {link?.title}
+                    Vous allez être redirigé vers la destination
                   </p>
                 </motion.div>
               ) : (
@@ -345,7 +344,7 @@ export default function ShieldPage() {
                       : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
                   }`}
                 >
-                  Continue to {link?.title}
+                  Continuer vers la destination
                   <ArrowRight className="w-5 h-5" />
                 </motion.button>
               )}

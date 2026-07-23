@@ -161,7 +161,6 @@ export default async function LinkPage(props: PageProps) {
       return (
         <PublicDirectRedirect
           destination={destination}
-          title={link.title || (locale === 'en' ? 'this link' : 'ce lien')}
           externalBrowserUrl={externalBrowserUrl}
           locale={locale}
         />
@@ -182,6 +181,17 @@ export async function generateMetadata(props: PageProps) {
     return {
       title: 'Page non trouvée',
       description: "Cette page n'existe pas",
+    }
+  }
+
+  if (link.isDirect) {
+    return {
+      title: 'TapLinkr Direct',
+      description: 'Secure redirect powered by TapLinkr.',
+      robots: {
+        index: false,
+        follow: false,
+      },
     }
   }
 
