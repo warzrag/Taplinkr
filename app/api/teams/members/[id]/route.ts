@@ -13,14 +13,18 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    // Vérifier que l'utilisateur est propriétaire de l'équipe
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: { ownedTeam: true }
+      select: { teamId: true, teamRole: true },
     })
-
-    if (!user?.ownedTeam) {
-      return NextResponse.json({ error: 'Vous n\'êtes pas propriétaire d\'une équipe' }, { status: 403 })
+    if (!user?.teamId) {
+      return NextResponse.json({ error: 'Vous n’êtes pas membre d’une équipe' }, { status: 403 })
+    }
+    const team = await prisma.team.findUnique({ where: { id: user.teamId } })
+    const isOwner = team?.ownerId === session.user.id
+    const isAdmin = user.teamRole === 'admin'
+    if (!team || (!isOwner && !isAdmin)) {
+      return NextResponse.json({ error: 'Permission refusée' }, { status: 403 })
     }
 
     // Vérifier que le membre appartient bien à l'équipe
@@ -28,13 +32,15 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       where: { id: params.id }
     })
 
-    if (!member || member.teamId !== user.ownedTeam.id) {
+    if (!member || member.teamId !== team.id) {
       return NextResponse.json({ error: 'Membre non trouvé dans votre équipe' }, { status: 404 })
     }
 
-    // Empêcher le propriétaire de se retirer lui-même
-    if (member.id === user.id) {
-      return NextResponse.json({ error: 'Vous ne pouvez pas vous retirer de votre propre équipe' }, { status: 400 })
+    if (member.id === team.ownerId) {
+      return NextResponse.json({ error: 'Le propriétaire ne peut pas être retiré' }, { status: 400 })
+    }
+    if (isAdmin && member.teamRole === 'admin') {
+      return NextResponse.json({ error: 'Seul le propriétaire peut retirer un administrateur' }, { status: 403 })
     }
 
     // Retirer le membre de l'équipe et invalider ses sessions

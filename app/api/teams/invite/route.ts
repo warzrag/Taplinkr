@@ -4,7 +4,11 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getTeamAwareUserPermissions, checkTeamLimit } from '@/lib/team-permissions'
 import { nanoid } from 'nanoid'
-import { sendEmail } from '@/lib/resend-email'
+import {
+  normalizeTeamInviteEmail,
+  sendTeamInvitationEmail,
+  type TeamInviteRole,
+} from '@/lib/team-invitations'
 
 // POST /api/teams/invite - Inviter un membre dans l'équipe
 export async function POST(request: NextRequest) {
@@ -16,45 +20,40 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { email, role = 'member', teamId } = body
+    const { email: rawEmail, role = 'member', teamId } = body
 
-    if (!email) {
+    if (!rawEmail || typeof rawEmail !== 'string') {
       return NextResponse.json({ error: 'Email requis' }, { status: 400 })
     }
+    const email = normalizeTeamInviteEmail(rawEmail)
 
     // Valider le rôle
-    const validRoles = ['owner', 'admin', 'member', 'viewer']
+    const validRoles: TeamInviteRole[] = ['admin', 'member', 'viewer']
     if (!validRoles.includes(role)) {
       return NextResponse.json({ error: 'Rôle invalide' }, { status: 400 })
     }
 
-    // Vérifier que l'utilisateur possède une équipe ou est admin de l'équipe
-    let team
-    if (teamId) {
-      // Si teamId est fourni, vérifier que l'utilisateur a les droits
-      team = await prisma.team.findFirst({
-        where: {
-          id: teamId,
-          ownerId: session.user.id
-        },
-        include: {
-          members: true,
-          invitations: { where: { status: 'pending' } }
-        }
-      })
-    } else {
-      // Sinon, chercher l'équipe où l'utilisateur est propriétaire
-      team = await prisma.team.findFirst({
-        where: { ownerId: session.user.id },
-        include: {
-          members: true,
-          invitations: { where: { status: 'pending' } }
-        }
-      })
-    }
+    const requester = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { teamId: true, teamRole: true },
+    })
+    const effectiveTeamId = teamId || requester?.teamId
+    const team = effectiveTeamId
+      ? await prisma.team.findUnique({
+          where: { id: effectiveTeamId },
+          include: {
+            members: true,
+            invitations: { where: { status: 'pending' } },
+          },
+        })
+      : null
 
-    if (!team) {
-      return NextResponse.json({ error: 'Seul le propriétaire de l\'équipe peut inviter des membres' }, { status: 403 })
+    const canInvite = team && (
+      team.ownerId === session.user.id
+      || (requester?.teamId === team.id && requester.teamRole === 'admin')
+    )
+    if (!team || !canInvite) {
+      return NextResponse.json({ error: 'Seuls le propriétaire et les administrateurs peuvent inviter des membres' }, { status: 403 })
     }
 
     // Vérifier les limites d'équipe en tenant compte du plan du propriétaire
@@ -85,6 +84,9 @@ export async function POST(request: NextRequest) {
 
     if (existingUser && existingUser.teamId === team.id) {
       return NextResponse.json({ error: 'Cet utilisateur est déjà membre de l\'équipe' }, { status: 400 })
+    }
+    if (existingUser?.teamId && existingUser.teamId !== team.id) {
+      return NextResponse.json({ error: 'Cet utilisateur est déjà membre d’une autre équipe' }, { status: 400 })
     }
 
     if (existingInvitation) {
@@ -154,86 +156,27 @@ export async function POST(request: NextRequest) {
 
     // Envoyer l'email d'invitation
     try {
-      const inviteUrl = `${process.env.NEXTAUTH_URL || 'https://www.taplinkr.com'}/teams/join/${token}`
-      
-      await sendEmail({
-        to: email,
-        subject: `Invitation à rejoindre l'équipe ${team.name} sur TapLinkr`,
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          </head>
-          <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px;">
-              <!-- Header -->
-              <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #8b5cf6;">
-                <h1 style="color: #8b5cf6; margin: 0;">TapLinkr</h1>
-                <p style="color: #666; margin: 5px 0;">One tap, tout accessible</p>
-              </div>
-              
-              <!-- Content -->
-              <div style="padding: 30px 0;">
-                <h2 style="color: #333; margin-bottom: 20px;">Invitation à rejoindre une équipe</h2>
-                
-                <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
-                  Bonjour,
-                </p>
-                
-                <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
-                  <strong>${invitation.invitedBy.name || invitation.invitedBy.email}</strong> vous invite à rejoindre l'équipe 
-                  <strong style="color: #8b5cf6;">${team.name}</strong> sur TapLinkr en tant que 
-                  <strong>${getRoleLabel(role)}</strong>.
-                </p>
-                
-                <div style="background-color: #f8f9fa; border-left: 4px solid #8b5cf6; padding: 15px; margin: 20px 0;">
-                  <p style="margin: 0; color: #555;">
-                    <strong>⚠️ Important :</strong> Si vous n'avez pas encore de compte TapLinkr, vous devrez d'abord en créer un avec l'adresse email <strong>${email}</strong>
-                  </p>
-                </div>
-                
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${inviteUrl}" 
-                     style="display: inline-block; 
-                            padding: 14px 30px; 
-                            background-color: #8b5cf6; 
-                            color: white; 
-                            text-decoration: none; 
-                            border-radius: 8px; 
-                            font-weight: bold;
-                            font-size: 16px;">
-                    Accepter l'invitation
-                  </a>
-                </div>
-                
-                <p style="color: #999; font-size: 14px; text-align: center; margin-top: 20px;">
-                  Cette invitation expire dans 7 jours
-                </p>
-                
-                <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px;">
-                  <p style="color: #999; font-size: 12px; text-align: center;">
-                    Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>
-                    <a href="${inviteUrl}" style="color: #8b5cf6; word-break: break-all;">${inviteUrl}</a>
-                  </p>
-                </div>
-              </div>
-              
-              <!-- Footer -->
-              <div style="text-align: center; padding: 20px 0; border-top: 1px solid #eee; margin-top: 30px;">
-                <p style="color: #999; font-size: 12px; margin: 0;">
-                  © 2024 TapLinkr. Tous droits réservés.
-                </p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
+      const delivery = await sendTeamInvitationEmail({
+        email,
+        inviter: invitation.invitedBy.name || invitation.invitedBy.email,
+        teamName: team.name,
+        role,
+        token,
       })
+      if (!delivery.success) {
+        return NextResponse.json({
+          error: "L'invitation a été créée, mais l'email n'a pas pu être envoyé. Utilisez « Renvoyer ».",
+          invitationCreated: true,
+          invitationId: invitation.id,
+        }, { status: 502 })
+      }
     } catch (emailError) {
       console.error('Erreur envoi email:', emailError)
-      // Continue même si l'email échoue
+      return NextResponse.json({
+        error: "L'invitation a été créée, mais l'email n'a pas pu être envoyé. Utilisez « Renvoyer ».",
+        invitationCreated: true,
+        invitationId: invitation.id,
+      }, { status: 502 })
     }
 
     return NextResponse.json({ 
@@ -252,14 +195,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-function getRoleLabel(role: string): string {
-  const labels: Record<string, string> = {
-    owner: 'Propriétaire',
-    admin: 'Administrateur',
-    member: 'Membre',
-    viewer: 'Observateur'
-  }
-  return labels[role] || role
 }

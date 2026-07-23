@@ -69,9 +69,14 @@ export default function SignIn() {
   // Rediriger si déjà connecté
   useEffect(() => {
     if (status === 'authenticated' && session) {
-      router.push('/dashboard')
+      const inviteToken = searchParams.get('invite')
+      if (inviteToken) {
+        window.location.href = `/dashboard/accept-invitation?token=${encodeURIComponent(inviteToken)}`
+        return
+      }
+      router.push(searchParams.get('welcome') === 'team' ? '/dashboard/team/welcome' : '/dashboard')
     }
-  }, [status, session, router])
+  }, [status, session, router, searchParams])
 
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
