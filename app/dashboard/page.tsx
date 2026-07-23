@@ -3,105 +3,27 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { toast } from 'react-hot-toast'
-import { BarChart3, Copy, ExternalLink, Eye, MousePointer, Palette, Plus, Shield, Sparkles, Zap } from 'lucide-react'
+import {
+  ArrowUpRight,
+  BarChart3,
+  Eye,
+  ExternalLink,
+  Link2,
+  MousePointer2,
+  Plus,
+  Zap,
+} from 'lucide-react'
+import { useState } from 'react'
+
 import { useLinks } from '@/contexts/LinksContext'
 import { useProfile } from '@/contexts/ProfileContext'
 
 const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
   ssr: false,
-  loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-black/50"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" /></div>,
+  loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-black/70"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" /></div>,
 })
 
-import { useState } from 'react'
-
-const hexToRgb = (color?: string | null) => {
-  if (!color || !color.startsWith('#')) return null
-  const value = color.replace('#', '')
-  const normalized = value.length === 3
-    ? value.split('').map((char) => `${char}${char}`).join('')
-    : value
-  if (normalized.length !== 6) return null
-  const parsed = Number.parseInt(normalized, 16)
-  if (Number.isNaN(parsed)) return null
-  return {
-    r: (parsed >> 16) & 255,
-    g: (parsed >> 8) & 255,
-    b: parsed & 255,
-  }
-}
-
-const getRelativeLuminance = (color?: string | null) => {
-  const rgb = hexToRgb(color)
-  if (!rgb) return null
-  const channel = (value: number) => {
-    const normalized = value / 255
-    return normalized <= 0.03928
-      ? normalized / 12.92
-      : Math.pow((normalized + 0.055) / 1.055, 2.4)
-  }
-  return 0.2126 * channel(rgb.r) + 0.7152 * channel(rgb.g) + 0.0722 * channel(rgb.b)
-}
-
-const getContrastRatio = (first?: string | null, second?: string | null) => {
-  const firstLum = getRelativeLuminance(first)
-  const secondLum = getRelativeLuminance(second)
-  if (firstLum === null || secondLum === null) return null
-  const lighter = Math.max(firstLum, secondLum)
-  const darker = Math.min(firstLum, secondLum)
-  return (lighter + 0.05) / (darker + 0.05)
-}
-
-const getPreviewTextColor = (backgroundColor?: string | null, textColor?: string | null) => {
-  const background = backgroundColor || '#ffffff'
-  const preferred = textColor || '#111827'
-  const contrast = getContrastRatio(background, preferred)
-  if (contrast === null || contrast >= 4.5) return preferred
-  const darkContrast = getContrastRatio(background, '#111827') || 0
-  const lightContrast = getContrastRatio(background, '#ffffff') || 0
-  return darkContrast >= lightContrast ? '#111827' : '#ffffff'
-}
-
-function PhonePreview({ page }: { page: any }) {
-  const links = page?.multiLinks || []
-  const previewBackground = page?.backgroundColor || '#ffffff'
-  const previewText = getPreviewTextColor(previewBackground, page?.textColor)
-  const mutedPreviewText = previewText === '#111827' ? '#4b5563' : previewText
-
-  return (
-    <div className="mx-auto w-full max-w-[290px] rounded-[2rem] bg-gray-950 p-3 shadow-2xl">
-      <div className="aspect-[9/16] overflow-hidden rounded-[1.5rem] bg-white">
-        <div className="h-full overflow-y-auto" style={{ backgroundColor: previewBackground, color: previewText }}>
-          {page?.coverImage ? (
-            <img src={page.coverImage} alt="" className="h-28 w-full object-cover" />
-          ) : (
-            <div className="h-24 bg-gradient-to-br from-indigo-500/30 to-cyan-400/10" />
-          )}
-          <div className="-mt-9 px-5 pb-8 text-center">
-            <div className="mx-auto h-20 w-20 overflow-hidden rounded-full border-4 border-white bg-gray-100 shadow-lg">
-              {page?.profileImage || page?.user?.image ? (
-                <img src={page.profileImage || page.user.image} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <div className="grid h-full w-full place-items-center text-2xl font-bold text-gray-500">
-                  {(page?.title || 'T')[0]}
-                </div>
-              )}
-            </div>
-            <h3 className="mt-3 text-xl font-bold" style={{ color: previewText }}>{page?.title || 'Ma page Taplinkr'}</h3>
-            <p className="mt-1 text-sm" style={{ color: mutedPreviewText }}>{page?.description || 'Tous mes liens importants en un seul endroit.'}</p>
-            <div className="mt-5 space-y-3">
-              {(links.length ? links : [{ title: 'Instagram' }, { title: 'Telegram' }, { title: 'Mon contenu' }]).slice(0, 5).map((item: any, index: number) => (
-                <div key={index} className="rounded-2xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white">
-                  {item.title || `Lien ${index + 1}`}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+const cardClass = 'rounded-2xl border border-[#252532] bg-[#11111a] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.12)]'
 
 export default function Dashboard() {
   const { data: session } = useSession()
@@ -109,142 +31,118 @@ export default function Dashboard() {
   const { profile } = useProfile()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
 
-  const mainPage = links[0]
-  const publicUrl = mainPage ? `${typeof window !== 'undefined' ? window.location.origin : 'https://www.taplinkr.com'}/${mainPage.slug}` : ''
-  const totalClicks = links.reduce((total, page) => total + (page.clicks || 0), 0)
-  const totalViews = links.reduce((total, page) => total + (page.views || 0), 0)
-  const activePages = links.filter(page => page.isActive).length
+  const name = profile?.name || session?.user?.name || session?.user?.email?.split('@')[0] || 'créateur'
+  const totalClicks = links.reduce((sum, item) => sum + (item.clicks || 0), 0)
+  const totalViews = links.reduce((sum, item) => sum + (item.views || 0), 0)
+  const activeLinks = links.filter(item => item.isActive).length
+  const directLinks = links.filter(item => item.isDirect).length
+  const recentLinks = links.slice(0, 4)
 
-  const copyUrl = async () => {
-    if (!publicUrl) return
-    await navigator.clipboard.writeText(publicUrl)
-    toast.success('Lien de page copié')
-  }
+  const stats = [
+    { label: 'Clics totaux', value: totalClicks, icon: MousePointer2, color: 'text-violet-400' },
+    { label: 'Vues totales', value: totalViews, icon: Eye, color: 'text-sky-400' },
+    { label: 'Liens actifs', value: activeLinks, icon: Link2, color: 'text-emerald-400' },
+    { label: 'Liens directs', value: directLinks, icon: Zap, color: 'text-amber-400' },
+  ]
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8 text-gray-950 dark:bg-gray-950 dark:text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="min-h-screen bg-[#09090f] px-5 py-8 text-white sm:px-8 lg:px-12 lg:py-12">
+      <div className="mx-auto max-w-[1500px]">
+        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
-              <Sparkles className="h-3.5 w-3.5" />
-              Tableau de bord Taplinkr
-            </p>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Bonjour, {profile?.name || session?.user?.email?.split('@')[0] || 'créateur'}
-            </h1>
-            <p className="mt-2 max-w-2xl text-gray-600 dark:text-gray-400">
-              Gérez vos pages de conversion, partagez votre lien et suivez ce qui transforme votre audience en clics.
-            </p>
+            <p className="text-sm font-semibold text-[#8e8ea2]">Vue d’ensemble · 30 derniers jours</p>
+            <h1 className="mt-2 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Bonjour, {name}</h1>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button onClick={() => setCreateMode('landing')} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-semibold text-gray-800 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900 dark:text-white">
+            <button
+              onClick={() => setCreateMode('landing')}
+              className="inline-flex items-center gap-2 rounded-xl border border-[#2b2b39] bg-[#11111a] px-4 py-3 text-sm font-semibold text-white transition hover:border-violet-500/50"
+            >
               <Plus className="h-4 w-4" />
               Créer une page
             </button>
-            <button onClick={() => setCreateMode('direct')} className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600">
+            <button
+              onClick={() => setCreateMode('direct')}
+              className="inline-flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-violet-400"
+            >
               <Zap className="h-4 w-4" />
               Créer un lien direct
             </button>
-            <Link href="/dashboard/links" className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-semibold text-gray-800 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100">
-              Mes pages
-            </Link>
           </div>
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Page principale</p>
-                <h2 className="mt-3 text-2xl font-bold">{mainPage?.title || 'Créez votre première page'}</h2>
-                <p className="mt-2 text-gray-600 dark:text-gray-400">
-                  {mainPage ? `taplinkr.com/${mainPage.slug}` : 'Une page mobile-first avec vos liens, vos socials et vos protections avancées.'}
-                </p>
+        <section className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {stats.map(stat => (
+            <article key={stat.label} className={cardClass}>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-[#a4a4b5]">{stat.label}</p>
+                <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </div>
-              {mainPage && (
-                <span className={`rounded-full px-3 py-1 text-xs font-bold ${mainPage.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
-                  {mainPage.isActive ? 'Publiée' : 'Inactive'}
-                </span>
-              )}
-            </div>
+              <p className="mt-7 text-4xl font-bold tracking-tight">{loading ? '—' : stat.value.toLocaleString('fr-FR')}</p>
+            </article>
+          ))}
+        </section>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {mainPage ? (
-                <>
-                  <button onClick={copyUrl} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-3 font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-gray-950">
-                    <Copy className="h-4 w-4" />
-                    Copier
-                  </button>
-                  <a href={`/${mainPage.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
-                    <ExternalLink className="h-4 w-4" />
-                    Voir
-                  </a>
-                  <Link href="/dashboard/links" className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
-                    <Palette className="h-4 w-4" />
-                    Gérer mes pages
-                  </Link>
-                </>
-              ) : (
-                <div className="sm:col-span-3 grid gap-3 sm:grid-cols-2">
-                  <button onClick={() => setCreateMode('landing')} className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold hover:border-indigo-300 dark:border-gray-800">
-                    <Plus className="h-4 w-4" />
-                    Créer une page
-                  </button>
-                  <button onClick={() => setCreateMode('direct')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-3 font-semibold text-white hover:bg-amber-600">
-                    <Zap className="h-4 w-4" />
-                    Créer un lien direct
-                  </button>
+        <section className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className={`${cardClass} p-0`}>
+            <div className="flex items-center justify-between border-b border-[#252532] px-6 py-5">
+              <div>
+                <h2 className="text-lg font-semibold">Vos derniers liens</h2>
+                <p className="mt-1 text-sm text-[#858598]">Accès rapide à vos pages et redirections.</p>
+              </div>
+              <Link href="/dashboard/links" className="inline-flex items-center gap-2 text-sm font-semibold text-violet-400 hover:text-violet-300">
+                Tout voir
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="divide-y divide-[#20202b]">
+              {recentLinks.length ? recentLinks.map(item => (
+                <Link
+                  key={item.id}
+                  href="/dashboard/links"
+                  className="flex items-center gap-4 px-6 py-4 transition hover:bg-white/[0.025]"
+                >
+                  <span className={`h-2.5 w-2.5 rounded-full ${item.isActive ? 'bg-emerald-400' : 'bg-[#4d4d5c]'}`} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold">{item.title}</p>
+                    <p className="mt-1 truncate text-sm text-[#858598]">taplinkr.com/{item.slug}</p>
+                  </div>
+                  <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${item.isDirect ? 'bg-violet-500/10 text-violet-300' : 'bg-sky-500/10 text-sky-300'}`}>
+                    {item.isDirect ? 'Direct' : 'Page'}
+                  </span>
+                  <span className="hidden text-sm text-[#a4a4b5] sm:block">{item.clicks || 0} clics</span>
+                </Link>
+              )) : (
+                <div className="px-6 py-14 text-center">
+                  <Link2 className="mx-auto h-8 w-8 text-[#555568]" />
+                  <p className="mt-4 font-semibold">Aucun lien pour le moment</p>
+                  <p className="mt-1 text-sm text-[#858598]">Créez votre première page ou redirection.</p>
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl bg-gray-50 p-5 dark:bg-gray-950">
-                <MousePointer className="mb-3 h-5 w-5 text-indigo-500" />
-                <p className="text-3xl font-bold">{totalClicks}</p>
-                <p className="text-sm text-gray-500">Clics</p>
-              </div>
-              <div className="rounded-2xl bg-gray-50 p-5 dark:bg-gray-950">
-                <Eye className="mb-3 h-5 w-5 text-emerald-500" />
-                <p className="text-3xl font-bold">{totalViews}</p>
-                <p className="text-sm text-gray-500">Vues</p>
-              </div>
-              <div className="rounded-2xl bg-gray-50 p-5 dark:bg-gray-950">
-                <ExternalLink className="mb-3 h-5 w-5 text-cyan-500" />
-                <p className="text-3xl font-bold">{activePages}</p>
-                <p className="text-sm text-gray-500">Pages actives</p>
-              </div>
+          <aside className={`${cardClass} flex flex-col justify-between`}>
+            <div>
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-500/10 text-violet-400">
+                <BarChart3 className="h-5 w-5" />
+              </span>
+              <h2 className="mt-6 text-xl font-semibold">Comprendre votre trafic</h2>
+              <p className="mt-3 text-sm leading-6 text-[#9393a5]">
+                Consultez l’évolution des clics, les visiteurs et les performances de chaque lien.
+              </p>
             </div>
-          </div>
-
-          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <PhonePreview page={mainPage} />
-          </div>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-3">
-          <Link href="/dashboard/links" className="rounded-2xl border border-gray-200 bg-white p-5 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900">
-            <ExternalLink className="mb-4 h-6 w-6 text-indigo-500" />
-            <h3 className="font-bold">Gérer mes pages</h3>
-            <p className="mt-1 text-sm text-gray-500">Créer, dupliquer, activer et modifier vos landing pages.</p>
-          </Link>
-          <Link href="/dashboard/visitors" className="rounded-2xl border border-gray-200 bg-white p-5 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900">
-            <BarChart3 className="mb-4 h-6 w-6 text-emerald-500" />
-            <h3 className="font-bold">Voir les analytics</h3>
-            <p className="mt-1 text-sm text-gray-500">Comprendre les clics, les sources, les pays et les meilleurs boutons.</p>
-          </Link>
-          <Link href="/dashboard/protection" className="rounded-2xl border border-gray-200 bg-white p-5 hover:border-indigo-300 dark:border-gray-800 dark:bg-gray-900">
-            <Shield className="mb-4 h-6 w-6 text-amber-500" />
-            <h3 className="font-bold">Protection & 18+</h3>
-            <p className="mt-1 text-sm text-gray-500">Préparer les pages sensibles, warnings et options avancées.</p>
-          </Link>
+            <Link href="/dashboard/analytics" className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl border border-[#30303e] px-4 py-3 text-sm font-semibold transition hover:border-violet-500/50 hover:bg-violet-500/5">
+              Voir les analytics
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+          </aside>
         </section>
       </div>
 
       {createMode && (
         <CreateLinkModal
-          isOpen={Boolean(createMode)}
+          isOpen
           initialMode={createMode}
           onClose={() => setCreateMode(null)}
           onSuccess={async () => {

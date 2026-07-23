@@ -49,6 +49,23 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'asc' }
     })
 
+    // Les redirections directes sont enregistrées dans Click afin que la
+    // redirection HTTP reste immédiate. On les réintègre ici aux analytics.
+    const directLinks = await prisma.link.findMany({
+      where: { userId: user.id, isDirect: true },
+      select: { id: true }
+    })
+    const directClicks = directLinks.length
+      ? await prisma.click.findMany({
+          where: {
+            userId: user.id,
+            linkId: { in: directLinks.map(link => link.id) },
+            createdAt: { gte: startDate, lte: endDate }
+          },
+          orderBy: { createdAt: 'asc' }
+        })
+      : []
+
     // Préparer les données pour les graphiques
     const summary: any[] = []
     const hourlyDistribution: Record<number, number> = {}
@@ -113,6 +130,29 @@ export async function GET(request: NextRequest) {
       sourceCount[source] = (sourceCount[source] || 0) + 1
     })
 
+    directClicks.forEach(click => {
+      const dateStr = new Date(click.createdAt).toISOString().split('T')[0]
+      const dayStats = dateMap.get(dateStr)
+      if (dayStats) dayStats.clicks++
+
+      if (click.country && click.country !== 'Unknown') {
+        countryCount[click.country] = (countryCount[click.country] || 0) + 1
+      }
+      if (click.device) {
+        deviceCount[click.device] = (deviceCount[click.device] || 0) + 1
+      }
+
+      let source = 'Direct'
+      if (click.referer && click.referer !== 'direct') {
+        try {
+          source = new URL(click.referer).hostname.replace(/^www\./, '')
+        } catch {
+          source = click.referer
+        }
+      }
+      sourceCount[source] = (sourceCount[source] || 0) + 1
+    })
+
     // Convertir le dateMap en array pour le summary
     dateMap.forEach((stats, date) => {
       summary.push({
@@ -140,9 +180,12 @@ export async function GET(request: NextRequest) {
       .slice(0, 5)
 
     // Calculer les totaux
-    const totalClicks = events.filter(e => e.eventType === 'click').length
+    const totalClicks = events.filter(e => e.eventType === 'click').length + directClicks.length
     const totalViews = events.filter(e => e.eventType === 'view').length
-    const uniqueVisitors = new Set(events.map(e => e.ip)).size
+    const uniqueVisitors = new Set([
+      ...events.map(e => e.ip).filter(Boolean),
+      ...directClicks.map(click => click.ip).filter(Boolean)
+    ]).size
 
     // Calculer le taux de croissance
     const halfwayDate = new Date(startDate)
@@ -150,11 +193,11 @@ export async function GET(request: NextRequest) {
     
     const firstHalfClicks = events.filter(e => 
       e.eventType === 'click' && new Date(e.createdAt) < halfwayDate
-    ).length
+    ).length + directClicks.filter(click => new Date(click.createdAt) < halfwayDate).length
     
     const secondHalfClicks = events.filter(e => 
       e.eventType === 'click' && new Date(e.createdAt) >= halfwayDate
-    ).length
+    ).length + directClicks.filter(click => new Date(click.createdAt) >= halfwayDate).length
     
     const growthRate = firstHalfClicks > 0 
       ? Math.round(((secondHalfClicks - firstHalfClicks) / firstHalfClicks) * 100)

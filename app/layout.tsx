@@ -61,7 +61,7 @@ export default function RootLayout({
         {/* Préchargement des routes critiques */}
         <link rel="prefetch" href="/dashboard" as="document" />
         <link rel="prefetch" href="/dashboard/links" as="document" />
-        <link rel="prefetch" href="/dashboard/visitors" as="document" />
+        <link rel="prefetch" href="/dashboard/analytics" as="document" />
       </head>
       <body className="h-full bg-gray-50 dark:bg-gray-900 antialiased transition-colors duration-300">
         <WebVitals />
