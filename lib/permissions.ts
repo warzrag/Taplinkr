@@ -143,6 +143,10 @@ export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
   },
 }
 
+function normalizePlan(plan: string | null | undefined): UserPlan {
+  return plan === 'standard' || plan === 'premium' ? plan : 'free'
+}
+
 export function checkPermission(
   user: UserPermissions,
   feature: keyof PlanLimits
@@ -158,7 +162,7 @@ export function checkPermission(
     return PLAN_LIMITS.free[feature] as boolean
   }
 
-  const planLimits = PLAN_LIMITS[user.plan]
+  const planLimits = PLAN_LIMITS[normalizePlan(user.plan)]
   return planLimits[feature] as boolean
 }
 
@@ -175,7 +179,7 @@ export function checkLimit(
   // Check if plan is still valid
   const activePlan = user.planExpiresAt && new Date(user.planExpiresAt) < new Date() 
     ? 'free' 
-    : user.plan
+    : normalizePlan(user.plan)
 
   const planLimits = PLAN_LIMITS[activePlan]
   const maxLimit = planLimits[limit] as number
@@ -202,7 +206,7 @@ export function getRemainingLimit(
 
   const activePlan = user.planExpiresAt && new Date(user.planExpiresAt) < new Date() 
     ? 'free' 
-    : user.plan
+    : normalizePlan(user.plan)
 
   const planLimits = PLAN_LIMITS[activePlan]
   const maxLimit = planLimits[limit] as number
@@ -267,14 +271,14 @@ export function getUserPermissions(user: {
   if (user.teamOwner) {
     return {
       role: user.role as UserRole,
-      plan: user.teamOwner.plan as UserPlan,
+      plan: normalizePlan(user.teamOwner.plan),
       planExpiresAt: user.teamOwner.planExpiresAt
     }
   }
   
   return {
     role: user.role as UserRole,
-    plan: user.plan as UserPlan,
+    plan: normalizePlan(user.plan),
     planExpiresAt: user.planExpiresAt
   }
 }

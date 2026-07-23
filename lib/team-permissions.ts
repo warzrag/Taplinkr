@@ -222,7 +222,7 @@ export async function getTeamAwareUserPermissions(userId: string): Promise<UserP
   }
 
   // Si l'utilisateur fait partie d'une équipe, utiliser le plan du propriétaire
-  if (user.team) {
+  if (user.team?.owner) {
     return getUserPermissions({
       role: user.role,
       plan: user.plan,
@@ -234,7 +234,8 @@ export async function getTeamAwareUserPermissions(userId: string): Promise<UserP
     })
   }
 
-  // Sinon, utiliser son propre plan
+  // Si l'équipe est absente ou incomplète, le plan personnel reste
+  // la source de vérité de repli et l'action ne provoque pas d'erreur 500.
   return getUserPermissions({
     role: user.role,
     plan: user.plan,

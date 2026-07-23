@@ -519,6 +519,14 @@ async function hydrateIncludes(model: string, items: any[], include: any): Promi
           it[field] = r[0] || null
         }
       }
+
+      if (subInclude) {
+        const relatedItems = items
+          .map(it => it[field])
+          .filter((related): related is Record<string, unknown> => Boolean(related))
+        const subModel = MODEL_BY_COLL[rel.coll]
+        if (subModel) await hydrateIncludes(subModel, relatedItems, subInclude)
+      }
     } else {
       // many
       for (const it of items) {
