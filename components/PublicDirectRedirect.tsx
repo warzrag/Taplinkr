@@ -1,70 +1,40 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowUpRight } from 'lucide-react'
-
-import { getExternalBrowserUrl, getMobilePlatform } from '@/lib/external-browser'
+import { useCallback, useEffect, useState } from 'react'
+import { ArrowUpRight, Loader2 } from 'lucide-react'
 
 interface PublicDirectRedirectProps {
   destination: string
   title: string
-  instagramExternalUrl?: string | null
+  externalBrowserUrl: string | null
 }
 
 export default function PublicDirectRedirect({
   destination,
   title,
-  instagramExternalUrl = null,
+  externalBrowserUrl,
 }: PublicDirectRedirectProps) {
   const [showFallback, setShowFallback] = useState(false)
-  const [secondsLeft, setSecondsLeft] = useState(3)
-  const externalUrl = useMemo(() => {
-    if (typeof window === 'undefined') return null
-    return getExternalBrowserUrl(window.location.href, getMobilePlatform(navigator.userAgent || ''))
-  }, [])
+  const automaticUrl = externalBrowserUrl || destination
 
   const openExternalBrowser = useCallback(() => {
-    if (externalUrl) window.location.href = externalUrl
-  }, [externalUrl])
+    window.location.href = automaticUrl
+  }, [automaticUrl])
 
   useEffect(() => {
-    let countdownTimer: number | undefined
-    let redirectTimer: number | undefined
-    let fallbackTimer: number | undefined
-    let secondFrame: number | undefined
-
-    // Instagram handles this private scheme itself and hands the URL directly
-    // to the external browser. The standard countdown remains as a fallback.
-    if (instagramExternalUrl) {
-      window.location.href = instagramExternalUrl
-    }
-
-    // X and Instagram can hydrate the page before painting it. Waiting for two
-    // frames guarantees that the user sees the initial "3" before the delay starts.
-    const firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        const startedAt = Date.now()
-        countdownTimer = window.setInterval(() => {
-          const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000)
-          setSecondsLeft(Math.max(0, 3 - elapsedSeconds))
-        }, 200)
-        redirectTimer = window.setTimeout(openExternalBrowser, 3000)
-        fallbackTimer = window.setTimeout(() => setShowFallback(true), 4500)
-      })
-    })
+    // The server-rendered meta refresh starts this before hydration. This second
+    // attempt covers in-app browsers that ignore meta refreshes.
+    window.location.href = automaticUrl
+    const fallbackTimer = window.setTimeout(() => setShowFallback(true), 1200)
 
     return () => {
-      window.cancelAnimationFrame(firstFrame)
-      if (secondFrame !== undefined) window.cancelAnimationFrame(secondFrame)
-      if (countdownTimer !== undefined) window.clearInterval(countdownTimer)
-      if (redirectTimer !== undefined) window.clearTimeout(redirectTimer)
-      if (fallbackTimer !== undefined) window.clearTimeout(fallbackTimer)
+      window.clearTimeout(fallbackTimer)
     }
-  }, [instagramExternalUrl, openExternalBrowser])
+  }, [automaticUrl])
 
   return (
     <>
-      {instagramExternalUrl && <meta httpEquiv="refresh" content={`0;url=${instagramExternalUrl}`} />}
+      <meta httpEquiv="refresh" content={`0;url=${automaticUrl}`} />
       <main
         className="min-h-screen bg-[#09090f] px-5 text-white"
         style={{ minHeight: '100dvh', background: '#09090f', color: '#fff', padding: '0 20px' }}
@@ -98,10 +68,9 @@ export default function PublicDirectRedirect({
             fontSize: 30,
             fontWeight: 700,
           }}
-          aria-live="polite"
-          aria-label={`Redirection dans ${secondsLeft} secondes`}
+          aria-label="Ouverture du navigateur"
         >
-          {secondsLeft}
+          <Loader2 className="h-9 w-9 animate-spin" aria-hidden="true" />
         </div>
         <p
           className="mt-6 text-xs font-semibold uppercase tracking-[0.22em] text-violet-400"
@@ -113,14 +82,13 @@ export default function PublicDirectRedirect({
           className="mt-3 text-2xl font-semibold"
           style={{ marginTop: 12, color: '#fff', fontSize: 24, fontWeight: 600 }}
         >
-          Redirection vers {title}
+          Ouverture de {title}
         </h1>
         <p
           className="mt-3 text-sm leading-6 text-white/60"
           style={{ marginTop: 12, color: 'rgba(255,255,255,.68)', fontSize: 14, lineHeight: 1.7 }}
         >
-          Vous allez être redirigé vers le navigateur de votre téléphone dans {secondsLeft} seconde
-          {secondsLeft === 1 ? '' : 's'}.
+          Nous ouvrons automatiquement le navigateur de votre téléphone.
         </p>
         <div
           className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/10"
@@ -134,13 +102,12 @@ export default function PublicDirectRedirect({
           }}
         >
           <div
-            className="h-full rounded-full bg-violet-500 transition-[width] duration-200"
+            className="h-full w-full animate-pulse rounded-full bg-violet-500"
             style={{
-              width: `${((3 - secondsLeft) / 3) * 100}%`,
+              width: '100%',
               height: '100%',
               borderRadius: 9999,
               background: '#8b5cf6',
-              transition: 'width 200ms ease',
             }}
           />
         </div>
