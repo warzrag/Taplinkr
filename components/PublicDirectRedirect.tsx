@@ -8,9 +8,14 @@ import { getExternalBrowserUrl, getMobilePlatform } from '@/lib/external-browser
 interface PublicDirectRedirectProps {
   destination: string
   title: string
+  instagramExternalUrl?: string | null
 }
 
-export default function PublicDirectRedirect({ destination, title }: PublicDirectRedirectProps) {
+export default function PublicDirectRedirect({
+  destination,
+  title,
+  instagramExternalUrl = null,
+}: PublicDirectRedirectProps) {
   const [showFallback, setShowFallback] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(3)
   const externalUrl = useMemo(() => {
@@ -27,6 +32,12 @@ export default function PublicDirectRedirect({ destination, title }: PublicDirec
     let redirectTimer: number | undefined
     let fallbackTimer: number | undefined
     let secondFrame: number | undefined
+
+    // Instagram handles this private scheme itself and hands the URL directly
+    // to the external browser. The standard countdown remains as a fallback.
+    if (instagramExternalUrl) {
+      window.location.href = instagramExternalUrl
+    }
 
     // X and Instagram can hydrate the page before painting it. Waiting for two
     // frames guarantees that the user sees the initial "3" before the delay starts.
@@ -49,13 +60,15 @@ export default function PublicDirectRedirect({ destination, title }: PublicDirec
       if (redirectTimer !== undefined) window.clearTimeout(redirectTimer)
       if (fallbackTimer !== undefined) window.clearTimeout(fallbackTimer)
     }
-  }, [openExternalBrowser])
+  }, [instagramExternalUrl, openExternalBrowser])
 
   return (
-    <main
-      className="min-h-screen bg-[#09090f] px-5 text-white"
-      style={{ minHeight: '100dvh', background: '#09090f', color: '#fff', padding: '0 20px' }}
-    >
+    <>
+      {instagramExternalUrl && <meta httpEquiv="refresh" content={`0;url=${instagramExternalUrl}`} />}
+      <main
+        className="min-h-screen bg-[#09090f] px-5 text-white"
+        style={{ minHeight: '100dvh', background: '#09090f', color: '#fff', padding: '0 20px' }}
+      >
       <div
         className="mx-auto flex min-h-screen w-full max-w-sm flex-col items-center justify-center text-center"
         style={{
@@ -150,7 +163,8 @@ export default function PublicDirectRedirect({ destination, title }: PublicDirec
             </a>
           </div>
         )}
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   )
 }

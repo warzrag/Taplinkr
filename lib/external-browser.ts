@@ -1,5 +1,10 @@
 export type MobilePlatform = 'ios' | 'android' | 'other'
 
+export function isInstagramInAppBrowser(userAgent: string, referer = ''): boolean {
+  return /Instagram/i.test(userAgent)
+    || /^https?:\/\/(?:www\.)?instagram\.com(?:\/|$)/i.test(referer)
+}
+
 export function isInAppBrowser(userAgent: string, referer = ''): boolean {
   if (/bot|crawler|spider|preview/i.test(userAgent)) return false
 
@@ -16,6 +21,10 @@ export function getMobilePlatform(userAgent: string): MobilePlatform {
   if (/iPad|iPhone|iPod/i.test(userAgent)) return 'ios'
   if (/Android/i.test(userAgent)) return 'android'
   return 'other'
+}
+
+export function getInstagramExternalBrowserUrl(currentUrl: string): string {
+  return `instagram://extbrowser/?url=${encodeURIComponent(currentUrl)}`
 }
 
 export function getExternalBrowserUrl(currentUrl: string, platform: MobilePlatform): string | null {
