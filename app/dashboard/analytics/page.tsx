@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   Activity,
   BarChart3,
+  Bot,
   Download,
   Eye,
   MousePointer2,
   RefreshCw,
+  ShieldCheck,
   Users,
 } from 'lucide-react'
 import {
@@ -38,13 +40,24 @@ interface AnalyticsData {
     views: number
     uniqueVisitors: number
     growthRate: number
+    filteredClicks: number
+    botsFiltered: number
+    duplicatesFiltered: number
   }
 }
 
 const emptyData: AnalyticsData = {
   summary: [],
   stats: { topCountries: [], topSources: [] },
-  totals: { clicks: 0, views: 0, uniqueVisitors: 0, growthRate: 0 },
+  totals: {
+    clicks: 0,
+    views: 0,
+    uniqueVisitors: 0,
+    growthRate: 0,
+    filteredClicks: 0,
+    botsFiltered: 0,
+    duplicatesFiltered: 0,
+  },
 }
 
 export default function AnalyticsPage() {
@@ -99,6 +112,9 @@ export default function AnalyticsPage() {
     { label: 'Clics totaux', value: data.totals.clicks, icon: MousePointer2, color: 'text-violet-400' },
     { label: 'Visiteurs uniques', value: data.totals.uniqueVisitors, icon: Users, color: 'text-sky-400' },
     { label: 'Vues', value: data.totals.views, icon: Eye, color: 'text-emerald-400' },
+    { label: 'Clics filtrés', value: data.totals.filteredClicks, icon: ShieldCheck, color: 'text-emerald-300' },
+    { label: 'Bots / aperçus', value: data.totals.botsFiltered, icon: Bot, color: 'text-rose-400' },
+    { label: 'Doublons / spam', value: data.totals.duplicatesFiltered, icon: Activity, color: 'text-amber-400' },
     { label: 'Clics / visiteur', value: clicksPerVisitor, icon: Activity, color: 'text-amber-400' },
   ]
 
@@ -114,7 +130,7 @@ export default function AnalyticsPage() {
             <h1 className="mt-3 text-4xl font-bold tracking-[-0.05em] sm:text-5xl">
               Votre trafic, <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">en un coup d’œil.</span>
             </h1>
-            <p className="mt-3 text-base text-[#9696a8]">Des données réelles issues de vos pages et liens directs.</p>
+            <p className="mt-3 text-base text-[#9696a8]">Des clics réels : robots, aperçus automatiques, doublons et rafales sont filtrés.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex rounded-xl border border-[#292936] bg-[#101018] p-1">
@@ -145,7 +161,7 @@ export default function AnalyticsPage() {
           </div>
         </header>
 
-        <section className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
           {cards.map(card => (
             <article key={card.label} className="rounded-2xl border border-[#252532] bg-[#11111a] p-6">
               <div className="flex items-center justify-between">

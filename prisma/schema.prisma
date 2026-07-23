@@ -49,6 +49,7 @@ model User {
   analyticsEvents         AnalyticsEvent[]
   analyticsSummary        AnalyticsSummary[]
   clicks                  Click[]
+  filteredClicks          FilteredClick[]
   customDomains           CustomDomain[]
   files                   File[]
   folders                 Folder[]
@@ -122,6 +123,7 @@ model Link {
   analyticsEvents    AnalyticsEvent[]
   analyticsSummary   AnalyticsSummary[]
   clickEvents        Click[]
+  filteredClicks     FilteredClick[]
   linkSchedule       LinkSchedule?
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   cover              File?               @relation("LinkCover", fields: [coverId], references: [id])
@@ -190,6 +192,26 @@ model Click {
   @@index([ip])
   @@index([multiLinkId, sessionId]) // 🔥 Index pour déduplication rapide
   @@map("clicks")
+}
+
+model FilteredClick {
+  id          String   @id @default(cuid())
+  linkId      String
+  userId      String
+  multiLinkId String?
+  visitorHash String
+  reason      String
+  userAgent   String?
+  referer     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  link        Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([linkId, createdAt])
+  @@index([reason, createdAt])
+  @@map("filtered_clicks")
 }
 
 model Folder {

@@ -65,6 +65,14 @@ export async function GET(request: NextRequest) {
           orderBy: { createdAt: 'asc' }
         })
       : []
+    const allFilteredClicks = await prisma.filteredClick.findMany({
+      where: { userId: user.id },
+      select: { reason: true, createdAt: true },
+    })
+    const filteredClicks = allFilteredClicks.filter(click => {
+      const createdAt = new Date(click.createdAt)
+      return createdAt >= startDate && createdAt <= endDate
+    })
 
     // Préparer les données pour les graphiques
     const summary: any[] = []
@@ -186,6 +194,12 @@ export async function GET(request: NextRequest) {
       ...events.map(e => e.ip).filter(Boolean),
       ...directClicks.map(click => click.ip).filter(Boolean)
     ]).size
+    const botsFiltered = filteredClicks.filter(click =>
+      ['bot', 'preview', 'prefetch'].includes(click.reason)
+    ).length
+    const duplicatesFiltered = filteredClicks.filter(click =>
+      ['duplicate', 'burst'].includes(click.reason)
+    ).length
 
     // Calculer le taux de croissance
     const halfwayDate = new Date(startDate)
@@ -216,7 +230,10 @@ export async function GET(request: NextRequest) {
         clicks: totalClicks,
         views: totalViews,
         uniqueVisitors,
-        growthRate
+        growthRate,
+        filteredClicks: filteredClicks.length,
+        botsFiltered,
+        duplicatesFiltered,
       }
     })
 
