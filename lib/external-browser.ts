@@ -1,7 +1,15 @@
 export type MobilePlatform = 'ios' | 'android' | 'other'
 
-export function isInAppBrowser(userAgent: string): boolean {
-  return /Instagram|FBAN|FBAV|TikTok|musical_ly|Twitter|TwitterAndroid|LinkedInApp|Snapchat/i.test(userAgent)
+export function isInAppBrowser(userAgent: string, referer = ''): boolean {
+  if (/bot|crawler|spider|preview/i.test(userAgent)) return false
+
+  if (/Instagram|FBAN|FBAV|TikTok|musical_ly|Twitter|TwitterAndroid|LinkedInApp|Snapchat/i.test(userAgent)) {
+    return true
+  }
+
+  const isMobileWebKit = /iPhone|iPad|iPod|Android/i.test(userAgent)
+  const isSocialRedirect = /^https?:\/\/(?:t\.co|(?:www\.)?(?:x|twitter|instagram)\.com)(?:\/|$)/i.test(referer)
+  return isMobileWebKit && isSocialRedirect
 }
 
 export function getMobilePlatform(userAgent: string): MobilePlatform {
