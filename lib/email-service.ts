@@ -4,6 +4,12 @@ import VerificationEmail from '@/emails/VerificationEmail'
 import ResetPasswordEmail from '@/emails/ResetPasswordEmail'
 
 export class EmailService {
+  private static getAppUrl() {
+    const appUrl = process.env.APP_URL || process.env.NEXTAUTH_URL
+    if (!appUrl) throw new Error('APP_URL or NEXTAUTH_URL is required')
+    return appUrl.replace(/\/$/, '')
+  }
+
   static async sendWelcomeEmail(to: string, userName: string) {
     try {
       const { data, error } = await resend.emails.send({
@@ -27,7 +33,7 @@ export class EmailService {
 
   static async sendVerificationEmail(to: string, userName: string, token: string) {
     try {
-      const verificationUrl = `${process.env.NEXTAUTH_URL}/auth/verify-email?token=${token}`
+      const verificationUrl = `${this.getAppUrl()}/auth/verify-email?token=${encodeURIComponent(token)}`
       
       const { data, error } = await resend.emails.send({
         from: emailConfig.from,
@@ -50,7 +56,7 @@ export class EmailService {
 
   static async sendPasswordResetEmail(to: string, userName: string, token: string) {
     try {
-      const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`
+      const resetUrl = `${this.getAppUrl()}/auth/reset-password?token=${encodeURIComponent(token)}`
       
       const { data, error } = await resend.emails.send({
         from: emailConfig.from,

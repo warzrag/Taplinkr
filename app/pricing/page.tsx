@@ -17,13 +17,14 @@ const plans = [
     name: 'Gratuit',
     price: '0 EUR',
     period: 'pour toujours',
-    description: 'Pour lancer une page createur propre, vos premiers liens et des stats essentielles.',
+    description: 'Pour lancer une page créateur propre, vos premiers liens et des statistiques essentielles.',
     cta: 'Créer mon compte',
+    highlighted: false,
     features: [
       '1 page publique',
       '5 liens actifs',
+      'Lien direct inclus',
       'Stats vues et clics',
-      'Branding de base',
     ],
   },
   {
@@ -31,7 +32,7 @@ const plans = [
     name: 'Standard',
     price: '9,99 EUR',
     period: '/ mois',
-    description: 'Pour convertir plus de fans avec deeplinks, garde 18+, analytics avances et campagnes mieux suivies.',
+    description: 'Pour convertir plus de visiteurs avec deeplinks, protection 18+, statistiques avancées et campagnes mieux suivies.',
     cta: 'Choisir Standard',
     highlighted: true,
     features: [
@@ -47,8 +48,9 @@ const plans = [
     name: 'Premium',
     price: '24,99 EUR',
     period: '/ mois',
-    description: 'Pour les agences et createurs qui pilotent plusieurs pages, domaines, offres et campagnes.',
+    description: 'Pour les agences et créateurs qui pilotent plusieurs pages, domaines, offres et campagnes.',
     cta: 'Choisir Premium',
+    highlighted: false,
     features: [
       'Liens illimités',
       'Themes, icones et domaines custom',
@@ -72,7 +74,7 @@ const faqs = [
   },
   {
     question: 'Les liens directs sont-ils inclus ?',
-    answer: 'Oui, a partir du plan Standard. Premium ajoute les options avancees pour pages sensibles, domaines custom, agences et gros volumes.',
+    answer: 'Oui, des le plan gratuit. Chaque lien direct utilise une URL Taplinkr courte et redirige immediatement vers votre destination. Premium ajoute la protection Shield et les options avancees.',
   },
 ]
 
@@ -129,7 +131,7 @@ export default function PricingPage() {
               Choisissez le plan qui transforme vos clics en revenus
             </h1>
             <p className="mx-auto mt-4 w-full max-w-[18rem] text-sm leading-7 text-neutral-600 dark:text-white/60 sm:max-w-2xl">
-              Commencez gratuitement, puis passez a Standard ou Premium quand vos deeplinks, protections 18+, domaines et analytics doivent suivre le rythme.
+              Commencez gratuitement, puis passez à Standard ou Premium lorsque vos deeplinks, protections, domaines et statistiques doivent suivre le rythme.
             </p>
 
             <div className="mx-auto mt-8 grid w-full max-w-[18rem] gap-4 text-left sm:max-w-xl md:max-w-2xl lg:max-w-6xl lg:grid-cols-3">
@@ -144,7 +146,7 @@ export default function PricingPage() {
                 >
                   {plan.highlighted && (
                     <span className="mb-5 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white dark:bg-neutral-950/10 dark:text-neutral-950">
-                      Pour createurs actifs
+                      Pour les créateurs actifs
                     </span>
                   )}
 
@@ -208,7 +210,7 @@ export default function PricingPage() {
                 Questions frequentes
               </h2>
               <p className="mt-3 max-w-[18rem] text-sm leading-7 text-neutral-600 dark:text-white/60 sm:max-w-xl">
-                Le bon plan depend de votre volume de liens, de vos besoins de protection 18+, de vos domaines et de votre niveau d analytics.
+                Le bon forfait dépend de votre volume de liens, de vos besoins de protection, de vos domaines et du niveau de statistiques souhaité.
               </p>
               <Link href="mailto:hello@taplinkr.com" className="mt-5 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-500">
                 Contacter le support

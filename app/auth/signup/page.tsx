@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import {
   ArrowLeft,
-  CheckCircle,
   ChevronRight,
   Eye,
   EyeOff,
@@ -34,23 +32,23 @@ const benefits = [
   {
     icon: Shield,
     title: 'Protection et confiance',
-    description: 'Controlez vos deeplinks, activez une garde 18+ et gardez vos pages sous votre marque.'
+    description: 'Contrôlez vos deeplinks, activez une garde 18+ et gardez vos pages sous votre marque.'
   },
   {
     icon: UserPlus,
     title: 'Pages qui vendent',
-    description: 'Composez une page fidele a votre identite, adaptee a chaque offre, reseau et campagne.'
+    description: 'Composez une page fidèle à votre identité, adaptée à chaque offre, réseau et campagne.'
   },
   {
     icon: Mail,
     title: 'Mise en ligne rapide',
-    description: 'Creez votre compte, branchez vos liens importants et commencez a lire vos analytics.'
+    description: 'Créez votre compte, branchez vos liens importants et commencez à lire vos statistiques.'
   },
 ]
 
 const steps = [
-  { label: 'Votre profil', description: 'Presentez votre marque createur' },
-  { label: 'Securite', description: 'Creez votre mot de passe' },
+  { label: 'Votre profil', description: 'Présentez votre activité' },
+  { label: 'Sécurité', description: 'Créez votre mot de passe' },
 ]
 
 export default function SignUp() {
@@ -61,7 +59,7 @@ export default function SignUp() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const { register, handleSubmit, formState: { errors }, trigger, getValues } = useForm<FormData>()
+  const { register, handleSubmit, formState: { errors }, trigger } = useForm<FormData>()
 
   useEffect(() => {
     const username = searchParams.get('username')
@@ -83,7 +81,7 @@ export default function SignUp() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, username: suggestedUsername || undefined }),
       })
 
       if (!response.ok) {
@@ -94,7 +92,7 @@ export default function SignUp() {
 
       toast.success('Compte créé avec succès ! Vérifiez vos emails pour finaliser.')
       router.push('/auth/verify-email-waiting?email=' + encodeURIComponent(data.email))
-    } catch (error) {
+    } catch {
       toast.error("Erreur lors de l'inscription")
     } finally {
       setLoading(false)
@@ -118,7 +116,7 @@ export default function SignUp() {
           >
             <div className="space-y-4">
               <span className="badge-pill bg-brand-500/10 text-brand-600">Votre hub en quelques minutes</span>
-              <h2 className="text-3xl font-semibold">Construisez une page createur prete a convertir</h2>
+              <h2 className="text-3xl font-semibold">Construisez une page créateur prête à convertir</h2>
               <p className="text-sm text-foreground/65">
                 Centralisez vos offres, contenus, deeplinks et protections dans une page rapide, claire et mesurable.
               </p>
@@ -157,7 +155,7 @@ export default function SignUp() {
                 href="/auth/signin"
                 className="text-foreground/70 transition-colors hover:text-foreground"
               >
-                J'ai deja un compte
+                J’ai déjà un compte
               </Link>
             </div>
 
@@ -165,11 +163,11 @@ export default function SignUp() {
               <div className="flex justify-center">
                 <Logo size="md" showText={false} />
               </div>
-              <h1 className="text-2xl font-semibold">Creez votre compte</h1>
+              <h1 className="text-2xl font-semibold">Créez votre compte</h1>
               <p className="text-sm text-foreground/60">
                 {suggestedUsername
-                  ? `Votre URL reservee : taplinkr.com/${suggestedUsername}`
-                  : 'Lancez votre page createur, vos deeplinks et vos analytics.'}
+                  ? `Votre URL réservée : taplinkr.com/${suggestedUsername}`
+                  : 'Lancez votre page créateur, vos deeplinks et vos statistiques.'}
               </p>
             </div>
 
@@ -282,10 +280,10 @@ export default function SignUp() {
                           type={showPassword ? 'text' : 'password'}
                           {...register('password', {
                             required: 'Le mot de passe est requis',
-                            minLength: { value: 8, message: 'Au moins 8 caracteres' },
+                            minLength: { value: 8, message: 'Au moins 8 caractères' },
                           })}
                           className="input pl-12 pr-12"
-                          placeholder="Creer un mot de passe"
+                          placeholder="Créer un mot de passe"
                         />
                         <button
                           type="button"
@@ -310,7 +308,7 @@ export default function SignUp() {
                     </div>
 
                     <Button type="submit" fullWidth loading={loading}>
-                      Creer mon compte
+                      Créer mon compte
                       <UserPlus className="h-4 w-4" />
                     </Button>
 
@@ -319,7 +317,7 @@ export default function SignUp() {
                       onClick={() => setStep(0)}
                       className="w-full text-sm text-foreground/50 transition-colors hover:text-foreground/70"
                     >
-                      Retour a l'etape precedente
+                      Retour à l’étape précédente
                     </button>
                   </motion.div>
                 )}
@@ -329,7 +327,7 @@ export default function SignUp() {
             <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
               <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Conseil</p>
               <p className="mt-2 text-sm text-foreground/70">
-                Une fois inscrit, ajoutez vos deeplinks, activez la garde 18+ si besoin et suivez les clics des la premiere campagne.
+                Une fois inscrit, ajoutez vos deeplinks, activez la garde 18+ si besoin et suivez les clics dès la première campagne.
               </p>
             </div>
           </motion.div>

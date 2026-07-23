@@ -335,7 +335,7 @@ export default function LinkCard({
               </button>
             ) : (
               <div className="scale-90 sm:scale-100">
-                <PreviewEditButton onClick={handleEdit} variant="option4" />
+                <PreviewEditButton onClick={() => onEdit(link)} variant="option4" />
               </div>
             )}
             

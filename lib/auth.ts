@@ -72,6 +72,8 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
+          if (user.isActive === false) throw new Error('ACCOUNT_DISABLED')
+
           console.log('🔍 Comparing passwords...')
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
           console.log('🔑 Password valid:', isPasswordValid)
@@ -155,6 +157,7 @@ export const authOptions: NextAuthOptions = {
               }
             })
           } else {
+            if (dbUser.isActive === false) return false
             // Mettre à jour l'image si elle a changé
             if (user.image && user.image !== dbUser.image) {
               await prisma.user.update({

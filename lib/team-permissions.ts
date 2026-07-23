@@ -253,7 +253,7 @@ export async function checkTeamPermission(
 
 export async function checkTeamLimit(
   userId: string,
-  limit: 'maxPages' | 'maxLinksPerPage' | 'maxFolders' | 'maxTeamMembers',
+  limit: 'maxPages' | 'maxLinksPerPage' | 'maxMultiLinks' | 'maxFolders' | 'maxTeamMembers',
   currentCount: number
 ): Promise<boolean> {
   const permissions = await getTeamAwareUserPermissions(userId)

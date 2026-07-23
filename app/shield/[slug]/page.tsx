@@ -9,7 +9,7 @@ interface LinkData {
   id: string
   slug: string
   title: string
-  directUrl: string
+  destinationToken: string
   shieldEnabled: boolean
   isUltraLink: boolean
   shieldConfig?: string
@@ -32,6 +32,18 @@ export default function ShieldPage() {
   const [showContent, setShowContent] = useState(false)
   const [shouldAutoRedirect, setShouldAutoRedirect] = useState(false)
 
+  const resolveDestination = useCallback(async () => {
+    if (!link?.destinationToken) return null
+    const response = await fetch(`/api/links/shield/${params.slug}/destination`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: link.destinationToken }),
+    })
+    if (!response.ok) return null
+    const data = await response.json()
+    return typeof data.url === 'string' ? data.url : null
+  }, [link?.destinationToken, params.slug])
+
   useEffect(() => {
     // Détection basique des bots
     const userAgent = navigator.userAgent.toLowerCase()
@@ -50,9 +62,9 @@ export default function ShieldPage() {
 
   // Effet pour la redirection automatique
   useEffect(() => {
-    if (shouldAutoRedirect && canProceed && link?.directUrl) {
+    if (shouldAutoRedirect && canProceed && link?.destinationToken) {
       console.log('Auto-redirect triggered')
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
         // Enregistrer l'action
         fetch(`/api/analytics/shield-action`, {
           method: 'POST',
@@ -64,18 +76,15 @@ export default function ShieldPage() {
           })
         }).catch(console.error)
         
-        // S'assurer que l'URL est valide
-        let targetUrl = link.directUrl
-        if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-          targetUrl = 'https://' + targetUrl
-        }
+        const targetUrl = await resolveDestination()
+        if (!targetUrl) return
         
         console.log('Auto-redirecting to:', targetUrl)
         window.location.href = targetUrl
       }, 500)
       return () => clearTimeout(timer)
     }
-  }, [shouldAutoRedirect, canProceed, link, isBot])
+  }, [shouldAutoRedirect, canProceed, link, isBot, resolveDestination])
 
   const fetchLinkData = async () => {
     try {
@@ -134,15 +143,15 @@ export default function ShieldPage() {
     }, 100)
   }
 
-  const handleProceed = () => {
-    console.log('handleProceed called', { canProceed, link, directUrl: link?.directUrl })
+  const handleProceed = async () => {
+    console.log('handleProceed called', { canProceed, link })
     
     if (!canProceed) {
       console.log('Cannot proceed - timer not finished')
       return
     }
     
-    if (!link?.directUrl) {
+    if (!link?.destinationToken) {
       console.error('No direct URL found')
       return
     }
@@ -158,11 +167,8 @@ export default function ShieldPage() {
       })
     }).catch(console.error)
     
-    // S'assurer que l'URL est valide
-    let targetUrl = link.directUrl
-    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-      targetUrl = 'https://' + targetUrl
-    }
+    const targetUrl = await resolveDestination()
+    if (!targetUrl) return
     
     console.log('Redirecting to:', targetUrl)
     

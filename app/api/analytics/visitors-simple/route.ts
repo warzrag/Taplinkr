@@ -34,7 +34,9 @@ export async function GET(request: Request) {
     }
     
     // Créer un map pour accès rapide aux infos des liens
-    const linkMap = new Map(userLinks.map(link => [link.id, link]))
+    const linkMap = new Map<string, { slug: string; title: string }>(
+      (userLinks as Array<{ id: string; slug: string; title: string }>).map(link => [link.id, link])
+    )
 
     // Construire les conditions de filtre
     const whereConditions: any = {

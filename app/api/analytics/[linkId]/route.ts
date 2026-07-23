@@ -4,10 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { analyticsService } from '@/lib/analytics-service'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { linkId: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ linkId: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
     

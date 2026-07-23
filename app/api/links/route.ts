@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { nanoid } from 'nanoid'
 import { getUpgradeMessage } from '@/lib/permissions'
-import { getTeamAwareUserPermissions, checkTeamLimit } from '@/lib/team-permissions'
+import { checkTeamLimit } from '@/lib/team-permissions'
 import { validateURL } from '@/lib/url-validator'
 
 export async function GET() {
@@ -12,9 +11,8 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    // Si pas de session, retourner un objet avec un tableau vide au lieu d'une erreur
     if (!session?.user?.id) {
-      return NextResponse.json({ links: [] })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Récupérer d'abord l'utilisateur avec son équipe
@@ -134,18 +132,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier les limites du plan en tenant compte de l'équipe
-    const userPermissions = await getTeamAwareUserPermissions(userId)
-
     // Compter les liens existants
     const linkCount = await prisma.link.count({
       where: { userId }
     })
 
-    // Vérifier la limite de liens par page pour le plan gratuit
-    if (!(await checkTeamLimit(userId, 'maxLinksPerPage', linkCount))) {
+    // Vérifier la limite de pages du compte
+    if (!(await checkTeamLimit(userId, 'maxPages', linkCount))) {
       return NextResponse.json({ 
-        error: 'Limite de liens atteinte',
-        message: getUpgradeMessage('maxLinksPerPage')
+        error: 'Limite de pages atteinte',
+        message: getUpgradeMessage('maxPages')
       }, { status: 403 })
     }
 
@@ -168,15 +164,6 @@ export async function POST(request: NextRequest) {
 
     // Validation selon le type de lien
     if (isDirect) {
-      // Vérifier si l'utilisateur peut créer des liens directs (plan Standard requis)
-      const canCreateDirectLinks = userPermissions.plan === 'standard' || userPermissions.plan === 'premium'
-      if (!canCreateDirectLinks) {
-        return NextResponse.json({ 
-          error: 'Les liens directs nécessitent un plan Standard ou Premium',
-          message: 'Passez à un plan supérieur pour créer des liens directs'
-        }, { status: 403 })
-      }
-      
       // Pour un lien direct, on vérifie l'URL de redirection
       if (!directUrl) {
         return NextResponse.json({ error: 'URL de redirection requise pour un lien direct' }, { status: 400 })

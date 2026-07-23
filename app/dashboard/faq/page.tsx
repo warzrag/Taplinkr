@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { HelpCircle, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'

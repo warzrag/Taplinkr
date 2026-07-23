@@ -17,9 +17,11 @@ import {
   Plus,
   Sparkles,
   Trash2,
+  Zap,
   X,
 } from 'lucide-react'
 import { Link as LinkType } from '@/types'
+import { normalizeHttpURL } from '@/lib/url-validator'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
 import IconUpload from './upload/IconUpload'
@@ -30,6 +32,7 @@ interface CreateLinkModalProps {
   onClose: () => void
   onSuccess: (newLink?: any) => void
   editingLink?: LinkType | null
+  initialMode?: 'landing' | 'direct'
 }
 
 interface PageLink {
@@ -72,13 +75,15 @@ function inferTitleFromUrl(url: string) {
   }
 }
 
-export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink }: CreateLinkModalProps) {
+export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink, initialMode = 'landing' }: CreateLinkModalProps) {
   const [loading, setLoading] = useState(false)
   const [imageUploading, setImageUploading] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
   const [activePanel, setActivePanel] = useState<'start' | 'identity' | 'links' | 'style'>('start')
+  const [pageMode, setPageMode] = useState<'landing' | 'direct'>('landing')
+  const [directUrl, setDirectUrl] = useState('')
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -100,6 +105,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     if (!isOpen) return
 
     if (editingLink) {
+      setPageMode(editingLink.isDirect ? 'direct' : 'landing')
+      setDirectUrl(editingLink.directUrl || '')
+      setActivePanel('identity')
       setTitle(editingLink.title || '')
       setDescription(editingLink.description || editingLink.bio || '')
       setSlug(editingLink.slug || '')
@@ -126,6 +134,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setBorderRadius(editingLink.borderRadius || 'rounded-2xl')
       setCustomSlugTouched(true)
     } else {
+      setPageMode(initialMode)
+      setDirectUrl('')
       setTitle('')
       setDescription('')
       setSlug('')
@@ -142,9 +152,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setBorderRadius('rounded-2xl')
       setCustomSlugTouched(false)
       setShowAdvanced(false)
-      setActivePanel('start')
+      setActivePanel(initialMode === 'direct' ? 'identity' : 'start')
     }
-  }, [isOpen, editingLink])
+  }, [isOpen, editingLink, initialMode])
 
   useEffect(() => {
     if (!customSlugTouched) {
@@ -180,6 +190,18 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     [links]
   )
 
+  const panelSteps = pageMode === 'direct'
+    ? [
+        ['start', 'Type', 'Page ou redirection'],
+        ['identity', 'Destination', 'Nom, URL et destination'],
+      ]
+    : [
+        ['start', 'Modele', 'Choisir une base'],
+        ['identity', 'Profil', 'Nom, bio, photo'],
+        ['links', 'Boutons', 'Liens a publier'],
+        ['style', 'Design', 'Couleurs et rendu'],
+      ]
+
   const previewLink = useMemo(() => ({
     id: editingLink?.id || 'preview',
     slug: slug || 'votre-page',
@@ -188,7 +210,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     profileImage,
     profileStyle: 'circle',
     coverImage,
-    isDirect: false,
+    isDirect: pageMode === 'direct',
     isActive: true,
     instagramUrl,
     tiktokUrl,
@@ -215,7 +237,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       updatedAt: new Date().toISOString(),
     })),
     userId: '',
-    directUrl: '',
+    directUrl,
     shieldEnabled: false,
     isUltraLink: false,
     isOnline: false,
@@ -224,7 +246,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     views: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  }), [accentColor, backgroundColor, borderRadius, coverImage, description, editingLink?.id, instagramUrl, links, profileImage, slug, textColor, tiktokUrl, title, twitterUrl, youtubeUrl])
+  }), [accentColor, backgroundColor, borderRadius, coverImage, description, directUrl, editingLink?.id, instagramUrl, links, pageMode, profileImage, slug, textColor, tiktokUrl, title, twitterUrl, youtubeUrl])
 
   const updateLink = (index: number, field: keyof PageLink, value: string) => {
     setLinks(current => {
@@ -256,6 +278,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }
 
   const applyStarter = (kind: 'creator' | 'premium' | 'social') => {
+    setPageMode('landing')
     if (kind === 'creator') {
       setDescription(description || 'Tous mes contenus, reseaux et offres au meme endroit.')
       setLinks([
@@ -280,6 +303,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         { title: 'YouTube', url: 'https://youtube.com/', description: '', icon: '', iconImage: '' },
       ])
     }
+    setActivePanel('identity')
+  }
+
+  const startDirectLink = () => {
+    setPageMode('direct')
     setActivePanel('identity')
   }
 
@@ -319,7 +347,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       return
     }
 
-    if (validLinks.length === 0) {
+    const normalizedDirectUrl = normalizeHttpURL(directUrl)
+    if (pageMode === 'direct' && !normalizedDirectUrl) {
+      toast.error('Ajoutez l’URL de destination')
+      return
+    }
+
+    if (pageMode === 'landing' && validLinks.length === 0) {
       toast.error('Ajoutez au moins un lien avec un titre et une URL')
       return
     }
@@ -333,18 +367,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         slug: slug.trim(),
         description: description.trim() || null,
         bio: description.trim() || null,
-        isDirect: false,
-        directUrl: null,
-        shieldEnabled: false,
-        isUltraLink: false,
-        multiLinks: validLinks.map((link, index) => ({
-          title: link.title.trim(),
-          url: link.url.trim(),
-          description: link.description?.trim() || null,
-          icon: link.icon || '',
-          iconImage: link.iconImage || '',
-          order: index,
-        })),
+        isDirect: pageMode === 'direct',
+        directUrl: pageMode === 'direct' ? normalizedDirectUrl : null,
+        shieldEnabled: pageMode === 'direct' ? Boolean(editingLink?.shieldEnabled) : false,
+        isUltraLink: pageMode === 'direct' ? Boolean(editingLink?.isUltraLink) : false,
+        multiLinks: pageMode === 'landing'
+          ? validLinks.map((link, index) => ({
+              title: link.title.trim(),
+              url: normalizeHttpURL(link.url),
+              description: link.description?.trim() || null,
+              icon: link.icon || '',
+              iconImage: link.iconImage || '',
+              order: index,
+            }))
+          : [],
         profileImage: profileImage || null,
         profileStyle: 'circle',
         coverImage: coverImage || null,
@@ -372,7 +408,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       }
 
       const savedLink = await response.json()
-      toast.success(editingLink ? 'Page mise a jour' : 'Page publiee')
+      toast.success(
+        pageMode === 'direct'
+          ? (editingLink ? 'Lien direct mis a jour' : 'Lien direct publie')
+          : (editingLink ? 'Page mise a jour' : 'Page publiee')
+      )
       onSuccess(savedLink)
       onClose()
     } catch (error) {
@@ -396,21 +436,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2">
                 <Sparkles className="w-3.5 h-3.5" />
-                Studio Taplinkr
+                Création Taplinkr
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-950 dark:text-white">
-                {editingLink ? 'Modifier ma page' : 'Construire ma page'}
+                {editingLink
+                  ? (pageMode === 'direct' ? 'Modifier mon lien direct' : 'Modifier ma page')
+                  : (pageMode === 'direct' ? 'Créer un lien direct' : 'Créer une page de liens')}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Profil, boutons, design et publication au meme endroit.
+                {pageMode === 'direct'
+                  ? 'Une URL Taplinkr courte qui redirige immédiatement vers votre destination.'
+                  : 'Profil, boutons, design et publication au meme endroit.'}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {[
-                  ['start', 'Depart'],
-                  ['identity', '1. Profil'],
-                  ['links', '2. Liens'],
-                  ['style', '3. Style'],
-                ].map(([value, label]) => (
+                {panelSteps.map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
@@ -440,12 +479,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
           <form onSubmit={handleSubmit} className="mx-auto grid w-full max-w-7xl lg:grid-cols-[220px_minmax(0,1fr)_380px]">
             <aside className="hidden border-r border-gray-200 bg-white px-4 py-6 dark:border-gray-800 dark:bg-gray-950 lg:block">
               <div className="sticky top-28 space-y-2">
-                {[
-                  ['start', 'Modele', 'Choisir une base'],
-                  ['identity', 'Profil', 'Nom, bio, photo'],
-                  ['links', 'Boutons', 'Liens a publier'],
-                  ['style', 'Design', 'Couleurs et rendu'],
-                ].map(([value, label, helper]) => (
+                {panelSteps.map(([value, label, helper]) => (
                   <button
                     key={value}
                     type="button"
@@ -468,14 +502,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 <div className="max-w-2xl">
                   <p className="text-sm font-bold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Nouveau</p>
                   <h3 className="mt-2 text-3xl font-bold leading-tight text-gray-950 dark:text-white">
-                    On part de quoi ?
+                    Choisissez un modèle de page
                   </h3>
                   <p className="mt-2 text-base text-gray-600 dark:text-gray-300">
                     Choisissez le type de page. Les boutons de base seront pre-remplis, vous n'aurez plus qu'a remplacer les URLs.
                   </p>
                 </div>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   <button
                     type="button"
                     onClick={() => applyStarter('creator')}
@@ -509,6 +543,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <h4 className="font-bold text-gray-950 dark:text-white">Reseaux</h4>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Instagram, TikTok, YouTube.</p>
                   </button>
+                  <button
+                    type="button"
+                    onClick={startDirectLink}
+                    className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-amber-400 hover:shadow-lg dark:border-amber-500/30 dark:bg-amber-500/10"
+                  >
+                    <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-amber-500 text-white">
+                      <Zap className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-bold text-gray-950 dark:text-white">Lien direct</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Une URL courte qui redirige sans page intermédiaire.</p>
+                  </button>
                 </div>
 
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 dark:bg-gray-950">
@@ -520,29 +565,93 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     onClick={() => setActivePanel('identity')}
                     className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"
                   >
-                    Commencer sans modele
+                    Créer une page vide
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
               </section>
 
               <section className={`${activePanel === 'identity' ? 'block' : 'hidden'} rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5`}>
-                <div className="mb-5">
-                  <p className="text-sm font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Etape 1</p>
-                  <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Qui voit-on sur la page ?</h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Mettez juste le nom et la phrase que vos visiteurs doivent comprendre en premier.</p>
-                </div>
-                <div className="grid gap-4">
-                  <div>
-                    <ImageUpload
-                      value={profileImage}
-                      onChange={setProfileImage}
-                      type="avatar"
-                      compact
-                      onUploadingChange={setImageUploading}
-                    />
-                  </div>
-                  <div className="space-y-4">
+                {pageMode === 'direct' ? (
+                  <>
+                    <div className="mb-5">
+                      <p className="text-sm font-bold uppercase tracking-wide text-amber-600 dark:text-amber-300">Lien direct</p>
+                      <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Choisissez la destination</h3>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Le visiteur clique sur votre URL Taplinkr et arrive directement sur cette adresse.</p>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Nom interne</label>
+                        <input
+                          value={title}
+                          onChange={(event) => setTitle(event.target.value)}
+                          placeholder="Ex : Ma boutique, Mon offre..."
+                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-950 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                        />
+                        <p className="mt-1.5 text-xs text-gray-500">Ce nom sert à retrouver le lien dans votre tableau de bord.</p>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">URL de destination</label>
+                        <input
+                          type="text"
+                          inputMode="url"
+                          value={directUrl}
+                          onChange={(event) => setDirectUrl(event.target.value)}
+                          placeholder="https://votre-site.com/offre"
+                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-950 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">URL courte Taplinkr</label>
+                        <div className="flex overflow-hidden rounded-xl border border-gray-300 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 dark:border-gray-700">
+                          <span className="hidden items-center bg-gray-50 px-3 text-sm text-gray-500 dark:bg-gray-950 sm:flex">taplinkr.com/</span>
+                          <input
+                            value={slug}
+                            onChange={(event) => {
+                              setCustomSlugTouched(true)
+                              setSlug(slugify(event.target.value))
+                            }}
+                            placeholder="mon-offre"
+                            className="min-w-0 flex-1 bg-white px-3 py-3 text-gray-950 outline-none dark:bg-gray-900 dark:text-white"
+                          />
+                        </div>
+                        <div className="mt-2 min-h-5 text-xs">
+                          {checkingSlug && <span className="inline-flex items-center gap-1 text-gray-500"><Loader2 className="h-3 w-3 animate-spin" /> Vérification...</span>}
+                          {!checkingSlug && slugAvailable === true && <span className="inline-flex items-center gap-1 text-green-600"><Check className="h-3 w-3" /> URL disponible</span>}
+                          {!checkingSlug && slugAvailable === false && <span className="inline-flex items-center gap-1 text-red-600"><AlertCircle className="h-3 w-3" /> URL déjà prise</span>}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-5 flex justify-between gap-3">
+                      <button type="button" onClick={() => setActivePanel('start')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Changer de type</button>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-60"
+                      >
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                        {editingLink ? 'Mettre à jour' : 'Publier le lien direct'}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-5">
+                      <p className="text-sm font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Etape 1</p>
+                      <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Qui voit-on sur la page ?</h3>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Mettez juste le nom et la phrase que vos visiteurs doivent comprendre en premier.</p>
+                    </div>
+                    <div className="grid gap-4">
+                      <div>
+                        <ImageUpload
+                          value={profileImage}
+                          onChange={setProfileImage}
+                          type="avatar"
+                          compact
+                          onUploadingChange={setImageUploading}
+                        />
+                      </div>
+                      <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
                         Nom affiche
@@ -566,18 +675,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                       />
                     </div>
-                  </div>
-                </div>
-                <div className="mt-5 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setActivePanel('links')}
-                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"
-                  >
-                    Continuer vers les liens
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
+                      </div>
+                    </div>
+                    <div className="mt-5 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setActivePanel('links')}
+                        className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"
+                      >
+                        Continuer vers les liens
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </>
+                )}
               </section>
 
               <section className={`${activePanel === 'links' ? 'block' : 'hidden'} rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5`}>
@@ -721,6 +832,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 </div>
               </section>
 
+              {pageMode === 'landing' && (
               <section className="rounded-2xl border border-gray-200 dark:border-gray-800">
                 <button
                   type="button"
@@ -796,6 +908,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   </div>
                 )}
               </section>
+              )}
             </div>
 
             <aside className="hidden lg:block border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 p-5">
@@ -810,7 +923,27 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   </a>
                 </div>
 
-                <div className="rounded-[2rem] bg-gray-950 p-3 shadow-2xl">
+                {pageMode === 'direct' && (
+                  <div className="rounded-3xl bg-gray-950 p-6 text-white shadow-2xl">
+                    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-500">
+                      <Zap className="h-6 w-6" />
+                    </div>
+                    <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-white/45">Votre lien court</p>
+                    <p className="mt-2 break-all text-lg font-bold">taplinkr.com/{slug || 'mon-offre'}</p>
+                    <div className="my-6 flex items-center gap-3 text-white/45">
+                      <div className="h-px flex-1 bg-white/15" />
+                      <ArrowRight className="h-5 w-5" />
+                      <div className="h-px flex-1 bg-white/15" />
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/45">Destination</p>
+                    <p className="mt-2 break-all text-sm text-white/80">{directUrl || 'https://votre-site.com/offre'}</p>
+                    <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-200">
+                      Redirection immédiate, suivi des clics inclus.
+                    </div>
+                  </div>
+                )}
+
+                <div className={pageMode === 'direct' ? 'hidden' : 'rounded-[2rem] bg-gray-950 p-3 shadow-2xl'}>
                   <div className="rounded-[1.5rem] overflow-hidden bg-white">
                     <div className="aspect-[9/16] overflow-hidden">
                       <div className="h-full overflow-y-auto" style={{ backgroundColor, color: textColor }}>
@@ -846,14 +979,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             </aside>
 
             <div className="lg:hidden sticky bottom-0 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur px-4 py-3">
-              {activePanel === 'style' ? (
+              {activePanel === 'style' || (pageMode === 'direct' && activePanel === 'identity') ? (
                 <button
                   type="submit"
                   disabled={loading || imageUploading}
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white disabled:opacity-60"
                 >
                   {loading || imageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {imageUploading ? 'Upload en cours' : editingLink ? 'Mettre a jour' : 'Publier ma page'}
+                  {imageUploading
+                    ? 'Upload en cours'
+                    : editingLink
+                      ? 'Mettre a jour'
+                      : pageMode === 'direct'
+                        ? 'Publier le lien direct'
+                        : 'Publier ma page'}
                 </button>
               ) : (
                 <button
@@ -869,7 +1008,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
             <div className="hidden lg:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-2xl dark:border-gray-800 dark:bg-gray-950">
               <div className="text-sm text-gray-500">
-                {validLinks.length} lien{validLinks.length > 1 ? 's' : ''} pret{validLinks.length > 1 ? 's' : ''}
+                {pageMode === 'direct'
+                  ? (directUrl ? 'Destination prête' : 'Destination à compléter')
+                  : `${validLinks.length} lien${validLinks.length > 1 ? 's' : ''} pret${validLinks.length > 1 ? 's' : ''}`}
               </div>
               <button
                 type="button"
@@ -885,7 +1026,13 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
               >
                 {loading || imageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {imageUploading ? 'Upload en cours' : editingLink ? 'Mettre a jour' : 'Publier ma page'}
+                {imageUploading
+                  ? 'Upload en cours'
+                  : editingLink
+                    ? 'Mettre a jour'
+                    : pageMode === 'direct'
+                      ? 'Publier le lien direct'
+                      : 'Publier ma page'}
               </button>
             </div>
           </form>

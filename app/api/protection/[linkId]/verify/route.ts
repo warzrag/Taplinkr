@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { passwordProtectionService } from '@/lib/password-protection'
+import { createSignedToken, passwordCookieName } from '@/lib/signed-token'
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { linkId: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ linkId: string }> }) {
+  const params = await props.params;
   try {
     const { password } = await request.json()
     const ip = request.headers.get('x-forwarded-for') || 
@@ -24,11 +23,14 @@ export async function POST(
     if (result.success) {
       // Set a session cookie or token to remember verification
       const response = NextResponse.json({ success: true })
-      response.cookies.set(`verified_${params.linkId}`, 'true', {
+      const maxAge = 60 * 60 * 24
+      const token = createSignedToken('password-access', params.linkId, Date.now() + maxAge * 1000)
+      response.cookies.set(passwordCookieName(params.linkId), token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 // 24 hours
+        sameSite: 'strict',
+        path: '/',
+        maxAge,
       })
       return response
     } else {

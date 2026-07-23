@@ -3,18 +3,32 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { EmailService } from '@/lib/email-service'
 import { nanoid } from 'nanoid'
+import { checkRateLimit, getClientIP, RateLimitPresets } from '@/lib/rate-limit'
+import { validateUsername } from '@/lib/username'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password, name } = body
+    const email = String(body.email || '').trim().toLowerCase()
+    const password = String(body.password || '')
+    const name = typeof body.name === 'string' ? body.name.trim().slice(0, 100) : ''
+    const preferredUsername = body.username ? validateUsername(body.username) : null
+
+    const rateLimit = checkRateLimit(`register:${getClientIP(request)}`, RateLimitPresets.AUTH_REGISTER)
+    if (!rateLimit.success) {
+      return NextResponse.json({ message: rateLimit.message }, { status: 429 })
+    }
 
     // Validation basique
-    if (!email || !password) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8 || password.length > 128) {
       return NextResponse.json(
-        { message: 'Email et mot de passe requis' },
+        { message: 'Email valide et mot de passe de 8 à 128 caractères requis' },
         { status: 400 }
       )
+    }
+
+    if (preferredUsername && 'error' in preferredUsername) {
+      return NextResponse.json({ message: preferredUsername.error }, { status: 400 })
     }
 
     // Vérifier si l'utilisateur existe déjà
@@ -30,11 +44,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Générer un username unique
-    const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
-    let username = baseUsername
+    const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24) || 'creator'
+    let username = preferredUsername && 'username' in preferredUsername ? preferredUsername.username : baseUsername
     let counter = 1
 
     while (await prisma.user.findUnique({ where: { username } })) {
+      if (preferredUsername && 'username' in preferredUsername) {
+        return NextResponse.json({ message: "Ce nom d’utilisateur vient d’être pris. Choisissez-en un autre." }, { status: 409 })
+      }
       username = `${baseUsername}${counter}`
       counter++
     }
@@ -71,12 +88,10 @@ export async function POST(request: NextRequest) {
     )
 
     // Retourner l'utilisateur sans le mot de passe
-    const { password: _, ...userWithoutPassword } = user
-
     return NextResponse.json(
       { 
         message: 'Compte créé avec succès ! Vérifiez votre email pour activer votre compte.',
-        user: userWithoutPassword,
+        user: { id: user.id, email: user.email, name: user.name, username: user.username },
         requiresEmailVerification: true
       },
       { status: 201 }

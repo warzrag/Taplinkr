@@ -27,9 +27,20 @@ export function middleware(request: NextRequest) {
     '/api/test-login',
     '/api/test-register',
     '/api/test-route',
+    '/api/test-clicks',
+    '/api/test-create',
     '/api/links/test',
     '/api/teams/test',
     '/api/analytics/test-simple',
+    '/api/check-auth',
+    '/api/check-clicks',
+    '/api/check-db',
+    '/api/check-links',
+    '/api/check-my-links',
+    '/api/force-add-clicks',
+    '/api/links-temp-fix',
+    '/api/migrate',
+    '/api/sync-user-links',
   ]
 
   if (
@@ -55,9 +66,15 @@ export function middleware(request: NextRequest) {
   } else if (pathname.match(/\.(jpg|jpeg|png|gif|svg|ico|woff2)$/)) {
     // Images et fonts - cache long
     response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
-  } else if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+  } else if (
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/teams')
+  ) {
     // Pages dashboard/admin - pas de cache
-    response.headers.set('Cache-Control', 'private, no-cache, must-revalidate')
+    response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate')
   } else if (pathname.startsWith('/')) {
     // Pages publiques - cache court
     response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')

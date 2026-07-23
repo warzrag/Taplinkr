@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { EmailService } from '@/lib/email-service'
 import { nanoid } from 'nanoid'
+import { checkRateLimit, getClientIP, RateLimitPresets } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
+    const body = await request.json()
+    const email = String(body.email || '').trim().toLowerCase()
+
+    const rateLimit = checkRateLimit(`resend-verification:${getClientIP(request)}:${email}`, RateLimitPresets.AUTH_RESET_PASSWORD)
+    if (!rateLimit.success) return NextResponse.json({ error: rateLimit.message }, { status: 429 })
 
     if (!email) {
       return NextResponse.json(

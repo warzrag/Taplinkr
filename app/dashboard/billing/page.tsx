@@ -142,7 +142,7 @@ export default function BillingPage() {
         </motion.div>
 
         {/* Code promo */}
-        {userPlan === 'free' && (
+        {(userPlan as string) === 'free' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

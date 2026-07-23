@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getLocationFromIP } from '@/lib/geo-location-helper'
+import { getClientIP } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Récupérer les informations de la requête
-    const ip = request.ip || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const ip = getClientIP(request)
     const userAgent = request.headers.get('user-agent') || ''
     const referer = request.headers.get('referer') || ''
 
@@ -36,12 +37,13 @@ export async function POST(request: NextRequest) {
     }
 
     // ⚡ RATE LIMITING (GetMySocial style - max 10 clics/minute par IP)
-    const ipAddress = ip.toString().split(',')[0].trim()
+    const ipAddress = ip.slice(0, 64)
     const oneMinuteAgo = new Date(Date.now() - 60000)
 
     const recentClicks = await prisma.click.count({
       where: {
         ip: ipAddress,
+        multiLinkId,
         createdAt: { gte: oneMinuteAgo }
       }
     })
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    if (!multiLink) {
+    if (!multiLink || !multiLink.parentLink?.isActive) {
       return NextResponse.json({ error: 'MultiLink non trouvé' }, { status: 404 })
     }
 
@@ -105,19 +107,19 @@ export async function POST(request: NextRequest) {
         linkId: multiLink.parentLinkId,
         userId: multiLink.parentLink.userId,
         ip: ipAddress,
-        userAgent,
-        referer,
+        userAgent: userAgent.slice(0, 512),
+        referer: referer.slice(0, 2048),
         device,
         browser,
         os,
-        screenResolution: screenResolution || null,
-        language: language || null,
-        timezone: timezone || null,
+        screenResolution: String(screenResolution || '').slice(0, 32) || null,
+        language: String(language || '').slice(0, 32) || null,
+        timezone: String(timezone || '').slice(0, 64) || null,
         country: locationData.country,
         city: locationData.city || null,
         region: locationData.region || null,
-        latitude: locationData.latitude || null,
-        longitude: locationData.longitude || null,
+        latitude: locationData.lat || null,
+        longitude: locationData.lon || null,
         multiLinkId: multiLinkId,
         sessionId: sessionId || null // 🔥 Stocker le sessionId
       }

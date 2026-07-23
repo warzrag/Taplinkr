@@ -18,11 +18,14 @@ export interface Link {
   title: string
   internalName?: string
   description?: string
+  bio?: string
   color?: string
   icon?: string
   coverImage?: string
   coverImagePosition?: string
   profileImage?: string
+  profileStyle?: string
+  animation?: string
   fontFamily?: string
   borderRadius?: string
   backgroundColor?: string

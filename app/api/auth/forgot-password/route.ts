@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendPasswordResetEmail } from '@/lib/email'
+import { EmailService } from '@/lib/email-service'
 import { nanoid } from 'nanoid'
+import { checkRateLimit, getClientIP, RateLimitPresets } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
+    const body = await request.json()
+    const email = String(body.email || '').trim().toLowerCase()
+
+    const rateLimit = checkRateLimit(`password-reset:${getClientIP(request)}:${email}`, RateLimitPresets.AUTH_RESET_PASSWORD)
+    if (!rateLimit.success) return NextResponse.json({ error: rateLimit.message }, { status: 429 })
 
     if (!email) {
       return NextResponse.json(
@@ -50,7 +55,12 @@ export async function POST(request: NextRequest) {
 
     // Envoyer l'email
     try {
-      await sendPasswordResetEmail(user.email, user.name || user.username, token)
+      const result = await EmailService.sendPasswordResetEmail(
+        user.email,
+        user.name || user.username || 'utilisateur',
+        token
+      )
+      if (!result.success) throw result.error
     } catch (emailError) {
       console.error('Erreur envoi email:', emailError)
       // Ne pas bloquer si l'email échoue, mais logger l'erreur

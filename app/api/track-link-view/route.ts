@@ -5,7 +5,9 @@ import { getLocationFromIP } from '@/lib/geo-location-helper'
 
 export async function POST(request: NextRequest) {
   try {
-    const { linkId, referrer, userAgent, screenResolution, language, timezone } = await request.json()
+    const { linkId, screenResolution, language, timezone } = await request.json()
+    const userAgent = request.headers.get('user-agent') || ''
+    const referrer = request.headers.get('referer') || ''
     
     if (!linkId) {
       return NextResponse.json({ error: 'Link ID required' }, { status: 400 })
@@ -23,12 +25,21 @@ export async function POST(request: NextRequest) {
         id: true, 
         userId: true,
         views: true,
-        isDirect: true
+        isDirect: true,
+        isActive: true
       }
     })
 
-    if (!link) {
+    if (!link || !link.isActive) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
+    }
+
+    const ipAddress = ip.toString().split(',')[0].trim().slice(0, 64)
+    const recentViews = await prisma.click.count({
+      where: { linkId, ip: ipAddress, createdAt: { gte: new Date(Date.now() - 60_000) } }
+    })
+    if (recentViews >= 10) {
+      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 })
     }
 
     // On ne compte les vues que pour les liens directs (pas pour les multi-liens)
@@ -70,7 +81,6 @@ export async function POST(request: NextRequest) {
                   userAgent?.toLowerCase().includes('tablet') ? 'tablet' : 'desktop'
 
     // Récupérer la géolocalisation
-    const ipAddress = ip.toString().split(',')[0].trim()
     let locationData
     try {
       locationData = await getLocationFromIP(ipAddress)
@@ -94,9 +104,9 @@ export async function POST(request: NextRequest) {
         device,
         browser,
         os,
-        screenResolution,
-        language,
-        timezone,
+        screenResolution: typeof screenResolution === 'string' ? screenResolution.slice(0, 32) : null,
+        language: typeof language === 'string' ? language.slice(0, 32) : null,
+        timezone: typeof timezone === 'string' ? timezone.slice(0, 64) : null,
         country: locationData.country,
         city: locationData.city || null,
         region: locationData.region || null,

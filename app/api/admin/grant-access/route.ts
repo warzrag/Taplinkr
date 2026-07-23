@@ -15,15 +15,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { userId, plan, duration, discount } = body
 
-    if (!userId || !plan) {
+    const allowedPlans = new Set(['free', 'standard', 'premium'])
+    const durationDays = Number(duration)
+    if (!userId || !allowedPlans.has(plan) || !Number.isInteger(durationDays) || durationDays < -1 || durationDays > 3650) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
     }
 
     // Calculer la date d'expiration
     let planExpiresAt = null
-    if (duration > 0) {
+    if (durationDays > 0) {
       planExpiresAt = new Date()
-      planExpiresAt.setDate(planExpiresAt.getDate() + duration)
+      planExpiresAt.setDate(planExpiresAt.getDate() + durationDays)
     }
     // Si duration = -1, c'est à vie donc planExpiresAt reste null
 
@@ -43,9 +45,15 @@ export async function POST(request: NextRequest) {
       console.log(`Réduction de ${discount}% appliquée pour l'utilisateur ${userId}`)
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      user: updatedUser 
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        plan: updatedUser.plan,
+        planExpiresAt: updatedUser.planExpiresAt,
+      }
     })
   } catch (error) {
     console.error('Erreur lors de l\'attribution de l\'accès:', error)

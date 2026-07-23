@@ -21,6 +21,22 @@ const DANGEROUS_PROTOCOLS = [
 ] as const
 
 /**
+ * Ajoute https:// lorsqu'un visiteur saisit simplement un domaine.
+ * Les protocoles explicites sont conservés afin que validateURL puisse
+ * ensuite rejeter ceux qui sont dangereux.
+ */
+export function normalizeHttpURL(url: string): string {
+  const trimmedUrl = typeof url === 'string' ? url.trim() : ''
+  if (!trimmedUrl) return ''
+
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmedUrl)) {
+    return trimmedUrl
+  }
+
+  return `https://${trimmedUrl.replace(/^\/+/, '')}`
+}
+
+/**
  * Valide une URL et vérifie qu'elle n'utilise que des protocoles sûrs
  *
  * @param url - L'URL à valider

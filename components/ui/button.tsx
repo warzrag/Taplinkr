@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'subtle' | 'link'
-type ButtonSize = 'sm' | 'md' | 'lg' | 'xl'
+type ButtonVariant = 'primary' | 'default' | 'secondary' | 'outline' | 'ghost' | 'subtle' | 'link'
+type ButtonSize = 'sm' | 'md' | 'lg' | 'xl' | 'icon'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
@@ -15,7 +15,9 @@ const baseStyles = 'relative inline-flex items-center justify-center gap-2 round
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: 'bg-brand-600 text-white shadow-sm hover:bg-brand-500 active:translate-y-0',
+  default: 'bg-brand-600 text-white shadow-sm hover:bg-brand-500 active:translate-y-0',
   secondary: 'border border-border/80 bg-white dark:bg-gray-800 text-foreground shadow-sm hover:border-[hsl(var(--border-strong))] active:translate-y-0',
+  outline: 'border border-border/80 bg-transparent text-foreground shadow-sm hover:bg-foreground/5 active:translate-y-0',
   ghost: 'bg-transparent text-foreground/70 hover:bg-foreground/5 hover:text-foreground active:translate-y-0',
   subtle: 'bg-[hsl(var(--surface-muted))] text-foreground/80 hover:text-foreground hover:bg-[hsl(var(--surface-muted))]/80 active:translate-y-0',
   link: 'rounded-none bg-transparent px-0 py-0 h-auto text-sm font-semibold text-brand-600 shadow-none hover:text-brand-500 hover:underline focus-visible:outline-offset-4',
@@ -26,6 +28,7 @@ const sizeStyles: Record<ButtonSize, string> = {
   md: 'h-11 px-5 text-sm',
   lg: 'h-12 px-6 text-base',
   xl: 'h-14 px-7 text-base',
+  icon: 'h-10 w-10 p-0',
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

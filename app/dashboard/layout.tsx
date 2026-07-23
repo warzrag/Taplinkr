@@ -38,10 +38,10 @@ export default function DashboardLayoutWrapper({
   // Afficher le loader pendant le chargement ou si pas encore de session
   if (status === 'loading' || (status === 'unauthenticated' && !shouldRedirect)) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#09090f] text-white flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="h-10 w-10 mx-auto animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-brand-500" />
-          <div className="text-gray-600 dark:text-gray-400">Chargement...</div>
+          <div className="text-[#9696a8]">Chargement...</div>
         </div>
       </div>
     )

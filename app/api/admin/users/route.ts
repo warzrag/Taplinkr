@@ -23,6 +23,7 @@ export async function GET() {
         planExpiresAt: true,
         emailVerified: true,
         createdAt: true,
+        isActive: true,
         _count: {
           select: {
             links: true
@@ -37,7 +38,7 @@ export async function GET() {
     // Ajouter isActive avec une valeur par défaut si elle n'existe pas
     const usersWithActive = users.map(user => ({
       ...user,
-      isActive: true // Temporairement, tous les utilisateurs sont actifs
+      isActive: user.isActive !== false
     }))
 
     return NextResponse.json(usersWithActive)

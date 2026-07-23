@@ -19,11 +19,22 @@ export async function POST(request: NextRequest) {
     // Récupérer le lien pour avoir l'userId
     const link = await prisma.link.findUnique({
       where: { id: linkId },
-      select: { userId: true }
+      select: { userId: true, isActive: true }
     })
     
-    if (!link) {
+    if (!link || !link.isActive) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
+    }
+
+    const ipAddress = ip.toString().split(',')[0].trim().slice(0, 64)
+    const recentClicks = await prisma.click.count({
+      where: { linkId, ip: ipAddress, createdAt: { gte: new Date(Date.now() - 60_000) } }
+    })
+    if (recentClicks >= 10) return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 })
+
+    if (multiLinkId) {
+      const child = await prisma.multiLink.findFirst({ where: { id: multiLinkId, parentLinkId: linkId } })
+      if (!child) return NextResponse.json({ error: 'Sous-lien invalide' }, { status: 400 })
     }
 
     // Créer l'entrée dans la table Click
@@ -35,7 +46,7 @@ export async function POST(request: NextRequest) {
         device: userAgent.includes('Mobile') ? 'mobile' : 'desktop',
         referer,
         userAgent,
-        ip
+        ip: ipAddress
       }
     })
 

@@ -35,23 +35,23 @@ interface FormData {
 const benefits = [
   {
     icon: BarChart3,
-    title: 'Analytics createur',
+    title: 'Statistiques créateur',
     description: 'Tableaux de bord clairs pour mesurer vues, clics, sources et conversions'
   },
   {
     icon: Shield,
-    title: 'Acces securise',
-    description: 'Sessions protegees, donnees serveur et acces prive au dashboard createur'
+    title: 'Accès sécurisé',
+    description: 'Sessions protégées, données côté serveur et accès privé au tableau de bord'
   },
   {
     icon: Users,
     title: 'Collaboration',
-    description: 'Gestion d equipe pour piloter plusieurs pages, campagnes et domaines'
+    description: 'Gestion d’équipe pour piloter plusieurs pages, campagnes et domaines'
   },
 ]
 
 const metrics = [
-  { value: 'Pages', label: 'Hubs createurs', icon: Users },
+  { value: 'Pages', label: 'Pages créateurs', icon: Users },
   { value: 'Stats', label: 'Clics et vues', icon: TrendingUp },
   { value: 'Geo', label: 'Sources et appareils', icon: Globe },
   { value: 'Teams', label: 'Agences', icon: Zap },
@@ -183,15 +183,15 @@ export default function SignIn() {
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-1.5 text-sm font-medium">
                   <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-gray-700 dark:text-gray-300">Plateforme createur</span>
+                  <span className="text-gray-700 dark:text-gray-300">Plateforme créateur</span>
                 </div>
 
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
-                  Pilotez votre hub createur
+                  Pilotez votre page créateur
                 </h1>
 
                 <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Retrouvez vos pages, deeplinks, protections 18+, domaines custom et analytics dans un dashboard unique.
+                  Retrouvez vos pages, deeplinks, protections, domaines personnalisés et statistiques dans un tableau de bord unique.
                 </p>
               </div>
             </div>
@@ -266,7 +266,7 @@ export default function SignIn() {
                   href="/auth/signup"
                   className="text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
                 >
-                  Creer un compte
+                  Créer un compte
                 </Link>
               </div>
 
@@ -280,7 +280,7 @@ export default function SignIn() {
                     Bon retour
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Connectez-vous pour gerer vos pages, deeplinks et analytics
+                    Connectez-vous pour gérer vos pages, deeplinks et statistiques
                   </p>
                 </div>
               </div>
@@ -393,7 +393,7 @@ export default function SignIn() {
                 href="/auth/signup"
                 className="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
               >
-                Creer un compte gratuit
+                Créer un compte gratuit
               </Link>
 
               {/* Security Badge */}
@@ -404,10 +404,10 @@ export default function SignIn() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-gray-900 dark:text-white">
-                      Connexion securisee SSL 256-bit
+                      Connexion sécurisée
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Vos donnees, pages et analytics restent proteges
+                      Vos données et vos pages restent protégées
                     </p>
                   </div>
                 </div>

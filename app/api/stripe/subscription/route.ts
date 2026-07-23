@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
       id: subscription.id,
       status: subscription.status,
       cancel_at_period_end: subscription.cancel_at_period_end,
-      current_period_end: subscription.current_period_end,
-      current_period_start: subscription.current_period_start,
+       current_period_end: subscription.items.data[0]?.current_period_end ?? null,
+       current_period_start: subscription.items.data[0]?.current_period_start ?? null,
       created: subscription.created,
     })
   } catch (error) {

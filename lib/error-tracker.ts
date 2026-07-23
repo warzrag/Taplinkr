@@ -98,7 +98,7 @@ class ErrorTracker {
 export const errorTracker = ErrorTracker.getInstance()
 
 // Wrapper pour les API routes
-export function withErrorTracking(handler: Function) {
+export function withErrorTracking(handler: (req: Request, ...args: any[]) => Promise<Response> | Response) {
   return async (req: Request, ...args: any[]) => {
     try {
       return await handler(req, ...args)
