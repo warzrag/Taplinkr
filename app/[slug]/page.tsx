@@ -6,7 +6,9 @@ import PublicDirectRedirect from '@/components/PublicDirectRedirect'
 import PublicLinkPreviewFinal from '@/components/PublicLinkPreviewFinal'
 import PublicPasswordGate from '@/components/PublicPasswordGate'
 import {
+  getExternalBrowserUrl,
   getInstagramExternalBrowserUrl,
+  getMobilePlatform,
   isInAppBrowser,
   isInstagramInAppBrowser,
 } from '@/lib/external-browser'
@@ -147,12 +149,15 @@ export default async function LinkPage(props: PageProps) {
       const forwardedProto = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim()
       const protocol = forwardedProto === 'http' ? 'http' : 'https'
       const publicUrl = `${protocol}://${host}/${encodeURIComponent(params.slug)}`
+      const externalBrowserUrl = isInstagram
+        ? getInstagramExternalBrowserUrl(publicUrl)
+        : getExternalBrowserUrl(publicUrl, getMobilePlatform(userAgent))
 
       return (
         <PublicDirectRedirect
           destination={destination}
           title={link.title || 'ce lien'}
-          instagramExternalUrl={isInstagram ? getInstagramExternalBrowserUrl(publicUrl) : null}
+          externalBrowserUrl={externalBrowserUrl}
         />
       )
     }
