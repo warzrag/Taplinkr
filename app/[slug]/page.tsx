@@ -5,7 +5,11 @@ import { notFound, redirect } from 'next/navigation'
 import PublicDirectRedirect from '@/components/PublicDirectRedirect'
 import PublicLinkPreviewFinal from '@/components/PublicLinkPreviewFinal'
 import PublicPasswordGate from '@/components/PublicPasswordGate'
-import { isInAppBrowser } from '@/lib/external-browser'
+import {
+  getInstagramExternalBrowserUrl,
+  isInAppBrowser,
+  isInstagramInAppBrowser,
+} from '@/lib/external-browser'
 import { prisma } from '@/lib/prisma'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
@@ -135,11 +139,20 @@ export default async function LinkPage(props: PageProps) {
       console.error('Erreur lors du suivi du lien direct:', error)
     }
 
-    if (isInAppBrowser(userAgent, requestHeaders.get('referer') || '')) {
+    const referer = requestHeaders.get('referer') || ''
+    if (isInAppBrowser(userAgent, referer)) {
+      const isInstagram = isInstagramInAppBrowser(userAgent, referer)
+      const forwardedHost = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host')
+      const host = forwardedHost?.split(',')[0]?.trim() || 'www.taplinkr.com'
+      const forwardedProto = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim()
+      const protocol = forwardedProto === 'http' ? 'http' : 'https'
+      const publicUrl = `${protocol}://${host}/${encodeURIComponent(params.slug)}`
+
       return (
         <PublicDirectRedirect
           destination={destination}
           title={link.title || 'ce lien'}
+          instagramExternalUrl={isInstagram ? getInstagramExternalBrowserUrl(publicUrl) : null}
         />
       )
     }

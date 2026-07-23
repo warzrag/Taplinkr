@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import {
   getExternalBrowserUrl,
+  getInstagramExternalBrowserUrl,
   getMobilePlatform,
   isInAppBrowser,
+  isInstagramInAppBrowser,
 } from '../lib/external-browser'
 
 describe('external browser redirects', () => {
@@ -30,6 +32,17 @@ describe('external browser redirects', () => {
 
   it('does not treat Twitter preview bots as in-app browsers', () => {
     expect(isInAppBrowser('Twitterbot/1.0', 'https://t.co/')).toBe(false)
+  })
+
+  it('detects Instagram without confusing X or Safari', () => {
+    expect(isInstagramInAppBrowser('Mozilla/5.0 Instagram 392.0.0 iPhone')).toBe(true)
+    expect(isInstagramInAppBrowser('Mozilla/5.0 iPhone Safari', 'https://www.instagram.com/')).toBe(true)
+    expect(isInstagramInAppBrowser('Mozilla/5.0 iPhone Safari', 'https://t.co/')).toBe(false)
+  })
+
+  it('builds the Instagram external-browser deeplink used by link-in-bio services', () => {
+    expect(getInstagramExternalBrowserUrl('https://www.taplinkr.com/creator?ref=instagram'))
+      .toBe('instagram://extbrowser/?url=https%3A%2F%2Fwww.taplinkr.com%2Fcreator%3Fref%3Dinstagram')
   })
 
   it('builds the historical Safari URL scheme on iOS', () => {
