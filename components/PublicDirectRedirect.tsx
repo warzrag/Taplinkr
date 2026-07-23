@@ -35,23 +35,25 @@ export default function PublicDirectRedirect({
       }
 
   const openExternalBrowser = useCallback(() => {
-    window.location.href = automaticUrl
+    window.location.assign(automaticUrl)
   }, [automaticUrl])
 
   useEffect(() => {
-    // The server-rendered meta refresh starts this before hydration. This second
-    // attempt covers in-app browsers that ignore meta refreshes.
-    window.location.href = automaticUrl
+    // A tiny client-side transition lets the browser register TapLinkr's title
+    // and favicon while remaining effectively instant for the visitor.
+    const redirectTimer = window.setTimeout(() => {
+      window.location.assign(automaticUrl)
+    }, 120)
     const fallbackTimer = window.setTimeout(() => setShowFallback(true), 1200)
 
     return () => {
+      window.clearTimeout(redirectTimer)
       window.clearTimeout(fallbackTimer)
     }
   }, [automaticUrl])
 
   return (
     <>
-      <meta httpEquiv="refresh" content={`0;url=${automaticUrl}`} />
       <main
         className="min-h-screen bg-[#09090f] px-5 text-white"
         style={{ minHeight: '100dvh', background: '#09090f', color: '#fff', padding: '0 20px' }}
@@ -147,6 +149,11 @@ export default function PublicDirectRedirect({
             </a>
           </div>
         )}
+        <noscript>
+          <a href={destination} className="mt-8 text-sm text-violet-300 underline">
+            {copy.fallback}
+          </a>
+        </noscript>
         </div>
       </main>
     </>

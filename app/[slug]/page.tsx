@@ -143,31 +143,32 @@ export default async function LinkPage(props: PageProps) {
     }
 
     const referer = requestHeaders.get('referer') || ''
+    let externalBrowserUrl: string | null = null
+
     if (isInAppBrowser(userAgent, referer)) {
-      const isInstagram = isInstagramInAppBrowser(userAgent, referer)
       const forwardedHost = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host')
       const host = forwardedHost?.split(',')[0]?.trim() || 'www.taplinkr.com'
       const forwardedProto = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim()
       const protocol = forwardedProto === 'http' ? 'http' : 'https'
       const publicUrl = `${protocol}://${host}/${encodeURIComponent(params.slug)}`
-      const externalBrowserUrl = isInstagram
+      externalBrowserUrl = isInstagramInAppBrowser(userAgent, referer)
         ? getInstagramExternalBrowserUrl(publicUrl)
         : getExternalBrowserUrl(publicUrl, getMobilePlatform(userAgent))
-      const locale = getDirectRedirectLocale(
-        requestHeaders.get('x-vercel-ip-country'),
-        requestHeaders.get('accept-language'),
-      )
-
-      return (
-        <PublicDirectRedirect
-          destination={destination}
-          externalBrowserUrl={externalBrowserUrl}
-          locale={locale}
-        />
-      )
     }
 
-    redirect(destination)
+    // Always serve a real TapLinkr page before navigating. This keeps TapLinkr's
+    // neutral title and favicon attached to the shared URL instead of letting
+    // browsers associate the destination's branding with it.
+    return (
+      <PublicDirectRedirect
+        destination={destination}
+        externalBrowserUrl={externalBrowserUrl}
+        locale={getDirectRedirectLocale(
+          requestHeaders.get('x-vercel-ip-country'),
+          requestHeaders.get('accept-language'),
+        )}
+      />
+    )
   }
 
   return <PublicLinkPreviewFinal link={toPlainObject(link)} />
@@ -186,11 +187,27 @@ export async function generateMetadata(props: PageProps) {
 
   if (link.isDirect) {
     return {
-      title: 'TapLinkr Direct',
-      description: 'Secure redirect powered by TapLinkr.',
+      title: 'TapLinkr — Opening link',
+      description: 'A secure link powered by TapLinkr.',
       robots: {
         index: false,
         follow: false,
+        noarchive: true,
+        nosnippet: true,
+      },
+      openGraph: {
+        title: 'TapLinkr',
+        description: 'A secure link powered by TapLinkr.',
+        url: `/${encodeURIComponent(params.slug)}`,
+        siteName: 'TapLinkr',
+        type: 'website',
+        images: ['/final.png'],
+      },
+      twitter: {
+        card: 'summary',
+        title: 'TapLinkr',
+        description: 'A secure link powered by TapLinkr.',
+        images: ['/final.png'],
       },
     }
   }
