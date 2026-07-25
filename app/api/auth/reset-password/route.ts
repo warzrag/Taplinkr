@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
 
     if (!token || !password) {
       return NextResponse.json(
-        { error: 'Token et mot de passe requis' },
+        { error: 'Token and password are required' },
         { status: 400 }
       )
     }
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Valider la longueur du mot de passe
     if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
       return NextResponse.json(
-        { error: 'Le mot de passe doit contenir au moins 8 caractères' },
+        { error: 'Password must be at least 8 characters long' },
         { status: 400 }
       )
     }
@@ -29,14 +29,14 @@ export async function POST(request: NextRequest) {
 
     if (!verificationToken) {
       return NextResponse.json(
-        { error: 'Token invalide ou expiré' },
+        { error: 'Invalid or expired token' },
         { status: 400 }
       )
     }
 
     if (verificationToken.type !== 'password_reset') {
       return NextResponse.json(
-        { error: 'Token invalide' },
+        { error: 'Invalid token' },
         { status: 400 }
       )
     }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       })
       
       return NextResponse.json(
-        { error: 'Token expiré. Veuillez demander un nouveau lien.' },
+        { error: 'Token expired. Please request a new link.' },
         { status: 400 }
       )
     }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur reset password:', error)
     return NextResponse.json(
-      { error: 'Une erreur est survenue' },
+      { error: 'Something went wrong' },
       { status: 500 }
     )
   }

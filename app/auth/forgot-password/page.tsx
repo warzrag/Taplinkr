@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
       toast.success('Email sent successfully.')
     } catch (error) {
       console.error('Erreur:', error)
-      toast.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+      toast.error(error instanceof Error ? error.message : 'Something went wrong')
     } finally {
       setLoading(false)
     }

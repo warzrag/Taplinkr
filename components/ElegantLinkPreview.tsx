@@ -304,7 +304,7 @@ export default function ElegantLinkPreview({ link, children, showOnHover = true 
                       >
                         <Shield className="w-3.5 h-3.5" />
                       </motion.div>
-                      <span className="text-xs font-medium">Protégé</span>
+                      <span className="text-xs font-medium">Protected</span>
                     </motion.div>
                   )}
                 </div>
@@ -367,7 +367,7 @@ export default function ElegantLinkPreview({ link, children, showOnHover = true 
                       className="flex items-center space-x-1 text-green-500"
                     >
                       <div className="w-2 h-2 bg-green-500 rounded-full" />
-                      <span className="text-xs font-medium">Aperçu live</span>
+                      <span className="text-xs font-medium">Live preview</span>
                     </motion.div>
                   </motion.div>
 

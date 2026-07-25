@@ -15,13 +15,13 @@ interface WorldMapChartProps {
 // Mapping des codes pays pour la carte
 const countryCoordinates: Record<string, { x: number; y: number; name: string }> = {
   'FR': { x: 260, y: 110, name: 'France' },
-  'US': { x: 100, y: 130, name: 'États-Unis' },
+  'US': { x: 100, y: 130, name: 'United States' },
   'GB': { x: 250, y: 95, name: 'Royaume-Uni' },
   'DE': { x: 270, y: 100, name: 'Allemagne' },
   'ES': { x: 245, y: 125, name: 'Espagne' },
   'IT': { x: 275, y: 120, name: 'Italie' },
   'CA': { x: 90, y: 85, name: 'Canada' },
-  'BR': { x: 140, y: 210, name: 'Brésil' },
+  'BR': { x: 140, y: 210, name: 'Brazil' },
   'JP': { x: 440, y: 135, name: 'Japon' },
   'CN': { x: 400, y: 130, name: 'Chine' },
   'IN': { x: 360, y: 160, name: 'Inde' },
@@ -32,8 +32,8 @@ const countryCoordinates: Record<string, { x: number; y: number; name: string }>
   'BE': { x: 262, y: 102, name: 'Belgique' },
   'NL': { x: 265, y: 97, name: 'Pays-Bas' },
   'CH': { x: 268, y: 112, name: 'Suisse' },
-  'SE': { x: 280, y: 75, name: 'Suède' },
-  'NO': { x: 270, y: 70, name: 'Norvège' }
+  'SE': { x: 280, y: 75, name: 'Sweden' },
+  'NO': { x: 270, y: 70, name: 'Norway' }
 }
 
 export default function WorldMapChart({ data }: WorldMapChartProps) {
@@ -144,7 +144,7 @@ export default function WorldMapChart({ data }: WorldMapChartProps) {
 
       {/* Légende */}
       <div className="absolute bottom-2 right-2 bg-white dark:bg-gray-800 rounded-lg p-3 shadow-lg border border-gray-200 dark:border-gray-700">
-        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Intensité des clics</p>
+        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Click intensity</p>
         <div className="flex items-center gap-2">
           <div className="flex gap-1">
             <div className="w-4 h-4 bg-blue-200 rounded" />

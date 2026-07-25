@@ -87,7 +87,7 @@ export default function PublicLinkPreviewStunning({ link }: PublicLinkPreviewPro
     } else {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      toast.success('Lien copié dans le presse-papiers!')
+      toast.success('Link copied to clipboard!')
       setTimeout(() => setCopied(false), 2000)
     }
   }
@@ -195,7 +195,7 @@ export default function PublicLinkPreviewStunning({ link }: PublicLinkPreviewPro
                 }`}
               >
                 <Heart className={`w-5 h-5 inline mr-2 ${liked ? 'fill-current' : ''}`} />
-                {liked ? 'Aimé' : 'J\'aime'}
+                {liked ? 'Liked' : 'Like'}
               </button>
 
               <button
@@ -203,7 +203,7 @@ export default function PublicLinkPreviewStunning({ link }: PublicLinkPreviewPro
                 className="px-5 py-2.5 bg-black/10 backdrop-blur text-white rounded-full border border-white/20 hover:bg-black/20 transition-all transform hover:scale-105 active:scale-95"
               >
                 {copied ? <Check className="w-5 h-5 inline mr-2" /> : <Share2 className="w-5 h-5 inline mr-2" />}
-                {copied ? 'Copié!' : 'Partager'}
+                {copied ? 'Copied!' : 'Share'}
               </button>
 
               <div className="px-5 py-2.5 bg-black/10 backdrop-blur text-white rounded-full border border-white/20">
@@ -299,7 +299,7 @@ export default function PublicLinkPreviewStunning({ link }: PublicLinkPreviewPro
             ) : (
               <div className="text-center py-16 text-gray-400">
                 <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">Aucun lien disponible</p>
+                <p className="text-lg">No links available</p>
               </div>
             )}
           </div>
@@ -314,7 +314,7 @@ export default function PublicLinkPreviewStunning({ link }: PublicLinkPreviewPro
             >
               <Sparkles className="w-4 h-4 text-purple-400 group-hover:rotate-12 transition-transform" />
               <span className="text-sm text-gray-400 group-hover:text-purple-400 transition-colors">
-                Créé avec TapLinkr
+                Made with TapLinkr
               </span>
             </a>
           </div>

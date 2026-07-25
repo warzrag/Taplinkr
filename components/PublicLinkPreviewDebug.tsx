@@ -11,7 +11,7 @@ export default function PublicLinkPreviewDebug({ link }: any) {
         
         {link.multiLinks && link.multiLinks.length > 0 && (
           <div className="space-y-2">
-            <h2 className="font-semibold">Liens:</h2>
+            <h2 className="font-semibold">Links:</h2>
             {link.multiLinks.map((ml: any) => (
               <a
                 key={ml.id}

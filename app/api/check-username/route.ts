@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const username = request.nextUrl.searchParams.get('username')
     if (!username) {
-      return NextResponse.json({ error: 'Nom d’utilisateur requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 })
     }
 
     const validation = validateUsername(username)
@@ -21,12 +21,12 @@ export async function GET(request: NextRequest) {
     })
 
     if (existingUser) {
-      return NextResponse.json({ available: false, error: "Ce nom d’utilisateur est déjà pris" })
+      return NextResponse.json({ available: false, error: "This username is already taken" })
     }
 
     return NextResponse.json({ available: true, username: validation.username })
   } catch (error) {
     console.error('Erreur de vérification du nom d’utilisateur :', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

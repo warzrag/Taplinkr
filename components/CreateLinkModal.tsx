@@ -198,7 +198,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         ['identity', 'Destination', 'Name, URL, and destination'],
       ]
     : [
-        ['start', 'Modele', 'Choisir une base'],
+        ['start', 'Template', 'Choose a starting point'],
         ['identity', 'Profile', 'Name, bio, photo'],
         ['links', 'Buttons', 'Links to publish'],
         ['style', 'Design', 'Colors and appearance'],
@@ -326,7 +326,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       await navigator.clipboard.writeText(`${window.location.origin}/${slug || 'votre-page'}`)
       toast.success('URL copiee')
     } catch {
-      toast.error('Impossible de copier le lien')
+      toast.error('Unable to copy the link')
     }
   }
 
@@ -334,7 +334,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     event.preventDefault()
 
     if (!title.trim()) {
-      toast.error('Ajoutez un nom pour votre page')
+      toast.error('Add a name for your page')
       return
     }
 
@@ -360,7 +360,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     }
 
     if (pageMode === 'landing' && validLinks.length === 0) {
-      toast.error('Ajoutez au moins un lien avec un titre et une URL')
+      toast.error('Add at least one link with a title and URL')
       return
     }
 
@@ -422,7 +422,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       onSuccess(savedLink)
       onClose()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+      toast.error(error instanceof Error ? error.message : 'Something went wrong')
     } finally {
       setLoading(false)
     }
@@ -478,7 +478,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
             >
               <X className="w-5 h-5 text-gray-500" />
-              <span className="hidden sm:inline">Fermer</span>
+              <span className="hidden sm:inline">Close</span>
             </button>
           </div>
 
@@ -793,7 +793,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 <div className="mt-5 flex justify-between">
                   <button type="button" onClick={() => setActivePanel('identity')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Back</button>
                   <button type="button" onClick={() => setActivePanel('style')} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700">
-                    Choisir le style
+                    Choose a style
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>

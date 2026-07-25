@@ -76,7 +76,7 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
       }
     } else {
       await navigator.clipboard.writeText(url)
-      toast.success('Lien copié dans le presse-papiers!')
+      toast.success('Link copied to clipboard!')
     }
   }
 
@@ -139,7 +139,7 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
           {/* Debug info - à retirer après */}
           {process.env.NODE_ENV === 'development' && (
             <div className="text-xs text-gray-500 mb-2">
-              Debug: {link.multiLinks?.length || 0} liens trouvés
+              Debug: {link.multiLinks?.length || 0} links found
             </div>
           )}
           
@@ -173,7 +173,7 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
                   
                   <div className="text-left">
                     <div className="font-medium text-gray-900">
-                      {multiLink.title || 'Lien sans titre'}
+                      {multiLink.title || 'Untitled link'}
                     </div>
                     {multiLink.description && (
                       <div className="text-sm text-gray-500">
@@ -189,7 +189,7 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
             ))
           ) : (
             <div className="text-center py-8 text-gray-500">
-              Aucun lien disponible pour le moment
+              No links available right now
             </div>
           )}
         </div>
@@ -197,7 +197,7 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
         {/* Footer */}
         <div className="mt-12 text-center">
           <p className="text-sm text-gray-500">
-            Créé avec{' '}
+            Made with{' '}
             <a 
               href="https://www.taplinkr.com" 
               className="text-purple-600 hover:underline"

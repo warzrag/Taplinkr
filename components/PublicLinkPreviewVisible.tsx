@@ -87,7 +87,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
     } else {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      toast.success('Lien copié!')
+      toast.success('Link copied!')
       setTimeout(() => setCopied(false), 2000)
     }
   }
@@ -191,7 +191,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
                   }`}
                 >
                   <Heart className={`w-4 h-4 inline mr-1.5 ${liked ? 'fill-current' : ''}`} />
-                  {liked ? 'Aimé' : 'J\'aime'}
+                  {liked ? 'Liked' : 'Like'}
                 </button>
 
                 <button
@@ -199,7 +199,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
                   className="px-4 py-2 bg-black/20 backdrop-blur text-white rounded-full text-sm hover:bg-black/30 transition-all transform hover:scale-105"
                 >
                   {copied ? <Check className="w-4 h-4 inline mr-1.5" /> : <Share2 className="w-4 h-4 inline mr-1.5" />}
-                  {copied ? 'Copié!' : 'Partager'}
+                  {copied ? 'Copied!' : 'Share'}
                 </button>
               </div>
 
@@ -288,7 +288,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
                       {clickedLinks.has(multiLink.id) && (
                         <div className="absolute top-3 right-3 flex items-center gap-1 bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
                           <Check className="w-3 h-3" />
-                          Visité
+                          Visited
                         </div>
                       )}
                     </div>
@@ -297,7 +297,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
               ) : (
                 <div className="text-center py-12 bg-white/10 backdrop-blur rounded-2xl">
                   <Sparkles className="w-12 h-12 mx-auto mb-4 text-white/50" />
-                  <p className="text-white/70">Aucun lien disponible</p>
+                  <p className="text-white/70">No links available</p>
                 </div>
               )}
             </div>
@@ -311,7 +311,7 @@ export default function PublicLinkPreviewVisible({ link }: PublicLinkPreviewProp
                 rel="noopener noreferrer"
               >
                 <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                Créé avec TapLinkr
+                Made with TapLinkr
               </a>
             </div>
           </div>

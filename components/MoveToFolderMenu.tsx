@@ -35,7 +35,7 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
         setFolders(data)
       }
     } catch (error) {
-      toast.error('Erreur lors du chargement des dossiers')
+      toast.error('Unable to load folders')
     } finally {
       setLoading(false)
     }
@@ -65,7 +65,7 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center space-x-2">
               <Move className="w-5 h-5" />
-              <span>Déplacer vers un dossier</span>
+              <span>Move to a folder</span>
             </h2>
             <button
               onClick={onClose}
@@ -118,7 +118,7 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
                   <div>
                     <p className="font-medium">{folder.name}</p>
                     {folder.id === currentFolderId && (
-                      <p className="text-sm text-gray-500">Dossier actuel</p>
+                      <p className="text-sm text-gray-500">Current folder</p>
                     )}
                   </div>
                 </button>
@@ -126,7 +126,7 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
 
               {folders.length === 0 && (
                 <p className="text-center text-gray-500 py-8">
-                  Aucun dossier créé. Créez un dossier depuis l'onglet "Dossiers".
+                  No folders yet. Create one from the "Folders" tab.
                 </p>
               )}
             </div>

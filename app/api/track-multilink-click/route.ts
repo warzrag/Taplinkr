@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const { multiLinkId, sessionId, screenResolution, language, timezone } = body
 
     if (typeof multiLinkId !== 'string' || !multiLinkId) {
-      return NextResponse.json({ error: 'multiLinkId requis' }, { status: 400 })
+      return NextResponse.json({ error: 'multiLinkId is required' }, { status: 400 })
     }
 
     const multiLink = await prisma.multiLink.findUnique({
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       include: { parentLink: true },
     })
     if (!multiLink?.parentLink?.isActive) {
-      return NextResponse.json({ error: 'MultiLink non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'MultiLink not found' }, { status: 404 })
     }
 
     const assessment = await assessClickRequest({
@@ -78,6 +78,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, counted: true })
   } catch (error) {
     console.error('Erreur lors de l’enregistrement du clic MultiLink:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

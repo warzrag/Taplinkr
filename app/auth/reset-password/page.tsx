@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
       }, 3000)
     } catch (error) {
       console.error('Erreur:', error)
-      toast.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+      toast.error(error instanceof Error ? error.message : 'Something went wrong')
     } finally {
       setLoading(false)
     }

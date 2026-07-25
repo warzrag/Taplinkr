@@ -335,7 +335,7 @@ export default function UltraElegantLinkCard({ link, onClick, isClicked = false 
               />
               <div>
                 <p className="text-sm font-semibold text-gray-900">{contentInfo.platform}</p>
-                <p className="text-xs text-gray-500">Lien premium</p>
+                <p className="text-xs text-gray-500">Premium link</p>
               </div>
             </div>
 

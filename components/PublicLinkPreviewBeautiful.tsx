@@ -106,7 +106,7 @@ export default function PublicLinkPreviewBeautiful({ link }: PublicLinkPreviewPr
     } else {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      toast.success('Lien copié !')
+      toast.success('Link copied!')
       setTimeout(() => setCopied(false), 2000)
     }
   }
@@ -242,7 +242,7 @@ export default function PublicLinkPreviewBeautiful({ link }: PublicLinkPreviewPr
                   }`}
                 >
                   <Heart className={`w-5 h-5 inline mr-2 ${liked ? 'fill-current' : ''}`} />
-                  {liked ? 'Aimé' : 'J\'aime'}
+                  {liked ? 'Liked' : 'Like'}
                 </motion.button>
 
                 <motion.button
@@ -252,7 +252,7 @@ export default function PublicLinkPreviewBeautiful({ link }: PublicLinkPreviewPr
                   className="px-6 py-3 bg-black/10 text-white rounded-full backdrop-blur-md border border-white/20 hover:bg-black/20 transition-all"
                 >
                   {copied ? <Check className="w-5 h-5 inline mr-2" /> : <Share2 className="w-5 h-5 inline mr-2" />}
-                  {copied ? 'Copié !' : 'Partager'}
+                  {copied ? 'Copied!' : 'Share'}
                 </motion.button>
 
                 <div className="px-6 py-3 bg-black/10 text-white rounded-full backdrop-blur-md border border-white/20">
@@ -359,7 +359,7 @@ export default function PublicLinkPreviewBeautiful({ link }: PublicLinkPreviewPr
             ) : (
               <div className="text-center py-12 text-gray-400">
                 <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Aucun lien disponible pour le moment</p>
+                <p>No links available right now</p>
               </div>
             )}
           </motion.div>
@@ -380,7 +380,7 @@ export default function PublicLinkPreviewBeautiful({ link }: PublicLinkPreviewPr
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Créé avec TapLinkr
+                Made with TapLinkr
               </a>
             </div>
           </motion.div>

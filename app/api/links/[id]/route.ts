@@ -113,11 +113,11 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 
     if (multiLinks !== undefined) {
       if (!Array.isArray(multiLinks) || (!effectiveIsDirect && multiLinks.length === 0)) {
-        return NextResponse.json({ error: 'Au moins un sous-lien valide est requis.' }, { status: 400 })
+        return NextResponse.json({ error: 'At least one valid sub-link is required.' }, { status: 400 })
       }
       for (const item of multiLinks) {
         if (!item?.title || !item?.url || !validateURL(item.url)) {
-          return NextResponse.json({ error: 'Chaque sous-lien doit avoir un titre et une URL http(s) valide.' }, { status: 400 })
+          return NextResponse.json({ error: 'Each sub-link must have a title and a valid HTTP(S) URL.' }, { status: 400 })
         }
       }
     }

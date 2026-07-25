@@ -9,13 +9,13 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { folderId } = await request.json()
 
     if (!folderId) {
-      return NextResponse.json({ error: 'ID du dossier requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Folder ID is required' }, { status: 400 })
     }
 
     // Récupérer l'utilisateur et son équipe
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!user?.teamId) {
-      return NextResponse.json({ error: 'Vous n\'êtes pas membre d\'une équipe' }, { status: 400 })
+      return NextResponse.json({ error: 'You are not a member of a team' }, { status: 400 })
     }
 
     // Vérifier que le dossier appartient à l'utilisateur
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!folder) {
-      return NextResponse.json({ error: 'Dossier non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Folder not found' }, { status: 404 })
     }
 
     // Partager le dossier avec l'équipe
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Erreur partage dossier:', error)
-    return NextResponse.json({ error: 'Erreur lors du partage' }, { status: 500 })
+    return NextResponse.json({ error: 'Unable to share the folder' }, { status: 500 })
   }
 }
 
@@ -68,14 +68,14 @@ export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
     const folderId = searchParams.get('folderId')
 
     if (!folderId) {
-      return NextResponse.json({ error: 'ID du dossier requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Folder ID is required' }, { status: 400 })
     }
 
     // Récupérer l'utilisateur
@@ -97,7 +97,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     if (!folder) {
-      return NextResponse.json({ error: 'Dossier non trouvé ou non autorisé' }, { status: 404 })
+      return NextResponse.json({ error: 'Folder not found or access denied' }, { status: 404 })
     }
 
     // Retirer le dossier du partage
@@ -118,6 +118,6 @@ export async function DELETE(request: NextRequest) {
     })
   } catch (error) {
     console.error('Erreur retrait partage dossier:', error)
-    return NextResponse.json({ error: 'Erreur lors du retrait' }, { status: 500 })
+    return NextResponse.json({ error: 'Unable to remove folder sharing' }, { status: 500 })
   }
 }

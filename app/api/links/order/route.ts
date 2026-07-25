@@ -8,14 +8,14 @@ export async function PATCH(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
     const { linkIds } = body // Array d'IDs dans le nouvel ordre
 
     if (!Array.isArray(linkIds)) {
-      return NextResponse.json({ error: 'linkIds doit être un tableau' }, { status: 400 })
+      return NextResponse.json({ error: 'linkIds must be an array' }, { status: 400 })
     }
 
     // Vérifier que tous les liens appartiennent à l'utilisateur
@@ -27,7 +27,7 @@ export async function PATCH(request: NextRequest) {
     })
 
     if (links.length !== linkIds.length) {
-      return NextResponse.json({ error: 'Certains liens n\'appartiennent pas à l\'utilisateur' }, { status: 403 })
+      return NextResponse.json({ error: 'Some links do not belong to this user' }, { status: 403 })
     }
 
     // Mettre à jour l'ordre de chaque lien
@@ -43,6 +43,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ message: 'Order updated' })
   } catch (error) {
     console.error('Erreur lors de la mise à jour de l\'ordre:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

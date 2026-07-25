@@ -37,7 +37,7 @@ export default function PasswordProtectionModal({
         setPassword('')
       }
     } catch (error) {
-      setError('Erreur lors de la vérification')
+      setError('Verification failed')
     } finally {
       setLoading(false)
     }
@@ -60,10 +60,10 @@ export default function PasswordProtectionModal({
             <Lock size={32} className="text-gray-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Contenu protégé
+            Protected content
           </h1>
           <p className="text-gray-600">
-            Ce lien nécessite un mot de passe pour accéder à "{linkTitle}"
+            This link requires a password to access "{linkTitle}"
           </p>
         </div>
 
@@ -73,9 +73,9 @@ export default function PasswordProtectionModal({
             <div className="flex items-center space-x-2">
               <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
               <div>
-                <p className="text-red-800 font-medium">Accès temporairement bloqué</p>
+                <p className="text-red-800 font-medium">Access temporarily blocked</p>
                 <p className="text-red-600 text-sm">
-                  Réessayez dans {formatLockTime(lockedUntil)}
+                  Try again in {formatLockTime(lockedUntil)}
                 </p>
               </div>
             </div>
@@ -127,14 +127,14 @@ export default function PasswordProtectionModal({
             disabled={loading || !password.trim() || isLocked}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Vérification...' : 'Accéder au contenu'}
+            {loading ? 'Verifying...' : 'Access content'}
           </button>
         </form>
 
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-xs text-gray-500">
-            Ce contenu est protégé par son créateur
+            This content is protected by its creator
           </p>
         </div>
       </div>

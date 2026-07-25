@@ -9,7 +9,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     })
 
     if (!existingLink) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     // Si folderId est fourni, vérifier que le dossier appartient à l'utilisateur
@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       })
 
       if (!folder) {
-        return NextResponse.json({ error: 'Dossier non trouvé' }, { status: 404 })
+        return NextResponse.json({ error: 'Folder not found' }, { status: 404 })
       }
     }
 
@@ -56,6 +56,6 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     return NextResponse.json(link)
   } catch (error) {
     console.error('Erreur lors du déplacement du lien:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

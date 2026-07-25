@@ -66,7 +66,7 @@ export default function PricingPage() {
       window.location.href = data.url
     } catch (error) {
       console.error('Erreur:', error)
-      toast.error('Une erreur est survenue')
+      toast.error('Something went wrong')
     } finally {
       setLoading(null)
     }

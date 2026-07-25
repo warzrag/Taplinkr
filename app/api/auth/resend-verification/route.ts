@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json(
-        { error: 'Email requis' },
+        { error: 'Email is required' },
         { status: 400 }
       )
     }
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // Vérifier si l'email est déjà vérifié
     if (user.emailVerified) {
       return NextResponse.json(
-        { error: 'Cet email est déjà vérifié' },
+        { error: 'This email is already verified' },
         { status: 400 }
       )
     }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors du renvoi de l\'email:', error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: 'Server error' },
       { status: 500 }
     )
   }

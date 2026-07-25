@@ -31,7 +31,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
     { value: '30', label: '30 derniers jours' },
     { value: '90', label: '3 derniers mois' },
     { value: '365', label: '12 derniers mois' },
-    { value: 'custom', label: 'Période personnalisée' }
+    { value: 'custom', label: 'Custom range' }
   ]
 
   const countryOptions = [
@@ -40,7 +40,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
     { value: 'CA', label: 'Canada' },
     { value: 'BE', label: 'Belgique' },
     { value: 'CH', label: 'Suisse' },
-    { value: 'US', label: 'États-Unis' }
+    { value: 'US', label: 'United States' }
   ]
 
   const deviceOptions = [
@@ -59,10 +59,10 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
   ]
 
   const timeOfDayOptions = [
-    { value: 'all', label: 'Toute la journée' },
+    { value: 'all', label: 'All day' },
     { value: 'morning', label: 'Matin (6h-12h)' },
-    { value: 'afternoon', label: 'Après-midi (12h-18h)' },
-    { value: 'evening', label: 'Soirée (18h-24h)' },
+    { value: 'afternoon', label: 'Afternoon (12 PM–6 PM)' },
+    { value: 'evening', label: 'Evening (6 PM–12 AM)' },
     { value: 'night', label: 'Nuit (0h-6h)' }
   ]
 
@@ -132,7 +132,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Filtres avancés</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Advanced filters</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Personnalisez vos analyses</p>
                 </div>
                 <button
@@ -149,7 +149,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
                 <div>
                   <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <Calendar className="w-4 h-4" />
-                    <span>Période</span>
+                    <span>Date range</span>
                   </label>
                   <select
                     value={filters.dateRange}
@@ -229,7 +229,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
                 <div>
                   <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <Clock className="w-4 h-4" />
-                    <span>Moment de la journée</span>
+                    <span>Time of day</span>
                   </label>
                   <select
                     value={filters.timeOfDay}
@@ -267,7 +267,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
                     onClick={resetFilters}
                     className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
-                    Réinitialiser
+                    Reset
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}

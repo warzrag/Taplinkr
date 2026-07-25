@@ -225,7 +225,7 @@ export default function SimpleElegantPreview({ link, children, showOnHover = tru
                       className="absolute top-3 right-3 bg-amber-500 text-white px-2 py-1 rounded-full flex items-center space-x-1"
                     >
                       <Shield className="w-3 h-3" />
-                      <span className="text-xs font-medium">Protégé</span>
+                      <span className="text-xs font-medium">Protected</span>
                     </motion.div>
                   )}
                 </div>
@@ -284,7 +284,7 @@ export default function SimpleElegantPreview({ link, children, showOnHover = tru
                       className="flex items-center space-x-1 text-green-500"
                     >
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                      <span className="text-xs font-medium">Aperçu</span>
+                      <span className="text-xs font-medium">Preview</span>
                     </motion.div>
                   </motion.div>
 

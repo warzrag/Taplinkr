@@ -12,7 +12,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const userId = session.user.id
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     })
 
     if (!existingLink) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     // Vérifier les limites du plan avant de dupliquer
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
 
     if (!(await checkTeamLimit(userId, 'maxLinksPerPage', linkCount))) {
       return NextResponse.json({ 
-        error: 'Limite de liens atteinte',
+        error: 'Link limit reached',
         message: getUpgradeMessage('maxLinksPerPage')
       }, { status: 403 })
     }
@@ -64,6 +64,6 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     return NextResponse.json(duplicatedLink, { status: 201 })
   } catch (error) {
     console.error('Erreur lors de la duplication du lien:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

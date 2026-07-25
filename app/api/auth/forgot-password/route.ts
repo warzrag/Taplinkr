@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json(
-        { error: 'Email requis' },
+        { error: 'Email is required' },
         { status: 400 }
       )
     }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur forgot password:', error)
     return NextResponse.json(
-      { error: 'Une erreur est survenue' },
+      { error: 'Something went wrong' },
       { status: 500 }
     )
   }

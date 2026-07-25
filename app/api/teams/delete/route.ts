@@ -9,7 +9,7 @@ export async function DELETE(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Vérifier que l'utilisateur possède une équipe
@@ -22,7 +22,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     if (!team) {
-      return NextResponse.json({ error: 'Aucune équipe trouvée' }, { status: 404 })
+      return NextResponse.json({ error: 'No team found' }, { status: 404 })
     }
 
     // Retirer tous les membres de l'équipe (sauf le propriétaire)
@@ -64,7 +64,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors de la suppression de l\'équipe:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la suppression de l\'équipe' },
+      { error: 'Unable to delete the team' },
       { status: 500 }
     )
   }

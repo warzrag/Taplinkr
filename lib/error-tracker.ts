@@ -29,7 +29,7 @@ class ErrorTracker {
     const errorLog: ErrorLog = {
       id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date(),
-      message: error.message || 'Erreur inconnue',
+      message: error.message || 'Unknown error',
       type: error.type || 'server',
       severity: error.severity || 'medium',
       ...error

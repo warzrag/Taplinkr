@@ -44,7 +44,7 @@ export default function PreviewEditButton({ onClick, variant = 'option1' }: Prev
               className="flex items-center gap-2"
             >
               <Eye size={16} />
-              <span className="text-sm font-medium">Prévisualiser</span>
+              <span className="text-sm font-medium">Preview</span>
               <Smartphone size={14} className="opacity-70" />
             </motion.div>
           )}
@@ -102,7 +102,7 @@ export default function PreviewEditButton({ onClick, variant = 'option1' }: Prev
             </motion.div>
           </div>
           <span className="text-sm font-medium">
-            Modifier & Prévisualiser
+            Edit & Preview
           </span>
           <motion.div
             animate={{ x: isHovered ? 0 : -10, opacity: isHovered ? 1 : 0 }}
@@ -157,7 +157,7 @@ export default function PreviewEditButton({ onClick, variant = 'option1' }: Prev
               </div>
             </div>
             <span className="text-sm font-medium text-white dark:text-black">
-              Éditer en direct
+              Edit live
             </span>
             <Sparkles size={14} className="text-purple-400 dark:text-purple-600 animate-pulse" />
           </div>

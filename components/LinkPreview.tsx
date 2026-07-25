@@ -126,7 +126,7 @@ export default function LinkPreview({ link, children }: LinkPreviewProps) {
                 {link.isProtected && (
                   <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-full flex items-center space-x-1">
                     <Shield className="w-3 h-3" />
-                    <span className="text-xs font-medium">Protégé</span>
+                    <span className="text-xs font-medium">Protected</span>
                   </div>
                 )}
               </div>
@@ -160,7 +160,7 @@ export default function LinkPreview({ link, children }: LinkPreviewProps) {
                 <div className="mt-4 flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Aperçu en direct
+                    Live preview
                   </span>
                 </div>
               </div>

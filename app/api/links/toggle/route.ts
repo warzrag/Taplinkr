@@ -8,20 +8,20 @@ export async function PATCH(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     let body
     try {
       body = await request.json()
     } catch (e) {
-      return NextResponse.json({ error: 'Corps de requête invalide' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
     
     const { linkId, isActive } = body
 
     if (typeof linkId !== 'string' || typeof isActive !== 'boolean') {
-      return NextResponse.json({ error: 'linkId et isActive requis' }, { status: 400 })
+      return NextResponse.json({ error: 'linkId and isActive are required' }, { status: 400 })
     }
 
     // Vérifier que le lien appartient à l'utilisateur
@@ -30,7 +30,7 @@ export async function PATCH(request: NextRequest) {
     })
 
     if (!existingLink) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     const link = await prisma.link.update({
@@ -41,6 +41,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(link)
   } catch (error) {
     console.error('Erreur lors du toggle du lien:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

@@ -93,8 +93,8 @@ export function useTeamPermissions() {
       const remainingCount = remaining(limit, currentCount)
       toast.error(
         remainingCount === 0 
-          ? `Vous avez atteint la limite de votre plan. ${getUpgradeMessage(limit)}`
-          : `Il vous reste ${remainingCount} élément(s) dans votre plan`,
+          ? `You have reached your plan limit. ${getUpgradeMessage(limit)}`
+          : `You have ${remainingCount} item(s) left on your plan`,
         {
           duration: 5000,
           icon: '⚠️',
@@ -126,7 +126,7 @@ export function useTeamPermissions() {
 
   const getPlan = (): string => {
     if (isAdmin()) return 'Admin'
-    if (teamInfo?.teamOwner) return `${userPermissions.plan} (via équipe)`
+    if (teamInfo?.teamOwner) return `${userPermissions.plan} (through team)`
     return userPermissions.plan
   }
 

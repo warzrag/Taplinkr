@@ -168,7 +168,7 @@ export default function FolderAnalyticsTooltip({
             </div>
           ) : (
             <div className="text-center py-4 text-gray-500 text-sm">
-              Aucune donnée disponible
+              No data available
             </div>
           )}
         </div>

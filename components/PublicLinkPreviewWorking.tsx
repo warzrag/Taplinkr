@@ -81,7 +81,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
     } else {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      toast.success('Lien copié!')
+      toast.success('Link copied!')
       setTimeout(() => setCopied(false), 2000)
     }
   }
@@ -162,7 +162,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
                 }`}
               >
                 <Heart className={`w-4 h-4 inline mr-1.5 ${liked ? 'fill-current' : ''}`} />
-                {liked ? 'Aimé' : 'J\'aime'}
+                {liked ? 'Liked' : 'Like'}
               </button>
 
               <button
@@ -172,7 +172,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
                 {copied ? (
                   <>
                     <Check className="w-4 h-4 inline mr-1.5" />
-                    Copié!
+                    Copied!
                   </>
                 ) : (
                   <>
@@ -242,7 +242,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
                     {/* Badge visité */}
                     {clickedLinks.has(multiLink.id) && (
                       <div className="absolute top-2 right-2 bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
-                        Visité
+                        Visited
                       </div>
                     )}
                   </div>
@@ -251,7 +251,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
             ) : (
               <div className="col-span-full text-center py-12">
                 <Sparkles className="w-12 h-12 mx-auto mb-4 text-white/50" />
-                <p className="text-white/70 text-lg">Aucun lien disponible</p>
+                <p className="text-white/70 text-lg">No links available</p>
               </div>
             )}
           </div>
@@ -265,7 +265,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
               rel="noopener noreferrer"
             >
               <Sparkles className="w-4 h-4" />
-              Créé avec TapLinkr
+              Made with TapLinkr
             </a>
           </div>
         </div>

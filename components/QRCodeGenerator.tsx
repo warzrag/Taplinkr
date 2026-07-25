@@ -59,7 +59,7 @@ export default function QRCodeGenerator({
       setQrCodeUrl(qrCodeDataUrl)
     } catch (error) {
       console.error('Erreur génération QR code:', error)
-      toast.error('Erreur lors de la génération du QR code')
+      toast.error('Unable to generate the QR code')
     }
   }
 
@@ -68,7 +68,7 @@ export default function QRCodeGenerator({
     link.download = `qrcode-${title.toLowerCase().replace(/ /g, '-')}.png`
     link.href = qrCodeUrl
     link.click()
-    toast.success('QR code téléchargé!')
+    toast.success('QR code downloaded!')
   }
 
   const copyQRCode = async () => {
@@ -79,9 +79,9 @@ export default function QRCodeGenerator({
       ])
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-      toast.success('QR code copié!')
+      toast.success('QR code copied!')
     } catch (error) {
-      toast.error('Impossible de copier l\'image')
+      toast.error('Unable to copy the image')
     }
   }
 
@@ -224,7 +224,7 @@ export default function QRCodeGenerator({
                   whileTap={{ scale: 0.98 }}
                 >
                   <Download className="w-4 h-4" />
-                  Télécharger
+                  Download
                 </motion.button>
                 
                 <motion.button
@@ -236,12 +236,12 @@ export default function QRCodeGenerator({
                   {copied ? (
                     <>
                       <Check className="w-4 h-4 text-green-500" />
-                      Copié!
+                      Copied!
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4" />
-                      Copier
+                      Copy
                     </>
                   )}
                 </motion.button>

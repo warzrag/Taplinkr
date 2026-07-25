@@ -35,7 +35,7 @@ export default function ExportButton({ data, type, linkId }: ExportButtonProps) 
         })
         filename = `analytics-link-${linkId}-${new Date().toISOString().split('T')[0]}.csv`
       } else if (type === 'folder') {
-        csvContent = "Dossier,Clics Totaux,Liens,Taux de croissance\n"
+        csvContent = "Folder,Total Clicks,Links,Growth Rate\n"
         // Simulated folder data
         csvContent += "Exemple,100,5,15%\n"
         filename = `analytics-folders-${new Date().toISOString().split('T')[0]}.csv`
@@ -155,7 +155,7 @@ export default function ExportButton({ data, type, linkId }: ExportButtonProps) 
             <BarChart3 className="w-4 h-4 text-blue-600" />
             <div>
               <p className="font-medium text-gray-900 dark:text-gray-100">JSON</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Données brutes</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Raw data</p>
             </div>
           </button>
         </motion.div>

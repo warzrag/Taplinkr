@@ -62,8 +62,8 @@ export function usePermissions() {
       const remainingCount = remaining(limit, currentCount)
       toast.error(
         remainingCount === 0 
-          ? `Vous avez atteint la limite de votre plan. ${getUpgradeMessage(limit)}`
-          : `Il vous reste ${remainingCount} élément(s) dans votre plan`,
+          ? `You have reached your plan limit. ${getUpgradeMessage(limit)}`
+          : `You have ${remainingCount} item(s) left on your plan`,
         {
           duration: 5000,
           icon: '⚠️',

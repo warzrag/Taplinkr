@@ -8,7 +8,7 @@ export async function POST() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Récupérer l'utilisateur et son équipe
@@ -18,11 +18,11 @@ export async function POST() {
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     if (!user.teamId) {
-      return NextResponse.json({ error: 'Vous n\'êtes pas membre d\'une équipe' }, { status: 400 })
+      return NextResponse.json({ error: 'You are not a member of a team' }, { status: 400 })
     }
 
     console.log('🔍 Partage des dossiers pour:', user.email)
@@ -85,7 +85,7 @@ export async function POST() {
   } catch (error) {
     console.error('❌ Erreur partage dossiers:', error)
     return NextResponse.json({
-      error: 'Erreur lors du partage des dossiers',
+      error: 'Unable to share folders',
       details: error instanceof Error ? error.message : 'Erreur inconnue'
     }, { status: 500 })
   }

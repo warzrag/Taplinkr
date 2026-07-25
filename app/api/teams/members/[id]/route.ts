@@ -10,7 +10,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
@@ -18,13 +18,13 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       select: { teamId: true, teamRole: true },
     })
     if (!user?.teamId) {
-      return NextResponse.json({ error: 'Vous n’êtes pas membre d’une équipe' }, { status: 403 })
+      return NextResponse.json({ error: 'You are not a member of a team' }, { status: 403 })
     }
     const team = await prisma.team.findUnique({ where: { id: user.teamId } })
     const isOwner = team?.ownerId === session.user.id
     const isAdmin = user.teamRole === 'admin'
     if (!team || (!isOwner && !isAdmin)) {
-      return NextResponse.json({ error: 'Permission refusée' }, { status: 403 })
+      return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
     }
 
     // Vérifier que le membre appartient bien à l'équipe
@@ -33,14 +33,14 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     })
 
     if (!member || member.teamId !== team.id) {
-      return NextResponse.json({ error: 'Membre non trouvé dans votre équipe' }, { status: 404 })
+      return NextResponse.json({ error: 'Member not found on your team' }, { status: 404 })
     }
 
     if (member.id === team.ownerId) {
-      return NextResponse.json({ error: 'Le propriétaire ne peut pas être retiré' }, { status: 400 })
+      return NextResponse.json({ error: 'The owner cannot be removed' }, { status: 400 })
     }
     if (isAdmin && member.teamRole === 'admin') {
-      return NextResponse.json({ error: 'Seul le propriétaire peut retirer un administrateur' }, { status: 403 })
+      return NextResponse.json({ error: 'Only the owner can remove an administrator' }, { status: 403 })
     }
 
     // Retirer le membre de l'équipe et invalider ses sessions
@@ -57,7 +57,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
   } catch (error) {
     console.error('Erreur lors du retrait du membre:', error)
     return NextResponse.json(
-      { error: 'Erreur lors du retrait du membre' },
+      { error: 'Unable to remove the member' },
       { status: 500 }
     )
   }

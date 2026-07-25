@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const linkId = searchParams.get('linkId') // Pour exclure le lien actuel en cas d'édition
 
     if (!slug) {
-      return NextResponse.json({ available: false, error: 'Slug requis' })
+      return NextResponse.json({ available: false, error: 'Slug is required' })
     }
 
     // Vérifier si le slug existe déjà

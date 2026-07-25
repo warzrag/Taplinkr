@@ -150,7 +150,7 @@ export default function MultiLinkPage({ link, profile }: MultiLinkPageProps) {
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
                 <div className="text-4xl mb-2">🔗</div>
                 <p className="text-white/90 text-sm">
-                  Aucun lien disponible pour le moment
+                  No links available right now
                 </p>
               </div>
             ) : (

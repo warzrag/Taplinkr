@@ -8,14 +8,14 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
     const { folderIds } = body
 
     if (!Array.isArray(folderIds)) {
-      return NextResponse.json({ error: 'folderIds doit être un tableau' }, { status: 400 })
+      return NextResponse.json({ error: 'folderIds must be an array' }, { status: 400 })
     }
 
     // Récupérer l'utilisateur
@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Vérifier que tous les dossiers appartiennent à l'utilisateur
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest) {
     })
 
     if (userFolders.length !== folderIds.length) {
-      return NextResponse.json({ error: 'Certains dossiers ne vous appartiennent pas' }, { status: 403 })
+      return NextResponse.json({ error: 'Some folders do not belong to you' }, { status: 403 })
     }
 
     // Mettre à jour l'ordre des dossiers
@@ -52,6 +52,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Erreur lors de la mise à jour de l\'ordre des dossiers:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

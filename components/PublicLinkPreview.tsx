@@ -160,9 +160,9 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
       // Fallback to clipboard
       try {
         await navigator.clipboard.writeText(url)
-        toast.success('Lien copié dans le presse-papiers!')
+        toast.success('Link copied to clipboard!')
       } catch (error) {
-        toast.error('Impossible de copier le lien')
+        toast.error('Unable to copy the link')
       }
     }
   }
@@ -516,7 +516,7 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
           ) : (
             <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 text-center">
               <div className="text-4xl mb-2">🔗</div>
-              <p className="text-gray-600 text-sm">Aucun lien disponible</p>
+              <p className="text-gray-600 text-sm">No links available</p>
             </div>
           )}
         </div>

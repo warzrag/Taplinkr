@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         where: { id: multiLinkId, parentLinkId: linkId },
       })
       if (!child) {
-        return NextResponse.json({ error: 'Sous-lien invalide' }, { status: 400 })
+        return NextResponse.json({ error: 'Invalid sub-link' }, { status: 400 })
       }
     }
 

@@ -164,7 +164,7 @@ export default function EmbedLink({ url, title, description, icon, onClick, styl
           <h3 className="font-bold text-sm flex items-center gap-2" style={{ color: 'inherit' }}>
             {title}
             <span className={`text-xs px-2 py-0.5 rounded-full bg-gradient-to-r ${embedInfo.color} text-white`}>
-              {embedInfo.type === 'youtube' ? 'Vidéo' : 'Musique'}
+              {embedInfo.type === 'youtube' ? 'Video' : 'Music'}
             </span>
           </h3>
           {description && (

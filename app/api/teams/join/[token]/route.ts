@@ -12,15 +12,15 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
     const { name, password } = body
 
     if (!token) {
-      return NextResponse.json({ error: 'Token manquant' }, { status: 400 })
+      return NextResponse.json({ error: 'Token is missing' }, { status: 400 })
     }
 
     if (!name || !password) {
-      return NextResponse.json({ error: 'Nom et mot de passe requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Name and password are required' }, { status: 400 })
     }
 
     if (password.length < 8) {
-      return NextResponse.json({ error: 'Le mot de passe doit contenir au moins 8 caractères' }, { status: 400 })
+      return NextResponse.json({ error: 'Password must be at least 8 characters long' }, { status: 400 })
     }
 
     // Rechercher l'invitation
@@ -32,16 +32,16 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
     })
 
     if (!invitation) {
-      return NextResponse.json({ error: 'Invitation invalide' }, { status: 404 })
+      return NextResponse.json({ error: 'Invalid invitation' }, { status: 404 })
     }
 
     // Vérifier le statut et l'expiration
     if (normalizeTeamInvitationStatus(invitation.status) !== 'pending') {
-      return NextResponse.json({ error: 'Cette invitation a déjà été utilisée' }, { status: 400 })
+      return NextResponse.json({ error: 'This invitation has already been used' }, { status: 400 })
     }
 
     if (new Date() > invitation.expiresAt) {
-      return NextResponse.json({ error: 'Cette invitation a expiré' }, { status: 400 })
+      return NextResponse.json({ error: 'This invitation has expired' }, { status: 400 })
     }
 
     // Vérifier si l'utilisateur existe déjà
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
 
     if (existingUser) {
       return NextResponse.json({ 
-        error: 'Un compte existe déjà avec cet email. Veuillez vous connecter.' 
+        error: 'An account already exists with this email. Please log in.'
       }, { status: 400 })
     }
 
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
   } catch (error) {
     console.error('Erreur acceptation invitation:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la création du compte' },
+      { error: 'Unable to create the account' },
       { status: 500 }
     )
   }

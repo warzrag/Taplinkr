@@ -7,7 +7,7 @@ export async function POST(req: Request) {
 
     if (!email) {
       return NextResponse.json(
-        { error: 'Email requis' },
+        { error: 'Email is required' },
         { status: 400 }
       )
     }
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Utilisateur non trouvé' },
+        { error: 'User not found' },
         { status: 404 }
       )
     }
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Erreur vérification statut email:', error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: 'Server error' },
       { status: 500 }
     )
   }

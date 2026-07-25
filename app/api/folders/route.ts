@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
     // Vérifier que le nom est fourni
     if (!name || name.trim() === '') {
       console.log('❌ [API FOLDERS] Erreur: Nom vide')
-      return NextResponse.json({ error: 'Le nom du dossier est requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Folder name is required' }, { status: 400 })
     }
 
     // Récupérer l'utilisateur

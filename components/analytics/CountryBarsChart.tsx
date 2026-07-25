@@ -15,13 +15,13 @@ interface CountryBarsChartProps {
 // Noms complets des pays
 const countryNames: Record<string, string> = {
   'FR': '🇫🇷 France',
-  'US': '🇺🇸 États-Unis',
+  'US': '🇺🇸 United States',
   'GB': '🇬🇧 Royaume-Uni',
   'DE': '🇩🇪 Allemagne',
   'ES': '🇪🇸 Espagne',
   'IT': '🇮🇹 Italie',
   'CA': '🇨🇦 Canada',
-  'BR': '🇧🇷 Brésil',
+  'BR': '🇧🇷 Brazil',
   'JP': '🇯🇵 Japon',
   'CN': '🇨🇳 Chine',
   'IN': '🇮🇳 Inde',
@@ -32,8 +32,8 @@ const countryNames: Record<string, string> = {
   'BE': '🇧🇪 Belgique',
   'NL': '🇳🇱 Pays-Bas',
   'CH': '🇨🇭 Suisse',
-  'SE': '🇸🇪 Suède',
-  'NO': '🇳🇴 Norvège',
+  'SE': '🇸🇪 Sweden',
+  'NO': '🇳🇴 Norway',
   'Unknown': '🌍 Inconnu'
 }
 
@@ -51,7 +51,7 @@ export default function CountryBarsChart({ data }: CountryBarsChartProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
         <Globe className="w-12 h-12 mb-3 opacity-30" />
-        <p className="text-sm">Aucune donnée géographique</p>
+        <p className="text-sm">No geographic data</p>
       </div>
     )
   }

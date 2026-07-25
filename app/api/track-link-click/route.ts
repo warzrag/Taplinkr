@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const { linkId } = await request.json()
     if (typeof linkId !== 'string' || !linkId) {
-      return NextResponse.json({ error: 'linkId requis' }, { status: 400 })
+      return NextResponse.json({ error: 'linkId is required' }, { status: 400 })
     }
 
     const link = await prisma.link.findUnique({
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       select: { id: true, userId: true, isActive: true, isDirect: true },
     })
     if (!link?.isActive || !link.isDirect) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     const assessment = await assessClickRequest({ request, linkId })
@@ -51,6 +51,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Erreur lors du suivi du clic:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

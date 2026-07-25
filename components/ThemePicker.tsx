@@ -40,8 +40,8 @@ export default function ThemePicker({ currentTheme, onThemeSelect }: ThemePicker
           <Palette className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Thèmes prédéfinis</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Choisissez un thème pour personnaliser votre page</p>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Preset themes</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Choose a theme to customize your page</p>
         </div>
       </div>
       
@@ -157,7 +157,7 @@ export default function ThemePicker({ currentTheme, onThemeSelect }: ThemePicker
           className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3"
         >
           <Sparkles className="w-5 h-5" />
-          <span className="font-medium">Aperçu du thème: {previewTheme.name}</span>
+          <span className="font-medium">Theme preview: {previewTheme.name}</span>
         </motion.div>
       )}
     </div>

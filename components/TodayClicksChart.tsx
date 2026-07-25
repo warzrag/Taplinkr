@@ -79,7 +79,7 @@ export default function TodayClicksChart() {
               Clics d'aujourd'hui
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Aucun lien trouvé
+              No links found
             </p>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function TodayClicksChart() {
             <TrendingUp className="w-8 h-8 text-gray-400" />
           </div>
           <p className="text-gray-500 dark:text-gray-400">
-            Créez des liens pour voir vos statistiques ici
+            Create links to see your analytics here
           </p>
         </div>
       </motion.div>
@@ -164,7 +164,7 @@ export default function TodayClicksChart() {
               <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {data.hasClicksToday
-                  ? "Statistiques en temps réel"
+                  ? "Real-time analytics"
                   : "Pas de clics aujourd'hui - Historique total"}
               </p>
             </div>

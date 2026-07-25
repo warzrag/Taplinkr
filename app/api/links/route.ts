@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     } = body
 
     if (!title) {
-      return NextResponse.json({ error: 'Titre requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
 
     // Vérifier les limites du plan en tenant compte de l'équipe
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     if (isDirect) {
       // Pour un lien direct, on vérifie l'URL de redirection
       if (!directUrl) {
-        return NextResponse.json({ error: 'URL de redirection requise pour un lien direct' }, { status: 400 })
+        return NextResponse.json({ error: 'A redirect URL is required for a direct link' }, { status: 400 })
       }
       if (!validateURL(directUrl)) {
         return NextResponse.json({
@@ -194,13 +194,13 @@ export async function POST(request: NextRequest) {
     } else {
       // Pour un multi-liens, on vérifie les sous-liens
       if (!multiLinks || !Array.isArray(multiLinks) || multiLinks.length === 0) {
-        return NextResponse.json({ error: 'Au moins un lien requis' }, { status: 400 })
+        return NextResponse.json({ error: 'At least one link is required' }, { status: 400 })
       }
       
       // Valider chaque sous-lien avec protection XSS
       for (const link of multiLinks) {
         if (!link.title || !link.url) {
-          return NextResponse.json({ error: 'Chaque lien doit avoir un titre et une URL' }, { status: 400 })
+          return NextResponse.json({ error: 'Each link must have a title and URL' }, { status: 400 })
         }
 
         // 🔥 VALIDATION SÉCURISÉE - Rejeter javascript:, data:, etc.

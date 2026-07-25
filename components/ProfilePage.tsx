@@ -148,14 +148,14 @@ export default function ProfilePage({ user }: ProfilePageProps) {
                 color: '#1f2937',
                 margin: '0 0 8px 0'
               }}>
-                Aucun lien disponible
+                No links available
               </h3>
               <p style={{ 
                 color: '#6b7280',
                 margin: 0,
                 fontSize: '16px'
               }}>
-                {user.name || user.username} n'a pas encore ajouté de liens.
+                {user.name || user.username} has not added any links yet.
               </p>
             </div>
           ) : (
@@ -265,7 +265,7 @@ export default function ProfilePage({ user }: ProfilePageProps) {
             color: 'rgba(255, 255, 255, 0.8)',
             fontSize: '14px'
           }}>
-            <span>Créé avec</span>
+            <span>Made with</span>
             <div style={{
               width: '20px',
               height: '20px',

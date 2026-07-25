@@ -8,7 +8,7 @@ export default function PublicLinkPreviewMinimal({ link }: PublicLinkPreviewProp
   if (!link) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white">Chargement...</div>
+        <div className="text-white">Loading...</div>
       </div>
     )
   }
@@ -112,7 +112,7 @@ export default function PublicLinkPreviewMinimal({ link }: PublicLinkPreviewProp
           
           {(!link.multiLinks || link.multiLinks.length === 0) && (
             <div className="text-center text-white/60 py-8">
-              Aucun lien disponible
+              No links available
             </div>
           )}
         </div>
@@ -124,7 +124,7 @@ export default function PublicLinkPreviewMinimal({ link }: PublicLinkPreviewProp
           href="https://www.taplinkr.com"
           className="text-white/60 text-sm hover:text-white/80 transition-colors"
         >
-          ✨ Créé avec TapLinkr
+          ✨ Made with TapLinkr
         </a>
       </div>
     </div>

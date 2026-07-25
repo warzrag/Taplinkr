@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const { email: rawEmail, role = 'member', teamId } = body
 
     if (!rawEmail || typeof rawEmail !== 'string') {
-      return NextResponse.json({ error: 'Email requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
     const email = normalizeTeamInviteEmail(rawEmail)
 

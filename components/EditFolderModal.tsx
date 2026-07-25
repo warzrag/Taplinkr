@@ -72,7 +72,7 @@ export default function EditFolderModal({ isOpen, folder, onClose, onSave }: Edi
     
     if (!name.trim()) {
       console.log('❌ [EDIT_FOLDER_MODAL] Erreur: nom vide')
-      toast.error('Le nom du dossier est requis')
+      toast.error('Folder name is required')
       return
     }
 
@@ -191,7 +191,7 @@ export default function EditFolderModal({ isOpen, folder, onClose, onSave }: Edi
                 {/* Icon Selector */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Icône
+                    Icon
                   </label>
                   <button
                     onClick={() => setShowIconPicker(!showIconPicker)}
@@ -278,13 +278,13 @@ export default function EditFolderModal({ isOpen, folder, onClose, onSave }: Edi
                 onClick={handleClose}
                 className="px-6 py-2 text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition-colors"
               >
-                Annuler
+                Cancel
               </button>
               <button
                 onClick={handleSave}
                 className="px-6 py-2 text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-colors shadow-lg"
               >
-                {folder ? 'Enregistrer' : 'Créer'}
+                {folder ? 'Save' : 'Create'}
               </button>
             </div>
           </motion.div>

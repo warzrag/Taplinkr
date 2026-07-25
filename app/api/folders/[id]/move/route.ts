@@ -9,7 +9,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -22,7 +22,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Vérifier que le dossier à déplacer appartient à l'utilisateur
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     })
 
     if (!folder) {
-      return NextResponse.json({ error: 'Dossier non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Folder not found' }, { status: 404 })
     }
 
     // Vérifier que le dossier parent existe si fourni
@@ -47,13 +47,13 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       })
 
       if (!parentFolder) {
-        return NextResponse.json({ error: 'Dossier parent introuvable' }, { status: 404 })
+        return NextResponse.json({ error: 'Parent folder not found' }, { status: 404 })
       }
 
       // Empêcher de déplacer un dossier dans lui-même ou dans ses descendants
       const isDescendant = await checkIfDescendant(folderId, parentId)
       if (folderId === parentId || isDescendant) {
-        return NextResponse.json({ error: 'Impossible de déplacer un dossier dans lui-même ou ses sous-dossiers' }, { status: 400 })
+        return NextResponse.json({ error: 'A folder cannot be moved into itself or one of its subfolders' }, { status: 400 })
       }
     }
 
@@ -78,7 +78,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     return NextResponse.json(updatedFolder)
   } catch (error) {
     console.error('Erreur lors du déplacement du dossier:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 

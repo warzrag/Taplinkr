@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
     const { token } = params
 
     if (!token) {
-      return NextResponse.json({ error: 'Token manquant' }, { status: 400 })
+      return NextResponse.json({ error: 'Token is missing' }, { status: 400 })
     }
 
     // Rechercher l'invitation

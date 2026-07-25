@@ -61,10 +61,10 @@ export default function LinkCard({
         // Rafraîchir immédiatement sans cache
         await refreshLinks()
       } else {
-        alert('Erreur lors du renommage')
+        alert('Unable to rename this link')
       }
     } catch (error) {
-      alert('Erreur lors du renommage du lien')
+      alert('Unable to rename this link')
     }
   }
 
@@ -75,7 +75,7 @@ export default function LinkCard({
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce lien ?')) {
+    if (confirm('Are you sure you want to delete this link?')) {
       onDelete(link.id)
     }
   }
@@ -213,7 +213,7 @@ export default function LinkCard({
                   const levelDescriptions = {
                     1: "Protection basique - Timer simple",
                     2: "Protection standard - Timer 3s + Redirection auto",
-                    3: "Protection élevée - Timer 5s + Validation manuelle"
+                    3: "High protection - 5-second timer + manual validation"
                   }
                   
                   return (
@@ -254,7 +254,7 @@ export default function LinkCard({
                     ml-1 sm:ml-2 p-0.5 sm:p-1 rounded-md transition-all duration-200
                     ${isCopied ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}
                   `}
-                  title={isCopied ? 'Copié !' : 'Copier le lien'}
+                  title={isCopied ? 'Copied!' : 'Copy link'}
                 >
                   {isCopied ? <CheckCircle size={12} className="sm:w-[14px] sm:h-[14px]" /> : <Copy size={12} className="sm:w-[14px] sm:h-[14px]" />}
                 </button>
@@ -290,7 +290,7 @@ export default function LinkCard({
             {link.isDirect ? (
               <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg">
                 <Zap size={14} className="text-purple-600 dark:text-purple-400" />
-                <span className="text-sm text-purple-600 dark:text-purple-400">Lien direct</span>
+                <span className="text-sm text-purple-600 dark:text-purple-400">Direct link</span>
               </div>
             ) : (
               link.multiLinks && link.multiLinks.length > 0 && (
@@ -313,7 +313,7 @@ export default function LinkCard({
               relative inline-flex h-6 w-11 sm:h-7 sm:w-14 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-inner
               ${link.isActive ? 'bg-gradient-to-r from-indigo-500 to-purple-600' : 'bg-gray-300 dark:bg-gray-600'}
             `}
-            title={link.isActive ? 'Désactiver' : 'Activer'}
+            title={link.isActive ? 'Disable' : 'Enable'}
           >
             <span
               className={`
@@ -343,7 +343,7 @@ export default function LinkCard({
               <button
                 onClick={() => onMoveToFolder(link)}
                 className="p-2.5 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-xl transition-all duration-200 hover:shadow-md"
-                title="Déplacer vers un dossier"
+                title="Move to a folder"
               >
                 <Folder size={18} />
               </button>
@@ -382,7 +382,7 @@ export default function LinkCard({
                     className="w-full px-4 py-2.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors duration-200"
                   >
                     <Trash2 size={16} />
-                    Supprimer
+                    Delete
                   </button>
                 </div>
               )}

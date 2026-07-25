@@ -14,7 +14,7 @@ const links = [
   { label: 'Features', href: '/#features' },
   { label: 'Demo', href: '/demo' },
   { label: 'Pricing', href: '/pricing' },
-  { label: 'Cas d’usage', href: '/#cas-usages' },
+  { label: 'Use cases', href: '/#cas-usages' },
 ]
 
 export function SiteHeader() {
@@ -35,7 +35,7 @@ export function SiteHeader() {
     <header className={cn('sticky top-0 z-50 border-b text-white backdrop-blur-lg transition-all', scrolled ? 'border-white/15 bg-slate-950/95 shadow-lg' : 'border-white/10 bg-slate-950/80')}>
       <Container className="flex h-16 items-center justify-between">
         <Link href="/" aria-label="TapLinkr home"><Logo size="sm" animated={false} /></Link>
-        <nav aria-label="Navigation principale" className="hidden items-center gap-7 text-sm font-medium md:flex">
+        <nav aria-label="Primary navigation" className="hidden items-center gap-7 text-sm font-medium md:flex">
           {links.map((item) => <Link key={item.href} href={item.href} className={cn('transition-colors hover:text-white', pathname === item.href ? 'text-white' : 'text-white/70')}>{item.label}</Link>)}
         </nav>
         <div className="hidden items-center gap-4 md:flex">
