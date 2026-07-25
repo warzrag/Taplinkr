@@ -15,7 +15,7 @@ export class EmailService {
       const { data, error } = await resend.emails.send({
         from: emailConfig.from,
         to,
-        subject: `Bienvenue sur TapLinkr, ${userName}! 🎉`,
+        subject: `Welcome to TapLinkr, ${userName}! 🎉`,
         react: WelcomeEmail({ userName, userEmail: to }),
       })
 
@@ -38,7 +38,7 @@ export class EmailService {
       const { data, error } = await resend.emails.send({
         from: emailConfig.from,
         to,
-        subject: 'Vérifiez votre adresse email - TapLinkr',
+        subject: 'Verify your email address - TapLinkr',
         react: VerificationEmail({ userName, verificationUrl }),
       })
 
@@ -61,7 +61,7 @@ export class EmailService {
       const { data, error } = await resend.emails.send({
         from: emailConfig.from,
         to,
-        subject: 'Réinitialisez votre mot de passe - TapLinkr',
+        subject: 'Reset your password - TapLinkr',
         react: ResetPasswordEmail({ userName, resetUrl }),
       })
 
@@ -82,15 +82,15 @@ export class EmailService {
       const { data, error } = await resend.emails.send({
         from: emailConfig.from,
         to,
-        subject: `${inviterName} vous invite à rejoindre ${teamName} sur TapLinkr`,
+        subject: `${inviterName} invited you to join ${teamName} on TapLinkr`,
         html: `
-          <h2>Invitation à rejoindre une équipe</h2>
-          <p>${inviterName} vous invite à rejoindre l'équipe "${teamName}" sur TapLinkr.</p>
-          <p>Cliquez sur le lien ci-dessous pour accepter l'invitation :</p>
+          <h2>You're invited to join a team</h2>
+          <p>${inviterName} invited you to join the "${teamName}" team on TapLinkr.</p>
+          <p>Click the button below to accept the invitation:</p>
           <a href="${inviteUrl}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
-            Accepter l'invitation
+            Accept invitation
           </a>
-          <p>Ou copiez ce lien : ${inviteUrl}</p>
+          <p>Or copy this link: ${inviteUrl}</p>
         `,
       })
 

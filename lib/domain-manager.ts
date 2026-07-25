@@ -18,7 +18,7 @@ export class DomainManager {
     })
 
     if (existing) {
-      throw new Error('Ce domaine est déjà utilisé')
+      throw new Error('This domain is already in use')
     }
 
     // Generate DNS records
@@ -41,7 +41,7 @@ export class DomainManager {
     })
 
     if (!domain) {
-      throw new Error('Domaine non trouvé')
+      throw new Error('Domain not found')
     }
 
     // Check DNS configuration (simplified for demo)
@@ -64,7 +64,7 @@ export class DomainManager {
     })
 
     if (!domain || !domain.verified) {
-      throw new Error('Le domaine doit être vérifié avant la configuration SSL')
+      throw new Error('The domain must be verified before SSL can be configured')
     }
 
     // In a real implementation, this would use Let's Encrypt or similar
@@ -138,7 +138,7 @@ export class DomainManager {
     })
 
     if (!domain || domain.userId !== userId) {
-      throw new Error('Domaine non trouvé ou non autorisé')
+      throw new Error('Domain not found or unauthorized')
     }
 
     await prisma.customDomain.delete({

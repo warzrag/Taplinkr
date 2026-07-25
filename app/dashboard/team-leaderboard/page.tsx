@@ -68,11 +68,11 @@ export default function TeamLeaderboardPage() {
         setData(result)
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Erreur lors du chargement')
+        toast.error(error.error || 'Unable to load the leaderboard.')
       }
     } catch (error) {
       console.error('Erreur leaderboard:', error)
-      toast.error('Erreur lors du chargement du leaderboard')
+      toast.error('Unable to load the leaderboard.')
     } finally {
       setLoading(false)
     }
@@ -119,12 +119,12 @@ export default function TeamLeaderboardPage() {
           <Link href="/dashboard/team">
             <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6">
               <ChevronLeft className="w-5 h-5" />
-              Retour à l'équipe
+              Back to team
             </button>
           </Link>
           <div className="text-center py-12">
             <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">Aucun membre n'a encore de liens assignés</p>
+            <p className="text-gray-500">No members have assigned links yet</p>
           </div>
         </div>
       </div>
@@ -143,7 +143,7 @@ export default function TeamLeaderboardPage() {
           <Link href="/dashboard/team">
             <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6">
               <ChevronLeft className="w-5 h-5" />
-              Retour à l'équipe
+              Back to team
             </button>
           </Link>
 
@@ -154,10 +154,10 @@ export default function TeamLeaderboardPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Leaderboard de l'équipe
+                  Team leaderboard
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Classement des membres par performance
+                  Members ranked by performance
                 </p>
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function TeamLeaderboardPage() {
                   <BarChart className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Clics</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total clicks</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {data.teamTotals.totalClicks.toLocaleString()}
                   </p>
@@ -229,7 +229,7 @@ export default function TeamLeaderboardPage() {
                   <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Vues</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total views</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {data.teamTotals.totalViews.toLocaleString()}
                   </p>
@@ -248,7 +248,7 @@ export default function TeamLeaderboardPage() {
                   <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Liens Assignés</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Assigned links</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {data.teamTotals.totalLinks}
                   </p>
@@ -264,7 +264,7 @@ export default function TeamLeaderboardPage() {
             <div className="flex items-center gap-3 mb-4">
               <Folder className="w-6 h-6 text-blue-500" />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Stats Créatrices
+                Creator stats
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -296,13 +296,13 @@ export default function TeamLeaderboardPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Clics</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Clicks</p>
                       <p className="text-xl font-bold text-gray-900 dark:text-white">
                         {creator.stats.totalClicks.toLocaleString()}
                       </p>
                     </div>
                     <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vues</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Views</p>
                       <p className="text-xl font-bold text-gray-900 dark:text-white">
                         {creator.stats.totalViews.toLocaleString()}
                       </p>
@@ -325,14 +325,14 @@ export default function TeamLeaderboardPage() {
           <div className="flex items-center gap-3 mb-4">
             <Trophy className="w-6 h-6 text-yellow-500" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Leaderboard Membres
+              Member leaderboard
             </h2>
           </div>
           {data.leaderboard.length === 0 || data.leaderboard.every(m => m.stats.totalLinks === 0) ? (
             <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
               <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 dark:text-gray-400">
-                Aucun membre n'a encore de liens assignés
+                No members have assigned links yet
               </p>
             </div>
           ) : (
@@ -397,19 +397,19 @@ export default function TeamLeaderboardPage() {
                   {/* Stats */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-shrink-0">
                     <div className="text-center">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Clics</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Clicks</p>
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
                         {member.stats.totalClicks.toLocaleString()}
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Vues</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Views</p>
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
                         {member.stats.totalViews.toLocaleString()}
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Liens</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Links</p>
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
                         {member.stats.totalLinks}
                       </p>

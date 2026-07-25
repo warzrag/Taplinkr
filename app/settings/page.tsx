@@ -41,18 +41,18 @@ interface ProfileData {
 const THEMES = [
   { 
     id: 'gradient', 
-    name: 'Dégradé', 
-    description: 'Arrière-plan dégradé coloré'
+    name: 'Gradient',
+    description: 'Colorful gradient background'
   },
   { 
     id: 'solid', 
-    name: 'Couleur unie', 
-    description: 'Arrière-plan couleur unie'
+    name: 'Solid color',
+    description: 'Solid color background'
   },
   { 
     id: 'image', 
     name: 'Image', 
-    description: 'Image de fond personnalisée'
+    description: 'Custom background image'
   },
 ]
 
@@ -110,7 +110,7 @@ export default function Settings() {
         })
       }
     } catch (error) {
-      toast.error('Erreur lors du chargement du profil')
+      toast.error('Unable to load your profile.')
     } finally {
       setLoading(false)
     }
@@ -126,14 +126,14 @@ export default function Settings() {
       })
 
       if (response.ok) {
-        toast.success('Profil mis à jour avec succès!')
+        toast.success('Profile updated successfully!')
         await fetchProfile()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Erreur lors de la sauvegarde')
+        toast.error(error.error || 'Unable to save your profile.')
       }
     } catch (error) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error('Unable to save your profile.')
     } finally {
       setSaving(false)
     }
@@ -148,7 +148,7 @@ export default function Settings() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
@@ -167,7 +167,7 @@ export default function Settings() {
             <div className="flex items-center space-x-3">
               <SettingsIcon className="w-8 h-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold">Paramètres du profil</h1>
+                <h1 className="text-2xl font-bold">Profile settings</h1>
                 <p className="text-gray-600">Personnalisez votre page publique</p>
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function Settings() {
               <Link href="/dashboard">
                 <button className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
                   <ArrowLeft className="w-4 h-4" />
-                  <span>Retour</span>
+                  <span>Back</span>
                 </button>
               </Link>
               
@@ -187,7 +187,7 @@ export default function Settings() {
                 className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
               >
                 <Eye className="w-4 h-4" />
-                <span>Prévisualiser</span>
+                <span>Preview</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
               
@@ -208,39 +208,39 @@ export default function Settings() {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center space-x-3 mb-6">
               <User className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-semibold">Informations générales</h2>
+              <h2 className="text-lg font-semibold">General information</h2>
             </div>
 
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom affiché
+                  Display name
                 </label>
                 <input
                   type="text"
                   value={profile.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Votre nom"
+                  placeholder="Your name"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Biographie
+                  Bio
                 </label>
                 <textarea
                   value={profile.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   rows={3}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Parlez-nous de vous..."
+                  placeholder="Tell people about yourself..."
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Photo de profil (URL)
+                  Profile photo (URL)
                 </label>
                 <input
                   type="url"
@@ -252,7 +252,7 @@ export default function Settings() {
                 {profile.image && (
                   <img 
                     src={profile.image} 
-                    alt="Aperçu" 
+                    alt="Preview"
                     className="mt-2 w-20 h-20 rounded-full object-cover"
                   />
                 )}
@@ -260,7 +260,7 @@ export default function Settings() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image de bannière (URL)
+                  Cover image (URL)
                 </label>
                 <input
                   type="url"
@@ -272,7 +272,7 @@ export default function Settings() {
                 {profile.bannerImage && (
                   <img 
                     src={profile.bannerImage} 
-                    alt="Aperçu bannière" 
+                    alt="Cover preview"
                     className="mt-2 w-full h-24 rounded-lg object-cover"
                   />
                 )}
@@ -284,14 +284,14 @@ export default function Settings() {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center space-x-3 mb-6">
               <Palette className="w-5 h-5 text-purple-600" />
-              <h2 className="text-lg font-semibold">Apparence</h2>
+              <h2 className="text-lg font-semibold">Appearance</h2>
             </div>
 
             <div className="space-y-6">
               {/* Thème */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Thème
+                  Theme
                 </label>
                 <div className="space-y-2">
                   {THEMES.map((theme) => (
@@ -317,7 +317,7 @@ export default function Settings() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Couleur principale
+                    Primary color
                   </label>
                   <div className="relative">
                     <button
@@ -340,7 +340,7 @@ export default function Settings() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Couleur secondaire
+                    Secondary color
                   </label>
                   <div className="relative">
                     <button
@@ -366,7 +366,7 @@ export default function Settings() {
               {profile.theme === 'image' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Image de fond (URL)
+                    Background image (URL)
                   </label>
                   <input
                     type="url"
@@ -384,16 +384,16 @@ export default function Settings() {
           <div className="bg-white rounded-lg shadow-sm p-6 lg:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
               <ExternalLink className="w-5 h-5 text-purple-600" />
-              <h2 className="text-lg font-semibold">Réseaux sociaux</h2>
+              <h2 className="text-lg font-semibold">Social media</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { field: 'instagramUrl', icon: Instagram, name: 'Instagram', placeholder: '@votre_username' },
-                { field: 'tiktokUrl', icon: ImageIcon, name: 'TikTok', placeholder: '@votre_username' },
-                { field: 'twitterUrl', icon: Twitter, name: 'Twitter / X', placeholder: '@votre_username' },
-                { field: 'youtubeUrl', icon: Youtube, name: 'YouTube', placeholder: '@votre_chaine' },
-                { field: 'linkedinUrl', icon: Linkedin, name: 'LinkedIn', placeholder: 'votre-profil' }
+                { field: 'instagramUrl', icon: Instagram, name: 'Instagram', placeholder: '@your_username' },
+                { field: 'tiktokUrl', icon: ImageIcon, name: 'TikTok', placeholder: '@your_username' },
+                { field: 'twitterUrl', icon: Twitter, name: 'Twitter / X', placeholder: '@your_username' },
+                { field: 'youtubeUrl', icon: Youtube, name: 'YouTube', placeholder: '@your_channel' },
+                { field: 'linkedinUrl', icon: Linkedin, name: 'LinkedIn', placeholder: 'your-profile' }
               ].map((social) => {
                 const Icon = social.icon
                 const value = profile[social.field as keyof ProfileData]

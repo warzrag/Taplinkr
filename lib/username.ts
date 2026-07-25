@@ -15,12 +15,12 @@ export function validateUsername(value: unknown): { valid: true; username: strin
   if (!/^[a-z0-9_-]{3,30}$/.test(username)) {
     return {
       valid: false,
-      error: "Le nom d’utilisateur doit contenir entre 3 et 30 caractères (lettres, chiffres, tirets et underscores uniquement)",
+      error: 'Username must be 3–30 characters and use only letters, numbers, hyphens, and underscores',
     }
   }
 
   if (RESERVED_USERNAMES.has(username)) {
-    return { valid: false, error: "Ce nom d’utilisateur est réservé" }
+    return { valid: false, error: 'This username is reserved' }
   }
 
   return { valid: true, username }

@@ -20,10 +20,10 @@ interface ResetPasswordEmailProps {
 }
 
 export const ResetPasswordEmail = ({
-  userName = 'là',
+  userName = 'there',
   resetUrl,
 }: ResetPasswordEmailProps) => {
-  const previewText = `Réinitialisez votre mot de passe TapLinkr`
+  const previewText = `Reset your TapLinkr password`
 
   return (
     <Html>
@@ -41,15 +41,15 @@ export const ResetPasswordEmail = ({
             />
           </Section>
           
-          <Heading style={h1}>Réinitialisation du mot de passe</Heading>
+          <Heading style={h1}>Reset your password</Heading>
           
           <Text style={text}>
-            Salut {userName},
+            Hi {userName},
           </Text>
           
           <Text style={text}>
-            Nous avons reçu une demande de réinitialisation de votre mot de passe.
-            Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.
+            We received a request to reset your password.
+            Click the button below to choose a new password.
           </Text>
 
           <Section style={buttonContainer}>
@@ -57,12 +57,12 @@ export const ResetPasswordEmail = ({
               style={button}
               href={resetUrl}
             >
-              Réinitialiser mon mot de passe
+              Reset my password
             </Button>
           </Section>
 
           <Text style={text}>
-            Ou copiez et collez ce lien dans votre navigateur :
+            Or copy and paste this link into your browser:
           </Text>
           
           <Text style={linkText}>
@@ -72,28 +72,28 @@ export const ResetPasswordEmail = ({
           <Hr style={hr} />
 
           <Text style={text}>
-            Ce lien expirera dans 1 heure pour des raisons de sécurité.
+            This link expires in one hour for security reasons.
           </Text>
 
           <Text style={text}>
-            Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer
-            cet email. Votre mot de passe ne sera pas modifié.
+            If you did not request this reset, you can ignore this email.
+            Your password will not be changed.
           </Text>
 
           <Text style={footer}>
-            Pour protéger votre compte, nous vous recommandons d'utiliser un mot de passe
-            fort et unique pour TapLinkr.
+            To protect your account, we recommend using a strong, unique password
+            for TapLinkr.
           </Text>
 
           <Text style={footer}>
-            Des questions ? Contactez-nous à{' '}
+            Questions? Contact us at{' '}
             <Link href="mailto:support@taplinkr.com" style={link}>
               support@taplinkr.com
             </Link>
           </Text>
 
           <Text style={footer}>
-            TapLinkr - One tap, tout accessible
+            TapLinkr — One tap, everything accessible
           </Text>
         </Container>
       </Body>

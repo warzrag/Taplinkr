@@ -327,10 +327,10 @@ export default function ShieldPage() {
                 >
                   <div className="flex items-center justify-center gap-2 text-white">
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span className="font-medium">Redirection automatique...</span>
+                    <span className="font-medium">Redirecting automatically...</span>
                   </div>
                   <p className="text-sm text-white/60 mt-2">
-                    Vous allez être redirigé vers la destination
+                    You are being redirected to the destination
                   </p>
                 </motion.div>
               ) : (
@@ -344,7 +344,7 @@ export default function ShieldPage() {
                       : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
                   }`}
                 >
-                  Continuer vers la destination
+                  Continue to destination
                   <ArrowRight className="w-5 h-5" />
                 </motion.button>
               )}

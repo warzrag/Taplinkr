@@ -28,14 +28,14 @@ interface DashboardLayoutProps {
 }
 
 const navItems = [
-  { icon: LayoutGrid, label: 'Aperçu', href: '/dashboard' },
-  { icon: ExternalLink, label: 'Liens', href: '/dashboard/links' },
+  { icon: LayoutGrid, label: 'Overview', href: '/dashboard' },
+  { icon: ExternalLink, label: 'Links', href: '/dashboard/links' },
   { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' },
-  { icon: Users, label: 'Équipe', href: '/dashboard/team' },
+  { icon: Users, label: 'Team', href: '/dashboard/team' },
   { icon: Shield, label: 'Protection', href: '/dashboard/protection' },
-  { icon: CreditCard, label: 'Facturation', href: '/dashboard/billing' },
-  { icon: User, label: 'Profil', href: '/dashboard/profile' },
-  { icon: BookOpen, label: 'Aide', href: '/dashboard/support' },
+  { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
+  { icon: User, label: 'Profile', href: '/dashboard/profile' },
+  { icon: BookOpen, label: 'Help', href: '/dashboard/support' },
 ]
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const displayName = session?.user?.name || session?.user?.email?.split('@')[0] || 'Mon espace'
+  const displayName = session?.user?.name || session?.user?.email?.split('@')[0] || 'My workspace'
   const initials = displayName.slice(0, 2).toUpperCase()
 
   const isActive = (href: string) => href === '/dashboard'
@@ -60,7 +60,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="dark min-h-screen bg-[#09090f] text-[#f7f7fb]">
       {sidebarOpen && (
         <button
-          aria-label="Fermer le menu"
+          aria-label="Close menu"
           className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <button
             onClick={() => setSidebarOpen(false)}
             className="rounded-lg p-2 text-[#9696a8] hover:bg-white/5 hover:text-white lg:hidden"
-            aria-label="Fermer le menu"
+            aria-label="Close menu"
           >
             <X className="h-5 w-5" />
           </button>
@@ -126,7 +126,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#2a2a38] px-4 py-2.5 text-sm font-semibold text-[#d8d8e2] transition hover:border-violet-500/40 hover:bg-violet-500/5 hover:text-white"
           >
             <LogOut className="h-4 w-4" />
-            Déconnexion
+            Log out
           </button>
         </div>
       </aside>
@@ -136,7 +136,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <button
             onClick={() => setSidebarOpen(true)}
             className="rounded-lg border border-[#2a2a38] p-2 text-[#c7c7d3]"
-            aria-label="Ouvrir le menu"
+            aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
           </button>

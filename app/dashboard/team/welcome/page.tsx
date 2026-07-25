@@ -71,23 +71,23 @@ export default function TeamWelcomePage() {
   const features = [
     {
       icon: LinkIcon,
-      title: 'Créez vos liens',
-      description: 'Partagez vos pages et liens avec votre équipe'
+      title: 'Create your links',
+      description: 'Share pages and links with your team'
     },
     {
       icon: BarChart3,
-      title: 'Analytics partagées',
-      description: 'Suivez les performances de toute l\'équipe'
+      title: 'Shared analytics',
+      description: 'Track performance across your team'
     },
     {
       icon: Palette,
-      title: 'Templates d\'équipe',
-      description: 'Utilisez les modèles créés par vos collègues'
+      title: 'Team templates',
+      description: 'Use templates created by your teammates'
     },
     {
       icon: Shield,
-      title: 'Accès sécurisé',
-      description: 'Vos données sont protégées et partagées en toute sécurité'
+      title: 'Secure access',
+      description: 'Your data is protected and shared securely'
     }
   ]
 
@@ -120,7 +120,7 @@ export default function TeamWelcomePage() {
             transition={{ delay: 0.7 }}
             className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4"
           >
-            Bienvenue dans l'équipe {teamName} !
+            Welcome to {teamName}!
           </motion.h1>
 
           <motion.p 
@@ -129,7 +129,7 @@ export default function TeamWelcomePage() {
             transition={{ delay: 0.9 }}
             className="text-xl text-gray-600 dark:text-gray-400 mb-2"
           >
-            Bonjour {session?.user?.name || session?.user?.email} ! 🎉
+            Hi {session?.user?.name || session?.user?.email}! 🎉
           </motion.p>
 
           <motion.p 
@@ -138,7 +138,7 @@ export default function TeamWelcomePage() {
             transition={{ delay: 1.1 }}
             className="text-lg text-gray-600 dark:text-gray-400"
           >
-            Vous faites maintenant partie de l'équipe. Découvrez tout ce que vous pouvez faire ensemble !
+            You're now part of the team. See what you can accomplish together!
           </motion.p>
         </motion.div>
 
@@ -180,9 +180,9 @@ export default function TeamWelcomePage() {
           className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white text-center"
         >
           <Users className="w-12 h-12 mx-auto mb-4 opacity-90" />
-          <h2 className="text-2xl font-bold mb-2">Prêt à commencer ?</h2>
+          <h2 className="text-2xl font-bold mb-2">Ready to get started?</h2>
           <p className="mb-6 opacity-90">
-            Explorez votre espace d'équipe et commencez à collaborer
+            Explore your team workspace and start collaborating
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -193,7 +193,7 @@ export default function TeamWelcomePage() {
               className="px-6 py-3 bg-white text-purple-600 rounded-xl font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
             >
               <Users className="w-5 h-5" />
-              Voir mon équipe
+              View my team
             </motion.button>
             
             <motion.button
@@ -202,7 +202,7 @@ export default function TeamWelcomePage() {
               onClick={() => router.push('/dashboard')}
               className="px-6 py-3 bg-purple-700 text-white rounded-xl font-semibold hover:bg-purple-800 transition-colors flex items-center justify-center gap-2"
             >
-              Aller au dashboard
+              Go to dashboard
               <ArrowRight className="w-5 h-5" />
             </motion.button>
           </div>

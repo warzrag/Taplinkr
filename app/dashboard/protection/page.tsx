@@ -53,15 +53,15 @@ function ProtectionModal({ isOpen, onClose, link, onSuccess }: ProtectionModalPr
       })
 
       if (response.ok) {
-        toast.success('Protection configurée avec succès!')
+        toast.success('Protection configured successfully!')
         onSuccess()
         onClose()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Erreur lors de la configuration')
+        toast.error(error.error || 'Unable to configure protection.')
       }
     } catch (error) {
-      toast.error('Erreur lors de la configuration')
+      toast.error('Unable to configure protection.')
     } finally {
       setLoading(false)
       setPassword('')
@@ -79,14 +79,14 @@ function ProtectionModal({ isOpen, onClose, link, onSuccess }: ProtectionModalPr
       })
 
       if (response.ok) {
-        toast.success('Protection supprimée')
+        toast.success('Protection removed.')
         onSuccess()
         onClose()
       } else {
-        toast.error('Erreur lors de la suppression')
+        toast.error('Unable to remove protection.')
       }
     } catch (error) {
-      toast.error('Erreur lors de la suppression')
+      toast.error('Unable to remove protection.')
     } finally {
       setLoading(false)
     }
@@ -112,7 +112,7 @@ function ProtectionModal({ isOpen, onClose, link, onSuccess }: ProtectionModalPr
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mot de passe *
+              Password *
             </label>
             <input
               type="password"
@@ -173,7 +173,7 @@ function ProtectionModal({ isOpen, onClose, link, onSuccess }: ProtectionModalPr
                 disabled={loading}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
               >
-                Supprimer protection
+                Remove protection
               </button>
             )}
             <button
@@ -236,7 +236,7 @@ export default function ProtectionPage() {
       }
     } catch (error) {
       console.error('Error fetching links:', error)
-      toast.error('Erreur lors du chargement des liens')
+      toast.error('Unable to load links.')
     } finally {
       setLoading(false)
     }
@@ -255,7 +255,7 @@ export default function ProtectionPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Chargement...</div>
+        <div className="text-gray-600">Loading...</div>
       </div>
     )
   }
@@ -275,9 +275,9 @@ export default function ProtectionPage() {
               <ArrowLeft size={20} />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Protection des Liens</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Link protection</h1>
               <p className="text-gray-600">
-                Protégez vos liens avec un mot de passe
+                Protect your links with a password
               </p>
             </div>
           </div>
@@ -291,7 +291,7 @@ export default function ProtectionPage() {
                 <Shield className="w-6 h-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Liens</p>
+                <p className="text-sm font-medium text-gray-600">Total links</p>
                 <p className="text-2xl font-bold text-gray-900">{links.length}</p>
               </div>
             </div>
@@ -303,7 +303,7 @@ export default function ProtectionPage() {
                 <Lock className="w-6 h-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Protégés</p>
+                <p className="text-sm font-medium text-gray-600">Protected</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {links.filter(link => link.isProtected).length}
                 </p>
@@ -317,7 +317,7 @@ export default function ProtectionPage() {
                 <Unlock className="w-6 h-6 text-orange-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Non Protégés</p>
+                <p className="text-sm font-medium text-gray-600">Unprotected</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {links.filter(link => !link.isProtected).length}
                 </p>
@@ -365,13 +365,13 @@ export default function ProtectionPage() {
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {link.isProtected ? 'Protégé' : 'Public'}
+                        {link.isProtected ? 'Protected' : 'Public'}
                       </span>
                       
                       <button
                         onClick={() => openProtectionModal(link)}
                         className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                        title={link.isProtected ? 'Modifier protection' : 'Ajouter protection'}
+                        title={link.isProtected ? 'Edit protection' : 'Add protection'}
                       >
                         <Settings size={16} />
                       </button>
@@ -393,10 +393,10 @@ export default function ProtectionPage() {
               <div className="text-center py-12">
                 <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Aucun lien trouvé
+                  No links found
                 </h3>
                 <p className="text-gray-500">
-                  Créez des liens pour pouvoir les protéger.
+                  Create links before adding protection.
                 </p>
               </div>
             )}

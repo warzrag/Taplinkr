@@ -50,11 +50,11 @@ export default function EditLinkPage() {
           const data = await response.json()
           setLinkData(data)
         } else {
-          toast.error('Erreur lors du chargement du lien')
+          toast.error('Unable to load the link.')
           router.push('/dashboard')
         }
       } catch (error) {
-        toast.error('Erreur lors du chargement du lien')
+        toast.error('Unable to load the link.')
         router.push('/dashboard')
       } finally {
         setLoading(false)
@@ -79,12 +79,12 @@ export default function EditLinkPage() {
       })
 
       if (response.ok) {
-        toast.success('Lien mis à jour avec succès!')
+        toast.success('Link updated successfully!')
       } else {
-        toast.error('Erreur lors de la sauvegarde')
+        toast.error('Unable to save the link.')
       }
     } catch (error) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error('Unable to save the link.')
     } finally {
       setSaving(false)
     }
@@ -162,14 +162,14 @@ export default function EditLinkPage() {
   if (!linkData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Lien non trouvé</div>
+        <div className="text-gray-600">Link not found</div>
       </div>
     )
   }
 
   const tabs = [
-    { id: 'general', label: 'Général', icon: Link2 },
-    { id: 'links', label: 'Liens', icon: Plus },
+    { id: 'general', label: 'General', icon: Link2 },
+    { id: 'links', label: 'Links', icon: Plus },
     { id: 'style', label: 'Style', icon: Palette },
   ]
 
@@ -189,14 +189,14 @@ export default function EditLinkPage() {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Retour</span>
+            <span>Back</span>
           </button>
           
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Éditer le lien
+            Edit link
           </h1>
           <p className="text-gray-600 text-sm">
-            Modifiez votre lien en temps réel
+            Update your link in real time
           </p>
         </div>
 
@@ -265,7 +265,7 @@ export default function EditLinkPage() {
             >
               {activeTab === 'general' && (
                 <div className="space-y-6">
-                  <h2 className="text-xl font-bold text-gray-900">Informations générales</h2>
+                  <h2 className="text-xl font-bold text-gray-900">General information</h2>
                   
                   <div className="space-y-4">
                     <div>
@@ -296,7 +296,7 @@ export default function EditLinkPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Slug (URL personnalisée)
+                        Slug (custom URL)
                       </label>
                       <div className="flex">
                         <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
@@ -314,7 +314,7 @@ export default function EditLinkPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Icône
+                        Icon
                       </label>
                       <input
                         type="text"
@@ -331,7 +331,7 @@ export default function EditLinkPage() {
               {activeTab === 'links' && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-gray-900">Gérer les liens</h2>
+                    <h2 className="text-xl font-bold text-gray-900">Manage links</h2>
                     <motion.button
                       onClick={addMultiLink}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
@@ -468,7 +468,7 @@ export default function EditLinkPage() {
               image: userProfile.image,
               bio: userProfile.bio
             } : {
-              name: 'Chargement...',
+              name: 'Loading...',
               username: 'user',
               image: null,
               bio: ''

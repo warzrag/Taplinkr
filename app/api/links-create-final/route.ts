@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
     })
 
     if (currentUser?.teamId && !hasTeamActionPermission(currentUser.teamRole, TeamAction.CREATE_LINK)) {
-      return NextResponse.json({ error: 'Vous n’avez pas la permission de créer un lien dans cette équipe' }, { status: 403 })
+      return NextResponse.json({ error: 'You do not have permission to create a link for this team' }, { status: 403 })
     }
 
     if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(slug) || RESERVED_USERNAMES.has(slug)) {
-      return NextResponse.json({ error: 'URL publique invalide ou réservée' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid or reserved public URL' }, { status: 400 })
     }
 
     const existingLink = await prisma.link.findUnique({ where: { slug } })
@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.isDirect && (!directUrl || !validateURL(directUrl))) {
-      return NextResponse.json({ error: 'URL de redirection invalide' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid redirect URL' }, { status: 400 })
     }
 
     if (!body.isDirect && Array.isArray(body.multiLinks)) {
       for (const link of body.multiLinks) {
         if (link?.url && !validateURL(link.url)) {
-          return NextResponse.json({ error: `URL invalide ou dangereuse: ${link.url}` }, { status: 400 })
+          return NextResponse.json({ error: `Invalid or unsafe URL: ${link.url}` }, { status: 400 })
         }
       }
     }
@@ -60,11 +60,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.shieldEnabled && !(await checkTeamPermission(session.user.id, 'hasShieldLink'))) {
-      return NextResponse.json({ error: 'Shield Protection nécessite le plan Premium' }, { status: 403 })
+      return NextResponse.json({ error: 'Shield Protection requires the Premium plan' }, { status: 403 })
     }
 
     if (body.isUltraLink && !(await checkTeamPermission(session.user.id, 'hasUltraLink'))) {
-      return NextResponse.json({ error: 'Ultra Link nécessite le plan Premium' }, { status: 403 })
+      return NextResponse.json({ error: 'Ultra Link requires the Premium plan' }, { status: 403 })
     }
 
     const maxOrder = await prisma.link.findFirst({
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
           prisma.multiLink.create({
             data: {
               parentLinkId: newLink.id,
-              title: subLink.title || `Lien ${index + 1}`,
+              title: subLink.title || `Link ${index + 1}`,
               url: subLink.url,
               description: subLink.description || null,
               icon: subLink.icon || '',
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Erreur creation lien FINAL:', error)
     return NextResponse.json({
-      error: 'Erreur lors de la creation',
+      error: 'Unable to create the link',
       message: error.message,
     }, { status: 500 })
   }

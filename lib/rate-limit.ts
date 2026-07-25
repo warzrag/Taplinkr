@@ -91,7 +91,7 @@ export function checkRateLimit(
       success: false,
       remaining: 0,
       resetAt: entry.resetAt,
-      message: config.message || `Trop de tentatives. Réessayez dans ${waitTime} minute${waitTime > 1 ? 's' : ''}.`
+      message: config.message || `Too many attempts. Try again in ${waitTime} minute${waitTime > 1 ? 's' : ''}.`
     }
   }
 
@@ -128,7 +128,7 @@ export const RateLimitPresets = {
   AUTH_LOGIN: {
     maxAttempts: 5,
     windowMs: 15 * 60 * 1000,
-    message: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.'
+    message: 'Too many login attempts. Try again in 15 minutes.'
   } as RateLimitConfig,
 
   /**
@@ -138,7 +138,7 @@ export const RateLimitPresets = {
   AUTH_REGISTER: {
     maxAttempts: 3,
     windowMs: 60 * 60 * 1000,
-    message: 'Trop d\'inscriptions. Réessayez dans 1 heure.'
+    message: 'Too many sign-up attempts. Try again in one hour.'
   } as RateLimitConfig,
 
   /**
@@ -148,7 +148,7 @@ export const RateLimitPresets = {
   AUTH_RESET_PASSWORD: {
     maxAttempts: 3,
     windowMs: 60 * 60 * 1000,
-    message: 'Trop de demandes de réinitialisation. Réessayez dans 1 heure.'
+    message: 'Too many reset requests. Try again in one hour.'
   } as RateLimitConfig,
 
   /**
@@ -158,7 +158,7 @@ export const RateLimitPresets = {
   TRACK_CLICK: {
     maxAttempts: 10,
     windowMs: 60 * 1000,
-    message: 'Trop de clics. Réessayez dans 1 minute.'
+    message: 'Too many clicks. Try again in one minute.'
   } as RateLimitConfig,
 
   /**
@@ -168,7 +168,7 @@ export const RateLimitPresets = {
   API_GENERAL: {
     maxAttempts: 100,
     windowMs: 60 * 1000,
-    message: 'Limite de requêtes atteinte. Réessayez dans 1 minute.'
+    message: 'Request limit reached. Try again in one minute.'
   } as RateLimitConfig
 } as const
 

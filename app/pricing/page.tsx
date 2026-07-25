@@ -14,49 +14,49 @@ import { Container } from '@/components/ui/Container'
 const plans = [
   {
     id: 'free',
-    name: 'Gratuit',
-    price: '0 EUR',
-    period: 'pour toujours',
-    description: 'Pour lancer une page créateur propre, vos premiers liens et des statistiques essentielles.',
-    cta: 'Créer mon compte',
+    name: 'Free',
+    price: '€0',
+    period: 'forever',
+    description: 'Launch a polished creator page with your first links and essential analytics.',
+    cta: 'Create my account',
     highlighted: false,
     features: [
-      '1 page publique',
-      '5 liens actifs',
-      'Lien direct inclus',
-      'Stats vues et clics',
+      '1 public page',
+      '5 active links',
+      'Direct link included',
+      'View and click analytics',
     ],
   },
   {
     id: 'standard',
     name: 'Standard',
-    price: '9,99 EUR',
-    period: '/ mois',
-    description: 'Pour convertir plus de visiteurs avec deeplinks, protection 18+, statistiques avancées et campagnes mieux suivies.',
-    cta: 'Choisir Standard',
+    price: '€9.99',
+    period: '/ month',
+    description: 'Convert more visitors with deep links, an 18+ gate, advanced analytics, and better campaign tracking.',
+    cta: 'Choose Standard',
     highlighted: true,
     features: [
-      'Pages et liens etendus',
-      'Deeplinks propres',
-      'Protection 18+ et avertissements',
-      'Analytics avances',
-      'Equipe jusqu a 10 membres',
+      'Expanded pages and links',
+      'Clean deep links',
+      '18+ protection and warnings',
+      'Advanced analytics',
+      'Teams of up to 10 members',
     ],
   },
   {
     id: 'premium',
     name: 'Premium',
-    price: '24,99 EUR',
-    period: '/ mois',
-    description: 'Pour les agences et créateurs qui pilotent plusieurs pages, domaines, offres et campagnes.',
-    cta: 'Choisir Premium',
+    price: '€24.99',
+    period: '/ month',
+    description: 'For agencies and creators managing multiple pages, domains, offers, and campaigns.',
+    cta: 'Choose Premium',
     highlighted: false,
     features: [
-      'Liens illimités',
-      'Themes, icones et domaines custom',
-      'Deeplinks premium',
-      'Analytics temps reel',
-      'Support prioritaire',
+      'Unlimited links',
+      'Custom themes, icons, and domains',
+      'Premium deep links',
+      'Real-time analytics',
+      'Priority support',
     ],
   },
 ] as const
@@ -65,16 +65,16 @@ type PlanId = (typeof plans)[number]['id']
 
 const faqs = [
   {
-    question: 'Puis-je commencer gratuitement ?',
-    answer: 'Oui. Le plan gratuit permet de creer une premiere page, partager quelques liens et verifier que Taplinkr correspond a votre audience.',
+    question: 'Can I start for free?',
+    answer: 'Yes. The free plan lets you create your first page, share a few links, and see whether Taplinkr fits your audience.',
   },
   {
-    question: 'Comment fonctionne le paiement ?',
-    answer: 'Les plans payants passent par Stripe Checkout. Vous pouvez gerer votre abonnement depuis le dashboard.',
+    question: 'How does billing work?',
+    answer: 'Paid plans use Stripe Checkout. You can manage your subscription from the dashboard.',
   },
   {
-    question: 'Les liens directs sont-ils inclus ?',
-    answer: 'Oui, des le plan gratuit. Chaque lien direct utilise une URL Taplinkr courte et redirige immediatement vers votre destination. Premium ajoute la protection Shield et les options avancees.',
+    question: 'Are direct links included?',
+    answer: 'Yes, even on the free plan. Every direct link uses a short Taplinkr URL and redirects immediately. Premium adds Shield protection and advanced options.',
   },
 ]
 
@@ -106,12 +106,12 @@ export default function PricingPage() {
       const data = await response.json()
 
       if (!response.ok || !data.url) {
-        throw new Error(data.error || 'Impossible de creer la session Stripe')
+        throw new Error(data.error || 'Unable to start Stripe Checkout.')
       }
 
       window.location.href = data.url
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur de paiement')
+      toast.error(error instanceof Error ? error.message : 'Payment error.')
     } finally {
       setLoadingPlan(null)
     }
@@ -125,13 +125,13 @@ export default function PricingPage() {
         <section className="overflow-x-hidden border-b border-neutral-200 bg-neutral-50 py-8 dark:border-white/10 dark:bg-white/[0.03] sm:py-12">
           <Container padding="sm" className="mx-auto w-full max-w-full text-center sm:max-w-6xl">
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-600">
-              Tarifs
+              Pricing
             </p>
             <h1 className="mx-auto mt-3 w-full max-w-[18rem] break-words text-2xl font-semibold leading-tight text-neutral-950 dark:text-white sm:max-w-3xl sm:text-4xl">
-              Choisissez le plan qui transforme vos clics en revenus
+              Choose the plan that turns clicks into revenue
             </h1>
             <p className="mx-auto mt-4 w-full max-w-[18rem] text-sm leading-7 text-neutral-600 dark:text-white/60 sm:max-w-2xl">
-              Commencez gratuitement, puis passez à Standard ou Premium lorsque vos deeplinks, protections, domaines et statistiques doivent suivre le rythme.
+              Start free, then upgrade to Standard or Premium as your deep links, protection, domains, and analytics grow.
             </p>
 
             <div className="mx-auto mt-8 grid w-full max-w-[18rem] gap-4 text-left sm:max-w-xl md:max-w-2xl lg:max-w-6xl lg:grid-cols-3">
@@ -146,7 +146,7 @@ export default function PricingPage() {
                 >
                   {plan.highlighted && (
                     <span className="mb-5 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white dark:bg-neutral-950/10 dark:text-neutral-950">
-                      Pour les créateurs actifs
+                      For active creators
                     </span>
                   )}
 
@@ -207,13 +207,13 @@ export default function PricingPage() {
                 <HelpCircle className="h-5 w-5" />
               </div>
               <h2 className="max-w-[18rem] break-words text-3xl font-semibold text-neutral-950 dark:text-white sm:max-w-none">
-                Questions frequentes
+                Frequently asked questions
               </h2>
               <p className="mt-3 max-w-[18rem] text-sm leading-7 text-neutral-600 dark:text-white/60 sm:max-w-xl">
-                Le bon forfait dépend de votre volume de liens, de vos besoins de protection, de vos domaines et du niveau de statistiques souhaité.
+                The right plan depends on your link volume, protection needs, domains, and desired level of analytics.
               </p>
               <Link href="mailto:hello@taplinkr.com" className="mt-5 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-500">
-                Contacter le support
+                Contact support
               </Link>
             </div>
 

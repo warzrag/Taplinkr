@@ -15,7 +15,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Récupérer d'abord l'utilisateur avec son équipe
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     
     // Si pas de session, retourner une erreur 401
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
     const userId = session.user.id
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (currentUser?.teamId && !hasTeamActionPermission(currentUser.teamRole, TeamAction.CREATE_LINK)) {
-      return NextResponse.json({ error: 'Vous n’avez pas la permission de créer un lien dans cette équipe' }, { status: 403 })
+      return NextResponse.json({ error: 'You do not have permission to create a link for this team' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       }
       if (!validateURL(directUrl)) {
         return NextResponse.json({
-          error: `URL de redirection invalide ou dangereuse: ${directUrl}. Seuls http:// et https:// sont autorisÃ©s.`
+          error: `Invalid or unsafe redirect URL: ${directUrl}. Only http:// and https:// are allowed.`
         }, { status: 400 })
       }
     } else {
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
         // 🔥 VALIDATION SÉCURISÉE - Rejeter javascript:, data:, etc.
         if (!validateURL(link.url)) {
           return NextResponse.json({
-            error: `URL invalide ou dangereuse: ${link.url}. Seuls http:// et https:// sont autorisés.`
+            error: `Invalid or unsafe URL: ${link.url}. Only http:// and https:// are allowed.`
           }, { status: 400 })
         }
       }
@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
       // Vérifier que le slug personnalisé est disponible
       const existingLink = await prisma.link.findUnique({ where: { slug } })
       if (existingLink) {
-        return NextResponse.json({ error: 'Cette URL personnalisée est déjà utilisée' }, { status: 400 })
+        return NextResponse.json({ error: 'This custom URL is already in use' }, { status: 400 })
       }
     }
 
@@ -324,7 +324,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(link, { status: 201 })
   } catch (error) {
     console.error('Erreur lors de la création du lien:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   } finally {
   }
 }

@@ -83,10 +83,10 @@ export default function EditPhonePreview({ isVisible, user, links }: EditPhonePr
               className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 text-center"
             >
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                Aperçu en temps réel
+                Live preview
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                Vos modifications apparaissent instantanément
+                Your changes appear instantly
               </p>
             </motion.div>
           </div>

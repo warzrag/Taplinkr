@@ -26,7 +26,7 @@ import {
   Maximize2
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { enUS } from 'date-fns/locale'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 
@@ -99,11 +99,11 @@ export default function VisitorsPage() {
         setTotalPages(Math.ceil(data.total / itemsPerPage))
       } else {
         console.error('Erreur API:', data.error)
-        toast.error(data.error || 'Erreur lors du chargement des visiteurs')
+        toast.error(data.error || 'Unable to load visitors.')
       }
     } catch (error) {
       console.error('Erreur lors du chargement des visiteurs:', error)
-      toast.error('Erreur de connexion au serveur')
+      toast.error('Unable to connect to the server.')
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -127,7 +127,7 @@ export default function VisitorsPage() {
         return (
           <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-full flex items-center gap-1">
             <WifiOff className="w-3 h-3" />
-            Bloqué
+            Blocked
           </span>
         )
       case 'bot':
@@ -140,7 +140,7 @@ export default function VisitorsPage() {
         return (
           <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 rounded-full flex items-center gap-1">
             <Wifi className="w-3 h-3" />
-            Succès
+            Success
           </span>
         )
     }
@@ -148,7 +148,7 @@ export default function VisitorsPage() {
 
   const formatTimeAgo = (timestamp: string) => {
     try {
-      return formatDistanceToNow(new Date(timestamp), { locale: fr, addSuffix: true })
+      return formatDistanceToNow(new Date(timestamp), { locale: enUS, addSuffix: true })
     } catch {
       return timestamp
     }
@@ -190,10 +190,10 @@ export default function VisitorsPage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                100 derniers visiteurs
+                Latest 100 visitors
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Données en temps réel de vos visiteurs
+                Real-time visitor data
               </p>
             </div>
           </div>
@@ -260,14 +260,14 @@ export default function VisitorsPage() {
             <div className="flex flex-col items-center justify-center py-20">
               <Users className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Aucun visiteur pour le moment
+                No visitors yet
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-                Les visiteurs apparaîtront ici lorsque des personnes cliqueront sur vos liens.
+                Visitors will appear here when people click your links.
               </p>
               <Link href="/dashboard">
                 <button className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors">
-                  Retour au tableau de bord
+                  Back to dashboard
                 </button>
               </Link>
             </div>
@@ -277,31 +277,31 @@ export default function VisitorsPage() {
                 <thead>
                   <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Temps
+                      Time
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Localisation
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Lien
+                      Link
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Navigateur
+                      Browser
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       OS
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Référent
+                      Referrer
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Appareil
+                      Device
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Statut
+                      Status
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Détails
+                      Details
                     </th>
                   </tr>
                 </thead>
@@ -396,7 +396,7 @@ export default function VisitorsPage() {
             <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Page {currentPage} sur {totalPages}
+                Page {currentPage} of {totalPages}
               </p>
               <div className="flex items-center gap-2">
                 <button
@@ -430,7 +430,7 @@ export default function VisitorsPage() {
             >
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Détails du visiteur</h3>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Visitor details</h3>
                   <button
                     onClick={() => setSelectedVisitor(null)}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -446,7 +446,7 @@ export default function VisitorsPage() {
                   <div>
                     <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Date de visite</h4>
                     <p className="text-gray-900 dark:text-gray-100">
-                      {format(new Date(selectedVisitor.timestamp), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                      {format(new Date(selectedVisitor.timestamp), 'MMMM d, yyyy h:mm a', { locale: enUS })}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {formatTimeAgo(selectedVisitor.timestamp)}
@@ -454,7 +454,7 @@ export default function VisitorsPage() {
                   </div>
                   
                   <div>
-                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Durée de visite</h4>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Visit duration</h4>
                     <div className="flex items-center gap-2">
                       <Timer className="w-4 h-4 text-gray-400" />
                       <p className="text-gray-900 dark:text-gray-100">{formatDuration(selectedVisitor.duration)}</p>
@@ -475,7 +475,7 @@ export default function VisitorsPage() {
                         <p className="text-gray-600 dark:text-gray-400">{selectedVisitor.location.country}</p>
                         {selectedVisitor.location.latitude && selectedVisitor.location.longitude && (
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Coordonnées: {selectedVisitor.location.latitude.toFixed(4)}, {selectedVisitor.location.longitude.toFixed(4)}
+                            Coordinates: {selectedVisitor.location.latitude.toFixed(4)}, {selectedVisitor.location.longitude.toFixed(4)}
                           </p>
                         )}
                       </div>
@@ -485,7 +485,7 @@ export default function VisitorsPage() {
 
                 {/* Lien visité */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Page visitée</h4>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Visited page</h4>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                     <div className="flex items-start gap-3">
                       <Link2 className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
@@ -494,7 +494,7 @@ export default function VisitorsPage() {
                         <p className="text-gray-600 dark:text-gray-400">/{selectedVisitor.linkSlug}</p>
                         {selectedVisitor.multiLinkClicked && (
                           <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                            Multi-link cliqué
+                            Multi-link clicked
                           </p>
                         )}
                       </div>
@@ -508,25 +508,25 @@ export default function VisitorsPage() {
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-3">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Navigateur</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Browser</p>
                         <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.browser}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Système</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Operating system</p>
                         <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.os}</p>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Appareil</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Device</p>
                         <div className="flex items-center gap-2">
                           {getDeviceIcon(selectedVisitor.deviceType)}
                           <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.device}</p>
                         </div>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Résolution</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Resolution</p>
                         <div className="flex items-center gap-2">
                           <Maximize2 className="w-4 h-4 text-gray-400" />
                           <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.screenResolution || 'N/A'}</p>
@@ -552,7 +552,7 @@ export default function VisitorsPage() {
 
                 {/* Source */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Source de trafic</h4>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Traffic source</h4>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                     <div className="flex items-start gap-3">
                       <Globe className="w-5 h-5 text-gray-400 mt-0.5" />

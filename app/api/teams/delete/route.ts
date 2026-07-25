@@ -58,7 +58,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     return NextResponse.json({ 
-      message: 'Équipe supprimée avec succès',
+      message: 'Team deleted successfully',
       deletedTeam: team.name 
     })
   } catch (error) {

@@ -10,7 +10,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -25,7 +25,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     })
 
     if (!existingFolder) {
-      return NextResponse.json({ error: 'Dossier non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Folder not found' }, { status: 404 })
     }
 
     const folder = await prisma.folder.update({
@@ -55,7 +55,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     return NextResponse.json(folder)
   } catch (error) {
     console.error('Erreur lors de la mise à jour du dossier:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
@@ -65,7 +65,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Vérifier que le dossier appartient à l'utilisateur
@@ -77,7 +77,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     })
 
     if (!existingFolder) {
-      return NextResponse.json({ error: 'Dossier non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Folder not found' }, { status: 404 })
     }
 
     // Déplacer tous les liens du dossier vers "sans dossier" (folderId = null)
@@ -97,6 +97,6 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Erreur lors de la suppression du dossier:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

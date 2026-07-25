@@ -13,34 +13,34 @@ interface FAQItem {
 
 const faqs: FAQItem[] = [
   {
-    category: 'Général',
-    question: 'Qu\'est-ce que TapLinkr ?',
-    answer: 'TapLinkr est une plateforme qui vous permet de créer des pages de liens personnalisées pour partager tous vos contenus et réseaux sociaux en un seul endroit.'
+    category: 'General',
+    question: 'What is TapLinkr?',
+    answer: 'TapLinkr lets you create custom link pages and share your content and social profiles in one place.'
   },
   {
-    category: 'Général',
-    question: 'Comment créer mon premier lien ?',
-    answer: 'Cliquez sur "Nouveau lien" dans votre dashboard, choisissez un nom et personnalisez votre page. Vous pouvez ajouter des liens vers vos réseaux sociaux, sites web, et plus encore.'
+    category: 'General',
+    question: 'How do I create my first link?',
+    answer: 'Click “New page” or “New direct link” in your dashboard, choose a name, and customize it. You can add social profiles, websites, and more.'
   },
   {
-    category: 'Fonctionnalités',
-    question: 'Puis-je organiser mes liens en dossiers ?',
-    answer: 'Oui ! Vous pouvez créer des dossiers pour organiser vos liens et même les réorganiser par glisser-déposer.'
+    category: 'Features',
+    question: 'Can I organize links into folders?',
+    answer: 'Yes. You can create folders to organize links and reorder them with drag and drop.'
   },
   {
-    category: 'Fonctionnalités',
-    question: 'Comment fonctionnent les analytics ?',
-    answer: 'Les analytics vous permettent de suivre les clics, les vues, et l\'origine de vos visiteurs en temps réel. Disponible pour tous les plans.'
+    category: 'Features',
+    question: 'How do analytics work?',
+    answer: 'Analytics show clicks, views, and visitor sources in real time. Core analytics are available on every plan.'
   },
   {
-    category: 'Plans et tarifs',
-    question: 'Quelle est la différence entre les plans ?',
-    answer: 'Le plan gratuit offre les fonctionnalités de base. Les plans payants ajoutent des thèmes premium, plus de liens, des domaines personnalisés et des fonctionnalités avancées.'
+    category: 'Plans and pricing',
+    question: 'What is the difference between plans?',
+    answer: 'The free plan includes core features. Paid plans add premium themes, more links, custom domains, and advanced features.'
   },
   {
     category: 'Support',
-    question: 'Comment contacter le support ?',
-    answer: 'Vous pouvez nous contacter via la page Support ou envoyer un email à support@taplinkr.com.'
+    question: 'How do I contact support?',
+    answer: 'Use the Support page or email support@taplinkr.com.'
   }
 ]
 
@@ -68,7 +68,7 @@ export default function FAQPage() {
           <Link href="/dashboard">
             <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6">
               <ArrowLeft className="w-4 h-4" />
-              Retour au dashboard
+              Back to dashboard
             </button>
           </Link>
           
@@ -78,10 +78,10 @@ export default function FAQPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                Questions fréquentes
+                Frequently asked questions
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Trouvez rapidement des réponses à vos questions
+                Find quick answers to your questions
               </p>
             </div>
           </div>
@@ -160,14 +160,14 @@ export default function FAQPage() {
           className="mt-12 text-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8"
         >
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
-            Vous ne trouvez pas votre réponse ?
+            Can't find your answer?
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Notre équipe est là pour vous aider
+            Our team is here to help
           </p>
           <Link href="/dashboard/support">
             <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all">
-              Contacter le support
+              Contact support
             </button>
           </Link>
         </motion.div>

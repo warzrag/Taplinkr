@@ -49,7 +49,7 @@ export default function VerifyEmailWaitingPage() {
 
       if (data.verified) {
         setVerified(true)
-        toast.success('Email vérifié avec succès!')
+        toast.success('Email verified successfully!')
         
         // Se connecter automatiquement
         setTimeout(async () => {
@@ -82,12 +82,12 @@ export default function VerifyEmailWaitingPage() {
       })
 
       if (response.ok) {
-        toast.success('Email de vérification renvoyé!')
+        toast.success('Verification email resent!')
       } else {
-        toast.error('Erreur lors de l\'envoi')
+        toast.error('Unable to send the email.')
       }
     } catch (error) {
-      toast.error('Erreur de connexion')
+      toast.error('Connection error.')
     } finally {
       setResending(false)
     }
@@ -124,11 +124,11 @@ export default function VerifyEmailWaitingPage() {
               </motion.div>
 
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                Vérifiez votre boîte mail
+                Check your email
               </h1>
 
               <p className="text-gray-600 mb-2">
-                Nous avons envoyé un email de confirmation à
+                We sent a confirmation email to
               </p>
               
               <p className="font-semibold text-gray-900 mb-6">
@@ -138,7 +138,7 @@ export default function VerifyEmailWaitingPage() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-sm text-blue-800">
                   Cliquez sur le lien dans l'email pour activer votre compte.
-                  Cette page se mettra à jour automatiquement.
+                  This page will update automatically.
                 </p>
               </div>
 
@@ -152,15 +152,15 @@ export default function VerifyEmailWaitingPage() {
                 ) : (
                   <RefreshCw className="w-4 h-4" />
                 )}
-                {resending ? 'Envoi en cours...' : 'Renvoyer l\'email'}
+                {resending ? 'Sending...' : 'Resend email'}
               </button>
 
               <div className="mt-6 pt-6 border-t">
                 <p className="text-sm text-gray-500 mb-3">
-                  Email non reçu ? Vérifiez vos spams
+                  Didn't receive it? Check your spam folder
                 </p>
                 <Link href="/auth/signin" className="text-sm text-blue-600 hover:text-blue-700">
-                  Retour à la connexion
+                  Back to login
                 </Link>
               </div>
             </>
@@ -177,7 +177,7 @@ export default function VerifyEmailWaitingPage() {
               </motion.div>
 
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                Email vérifié !
+                Email verified!
               </h1>
 
               <p className="text-gray-600 mb-6">

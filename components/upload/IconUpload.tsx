@@ -14,13 +14,13 @@ export default function IconUpload({ value, onChange, className = '' }: IconUplo
 
   const handleFileUpload = async (file: File) => {
     if (!file || !file.type.startsWith('image/')) {
-      alert('Veuillez sélectionner une image')
+      alert('Select an image.')
       return
     }
 
     // Limite de taille : 2MB
     if (file.size > 2 * 1024 * 1024) {
-      alert('L\'image ne doit pas dépasser 2MB')
+      alert('The image must be 2 MB or smaller.')
       return
     }
 
@@ -35,14 +35,14 @@ export default function IconUpload({ value, onChange, className = '' }: IconUplo
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de l\'upload')
+        throw new Error('Unable to upload the image.')
       }
 
       const data = await response.json()
       onChange(data.url)
     } catch (error) {
       console.error('Erreur upload:', error)
-      alert('Erreur lors de l\'upload de l\'icône')
+      alert('Unable to upload the icon.')
     }
   }
 
@@ -69,7 +69,7 @@ export default function IconUpload({ value, onChange, className = '' }: IconUplo
         <div className="relative w-12 h-12 group">
           <img
             src={value}
-            alt="Icône"
+            alt="Icon"
             className="w-full h-full object-cover rounded-lg border border-gray-200"
           />
           <button

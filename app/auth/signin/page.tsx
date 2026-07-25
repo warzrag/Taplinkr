@@ -35,24 +35,24 @@ interface FormData {
 const benefits = [
   {
     icon: BarChart3,
-    title: 'Statistiques créateur',
+    title: 'Creator analytics',
     description: 'Tableaux de bord clairs pour mesurer vues, clics, sources et conversions'
   },
   {
     icon: Shield,
-    title: 'Accès sécurisé',
-    description: 'Sessions protégées, données côté serveur et accès privé au tableau de bord'
+    title: 'Secure access',
+    description: 'Protected sessions, server-side data, and private dashboard access'
   },
   {
     icon: Users,
     title: 'Collaboration',
-    description: 'Gestion d’équipe pour piloter plusieurs pages, campagnes et domaines'
+    description: 'Team management for multiple pages, campaigns, and domains'
   },
 ]
 
 const metrics = [
-  { value: 'Pages', label: 'Pages créateurs', icon: Users },
-  { value: 'Stats', label: 'Clics et vues', icon: TrendingUp },
+  { value: 'Pages', label: 'Creator pages', icon: Users },
+  { value: 'Stats', label: 'Clicks and views', icon: TrendingUp },
   { value: 'Geo', label: 'Sources et appareils', icon: Globe },
   { value: 'Teams', label: 'Agences', icon: Zap },
 ]
@@ -80,14 +80,14 @@ export default function SignIn() {
 
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
-      toast.success('Email vérifié avec succès ! Vous pouvez maintenant vous connecter.', {
+      toast.success('Email verified successfully. You can now log in.', {
         duration: 5000,
         icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
       })
     }
 
     if (searchParams.get('message') === 'account_created') {
-      toast.success('Compte créé avec succès ! Connectez-vous pour accéder à votre espace.', {
+      toast.success('Account created successfully. Log in to access your workspace.', {
         duration: 5000,
         icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
       })
@@ -95,7 +95,7 @@ export default function SignIn() {
 
     if (searchParams.get('message') === 'login_to_join') {
       const teamName = searchParams.get('team')
-      toast.success(`Connectez-vous pour rejoindre l'équipe ${teamName || ''}`, {
+      toast.success(`Log in to join the ${teamName || ''} team`, {
         duration: 5000,
         icon: <Users className="h-5 w-5 text-brand-500" />,
       })
@@ -124,24 +124,24 @@ export default function SignIn() {
 
       if (result?.error) {
         if (result.error === 'EMAIL_NOT_VERIFIED') {
-          toast.error('Veuillez vérifier votre email avant de vous connecter', { duration: 5000 })
+          toast.error('Please verify your email before logging in.', { duration: 5000 })
         } else if (result.error === 'RATE_LIMIT_EXCEEDED') {
-          toast.error('Trop de tentatives. Réessayez dans 15 minutes.', { duration: 5000 })
+          toast.error('Too many attempts. Try again in 15 minutes.', { duration: 5000 })
         } else {
-          toast.error('Email ou mot de passe incorrect')
+          toast.error('Incorrect email or password.')
         }
         setLoading(false)
         return
       }
 
       if (result?.ok) {
-        toast.success('Connexion réussie !')
+        toast.success('Logged in successfully.')
         // Forcer un rechargement complet de la page pour réinitialiser le SessionProvider
         window.location.href = callbackUrl
       }
     } catch (error) {
       console.error('💥 Erreur:', error)
-      toast.error('Erreur de connexion')
+      toast.error('Unable to log in.')
       setLoading(false)
     }
   }
@@ -152,7 +152,7 @@ export default function SignIn() {
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
         <div className="text-center space-y-4">
           <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-200 border-t-brand-500" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">Vérification...</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Checking...</p>
         </div>
       </div>
     )
@@ -182,21 +182,21 @@ export default function SignIn() {
             <div className="space-y-6">
               <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                 <ArrowLeft className="h-4 w-4" />
-                Retour à l'accueil
+                Back to home
               </Link>
 
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-1.5 text-sm font-medium">
                   <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-gray-700 dark:text-gray-300">Plateforme créateur</span>
+                  <span className="text-gray-700 dark:text-gray-300">Creator platform</span>
                 </div>
 
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
-                  Pilotez votre page créateur
+                  Run your creator page
                 </h1>
 
                 <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Retrouvez vos pages, deeplinks, protections, domaines personnalisés et statistiques dans un tableau de bord unique.
+                  Manage your pages, deep links, protection, custom domains, and analytics from one dashboard.
                 </p>
               </div>
             </div>
@@ -265,13 +265,13 @@ export default function SignIn() {
                   className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Retour
+                  Back
                 </Link>
                 <Link
                   href="/auth/signup"
                   className="text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
                 >
-                  Créer un compte
+                  Create an account
                 </Link>
               </div>
 
@@ -285,7 +285,7 @@ export default function SignIn() {
                     Bon retour
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Connectez-vous pour gérer vos pages, deeplinks et statistiques
+                    Log in to manage your pages, deep links, and analytics
                   </p>
                 </div>
               </div>
@@ -295,7 +295,7 @@ export default function SignIn() {
                 {/* Email Field */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-900 dark:text-white">
-                    Adresse email
+                    Email address
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -305,7 +305,7 @@ export default function SignIn() {
                         required: 'L\'email est requis',
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: 'Email invalide',
+                          message: 'Invalid email address',
                         },
                       })}
                       className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-12 pr-4 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
@@ -330,13 +330,13 @@ export default function SignIn() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium text-gray-900 dark:text-white">
-                      Mot de passe
+                      Password
                     </label>
                     <Link
                       href="/auth/forgot-password"
                       className="text-xs font-medium text-brand-600 hover:text-brand-500 transition-colors"
                     >
-                      Mot de passe oublie ?
+                      Forgot password?
                     </Link>
                   </div>
                   <div className="relative">
@@ -398,7 +398,7 @@ export default function SignIn() {
                 href="/auth/signup"
                 className="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
               >
-                Créer un compte gratuit
+                Create a free account
               </Link>
 
               {/* Security Badge */}
@@ -409,10 +409,10 @@ export default function SignIn() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-gray-900 dark:text-white">
-                      Connexion sécurisée
+                      Secure login
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Vos données et vos pages restent protégées
+                      Your data and pages stay protected
                     </p>
                   </div>
                 </div>

@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     const type = IMAGE_TYPES.has(requestedType) ? requestedType : 'image'
 
     if (!file) {
-      return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 })
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'Fichier trop volumineux (max 4MB)' }, { status: 400 })
+      return NextResponse.json({ error: 'File too large (max 4 MB)' }, { status: 400 })
     }
 
     const rawBuffer = Buffer.from(await file.arrayBuffer())
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     try {
       uploaded = await optimizeImage(rawBuffer, type, file.type)
     } catch {
-      return NextResponse.json({ error: 'Contenu image invalide' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid image content' }, { status: 400 })
     }
 
     const fileId = nanoid()
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     console.error('Erreur upload:', error)
     const message = error?.message?.includes('BLOB_READ_WRITE_TOKEN')
       ? 'Vercel Blob n\'est pas configure. Verifie BLOB_READ_WRITE_TOKEN dans Vercel.'
-      : 'Erreur lors de l upload'
+      : 'Unable to upload the file'
     return NextResponse.json({ error: message, details: error?.message }, { status: 500 })
   }
 }

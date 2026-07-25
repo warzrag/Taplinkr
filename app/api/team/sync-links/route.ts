@@ -220,8 +220,8 @@ export async function POST(request: Request) {
           data: {
             userId: member.id,
             type: 'team_link_shared',
-            title: 'Nouveau lien partagé',
-            message: `${updatedLink.user.name || updatedLink.user.email} a partagé le lien "${updatedLink.title}"`,
+            title: 'New shared link',
+            message: `${updatedLink.user.name || updatedLink.user.email} shared the link "${updatedLink.title}"`,
             data: JSON.stringify({ linkId, teamId })
           }
         })
@@ -229,7 +229,7 @@ export async function POST(request: Request) {
     )
 
     return NextResponse.json({
-      message: 'Lien partagé avec succès',
+      message: 'Link shared successfully',
       link: updatedLink
     })
   } catch (error) {
@@ -310,7 +310,7 @@ export async function PUT(request: Request) {
     )
 
     return NextResponse.json({
-      message: 'Lien mis à jour avec succès',
+      message: 'Link updated successfully',
       link: updatedLink
     })
   } catch (error) {
@@ -393,7 +393,7 @@ export async function DELETE(request: Request) {
     )
 
     return NextResponse.json({
-      message: 'Lien retiré du partage équipe',
+      message: 'Link removed from team sharing',
       link: updatedLink
     })
   } catch (error) {

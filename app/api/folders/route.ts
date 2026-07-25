@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Récupérer l'utilisateur et son équipe
@@ -19,7 +19,7 @@ export async function GET() {
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // 🔥 DÉSACTIVATION CACHE REDIS: Problème multi-instance Next.js
@@ -95,7 +95,7 @@ export async function GET() {
     return response
   } catch (error) {
     console.error('Erreur lors de la récupération des dossiers:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user?.email) {
       console.log('❌ [API FOLDERS] Erreur: Pas de session')
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       console.log('❌ [API FOLDERS] Erreur: Utilisateur non trouvé')
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Vérifier que le dossier parent existe si fourni
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
       })
       
       if (!parentFolder) {
-        return NextResponse.json({ error: 'Dossier parent introuvable' }, { status: 404 })
+        return NextResponse.json({ error: 'Parent folder not found' }, { status: 404 })
       }
     }
 
@@ -211,20 +211,20 @@ export async function POST(request: NextRequest) {
       // Vérifier si c'est une erreur Prisma
       if (error.message.includes('P2002')) {
         return NextResponse.json({ 
-          error: 'Un dossier avec ce nom existe déjà' 
+          error: 'A folder with this name already exists'
         }, { status: 400 })
       }
       
       if (error.message.includes('P2025')) {
         return NextResponse.json({ 
-          error: 'Utilisateur ou données introuvables' 
+          error: 'User or data not found'
         }, { status: 404 })
       }
     }
     
     return NextResponse.json({ 
-      error: 'Erreur lors de la création du dossier',
-      details: error instanceof Error ? error.message : 'Erreur inconnue'
+      error: 'Unable to create the folder',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }

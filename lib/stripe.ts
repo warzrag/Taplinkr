@@ -17,16 +17,16 @@ export const PRICING_PLANS = {
     currency: 'eur',
     interval: 'month' as const,
     features: [
-      'Pages bio illimitées mobile-first',
-      '50 liens par page optimisés tap',
-      'Thèmes et animations mobiles',
-      'Images de profil et bannière HD',
-      'Statut en ligne temps réel',
-      'Géolocalisation des visiteurs',
-      'Liens directs one-tap',
-      'Analytics mobile détaillées',
-      'Équipe jusqu\'à 10 membres',
-      'Support prioritaire'
+      'Unlimited mobile-first bio pages',
+      '50 tap-optimized links per page',
+      'Mobile themes and animations',
+      'HD profile and cover images',
+      'Real-time online status',
+      'Visitor location insights',
+      'One-tap direct links',
+      'Detailed mobile analytics',
+      'Teams of up to 10 members',
+      'Priority support'
     ]
   },
   premium: {
@@ -36,16 +36,16 @@ export const PRICING_PLANS = {
     currency: 'eur',
     interval: 'month' as const,
     features: [
-      'Tout du plan Standard',
-      'Liens illimités avec micro-interactions',
-      'Icônes personnalisées et animations tap',
-      'Intégration réseaux sociaux native',
-      'Polices, couleurs et thèmes premium',
-      'Animations mobiles avancées',
-      'Protection Shield anti-bot',
-      'Analytics temps réel + heatmap des taps',
-      'Équipe jusqu\'à 10 membres',
-      'Support VIP 24/7'
+      'Everything in Standard',
+      'Unlimited links with micro-interactions',
+      'Custom icons and tap animations',
+      'Native social media integrations',
+      'Premium fonts, colors, and themes',
+      'Advanced mobile animations',
+      'Shield anti-bot protection',
+      'Real-time analytics and tap heatmaps',
+      'Teams of up to 10 members',
+      '24/7 VIP support'
     ]
   }
 }

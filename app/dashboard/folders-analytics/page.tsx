@@ -143,7 +143,7 @@ export default function FoldersAnalyticsPage() {
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full"
           />
-          <p className="text-gray-600 font-medium">Chargement des analytics...</p>
+          <p className="text-gray-600 font-medium">Loading analytics...</p>
         </motion.div>
       </div>
     )
@@ -176,7 +176,7 @@ export default function FoldersAnalyticsPage() {
               </Link>
               <div>
                 <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
-                  Analytics des Dossiers
+                  Folder analytics
                 </h1>
                 <p className="text-lg text-gray-600 mt-1">
                   Analysez les performances de vos dossiers et liens
@@ -199,7 +199,7 @@ export default function FoldersAnalyticsPage() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Clics Totaux</p>
+                <p className="text-sm font-medium text-gray-600">Total clicks</p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">{totalClicks.toLocaleString()}</p>
               </div>
               <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
@@ -214,7 +214,7 @@ export default function FoldersAnalyticsPage() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Dossiers</p>
+                <p className="text-sm font-medium text-gray-600">Folders</p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">{folders.length}</p>
               </div>
               <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg">
@@ -229,7 +229,7 @@ export default function FoldersAnalyticsPage() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Liens Totaux</p>
+                <p className="text-sm font-medium text-gray-600">Total links</p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">
                   {allFolders.reduce((sum, f) => sum + f.linksCount, 0)}
                 </p>
@@ -267,7 +267,7 @@ export default function FoldersAnalyticsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
-          <h3 className="text-2xl font-bold text-gray-900">Performance par Dossier</h3>
+          <h3 className="text-2xl font-bold text-gray-900">Performance by folder</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {allFolders.map((folder, index) => (
@@ -308,7 +308,7 @@ export default function FoldersAnalyticsPage() {
 
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Clics totaux</span>
+                    <span className="text-sm text-gray-600">Total clicks</span>
                     <span className="text-2xl font-bold text-gray-900">{folder.totalClicks.toLocaleString()}</span>
                   </div>
                   {folder.hasChildren && (

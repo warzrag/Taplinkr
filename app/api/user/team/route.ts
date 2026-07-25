@@ -8,7 +8,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
@@ -39,7 +39,7 @@ export async function GET() {
     })
 
     if (!user?.team) {
-      return NextResponse.json({ error: 'Pas d\'équipe' }, { status: 404 })
+      return NextResponse.json({ error: 'No team found' }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -50,7 +50,7 @@ export async function GET() {
   } catch (error) {
     console.error('Erreur récupération équipe:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la récupération des informations' },
+      { error: 'Unable to load team information' },
       { status: 500 }
     )
   }

@@ -71,13 +71,13 @@ export default function ImageUpload({
   const handleFile = async (file: File) => {
     // Vérifier le type
     if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image')
+      toast.error('Select an image.')
       return
     }
 
     // Vérifier la taille
     if (file.size > 4 * 1024 * 1024) {
-      toast.error('L\'image ne doit pas dépasser 4MB')
+      toast.error('The image must be 4 MB or smaller.')
       return
     }
 
@@ -103,15 +103,15 @@ export default function ImageUpload({
         if (!uploadResponse.ok) {
           const error = await uploadResponse.json()
           console.error('Upload API error:', error)
-          throw new Error(error.error || 'Erreur lors de l\'upload')
+          throw new Error(error.error || 'Unable to upload the image.')
         }
 
         const data = await uploadResponse.json()
         onChange(data.url)
-        toast.success('Image uploadée avec succès')
+        toast.success('Image uploaded successfully.')
       } catch (error) {
         console.error('Erreur upload:', error)
-        toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
+        toast.error(error instanceof Error ? error.message : 'Unable to upload the image.')
         setPreview(value || null)
         onChange(value || '')
       } finally {
@@ -145,15 +145,15 @@ export default function ImageUpload({
       if (!uploadResponse.ok) {
         const error = await uploadResponse.json()
         console.error('Upload API error:', error)
-        throw new Error(error.error || 'Erreur lors de l\'upload')
+        throw new Error(error.error || 'Unable to upload the image.')
       }
 
       const data = await uploadResponse.json()
       onChange(data.url)
-      toast.success('Image uploadée avec succès')
+      toast.success('Image uploaded successfully.')
     } catch (error) {
       console.error('Erreur upload:', error)
-      toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
+      toast.error(error instanceof Error ? error.message : 'Unable to upload the image.')
       setPreview(value || null)
       onChange(value || '')
     } finally {
@@ -309,7 +309,7 @@ export default function ImageUpload({
                     )}
                   </div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {isDragging ? 'Déposez l\'image ici' : 'Cliquez ou glissez une image'}
+                    {isDragging ? 'Drop the image here' : 'Click or drag an image'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     JPG, PNG, GIF, WebP • Max 4MB

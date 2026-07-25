@@ -55,13 +55,13 @@ export default function AdminPage() {
       const data = await response.json()
 
       if (response.ok) {
-        toast.success(`"${folderName}" partagé avec l'équipe`)
+        toast.success(`"${folderName}" shared with the team`)
         loadFolders()
       } else {
-        toast.error(data.error || 'Erreur lors du partage')
+        toast.error(data.error || 'Unable to share the folder.')
       }
     } catch (error) {
-      toast.error('Erreur lors du partage')
+      toast.error('Unable to share the folder.')
     }
   }
 
@@ -74,13 +74,13 @@ export default function AdminPage() {
       const data = await response.json()
 
       if (response.ok) {
-        toast.success(`"${folderName}" retiré du partage`)
+        toast.success(`"${folderName}" removed from team sharing`)
         loadFolders()
       } else {
-        toast.error(data.error || 'Erreur')
+        toast.error(data.error || 'Unable to update sharing.')
       }
     } catch (error) {
-      toast.error('Erreur lors du retrait')
+      toast.error('Unable to remove the folder from sharing.')
     }
   }
 
@@ -105,7 +105,7 @@ export default function AdminPage() {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Panneau Admin</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Gestion des dossiers d'équipe</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Team folder management</p>
           </div>
         </div>
 
@@ -114,7 +114,7 @@ export default function AdminPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-2">
               <Folder className="w-5 h-5 text-blue-600" />
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total Dossiers</h3>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total folders</h3>
             </div>
             <p className="text-3xl font-bold text-blue-600">{stats.total}</p>
           </div>
@@ -122,7 +122,7 @@ export default function AdminPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-2">
               <Check className="w-5 h-5 text-green-600" />
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Partagés</h3>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Shared</h3>
             </div>
             <p className="text-3xl font-bold text-green-600">{stats.shared}</p>
           </div>
@@ -130,7 +130,7 @@ export default function AdminPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-2">
               <AlertCircle className="w-5 h-5 text-orange-600" />
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Non partagés</h3>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Not shared</h3>
             </div>
             <p className="text-3xl font-bold text-orange-600">{stats.notShared}</p>
           </div>
@@ -151,7 +151,7 @@ export default function AdminPage() {
             ) : folders.length === 0 ? (
               <div className="text-center py-12">
                 <Folder className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">Aucun dossier trouvé</p>
+                <p className="text-gray-600 dark:text-gray-400">No folders found</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -177,12 +177,12 @@ export default function AdminPage() {
                         {folder.teamShared ? (
                           <>
                             <Check className="w-4 h-4 text-green-600" />
-                            Partagé avec l'équipe
+                            Shared with the team
                           </>
                         ) : (
                           <>
                             <AlertCircle className="w-4 h-4 text-orange-600" />
-                            Non partagé
+                            Not shared
                           </>
                         )}
                       </p>
@@ -222,7 +222,7 @@ export default function AdminPage() {
               <strong className="text-gray-900 dark:text-white">Email:</strong> {session.user.email}
             </p>
             <p className="text-gray-600 dark:text-gray-400">
-              <strong className="text-gray-900 dark:text-white">Rôle:</strong> {session.user.role}
+              <strong className="text-gray-900 dark:text-white">Role:</strong> {session.user.role}
             </p>
             <p className="text-gray-600 dark:text-gray-400">
               <strong className="text-gray-900 dark:text-white">Plan:</strong> {session.user.plan}

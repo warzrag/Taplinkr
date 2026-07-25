@@ -117,7 +117,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
       }
     } catch (error) {
       console.error('Erreur chargement liens:', error)
-      toast.error('Erreur lors du chargement des liens')
+      toast.error('Unable to load links.')
     } finally {
       setLoading(false)
     }
@@ -132,15 +132,15 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
       })
 
       if (response.ok) {
-        toast.success('Lien partagé avec l\'équipe')
+        toast.success('Link shared with the team.')
         fetchLinks()
         setShowShareModal(false)
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Erreur lors du partage')
+        toast.error(error.error || 'Unable to share the link.')
       }
     } catch (error) {
-      toast.error('Erreur lors du partage du lien')
+      toast.error('Unable to share the link.')
     }
   }
 
@@ -151,20 +151,20 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
       })
 
       if (response.ok) {
-        toast.success('Lien retiré du partage')
+        toast.success('Link removed from team sharing.')
         fetchLinks()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Erreur lors du retrait')
+        toast.error(error.error || 'Unable to remove the link from sharing.')
       }
     } catch (error) {
-      toast.error('Erreur lors du retrait du partage')
+      toast.error('Unable to remove the link from sharing.')
     }
   }
 
   const copyLink = (slug: string) => {
     navigator.clipboard.writeText(`https://taplinkr.com/${slug}`)
-    toast.success('Lien copié!')
+    toast.success('Link copied!')
   }
 
   const fetchTeamMembers = async () => {
@@ -190,14 +190,14 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
       })
 
       if (response.ok) {
-        toast.success(assignedToUserId ? 'Lien assigné' : 'Assignation retirée')
+        toast.success(assignedToUserId ? 'Link assigned' : 'Assignment removed')
         fetchLinks()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Erreur lors de l\'assignation')
+        toast.error(error.error || 'Unable to assign the link.')
       }
     } catch (error) {
-      toast.error('Erreur lors de l\'assignation du lien')
+      toast.error('Unable to assign the link.')
     }
   }
 
@@ -216,14 +216,14 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
       })
 
       if (response.ok) {
-        toast.success('Lien renommé')
+        toast.success('Link renamed.')
         fetchLinks()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Erreur lors du renommage')
+        toast.error(error.error || 'Unable to rename the link.')
       }
     } catch (error) {
-      toast.error('Erreur lors du renommage du lien')
+      toast.error('Unable to rename the link.')
     }
   }
 
@@ -268,8 +268,8 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
               <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100">Liens d'équipe</h2>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Gérez et partagez vos liens</p>
+              <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100">Team links</h2>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage and share your links</p>
             </div>
           </div>
 
@@ -282,7 +282,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
-              Tous ({filteredLinks.length})
+              All ({filteredLinks.length})
             </button>
             <button
               onClick={() => setFilter('mine')}
@@ -302,7 +302,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
-              Équipe ({teamLinks.length})
+              Team ({teamLinks.length})
             </button>
           </div>
         </div>
@@ -312,12 +312,12 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
           <div className="flex items-center gap-2">
             {getRoleIcon(userRole)}
             <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
-              Votre rôle: <span className="font-medium capitalize">{userRole || 'Viewer'}</span>
+              Your role: <span className="font-medium capitalize">{userRole || 'Viewer'}</span>
             </span>
           </div>
           {canShare && (
             <span className="text-xs text-gray-500 dark:text-gray-400 sm:ml-auto">
-              Vous pouvez partager et modifier les liens
+              You can share and edit links
             </span>
           )}
         </div>
@@ -373,7 +373,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                       )}
                       {link.teamShared && (
                         <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs font-medium rounded-full whitespace-nowrap">
-                          Partagé
+                          Shared
                         </span>
                       )}
                       {link.internalName && (
@@ -395,7 +395,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                       {link.lastModifier && link.lastModifier.id !== link.user?.id && (
                         <span className="flex items-center gap-1">
                           <Edit3 className="w-3 h-3 flex-shrink-0" />
-                          <span className="hidden sm:inline">Modifié par</span>
+                          <span className="hidden sm:inline">Edited by</span>
                           <span className="truncate max-w-[100px]">{link.lastModifier.name || link.lastModifier.email}</span>
                         </span>
                       )}
@@ -438,7 +438,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                   <button
                     onClick={() => copyLink(link.slug)}
                     className="p-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
-                    title="Copier le lien"
+                    title="Copy link"
                   >
                     <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
@@ -447,7 +447,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     href={`/${link.slug}`}
                     target="_blank"
                     className="p-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
-                    title="Ouvrir le lien"
+                    title="Open link"
                   >
                     <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </Link>
@@ -456,7 +456,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     <button
                       onClick={() => shareLink(link.id)}
                       className="p-2 sm:p-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 rounded-lg transition-all shadow-lg"
-                      title="Partager avec l'équipe"
+                      title="Share with team"
                     >
                       <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
@@ -476,7 +476,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     <Link
                       href={`/dashboard/links/${link.id}/edit`}
                       className="p-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
-                      title="Modifier"
+                      title="Edit"
                     >
                       <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Link>
@@ -488,9 +488,9 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                       value={link.assignedToUserId || ''}
                       onChange={(e) => assignLink(link.id, e.target.value || null)}
                       className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      title="Assigner à un membre"
+                      title="Assign to a member"
                     >
-                      <option value="">Non assigné</option>
+                      <option value="">Unassigned</option>
                       {teamMembers.map((member) => (
                         <option key={member.id} value={member.id}>
                           {(member as any).nickname || member.name || member.email}
@@ -509,10 +509,10 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
             <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500">
               {filter === 'team'
-                ? 'Aucun lien partagé avec l\'équipe'
+                ? 'No links shared with the team'
                 : filter === 'mine'
-                ? 'Vous n\'avez pas encore de liens personnels'
-                : 'Aucun lien disponible'}
+                ? 'You do not have any personal links yet'
+                : 'No links available'}
             </p>
           </div>
         )}

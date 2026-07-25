@@ -17,22 +17,22 @@ interface PricingFeature {
 }
 
 const features: PricingFeature[] = [
-  { name: 'Pages', free: '1', standard: 'Illimitées', premium: 'Illimitées', icon: Sparkles },
-  { name: 'Liens par page', free: '5', standard: '50', premium: 'Illimités', icon: Zap },
+  { name: 'Pages', free: '1', standard: 'Unlimited', premium: 'Unlimited', icon: Sparkles },
+  { name: 'Links per page', free: '5', standard: '50', premium: 'Unlimited', icon: Zap },
   { name: 'Animations', free: true, standard: true, premium: true },
-  { name: 'Images de profil/couverture', free: true, standard: true, premium: true },
-  { name: 'Statut en ligne', free: false, standard: true, premium: true },
-  { name: 'Localisation', free: false, standard: true, premium: true },
-  { name: 'Icônes personnalisées', free: false, standard: false, premium: true, icon: Palette },
-  { name: 'Réseaux sociaux', free: false, standard: false, premium: true, icon: Users },
-  { name: 'Polices personnalisées', free: false, standard: false, premium: true },
-  { name: 'Thèmes personnalisés', free: false, standard: false, premium: true },
-  { name: 'Liens directs', free: true, standard: true, premium: true },
+  { name: 'Profile and cover images', free: true, standard: true, premium: true },
+  { name: 'Online status', free: false, standard: true, premium: true },
+  { name: 'Location', free: false, standard: true, premium: true },
+  { name: 'Custom icons', free: false, standard: false, premium: true, icon: Palette },
+  { name: 'Social networks', free: false, standard: false, premium: true, icon: Users },
+  { name: 'Custom fonts', free: false, standard: false, premium: true },
+  { name: 'Custom themes', free: false, standard: false, premium: true },
+  { name: 'Direct links', free: true, standard: true, premium: true },
   { name: 'Shield Protection', free: false, standard: false, premium: true, icon: Shield },
   { name: 'ULTRA LINK', free: false, standard: false, premium: true, icon: Zap },
-  { name: 'Membres d\'équipe', free: '0', standard: '10', premium: '10', icon: Users },
-  { name: 'Analytics', free: 'Basiques', standard: 'Avancées', premium: 'Temps réel', icon: BarChart3 },
-  { name: 'Support', free: 'Email', standard: 'Prioritaire', premium: 'VIP 24/7', icon: Clock },
+  { name: 'Team members', free: '0', standard: '10', premium: '10', icon: Users },
+  { name: 'Analytics', free: 'Basic', standard: 'Advanced', premium: 'Real-time', icon: BarChart3 },
+  { name: 'Support', free: 'Email', standard: 'Priority', premium: '24/7 VIP', icon: Clock },
 ]
 
 export default function PricingPage() {
@@ -59,7 +59,7 @@ export default function PricingPage() {
       const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la création de la session')
+        throw new Error(data.error || 'Unable to start checkout.')
       }
 
       // Rediriger vers Stripe Checkout
@@ -79,7 +79,7 @@ export default function PricingPage() {
       period: 'pour toujours',
       description: 'Parfait pour commencer',
       color: 'from-gray-400 to-gray-600',
-      buttonText: userPlan === 'free' ? 'Plan actuel' : 'Rétrograder',
+      buttonText: userPlan === 'free' ? 'Current plan' : 'Downgrade',
       buttonAction: () => {},
       disabled: userPlan === 'free',
       popular: false
@@ -87,10 +87,10 @@ export default function PricingPage() {
     {
       name: 'Standard',
       price: '9.99€',
-      period: '/mois',
-      description: 'Pour les créateurs sérieux',
+      period: '/month',
+      description: 'For serious creators',
       color: 'from-blue-500 to-indigo-600',
-      buttonText: userPlan === 'standard' ? 'Plan actuel' : 'Choisir Standard',
+      buttonText: userPlan === 'standard' ? 'Current plan' : 'Choose Standard',
       buttonAction: () => handleSubscribe('standard'),
       disabled: userPlan === 'standard',
       popular: true
@@ -98,10 +98,10 @@ export default function PricingPage() {
     {
       name: 'Premium',
       price: '24.99€',
-      period: '/mois',
+      period: '/month',
       description: 'Pour les professionnels',
       color: 'from-purple-500 to-pink-600',
-      buttonText: userPlan === 'premium' ? 'Plan actuel' : 'Choisir Premium',
+      buttonText: userPlan === 'premium' ? 'Current plan' : 'Choose Premium',
       buttonAction: () => handleSubscribe('premium'),
       disabled: userPlan === 'premium',
       popular: false
@@ -118,10 +118,10 @@ export default function PricingPage() {
           className="text-center mb-12"
         >
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 dark:from-gray-100 dark:to-blue-400 bg-clip-text text-transparent mb-4">
-            Choisissez votre plan
+            Choose your plan
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Débloquez toutes les fonctionnalités pour créer des liens extraordinaires
+            Unlock every feature you need to build exceptional links
           </p>
         </motion.div>
 
@@ -171,7 +171,7 @@ export default function PricingPage() {
                   {loading === plan.name.toLowerCase() ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Chargement...
+                      Loading...
                     </>
                   ) : (
                     <>
@@ -195,7 +195,7 @@ export default function PricingPage() {
         >
           <div className="p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Comparaison détaillée
+              Detailed comparison
             </h2>
           </div>
 
@@ -204,7 +204,7 @@ export default function PricingPage() {
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left p-4 font-semibold text-gray-900 dark:text-gray-100">
-                    Fonctionnalités
+                    Features
                   </th>
                   <th className="text-center p-4 font-semibold text-gray-600 dark:text-gray-400">
                     Gratuit
@@ -257,7 +257,7 @@ export default function PricingPage() {
               onClick={() => router.push('/dashboard/billing')}
               className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
             >
-              Gérer mon abonnement
+              Manage my subscription
             </button>
           </motion.div>
         )}

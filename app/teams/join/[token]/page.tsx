@@ -45,7 +45,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Invitation invalide')
+        setError(data.error || 'Invalid invitation')
         return
       }
 
@@ -54,7 +54,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
       // Si l'utilisateur existe déjà
       if (data.invitation.userExists) {
         if (data.invitation.isAlreadyMember) {
-          setError('Vous êtes déjà membre de cette équipe')
+          setError('You are already a member of this team')
           return
         }
         // Rediriger vers la page de connexion avec le token d'invitation
@@ -65,7 +65,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
       setName(data.invitation.email.split('@')[0]) // Suggérer un nom basé sur l'email
     } catch (error) {
       console.error('Erreur:', error)
-      setError('Erreur lors de la vérification de l\'invitation')
+      setError('Unable to verify the invitation')
     } finally {
       setLoading(false)
     }
@@ -75,12 +75,12 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
     e.preventDefault()
     
     if (!name.trim() || !password) {
-      toast.error('Veuillez remplir tous les champs')
+      toast.error('Please complete all fields.')
       return
     }
 
     if (password.length < 8) {
-      toast.error('Le mot de passe doit contenir au moins 8 caractères')
+      toast.error('Your password must be at least 8 characters.')
       return
     }
 
@@ -99,16 +99,16 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la création du compte')
+        throw new Error(data.error || 'Unable to create your account.')
       }
 
-      toast.success('Compte créé et équipe rejointe avec succès!')
+      toast.success('Account created and team joined successfully!')
       
       // Rediriger vers la page de connexion avec les informations pré-remplies et un flag pour la bienvenue
       router.push(`/auth/signin?email=${encodeURIComponent(invitation!.email)}&message=team_joined&team=${encodeURIComponent(invitation!.team.name)}&welcome=team`)
     } catch (error: any) {
       console.error('Erreur:', error)
-      toast.error(error.message || 'Erreur lors de la création du compte')
+      toast.error(error.message || 'Unable to create your account.')
     } finally {
       setJoining(false)
     }
@@ -123,7 +123,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
           className="text-center"
         >
           <Loader2 className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Vérification de l'invitation...</p>
+          <p className="text-gray-600">Checking your invitation...</p>
         </motion.div>
       </div>
     )
@@ -140,13 +140,13 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-10 h-10 text-red-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Invitation invalide</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Invalid invitation</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
           <button
             onClick={() => router.push('/auth/signin')}
             className="px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors"
           >
-            Aller à la connexion
+            Go to login
           </button>
         </motion.div>
       </div>
@@ -168,10 +168,10 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
             <Users className="w-10 h-10 text-purple-600" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Rejoindre l'équipe {invitation.team.name}
+            Join {invitation.team.name}
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            {invitation.invitedBy.name || invitation.invitedBy.email} vous a invité en tant que {getRoleLabel(invitation.role)}
+            {invitation.invitedBy.name || invitation.invitedBy.email} invited you as a {getRoleLabel(invitation.role)}
           </p>
         </div>
 
@@ -180,7 +180,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
           {/* Email (read-only) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Adresse email
+              Email address
             </label>
             <div className="relative">
               <Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
@@ -196,13 +196,13 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Votre nom *
+              Your name *
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Jean Dupont"
+              placeholder="John Smith"
               required
               className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
             />
@@ -211,7 +211,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
           {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Créer un mot de passe *
+              Create a password *
             </label>
             <div className="relative">
               <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
@@ -219,7 +219,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimum 8 caractères"
+                placeholder="At least 8 characters"
                 required
                 minLength={8}
                 className="w-full pl-12 pr-12 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
@@ -233,7 +233,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
               </button>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Le mot de passe doit contenir au moins 8 caractères
+              Your password must be at least 8 characters
             </p>
           </div>
 
@@ -246,12 +246,12 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
             {joining ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Création du compte...
+                Creating your account...
               </>
             ) : (
               <>
                 <CheckCircle className="w-5 h-5" />
-                Créer mon compte et rejoindre l'équipe
+                Create my account and join the team
               </>
             )}
           </button>
@@ -260,7 +260,7 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
         {/* Info */}
         <div className="mt-8 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
           <p className="text-sm text-purple-700 dark:text-purple-300 text-center">
-            En créant votre compte, vous acceptez nos conditions d'utilisation et rejoignez automatiquement l'équipe {invitation.team.name}
+            By creating your account, you agree to our Terms of Service and automatically join {invitation.team.name}.
           </p>
         </div>
       </motion.div>
@@ -270,10 +270,10 @@ export default function JoinTeamPage(props: { params: Promise<{ token: string }>
 
 function getRoleLabel(role: string): string {
   const labels: Record<string, string> = {
-    owner: 'Propriétaire',
-    admin: 'Administrateur',
-    member: 'Membre',
-    viewer: 'Observateur'
+    owner: 'Owner',
+    admin: 'Admin',
+    member: 'Member',
+    viewer: 'Viewer'
   }
   return labels[role] || role
 }

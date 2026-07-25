@@ -25,12 +25,12 @@ export default function PublicPasswordGate({ linkId, title, hint }: {
       })
       const data = await response.json()
       if (!response.ok) {
-        setError(data.error || 'Mot de passe incorrect')
+        setError(data.error || 'Incorrect password')
         return
       }
       window.location.reload()
     } catch {
-      setError('Impossible de vérifier le mot de passe. Réessayez.')
+      setError('Unable to verify the password. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -43,9 +43,9 @@ export default function PublicPasswordGate({ linkId, title, hint }: {
           <Lock aria-hidden="true" />
         </div>
         <h1 className="text-center text-2xl font-bold text-slate-900">{title}</h1>
-        <p className="mt-2 text-center text-sm text-slate-600">Cette page est protégée par un mot de passe.</p>
+        <p className="mt-2 text-center text-sm text-slate-600">This page is password protected.</p>
         {hint && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">Indice : {hint}</p>}
-        <label htmlFor="page-password" className="mt-6 block text-sm font-medium text-slate-800">Mot de passe</label>
+        <label htmlFor="page-password" className="mt-6 block text-sm font-medium text-slate-800">Password</label>
         <input
           id="page-password"
           type="password"
@@ -58,7 +58,7 @@ export default function PublicPasswordGate({ linkId, title, hint }: {
         {error && <p role="alert" className="mt-3 text-sm text-red-600">{error}</p>}
         <button disabled={loading || !password} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
           {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-          Accéder à la page
+          Open page
         </button>
       </form>
     </main>

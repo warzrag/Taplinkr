@@ -18,7 +18,7 @@ export default function SupportPage() {
     e.preventDefault()
     
     if (!formData.subject || !formData.message) {
-      toast.error('Veuillez remplir tous les champs')
+      toast.error('Please complete all fields.')
       return
     }
 
@@ -26,7 +26,7 @@ export default function SupportPage() {
     
     // Simuler l'envoi
     setTimeout(() => {
-      toast.success('Message envoyé ! Nous vous répondrons dans les 24h.')
+      toast.success("Message sent! We'll respond within 24 hours.")
       setFormData({ subject: '', category: 'general', message: '' })
       setLoading(false)
     }, 1500)
@@ -44,7 +44,7 @@ export default function SupportPage() {
           <Link href="/dashboard">
             <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6">
               <ArrowLeft className="w-4 h-4" />
-              Retour au dashboard
+              Back to dashboard
             </button>
           </Link>
           
@@ -57,7 +57,7 @@ export default function SupportPage() {
                 Support
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Notre équipe est là pour vous aider
+                Our team is here to help
               </p>
             </div>
           </div>
@@ -75,11 +75,11 @@ export default function SupportPage() {
               <div className="flex items-center gap-3 mb-3">
                 <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                  Temps de réponse
+                  Response time
                 </h3>
               </div>
               <p className="text-gray-600 dark:text-gray-400">
-                Nous répondons généralement sous 24h
+                We usually respond within 24 hours
               </p>
             </div>
 
@@ -88,7 +88,7 @@ export default function SupportPage() {
               <div className="flex items-center gap-3 mb-3">
                 <Mail className="w-5 h-5 text-green-600 dark:text-green-400" />
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                  Email direct
+                  Direct email
                 </h3>
               </div>
               <a 
@@ -103,10 +103,10 @@ export default function SupportPage() {
             <Link href="/dashboard/faq">
               <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-6 cursor-pointer hover:shadow-md transition-all">
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  Consultez la FAQ
+                  Browse the FAQ
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Trouvez rapidement des réponses aux questions fréquentes
+                  Find quick answers to common questions
                 </p>
               </div>
             </Link>
@@ -120,39 +120,39 @@ export default function SupportPage() {
           >
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-                Envoyez-nous un message
+                Send us a message
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Category */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Catégorie
+                    Category
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
-                    <option value="general">Question générale</option>
-                    <option value="technical">Problème technique</option>
-                    <option value="billing">Facturation</option>
-                    <option value="feature">Demande de fonctionnalité</option>
-                    <option value="other">Autre</option>
+                    <option value="general">General question</option>
+                    <option value="technical">Technical issue</option>
+                    <option value="billing">Billing</option>
+                    <option value="feature">Feature request</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
 
                 {/* Subject */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Sujet
+                    Subject
                   </label>
                   <input
                     type="text"
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Décrivez brièvement votre demande"
+                    placeholder="Briefly describe your request"
                     required
                   />
                 </div>
@@ -167,7 +167,7 @@ export default function SupportPage() {
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     rows={6}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 resize-none"
-                    placeholder="Expliquez-nous comment nous pouvons vous aider..."
+                    placeholder="Tell us how we can help..."
                     required
                   />
                 </div>
@@ -177,7 +177,7 @@ export default function SupportPage() {
                   <div className="flex items-start gap-2">
                     <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-blue-700 dark:text-blue-300">
-                      Pour les problèmes urgents, mentionnez-le dans votre message et nous prioriserons votre demande.
+                      For urgent issues, mention that in your message and we'll prioritize your request.
                     </p>
                   </div>
                 </div>
@@ -198,7 +198,7 @@ export default function SupportPage() {
                   ) : (
                     <>
                       <Send className="w-5 h-5" />
-                      Envoyer le message
+                      Send message
                     </>
                   )}
                 </motion.button>

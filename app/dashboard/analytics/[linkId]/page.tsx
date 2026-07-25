@@ -160,7 +160,7 @@ export default function LinkAnalyticsPage() {
           className="text-center"
         >
           <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Chargement des analytics...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading analytics...</p>
         </motion.div>
       </div>
     )
@@ -215,7 +215,7 @@ export default function LinkAnalyticsPage() {
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
-                7 jours
+                7 days
               </button>
               <button
                 onClick={() => setDateRange('30d')}
@@ -225,7 +225,7 @@ export default function LinkAnalyticsPage() {
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
-                30 jours
+                30 days
               </button>
               <button
                 onClick={() => setDateRange('all')}
@@ -257,7 +257,7 @@ export default function LinkAnalyticsPage() {
                 +{stats.totalClicks}
               </span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Clics</h3>
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total clicks</h3>
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalClicks.toLocaleString()}</p>
           </motion.div>
 
@@ -275,7 +275,7 @@ export default function LinkAnalyticsPage() {
                 +{stats.totalViews}
               </span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Vues</h3>
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total views</h3>
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalViews.toLocaleString()}</p>
           </motion.div>
 
@@ -361,7 +361,7 @@ export default function LinkAnalyticsPage() {
           >
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <Globe className="w-5 h-5 text-purple-600" />
-              Top Pays
+              Top countries
             </h3>
             <div className="space-y-4">
               {topCountries.map(([country, count]) => {
@@ -401,7 +401,7 @@ export default function LinkAnalyticsPage() {
         >
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Activity className="w-5 h-5 text-purple-600" />
-            Clics Récents
+            Recent clicks
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -411,16 +411,16 @@ export default function LinkAnalyticsPage() {
                     Date
                   </th>
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Pays
+                    Country
                   </th>
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                     Ville
                   </th>
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Appareil
+                    Device
                   </th>
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Navigateur
+                    Browser
                   </th>
                 </tr>
               </thead>
@@ -449,7 +449,7 @@ export default function LinkAnalyticsPage() {
             {clicks.length === 0 && (
               <div className="text-center py-12">
                 <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500 dark:text-gray-400">Aucun clic pour le moment</p>
+                <p className="text-gray-500 dark:text-gray-400">No clicks yet</p>
               </div>
             )}
           </div>

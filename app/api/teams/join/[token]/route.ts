@@ -117,7 +117,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
 
     return NextResponse.json({ 
       success: true,
-      message: 'Compte créé et équipe rejointe avec succès',
+      message: 'Account created and team joined successfully',
       user: {
         id: result.id,
         email: result.email,

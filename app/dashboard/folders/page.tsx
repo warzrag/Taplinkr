@@ -148,7 +148,7 @@ export default function FoldersPage() {
       }
     } catch (error) {
       console.error('Erreur lors du chargement:', error)
-      toast.error('Erreur lors du chargement des données')
+      toast.error('Unable to load your data.')
     } finally {
       setLoading(false)
     }
@@ -170,13 +170,13 @@ export default function FoldersPage() {
       })
 
       if (response.ok) {
-        toast.success(isActive ? 'Lien activé' : 'Lien désactivé')
+        toast.success(isActive ? 'Link activated' : 'Link deactivated')
       } else {
         await fetchData()
       }
     } catch (error) {
       await fetchData()
-      toast.error('Erreur lors de la mise à jour')
+      toast.error('Unable to update the link.')
     }
   }
 
@@ -186,7 +186,7 @@ export default function FoldersPage() {
   }
 
   const handleDeleteLink = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce lien ?')) return
+    if (!confirm('Are you sure you want to delete this link?')) return
 
     try {
       // Optimistic update
@@ -201,14 +201,14 @@ export default function FoldersPage() {
       })
 
       if (response.ok) {
-        toast.success('Lien supprimé')
+        toast.success('Link deleted.')
       } else {
         await fetchData()
-        toast.error('Erreur lors de la suppression')
+        toast.error('Unable to delete the link.')
       }
     } catch (error) {
       await fetchData()
-      toast.error('Erreur lors de la suppression')
+      toast.error('Unable to delete the link.')
     }
   }
 
@@ -224,7 +224,7 @@ export default function FoldersPage() {
         fetchData()
       }
     } catch (error) {
-      toast.error('Erreur lors du déplacement')
+      toast.error('Unable to move the link.')
     }
   }
 
@@ -256,23 +256,23 @@ export default function FoldersPage() {
         localStorage.removeItem('folder-stats')
         localStorage.removeItem('folders-page-cache')  // 🔥 FIX
 
-        toast.success('Dossier modifié')
+        toast.success('Folder updated.')
         // Recharger avec cache bypass
         await fetchData(true)
       } else {
         // En cas d'erreur, restaurer l'ancien état
         await fetchData(true)
-        toast.error('Erreur lors de la modification')
+        toast.error('Unable to update the folder.')
       }
     } catch (error) {
       // En cas d'erreur, restaurer l'ancien état
       await fetchData(true)
-      toast.error('Erreur lors de la modification')
+      toast.error('Unable to update the folder.')
     }
   }
 
   const handleDeleteFolder = async (folderId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce dossier et tous ses liens ?')) return
+    if (!confirm('Are you sure you want to delete this folder and all of its links?')) return
 
     try {
       // Optimistic update - Retirer immédiatement du state
@@ -288,18 +288,18 @@ export default function FoldersPage() {
         localStorage.removeItem('folder-stats')
         localStorage.removeItem('folders-page-cache')  // 🔥 FIX
 
-        toast.success('Dossier supprimé')
+        toast.success('Folder deleted.')
         // Recharger avec cache bypass
         await fetchData(true)
       } else {
         // En cas d'erreur, recharger pour restaurer l'état
         await fetchData(true)
-        toast.error('Erreur lors de la suppression')
+        toast.error('Unable to delete the folder.')
       }
     } catch (error) {
       // En cas d'erreur, recharger pour restaurer l'état
       await fetchData(true)
-      toast.error('Erreur lors de la suppression')
+      toast.error('Unable to delete the folder.')
     }
   }
 
@@ -345,13 +345,13 @@ export default function FoldersPage() {
         localStorage.removeItem('folder-stats')
         localStorage.removeItem('folders-page-cache')  // 🔥 FIX
 
-        toast.success(`"${folderName}" partagé avec l'équipe`)
+        toast.success(`"${folderName}" shared with the team`)
         await fetchData(true)
       } else {
-        toast.error(data.error || 'Erreur lors du partage')
+        toast.error(data.error || 'Unable to share the folder.')
       }
     } catch (error) {
-      toast.error('Erreur lors du partage')
+      toast.error('Unable to share the folder.')
     }
   }
 
@@ -369,13 +369,13 @@ export default function FoldersPage() {
         localStorage.removeItem('folder-stats')
         localStorage.removeItem('folders-page-cache')  // 🔥 FIX
 
-        toast.success(`"${folderName}" retiré du partage`)
+        toast.success(`"${folderName}" removed from team sharing`)
         await fetchData(true)
       } else {
-        toast.error(data.error || 'Erreur')
+        toast.error(data.error || 'Unable to update sharing.')
       }
     } catch (error) {
-      toast.error('Erreur lors du retrait')
+      toast.error('Unable to remove the folder from sharing.')
     }
   }
 
@@ -399,7 +399,7 @@ export default function FoldersPage() {
                 Mes dossiers et liens
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Organisez vos liens avec des dossiers et glissez-déposez pour réorganiser
+                Organize links with folders and drag and drop to reorder
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -413,11 +413,11 @@ export default function FoldersPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
               >
                 <Plus className="w-4 h-4" />
-                <span>Créer un lien</span>
+                <span>Create a link</span>
               </motion.button>
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <FolderPlus className="w-4 h-4" />
-                <span>Cliquez sur "Nouveau" pour créer des dossiers</span>
+                <span>Click "New" to create folders</span>
               </div>
             </div>
           </div>

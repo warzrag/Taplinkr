@@ -17,7 +17,7 @@ export default function PromoCodeInput({ onApply, className = '' }: PromoCodeInp
 
   const validateCode = async () => {
     if (!code.trim()) {
-      toast.error('Veuillez entrer un code promo')
+      toast.error('Enter a promo code.')
       return
     }
 
@@ -33,16 +33,16 @@ export default function PromoCodeInput({ onApply, className = '' }: PromoCodeInp
 
       if (response.ok && data.valid) {
         setDiscount({ ...data, code: code.toUpperCase() })
-        toast.success('Code promo valide !')
+        toast.success('Valid promo code!')
         if (onApply) {
           onApply(code.toUpperCase(), { ...data, code: code.toUpperCase() })
         }
       } else {
-        toast.error(data.error || 'Code promo invalide')
+        toast.error(data.error || 'Invalid promo code.')
         setDiscount(null)
       }
     } catch (error) {
-      toast.error('Erreur lors de la validation')
+      toast.error('Unable to validate the promo code.')
       setDiscount(null)
     } finally {
       setLoading(false)
@@ -65,7 +65,7 @@ export default function PromoCodeInput({ onApply, className = '' }: PromoCodeInp
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="Code promo"
+            placeholder="Promo code"
             disabled={loading || discount}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
           />
@@ -93,7 +93,7 @@ export default function PromoCodeInput({ onApply, className = '' }: PromoCodeInp
             className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2"
           >
             <X className="w-4 h-4" />
-            Retirer
+            Remove
           </button>
         )}
       </div>
@@ -108,13 +108,13 @@ export default function PromoCodeInput({ onApply, className = '' }: PromoCodeInp
             <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="text-sm font-medium text-green-800">
-                Code promo appliqué !
+                Promo code applied!
               </p>
               <p className="text-xs text-green-600 mt-1">
                 {discount.discountType === 'fixed_days' ? (
                   <>{discount.discountValue} jours Premium offerts</>
                 ) : (
-                  <>{discount.discountValue}% de réduction</>
+                  <>{discount.discountValue}% off</>
                 )}
               </p>
               {discount.description && (

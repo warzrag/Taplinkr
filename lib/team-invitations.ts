@@ -32,9 +32,9 @@ function escapeHtml(value: string): string {
 
 function roleLabel(role: TeamInviteRole): string {
   return {
-    admin: 'Administrateur',
-    member: 'Membre',
-    viewer: 'Observateur',
+    admin: 'Admin',
+    member: 'Member',
+    viewer: 'Viewer',
   }[role]
 }
 
@@ -52,24 +52,24 @@ export async function sendTeamInvitationEmail(input: {
 
   const result = await sendEmail({
     to: input.email,
-    subject: `Invitation à rejoindre l'équipe ${input.teamName} sur TapLinkr`,
+    subject: `You're invited to join ${input.teamName} on TapLinkr`,
     html: `
       <!doctype html>
-      <html lang="fr">
+      <html lang="en-US">
         <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
         <body style="margin:0;background:#f5f3ff;font-family:Arial,sans-serif;color:#18181b">
           <div style="max-width:560px;margin:0 auto;padding:32px 16px">
             <div style="background:#fff;border:1px solid #e4e4e7;border-radius:20px;padding:32px">
               <div style="font-size:22px;font-weight:800;color:#7c3aed">TapLinkr</div>
-              <h1 style="margin:28px 0 12px;font-size:26px">Rejoignez ${teamName}</h1>
+              <h1 style="margin:28px 0 12px;font-size:26px">Join ${teamName}</h1>
               <p style="line-height:1.65;color:#52525b">
-                ${inviter} vous invite en tant que <strong>${roleLabel(input.role)}</strong>.
+                ${inviter} invited you as a <strong>${roleLabel(input.role)}</strong>.
               </p>
               <a href="${inviteUrl}" style="display:block;margin:28px 0;padding:15px 20px;border-radius:12px;background:#7c3aed;color:#fff;text-align:center;text-decoration:none;font-weight:700">
-                Accepter l’invitation
+                Accept invitation
               </a>
               <p style="font-size:13px;line-height:1.55;color:#71717a">
-                Cette invitation est réservée à ${email} et expire dans 7 jours.
+                This invitation is for ${email} and expires in 7 days.
               </p>
               <p style="font-size:12px;line-height:1.55;color:#a1a1aa;word-break:break-all">${inviteUrl}</p>
             </div>

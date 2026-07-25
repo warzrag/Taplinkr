@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     
     if (!email) {
-      toast.error('Veuillez entrer votre email')
+      toast.error('Please enter your email address.')
       return
     }
 
@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
       }
 
       setEmailSent(true)
-      toast.success('Email envoyé avec succès')
+      toast.success('Email sent successfully.')
     } catch (error) {
       console.error('Erreur:', error)
       toast.error(error instanceof Error ? error.message : 'Une erreur est survenue')
@@ -65,17 +65,17 @@ export default function ForgotPasswordPage() {
             </motion.div>
 
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Email envoyé !
+              Email sent!
             </h2>
             
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              Nous avons envoyé un lien de réinitialisation à <strong>{email}</strong>. 
-              Vérifiez votre boîte de réception et suivez les instructions.
+              We sent a reset link to <strong>{email}</strong>.
+              Check your inbox and follow the instructions.
             </p>
 
             <div className="space-y-4">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Vous n'avez pas reçu l'email ?
+                Didn't receive the email?
               </p>
               
               <button
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
                 className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 text-sm inline-flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Retour à la connexion
+                Back to login
               </Link>
             </div>
           </div>
@@ -117,16 +117,16 @@ export default function ForgotPasswordPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Mot de passe oublié ?
+            Forgot your password?
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Entrez votre email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+            Enter your email and we'll send you a link to reset your password.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Adresse email
+                Email address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -161,7 +161,7 @@ export default function ForgotPasswordPage() {
               ) : (
                 <>
                   <Send className="w-5 h-5" />
-                  Envoyer le lien
+                  Send reset link
                 </>
               )}
             </motion.button>
@@ -173,7 +173,7 @@ export default function ForgotPasswordPage() {
               className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 inline-flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Retour à la connexion
+              Back to login
             </Link>
           </div>
         </div>

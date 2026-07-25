@@ -13,7 +13,7 @@ export async function POST(_request: NextRequest, props: { params: Promise<{ id:
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await props.params
@@ -24,7 +24,7 @@ export async function POST(_request: NextRequest, props: { params: Promise<{ id:
       },
     })
     if (!invitation) {
-      return NextResponse.json({ error: 'Invitation introuvable' }, { status: 404 })
+      return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
     }
 
     const requester = await prisma.user.findUnique({
@@ -35,13 +35,13 @@ export async function POST(_request: NextRequest, props: { params: Promise<{ id:
       requester?.teamId === invitation.teamId && requester.teamRole === 'admin'
     )
     if (!requester || !canManage) {
-      return NextResponse.json({ error: 'Permission refusée' }, { status: 403 })
+      return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
     }
     if (invitation.status === 'accepted') {
-      return NextResponse.json({ error: 'Cette invitation a déjà été acceptée' }, { status: 400 })
+      return NextResponse.json({ error: 'This invitation has already been accepted' }, { status: 400 })
     }
     if (!['admin', 'member', 'viewer'].includes(invitation.role)) {
-      return NextResponse.json({ error: 'Le rôle de cette invitation est invalide' }, { status: 400 })
+      return NextResponse.json({ error: 'This invitation has an invalid role' }, { status: 400 })
     }
 
     const token = nanoid(32)
@@ -65,7 +65,7 @@ export async function POST(_request: NextRequest, props: { params: Promise<{ id:
     })
     if (!delivery.success) {
       return NextResponse.json({
-        error: "Le nouveau lien a été créé, mais l'email n'a pas pu être envoyé.",
+        error: 'A new link was created, but the email could not be sent.',
       }, { status: 502 })
     }
 
@@ -75,6 +75,6 @@ export async function POST(_request: NextRequest, props: { params: Promise<{ id:
     })
   } catch (error) {
     console.error("Erreur lors du renvoi de l'invitation:", error)
-    return NextResponse.json({ error: "Erreur lors du renvoi de l'invitation" }, { status: 500 })
+    return NextResponse.json({ error: 'Unable to resend the invitation' }, { status: 500 })
   }
 }

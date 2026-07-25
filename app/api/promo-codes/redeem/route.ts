@@ -16,15 +16,15 @@ function asDate(value: unknown): Date | null {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    if (!session?.user?.id) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
     const code = String((await request.json()).code || '').trim().toUpperCase()
     if (!/^[A-Z0-9_-]{3,40}$/.test(code)) {
-      return NextResponse.json({ error: 'Code promo invalide' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 })
     }
 
     const promoQuery = await db.collection('promoCodes').where('code', '==', code).limit(1).get()
-    if (promoQuery.empty) return NextResponse.json({ error: 'Code promo invalide' }, { status: 400 })
+    if (promoQuery.empty) return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 })
 
     const promoRef = promoQuery.docs[0].ref
     const userRef = db.collection('users').doc(session.user.id)
@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
         transaction.get(redemptionRef),
       ])
 
-      if (!promoSnap.exists) throw new Error('Code promo invalide')
-      if (!userSnap.exists) throw new Error('Utilisateur introuvable')
-      if (redemptionSnap.exists) throw new Error('Code déjà utilisé')
+      if (!promoSnap.exists) throw new Error('Invalid promo code')
+      if (!userSnap.exists) throw new Error('User not found')
+      if (redemptionSnap.exists) throw new Error('Promo code already used')
 
       const promo = promoSnap.data()!
       const user = userSnap.data()!
@@ -47,10 +47,10 @@ export async function POST(request: NextRequest) {
       const validFrom = asDate(promo.validFrom)
       const validUntil = asDate(promo.validUntil)
       if (!promo.isActive || (validFrom && now < validFrom) || (validUntil && now > validUntil)) {
-        throw new Error('Code promo expiré ou inactif')
+        throw new Error('Promo code expired or inactive')
       }
       if (promo.requiredPlan && user.plan !== promo.requiredPlan) {
-        throw new Error(`Ce code nécessite le plan ${promo.requiredPlan}`)
+        throw new Error(`This code requires the ${promo.requiredPlan} plan`)
       }
       if (promo.maxUses != null && Number(promo.currentUses || 0) >= Number(promo.maxUses)) {
         throw new Error("Limite d'utilisation atteinte")
@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
       let days: number
       if (promo.discountType === 'fixed_days') days = Number(promo.discountValue)
       else if (promo.discountType === 'percentage') days = Math.round(Number(promo.discountValue) * 0.3)
-      else throw new Error('Type de promotion invalide')
-      if (!Number.isInteger(days) || days <= 0 || days > 3650) throw new Error('Promotion invalide')
+      else throw new Error('Invalid promotion type')
+      if (!Number.isInteger(days) || days <= 0 || days > 3650) throw new Error('Invalid promotion')
 
       const currentExpiry = asDate(user.planExpiresAt)
       const baseDate = user.plan === 'premium' && currentExpiry && currentExpiry > now ? currentExpiry : now
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
       return {
         success: true,
-        message: `${days} jours Premium ajoutés à votre compte !`,
+        message: `${days} days of Premium added to your account!`,
         newPlan: 'premium',
         newExpiry,
       }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result)
   } catch (error) {
     console.error('Erreur lors de l’utilisation du code promo:', error)
-    const message = error instanceof Error ? error.message : 'Erreur serveur'
+    const message = error instanceof Error ? error.message : 'Server error'
     return NextResponse.json({ error: message }, { status: 400 })
   }
 }

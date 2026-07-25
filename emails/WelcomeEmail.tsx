@@ -20,10 +20,10 @@ interface WelcomeEmailProps {
 }
 
 export const WelcomeEmail = ({
-  userName = 'là',
+  userName = 'there',
   userEmail,
 }: WelcomeEmailProps) => {
-  const previewText = `Bienvenue sur TapLinkr, ${userName}!`
+  const previewText = `Welcome to TapLinkr, ${userName}!`
 
   return (
     <Html>
@@ -41,19 +41,19 @@ export const WelcomeEmail = ({
             />
           </Section>
           
-          <Heading style={h1}>Bienvenue sur TapLinkr ! 🎉</Heading>
+          <Heading style={h1}>Welcome to TapLinkr! 🎉</Heading>
           
           <Text style={text}>
-            Salut {userName},
+            Hi {userName},
           </Text>
           
           <Text style={text}>
-            Merci de rejoindre TapLinkr ! Nous sommes ravis de vous avoir parmi nous.
+            Thanks for joining TapLinkr! We're excited to have you here.
           </Text>
 
           <Text style={text}>
-            Avec TapLinkr, vous pouvez créer votre page bio personnalisée en quelques minutes
-            et partager tous vos liens importants en un seul endroit.
+            With TapLinkr, you can create a custom bio page in minutes
+            and share all your important links in one place.
           </Text>
 
           <Section style={buttonContainer}>
@@ -61,27 +61,27 @@ export const WelcomeEmail = ({
               style={button}
               href="https://www.taplinkr.com/dashboard"
             >
-              Accéder à mon dashboard
+              Go to my dashboard
             </Button>
           </Section>
 
           <Hr style={hr} />
 
-          <Heading style={h2}>Pour bien démarrer :</Heading>
+          <Heading style={h2}>Get started:</Heading>
           
           <Text style={text}>
-            <strong>1. Personnalisez votre profil</strong><br />
-            Ajoutez votre photo, votre bio et choisissez votre thème
+            <strong>1. Customize your profile</strong><br />
+            Add your photo and bio, then choose your theme
           </Text>
           
           <Text style={text}>
-            <strong>2. Ajoutez vos liens</strong><br />
-            Connectez tous vos réseaux sociaux et sites web
+            <strong>2. Add your links</strong><br />
+            Connect your social profiles and websites
           </Text>
           
           <Text style={text}>
-            <strong>3. Partagez votre page</strong><br />
-            Votre lien unique : <Link href={`https://www.taplinkr.com/${userEmail.split('@')[0]}`} style={link}>
+            <strong>3. Share your page</strong><br />
+            Your unique link: <Link href={`https://www.taplinkr.com/${userEmail.split('@')[0]}`} style={link}>
               taplinkr.com/{userEmail.split('@')[0]}
             </Link>
           </Text>
@@ -89,14 +89,14 @@ export const WelcomeEmail = ({
           <Hr style={hr} />
 
           <Text style={footer}>
-            Des questions ? Répondez simplement à cet email ou contactez-nous à{' '}
+            Questions? Reply to this email or contact us at{' '}
             <Link href="mailto:support@taplinkr.com" style={link}>
               support@taplinkr.com
             </Link>
           </Text>
 
           <Text style={footer}>
-            TapLinkr - One tap, tout accessible
+            TapLinkr — One tap, everything accessible
           </Text>
         </Container>
       </Body>
