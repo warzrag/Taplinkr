@@ -72,39 +72,62 @@ export async function GET(request: Request) {
       whereConditions.device = 'desktop'
     }
 
-    // Récupérer les clics avec toutes les données nécessaires
-    const [clicks, total] = await Promise.all([
-      prisma.click.findMany({
-        where: whereConditions,
-        orderBy: { createdAt: 'desc' },
-        skip: offset,
-        take: limit,
-        select: {
-          id: true,
-          createdAt: true,
-          userAgent: true,
-          ip: true,
-          referer: true,
-          linkId: true,
-          country: true,
-          city: true,
-          region: true,
-          browser: true,
-          os: true,
-          device: true,
-          screenResolution: true,
-          language: true,
-          timezone: true,
-          duration: true,
-          multiLinkId: true,
-          latitude: true,
-          longitude: true
-        }
-      }),
-      prisma.click.count({
-        where: whereConditions
+    const clickSelect = {
+      id: true,
+      createdAt: true,
+      userAgent: true,
+      ip: true,
+      referer: true,
+      linkId: true,
+      country: true,
+      city: true,
+      region: true,
+      browser: true,
+      os: true,
+      device: true,
+      screenResolution: true,
+      language: true,
+      timezone: true,
+      duration: true,
+      multiLinkId: true,
+      latitude: true,
+      longitude: true,
+    } as const
+
+    let clicks
+    let total
+    try {
+      ;[clicks, total] = await Promise.all([
+        prisma.click.findMany({
+          where: whereConditions,
+          orderBy: { createdAt: 'desc' },
+          skip: offset,
+          take: limit,
+          select: clickSelect,
+        }),
+        prisma.click.count({ where: whereConditions }),
+      ])
+    } catch (queryError) {
+      const message = queryError instanceof Error ? queryError.message : String(queryError)
+      if (!message.includes('FAILED_PRECONDITION') && !message.includes('requires an index')) {
+        throw queryError
+      }
+
+      // Firestore indexes can take a few minutes to build after deployment.
+      // Keep the click log available in the meantime with a bounded in-memory fallback.
+      const unfilteredClicks = await prisma.click.findMany({
+        select: clickSelect,
       })
-    ])
+      const filteredClicks = unfilteredClicks
+        .filter(click => linkIds.includes(click.linkId))
+        .filter(click => device === 'all' || (device === 'mobile'
+          ? click.device === 'mobile' || click.device === 'tablet'
+          : click.device === 'desktop'))
+        .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+
+      total = filteredClicks.length
+      clicks = filteredClicks.slice(offset, offset + limit)
+    }
 
     // Transformer les clics en format visiteur
     const visitors = clicks.map((click) => {
