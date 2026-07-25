@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       // Ne pas révéler si l'email existe ou non
       return NextResponse.json(
-        { message: 'Si cet email existe, un nouveau lien de vérification a été envoyé.' },
+        { message: 'If this email exists, a new verification link has been sent.' },
         { status: 200 }
       )
     }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     )
 
     return NextResponse.json(
-      { message: 'Un nouveau lien de vérification a été envoyé à votre adresse email.' },
+      { message: 'A new verification link has been sent to your email address.' },
       { status: 200 }
     )
   } catch (error) {

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     
     if (!session) {
       return NextResponse.json(
-        { error: 'Non authentifié' },
+        { error: 'Not authenticated' },
         { status: 401 }
       )
     }
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (!code) {
       return NextResponse.json(
-        { error: 'Code promo manquant' },
+        { error: 'Promo code required' },
         { status: 400 }
       )
     }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     if (!promoCode) {
       return NextResponse.json(
-        { error: 'Code promo invalide' },
+        { error: 'Invalid promo code' },
         { status: 404 }
       )
     }
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Vérifier la date de validité
     if (promoCode.validUntil && new Date() > promoCode.validUntil) {
       return NextResponse.json(
-        { error: 'Ce code promo a expiré' },
+        { error: 'This promo code has expired' },
         { status: 400 }
       )
     }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     // Vérifier si l'utilisateur a déjà utilisé ce code
     if (promoCode.promoRedemptions.length > 0) {
       return NextResponse.json(
-        { error: 'Vous avez déjà utilisé ce code promo' },
+        { error: 'You have already used this promo code' },
         { status: 400 }
       )
     }
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     if (promoCode.requiredPlan && user?.plan !== promoCode.requiredPlan) {
       return NextResponse.json(
-        { error: `Ce code promo nécessite le plan ${promoCode.requiredPlan}` },
+        { error: `This promo code requires the ${promoCode.requiredPlan} plan` },
         { status: 400 }
       )
     }
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors de la validation du code promo:', error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: 'Server error' },
       { status: 500 }
     )
   }

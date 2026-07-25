@@ -79,10 +79,10 @@ export default function AdminUsersPage() {
         const data = await response.json()
         setUsers(data)
       } else {
-        toast.error('Erreur lors du chargement des utilisateurs')
+        toast.error('Unable to load users.')
       }
     } catch (error) {
-      toast.error('Erreur de connexion')
+      toast.error('Connection error.')
     } finally {
       setLoading(false)
     }
@@ -110,13 +110,13 @@ export default function AdminUsersPage() {
       })
 
       if (response.ok) {
-        toast.success(currentStatus ? 'Utilisateur désactivé' : 'Utilisateur activé')
+        toast.success(currentStatus ? 'User deactivated' : 'User activated')
         fetchUsers()
       } else {
-        toast.error('Erreur lors de la modification')
+        toast.error('Unable to update the user.')
       }
     } catch (error) {
-      toast.error('Erreur de connexion')
+      toast.error('Connection error.')
     } finally {
       setProcessingUser(null)
       setShowActions(null)
@@ -124,7 +124,7 @@ export default function AdminUsersPage() {
   }
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
+    if (!confirm('Are you sure you want to delete this user? This cannot be undone.')) {
       return
     }
 
@@ -135,13 +135,13 @@ export default function AdminUsersPage() {
       })
 
       if (response.ok) {
-        toast.success('Utilisateur supprimé')
+        toast.success('User deleted.')
         fetchUsers()
       } else {
-        toast.error('Erreur lors de la suppression')
+        toast.error('Unable to delete the user.')
       }
     } catch (error) {
-      toast.error('Erreur de connexion')
+      toast.error('Connection error.')
     } finally {
       setProcessingUser(null)
       setShowActions(null)
@@ -158,13 +158,13 @@ export default function AdminUsersPage() {
       })
 
       if (response.ok) {
-        toast.success('Rôle modifié avec succès')
+        toast.success('Role updated successfully.')
         fetchUsers()
       } else {
-        toast.error('Erreur lors de la modification du rôle')
+        toast.error('Unable to update the role.')
       }
     } catch (error) {
-      toast.error('Erreur de connexion')
+      toast.error('Connection error.')
     } finally {
       setProcessingUser(null)
       setShowRoleModal(null)
@@ -181,13 +181,13 @@ export default function AdminUsersPage() {
       })
 
       if (response.ok) {
-        toast.success('Abonnement modifié avec succès')
+        toast.success('Subscription updated successfully.')
         fetchUsers()
       } else {
-        toast.error('Erreur lors de la modification de l\'abonnement')
+        toast.error('Unable to update the subscription.')
       }
     } catch (error) {
-      toast.error('Erreur de connexion')
+      toast.error('Connection error.')
     } finally {
       setProcessingUser(null)
       setShowPlanModal(null)
@@ -245,7 +245,7 @@ export default function AdminUsersPage() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
                 Gestion des utilisateurs
               </h1>
-              <p className="text-gray-600 mt-1">Gérez les comptes et permissions des utilisateurs</p>
+              <p className="text-gray-600 mt-1">Manage user accounts and permissions</p>
             </div>
             
             <div className="flex gap-2">
@@ -306,7 +306,7 @@ export default function AdminUsersPage() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Vérifiés</p>
+                  <p className="text-sm text-gray-500">Verified</p>
                   <p className="text-2xl font-bold text-blue-600">{stats.verified}</p>
                 </div>
                 <Mail className="w-8 h-8 text-blue-400" />
@@ -348,8 +348,8 @@ export default function AdminUsersPage() {
               <option value="all">Tous les utilisateurs</option>
               <option value="active">Actifs seulement</option>
               <option value="inactive">Inactifs seulement</option>
-              <option value="verified">Email vérifié</option>
-              <option value="unverified">Email non vérifié</option>
+              <option value="verified">Email verified</option>
+              <option value="unverified">Email not verified</option>
               <option value="premium">Premium seulement</option>
               <option value="admin">Admins seulement</option>
             </select>
@@ -367,7 +367,7 @@ export default function AdminUsersPage() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Utilisateur
+                    User
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Statut
@@ -376,7 +376,7 @@ export default function AdminUsersPage() {
                     Plan
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Liens
+                    Links
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Inscrit le
@@ -432,12 +432,12 @@ export default function AdminUsersPage() {
                         {user.emailVerified ? (
                           <span className="inline-flex items-center gap-1 text-xs text-green-600">
                             <Check className="w-3 h-3" />
-                            Email vérifié
+                            Email verified
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-xs text-amber-600">
                             <X className="w-3 h-3" />
-                            Non vérifié
+                            Not verified
                           </span>
                         )}
                       </div>
@@ -500,7 +500,7 @@ export default function AdminUsersPage() {
                                 {user.isActive ? (
                                   <>
                                     <UserX className="w-4 h-4 text-amber-600" />
-                                    <span className="text-amber-600">Désactiver</span>
+                                    <span className="text-amber-600">Deactivate</span>
                                   </>
                                 ) : (
                                   <>
@@ -518,7 +518,7 @@ export default function AdminUsersPage() {
                                 className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
                               >
                                 <Shield className="w-4 h-4 text-purple-600" />
-                                <span>Changer le rôle</span>
+                                <span>Change role</span>
                               </button>
                               
                               {session?.user?.role === 'admin' && (
@@ -530,7 +530,7 @@ export default function AdminUsersPage() {
                                   className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
                                 >
                                   <Crown className="w-4 h-4 text-yellow-600" />
-                                  <span>Gérer l'abonnement</span>
+                                  <span>Manage subscription</span>
                                 </button>
                               )}
                               
@@ -540,7 +540,7 @@ export default function AdminUsersPage() {
                                   className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
                                 >
                                   <Trash2 className="w-4 h-4" />
-                                  Supprimer
+                                  Delete
                                 </button>
                               )}
                             </motion.div>
@@ -557,7 +557,7 @@ export default function AdminUsersPage() {
           {filteredUsers.length === 0 && (
             <div className="text-center py-12">
               <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Aucun utilisateur trouvé</p>
+              <p className="text-gray-500">No users found</p>
             </div>
           )}
         </motion.div>
@@ -580,22 +580,22 @@ export default function AdminUsersPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Changer le rôle de l'utilisateur
+                  Change user role
                 </h3>
                 
                 <div className="mb-6">
                   <p className="text-sm text-gray-600 mb-2">
-                    Utilisateur : <span className="font-medium text-gray-900">
+                    User: <span className="font-medium text-gray-900">
                       {users.find(u => u.id === showRoleModal)?.email}
                     </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    Rôle actuel : <span className="font-medium text-gray-900">
+                    Current role: <span className="font-medium text-gray-900">
                       {users.find(u => u.id === showRoleModal)?.role === 'admin' 
-                        ? 'Administrateur' 
+                        ? 'Admin'
                         : users.find(u => u.id === showRoleModal)?.role === 'manager' 
                         ? 'Manager' 
-                        : 'Utilisateur'}
+                        : 'User'}
                     </span>
                   </p>
                 </div>
@@ -613,8 +613,8 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-3">
                       <Users className="w-5 h-5 text-blue-600" />
                       <div>
-                        <p className="font-medium text-gray-900">Utilisateur</p>
-                        <p className="text-sm text-gray-500">Accès standard à l'application</p>
+                        <p className="font-medium text-gray-900">User</p>
+                        <p className="text-sm text-gray-500">Standard app access</p>
                       </div>
                     </div>
                   </button>
@@ -634,9 +634,9 @@ export default function AdminUsersPage() {
                       <Shield className="w-5 h-5 text-purple-600" />
                       <div>
                         <p className="font-medium text-gray-900">Manager</p>
-                        <p className="text-sm text-gray-500">Peut gérer les utilisateurs (sauf admin/manager)</p>
+                        <p className="text-sm text-gray-500">Can manage users except admins and managers</p>
                         {session?.user?.role !== 'admin' && (
-                          <p className="text-xs text-red-500 mt-1">Seul l'admin peut attribuer ce rôle</p>
+                          <p className="text-xs text-red-500 mt-1">Only an admin can assign this role</p>
                         )}
                       </div>
                     </div>
@@ -650,8 +650,8 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-3">
                       <Shield className="w-5 h-5 text-red-600" />
                       <div>
-                        <p className="font-medium text-gray-900">Administrateur</p>
-                        <p className="text-sm text-gray-500">Accès complet - Un seul admin autorisé</p>
+                        <p className="font-medium text-gray-900">Admin</p>
+                        <p className="text-sm text-gray-500">Full access — only one admin allowed</p>
                         <p className="text-xs text-red-500 mt-1">Il ne peut y avoir qu'un seul administrateur</p>
                       </div>
                     </div>
@@ -663,7 +663,7 @@ export default function AdminUsersPage() {
                     onClick={() => setShowRoleModal(null)}
                     className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                   >
-                    Annuler
+                    Cancel
                   </button>
                 </div>
               </motion.div>
@@ -689,12 +689,12 @@ export default function AdminUsersPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Gérer l'abonnement
+                  Manage subscription
                 </h3>
                 
                 <div className="mb-6">
                   <p className="text-sm text-gray-600 mb-2">
-                    Utilisateur : <span className="font-medium text-gray-900">
+                    User: <span className="font-medium text-gray-900">
                       {users.find(u => u.id === showPlanModal)?.email}
                     </span>
                   </p>
@@ -719,7 +719,7 @@ export default function AdminUsersPage() {
                       <Users className="w-5 h-5 text-gray-600" />
                       <div>
                         <p className="font-medium text-gray-900">Plan Gratuit</p>
-                        <p className="text-sm text-gray-500">Accès aux fonctionnalités de base</p>
+                        <p className="text-sm text-gray-500">Access to core features</p>
                       </div>
                     </div>
                   </button>
@@ -735,7 +735,7 @@ export default function AdminUsersPage() {
                         <Gift className="w-5 h-5 text-yellow-600" />
                         <div>
                           <p className="font-medium text-gray-900">Offrir 1 mois Premium</p>
-                          <p className="text-sm text-gray-500">30 jours d'accès Premium gratuit</p>
+                          <p className="text-sm text-gray-500">30 days of free Premium access</p>
                         </div>
                       </div>
                     </button>
@@ -748,7 +748,7 @@ export default function AdminUsersPage() {
                         <Clock className="w-5 h-5 text-yellow-600" />
                         <div>
                           <p className="font-medium text-gray-900">Offrir 3 mois Premium</p>
-                          <p className="text-sm text-gray-500">90 jours d'accès Premium gratuit</p>
+                          <p className="text-sm text-gray-500">90 days of free Premium access</p>
                         </div>
                       </div>
                     </button>
@@ -761,7 +761,7 @@ export default function AdminUsersPage() {
                         <Zap className="w-5 h-5 text-yellow-600" />
                         <div>
                           <p className="font-medium text-gray-900">Offrir 1 an Premium</p>
-                          <p className="text-sm text-gray-500">365 jours d'accès Premium gratuit</p>
+                          <p className="text-sm text-gray-500">365 days of free Premium access</p>
                         </div>
                       </div>
                     </button>
@@ -773,8 +773,8 @@ export default function AdminUsersPage() {
                       <div className="flex items-center gap-3">
                         <Crown className="w-5 h-5 text-purple-600" />
                         <div>
-                          <p className="font-medium text-gray-900">Premium à vie</p>
-                          <p className="text-sm text-gray-500">Accès illimité pour toujours</p>
+                          <p className="font-medium text-gray-900">Lifetime Premium</p>
+                          <p className="text-sm text-gray-500">Unlimited access forever</p>
                         </div>
                       </div>
                     </button>
@@ -786,7 +786,7 @@ export default function AdminUsersPage() {
                     onClick={() => setShowPlanModal(null)}
                     className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                   >
-                    Annuler
+                    Cancel
                   </button>
                 </div>
               </motion.div>

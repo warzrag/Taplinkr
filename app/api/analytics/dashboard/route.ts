@@ -8,7 +8,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const stats = await analyticsService.getDashboardStats(session.user.id)
@@ -16,6 +16,6 @@ export async function GET() {
     return NextResponse.json(stats)
   } catch (error) {
     console.error('Erreur lors de la récupération des stats dashboard:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

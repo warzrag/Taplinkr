@@ -406,7 +406,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                 {/* Zone de debug supprimée - on affiche directement les liens */}
                 {false && (
                 <div className="p-4 bg-red-600 text-white font-bold text-center text-xl border-4 border-black">
-                  🔥 DEBUG v2 - ÉTAPE {currentStep} 🔥
+                  🔥 DEBUG v2 — STEP {currentStep} 🔥
                   <br/>
                   {currentStep >= 5 ? '⚠️ LIENS MANQUANTS ICI ⚠️' : '⏳ PAS ENCORE'}
                   <br/>
@@ -454,7 +454,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
                   /* Message avant l'étape 5 */
                   <div className="flex items-center justify-center h-full">
                     <p className="text-sm text-gray-400 text-center px-4">
-                      Vos liens apparaîtront ici
+                      Your links will appear here
                     </p>
                   </div>
                 ) : null}
@@ -525,7 +525,7 @@ export default function LivePhonePreview({ user, links = [], currentStep }: Live
             animate={{ opacity: [1, 0.5, 1] }}
             transition={{ duration: 1, repeat: Infinity }}
           />
-          <span>APERÇU LIVE</span>
+          <span>LIVE PREVIEW</span>
         </motion.div>
       </motion.div>
     </div>

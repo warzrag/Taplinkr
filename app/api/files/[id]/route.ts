@@ -16,7 +16,7 @@ export async function DELETE(_request: NextRequest, props: { params: Promise<{ i
   } catch (error: any) {
     console.error('File delete error:', error)
     return NextResponse.json({
-      error: 'Erreur lors de la suppression',
+      error: 'Unable to delete the file',
       details: error?.message,
     }, { status: 500 })
   }

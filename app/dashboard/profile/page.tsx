@@ -76,7 +76,7 @@ export default function ProfilePage() {
       const loadProfile = async () => {
         try {
           const response = await fetch('/api/profile', { cache: 'no-store' })
-          if (!response.ok) throw new Error('Erreur lors du chargement du profil')
+          if (!response.ok) throw new Error('Unable to load your profile.')
           const data = await response.json()
           setProfile({
             name: data.name || '',
@@ -119,12 +119,12 @@ export default function ProfilePage() {
       })
 
       if (response.ok) {
-        toast.success('Profil mis à jour avec succès!')
+        toast.success('Profile updated successfully!')
       } else {
-        toast.error('Erreur lors de la sauvegarde')
+        toast.error('Unable to save your profile.')
       }
     } catch (error) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error('Unable to save your profile.')
     } finally {
       setSaving(false)
     }
@@ -146,7 +146,7 @@ export default function ProfilePage() {
       const uploadData = await uploadResponse.json()
 
       if (!uploadResponse.ok || !uploadData.url) {
-        throw new Error(uploadData.error || 'Erreur lors de l upload')
+        throw new Error(uploadData.error || 'Unable to upload the image.')
       }
 
       const updateResponse = await fetch('/api/profile', {
@@ -156,13 +156,13 @@ export default function ProfilePage() {
       })
 
       if (!updateResponse.ok) {
-        throw new Error('Erreur lors de la sauvegarde')
+        throw new Error('Unable to save your profile.')
       }
 
       setProfile(prev => ({ ...prev, image: uploadData.url }))
       toast.success('Photo de profil mise a jour')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur lors de l upload')
+      toast.error(error instanceof Error ? error.message : 'Unable to upload the image.')
     } finally {
       setUploadingImage(false)
       e.target.value = ''
@@ -179,13 +179,13 @@ export default function ProfilePage() {
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la suppression')
+        throw new Error('Unable to delete the image.')
       }
 
       setProfile(prev => ({ ...prev, image: '' }))
       toast.success('Photo supprimee')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur lors de la suppression')
+      toast.error(error instanceof Error ? error.message : 'Unable to delete the image.')
     } finally {
       setUploadingImage(false)
     }
@@ -218,9 +218,9 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 dark:from-gray-100 dark:to-blue-400 bg-clip-text text-transparent">
-                Mon Profil
+                My profile
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">Gérez vos informations personnelles et votre abonnement</p>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your personal information and subscription</p>
             </div>
           </div>
         </motion.div>
@@ -237,7 +237,7 @@ export default function ProfilePage() {
             >
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Photo de profil</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Cette photo sera affichée sur votre profil et à travers la plateforme.
+                This photo will appear on your profile across the platform.
               </p>
               
               <div className="flex items-center gap-6">
@@ -272,7 +272,7 @@ export default function ProfilePage() {
                       disabled={uploadingImage}
                     />
                     <Upload className="w-4 h-4" />
-                    {uploadingImage ? 'Chargement...' : 'Telecharger'}
+                    {uploadingImage ? 'Uploading...' : 'Upload'}
                   </label>
                   
                   <motion.button
@@ -283,7 +283,7 @@ export default function ProfilePage() {
                     disabled={uploadingImage || !profile.image}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Supprimer
+                    Delete
                   </motion.button>
                 </div>
               </div>
@@ -301,7 +301,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Prénom
+                    First name
                   </label>
                   <input
                     type="text"
@@ -342,7 +342,7 @@ export default function ProfilePage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Adresse email
+                    Email address
                   </label>
                   <div className="relative">
                     <input
@@ -355,7 +355,7 @@ export default function ProfilePage() {
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                         <div className="flex items-center gap-1 text-green-600">
                           <BadgeCheck className="w-4 h-4" />
-                          <span className="text-xs font-medium">Vérifié</span>
+                          <span className="text-xs font-medium">Verified</span>
                         </div>
                       </div>
                     )}
@@ -388,13 +388,13 @@ export default function ProfilePage() {
                 <div className="p-2 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl">
                   <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Sécurité</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Security</h2>
               </div>
               
               <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-white">Mot de passe</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Dernière modification : Jamais</p>
+                  <h3 className="font-medium text-gray-900 dark:text-white">Password</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Last changed: Never</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex gap-1">
@@ -408,7 +408,7 @@ export default function ProfilePage() {
                     onClick={() => setShowPasswordModal(true)}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600 flex items-center gap-2"
                   >
-                    Modifier
+                    Change
                     <ChevronRight className="w-4 h-4" />
                   </motion.button>
                 </div>
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                   {isPaid ? (
                     <>Renouvellement le {new Date(profile.planExpiresAt || '').toLocaleDateString()}</>
                   ) : (
-                    <>Aucun renouvellement</>
+                    <>No renewal</>
                   )}
                 </div>
                 
@@ -477,7 +477,7 @@ export default function ProfilePage() {
                       : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
                   }`}
                 >
-                  {isPaid ? 'Gérer l\'abonnement' : 'Voir les plans'}
+                  {isPaid ? 'Manage subscription' : 'View plans'}
                 </motion.button>
               </div>
             </motion.div>
@@ -494,7 +494,7 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">Liens directs</span>
+                    <span className="text-sm font-medium text-gray-700">Direct links</span>
                     <span className="text-sm font-bold text-gray-900">
                       {usage.deepLinks} / {limits.deepLinks}
                     </span>
@@ -540,17 +540,17 @@ export default function ProfilePage() {
               className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
             >
               <h3 className="font-semibold mb-4">
-                Fonctionnalités {isPremium ? 'Premium' : 'Gratuites'}
+                {isPremium ? 'Premium' : 'Free'} features
               </h3>
               
               <div className="space-y-3">
                 {[
                   { icon: Link, label: `${limits.landingPages} Landing Page${limits.landingPages > 1 ? 's' : ''}`, available: true },
                   { icon: BarChart3, label: 'Analytics de base', available: true },
-                  { icon: Globe, label: 'Liens directs', available: true },
-                  { icon: Globe, label: 'Domaines personnalisés', available: isPremium },
-                  { icon: Palette, label: 'Personnalisation avancée', available: isPremium },
-                  { icon: ShieldCheck, label: 'Protection Shield complète', available: isPremium },
+                  { icon: Globe, label: 'Direct links', available: true },
+                  { icon: Globe, label: 'Custom domains', available: isPremium },
+                  { icon: Palette, label: 'Advanced customization', available: isPremium },
+                  { icon: ShieldCheck, label: 'Full Shield protection', available: isPremium },
                 ].map((feature, index) => (
                   <motion.div
                     key={index}

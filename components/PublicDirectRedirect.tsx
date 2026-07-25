@@ -3,36 +3,24 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowUpRight, Loader2 } from 'lucide-react'
 
-import type { DirectRedirectLocale } from '@/lib/external-browser'
-
 interface PublicDirectRedirectProps {
   destination: string
   externalBrowserUrl: string | null
-  locale: DirectRedirectLocale
 }
 
 export default function PublicDirectRedirect({
   destination,
   externalBrowserUrl,
-  locale,
 }: PublicDirectRedirectProps) {
   const [showFallback, setShowFallback] = useState(false)
   const automaticUrl = externalBrowserUrl || destination
-  const copy = locale === 'en'
-    ? {
-        ariaLabel: 'Opening your browser',
-        heading: 'Opening link',
-        description: "We're opening this link in your phone's browser.",
-        button: 'Open in my browser',
-        fallback: 'Continue here if opening is blocked',
-      }
-    : {
-        ariaLabel: 'Ouverture du navigateur',
-        heading: 'Ouverture du lien',
-        description: 'Nous ouvrons automatiquement le navigateur de votre téléphone.',
-        button: 'Ouvrir dans mon navigateur',
-        fallback: "Continuer ici si l’ouverture est bloquée",
-      }
+  const copy = {
+    ariaLabel: 'Opening your browser',
+    heading: 'Opening link',
+    description: "We're opening this link in your phone's browser.",
+    button: 'Open in my browser',
+    fallback: 'Continue here if opening is blocked',
+  }
 
   const openExternalBrowser = useCallback(() => {
     window.location.assign(automaticUrl)

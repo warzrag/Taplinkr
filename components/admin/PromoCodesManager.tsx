@@ -61,7 +61,7 @@ export default function PromoCodesManager({
 
   const handleCreatePromo = async () => {
     if (!formData.code || !formData.discountValue) {
-      toast.error('Code et valeur de réduction requis')
+      toast.error('Promo code and discount value are required.')
       return
     }
 
@@ -78,7 +78,7 @@ export default function PromoCodesManager({
       })
 
       if (response.ok) {
-        toast.success('Code promo créé avec succès')
+        toast.success('Promo code created successfully.')
         setFormData({
           code: '',
           description: '',
@@ -92,10 +92,10 @@ export default function PromoCodesManager({
         onRefresh()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Erreur lors de la création')
+        toast.error(error.error || 'Unable to create the promo code.')
       }
     } catch (error) {
-      toast.error('Erreur de connexion')
+      toast.error('Connection error.')
     } finally {
       setLoading(false)
     }
@@ -110,16 +110,16 @@ export default function PromoCodesManager({
       })
 
       if (response.ok) {
-        toast.success(currentStatus ? 'Code promo désactivé' : 'Code promo activé')
+        toast.success(currentStatus ? 'Promo code deactivated' : 'Promo code activated')
         onRefresh()
       }
     } catch (error) {
-      toast.error('Erreur lors de la modification')
+      toast.error('Unable to update the promo code.')
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce code promo ?')) {
+    if (!confirm('Are you sure you want to delete this promo code?')) {
       return
     }
 
@@ -129,17 +129,17 @@ export default function PromoCodesManager({
       })
 
       if (response.ok) {
-        toast.success('Code promo supprimé')
+        toast.success('Promo code deleted.')
         onRefresh()
       }
     } catch (error) {
-      toast.error('Erreur lors de la suppression')
+      toast.error('Unable to delete the promo code.')
     }
   }
 
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code)
-    toast.success('Code copié !')
+    toast.success('Code copied!')
   }
 
   return (
@@ -165,7 +165,7 @@ export default function PromoCodesManager({
           className="w-full mb-6 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 hover:shadow-lg transition-shadow"
         >
           <Plus className="w-5 h-5" />
-          Créer un code promo
+          Create promo code
         </motion.button>
       )}
 
@@ -182,7 +182,7 @@ export default function PromoCodesManager({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Code promo
+                    Promo code
                   </label>
                   <input
                     type="text"
@@ -195,7 +195,7 @@ export default function PromoCodesManager({
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type de réduction
+                    Discount type
                   </label>
                   <select
                     value={formData.discountType}
@@ -245,7 +245,7 @@ export default function PromoCodesManager({
                     type="number"
                     value={formData.maxUses}
                     onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
-                    placeholder="Illimité"
+                    placeholder="Unlimited"
                     min="1"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
@@ -274,7 +274,7 @@ export default function PromoCodesManager({
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Offre spéciale été 2024"
+                  placeholder="Summer special"
                   rows={2}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
@@ -286,13 +286,13 @@ export default function PromoCodesManager({
                   disabled={loading}
                   className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'Création...' : 'Créer le code'}
+                  {loading ? 'Creating...' : 'Create code'}
                 </button>
                 <button
                   onClick={() => setShowCreateForm(false)}
                   className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                 >
-                  Annuler
+                  Cancel
                 </button>
               </div>
             </div>
@@ -304,7 +304,7 @@ export default function PromoCodesManager({
       <div className="space-y-3">
         {promoCodes.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            Aucun code promo créé
+            No promo codes created
           </div>
         ) : (
           promoCodes.map((promo) => (
@@ -357,7 +357,7 @@ export default function PromoCodesManager({
                       ) : (
                         <>
                           <Percent className="w-4 h-4" />
-                          <span>{promo.discountValue}% de réduction</span>
+                          <span>{promo.discountValue}% off</span>
                         </>
                       )}
                     </div>

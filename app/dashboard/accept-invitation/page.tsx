@@ -32,11 +32,11 @@ export default function AcceptInvitationPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de l\'acceptation')
+        throw new Error(data.error || 'Unable to accept the invitation.')
       }
 
       setStatus('success')
-      setMessage(data.message || 'Équipe rejointe avec succès!')
+      setMessage(data.message || 'Team joined successfully!')
       
       // Rediriger après 2 secondes vers la page de bienvenue
       setTimeout(() => {
@@ -45,7 +45,7 @@ export default function AcceptInvitationPage() {
     } catch (error: any) {
       console.error('Erreur:', error)
       setStatus('error')
-      setMessage(error.message || 'Erreur lors de l\'acceptation de l\'invitation')
+      setMessage(error.message || 'Unable to accept the invitation.')
     }
   }
 
@@ -63,7 +63,7 @@ export default function AcceptInvitationPage() {
               Acceptation de l'invitation...
             </h2>
             <p className="text-gray-600">
-              Veuillez patienter pendant que nous vous ajoutons à l'équipe.
+              Please wait while we add you to the team.
             </p>
           </>
         )}
@@ -90,14 +90,14 @@ export default function AcceptInvitationPage() {
           <>
             <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Erreur
+              Error
             </h2>
             <p className="text-gray-600 mb-6">{message}</p>
             <button
               onClick={() => router.push('/dashboard')}
               className="px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors"
             >
-              Retour au tableau de bord
+              Back to dashboard
             </button>
           </>
         )}

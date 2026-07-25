@@ -40,7 +40,7 @@ export async function PATCH(request: NextRequest) {
 
     await Promise.all(updatePromises)
 
-    return NextResponse.json({ message: 'Ordre mis à jour' })
+    return NextResponse.json({ message: 'Order updated' })
   } catch (error) {
     console.error('Erreur lors de la mise à jour de l\'ordre:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })

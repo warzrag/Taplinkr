@@ -6,7 +6,6 @@ import PublicDirectRedirect from '@/components/PublicDirectRedirect'
 import PublicLinkPreviewFinal from '@/components/PublicLinkPreviewFinal'
 import PublicPasswordGate from '@/components/PublicPasswordGate'
 import {
-  getDirectRedirectLocale,
   getExternalBrowserUrl,
   getInstagramExternalBrowserUrl,
   getMobilePlatform,
@@ -97,7 +96,7 @@ export default async function LinkPage(props: PageProps) {
   if (link.passwordProtection) {
     const token = (await cookies()).get(passwordCookieName(link.id))?.value
     if (!verifySignedToken(token, 'password-access', link.id)) {
-      return <PublicPasswordGate linkId={link.id} title={link.title || 'Page protégée'} hint={link.passwordProtection.hint} />
+      return <PublicPasswordGate linkId={link.id} title={link.title || 'Protected page'} hint={link.passwordProtection.hint} />
     }
   }
 
@@ -144,7 +143,7 @@ export default async function LinkPage(props: PageProps) {
         })
       }
     } catch (error) {
-      console.error('Erreur lors du suivi du lien direct:', error)
+      console.error('Error tracking direct link:', error)
     }
 
     const referer = requestHeaders.get('referer') || ''
@@ -168,10 +167,6 @@ export default async function LinkPage(props: PageProps) {
       <PublicDirectRedirect
         destination={destination}
         externalBrowserUrl={externalBrowserUrl}
-        locale={getDirectRedirectLocale(
-          requestHeaders.get('x-vercel-ip-country'),
-          requestHeaders.get('accept-language'),
-        )}
       />
     )
   }
@@ -185,8 +180,8 @@ export async function generateMetadata(props: PageProps) {
 
   if (!link) {
     return {
-      title: 'Page non trouvée',
-      description: "Cette page n'existe pas",
+      title: 'Page not found',
+      description: 'This page does not exist',
     }
   }
 
@@ -219,7 +214,7 @@ export async function generateMetadata(props: PageProps) {
 
   const owner = link.user?.name || link.user?.username || 'TapLinkr'
   const title = link.title || `${owner} - TapLinkr`
-  const description = link.description || `Découvrez les liens de ${owner}`
+  const description = link.description || `Explore ${owner}'s links`
 
   return {
     title,

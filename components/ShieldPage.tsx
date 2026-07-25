@@ -69,7 +69,7 @@ export default function ShieldPage({ link }: ShieldPageProps) {
                 Protection Shield
               </h1>
               <p className="text-white/80">
-                Vérification de sécurité en cours...
+                Running security check...
               </p>
             </div>
           </div>
@@ -78,10 +78,10 @@ export default function ShieldPage({ link }: ShieldPageProps) {
           <div className="px-8 py-6">
             <div className="text-center mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-3">
-                Lien protégé détecté
+                Protected link detected
               </h2>
               <p className="text-gray-600">
-                Ce lien est protégé par notre système de sécurité pour éviter les accès automatisés.
+                This link is protected by our security system to prevent automated access.
               </p>
             </div>
 
@@ -96,7 +96,7 @@ export default function ShieldPage({ link }: ShieldPageProps) {
                     </h3>
                   )}
                   <p className="text-sm text-gray-600 mb-2">
-                    Partagé par {link.user.name || link.user.username}
+                    Shared by {link.user.name || link.user.username}
                   </p>
                   <p className="text-xs text-gray-500 break-all">
                     Destination: {link.url}
@@ -114,7 +114,7 @@ export default function ShieldPage({ link }: ShieldPageProps) {
                   </span>
                 </div>
                 <p className="text-gray-600">
-                  Redirection automatique dans {countdown} seconde{countdown > 1 ? 's' : ''}...
+                  Redirecting automatically in {countdown} second{countdown > 1 ? 's' : ''}...
                 </p>
               </div>
             ) : (
@@ -123,13 +123,13 @@ export default function ShieldPage({ link }: ShieldPageProps) {
                   <ArrowRight className="w-6 h-6 text-green-600" />
                 </div>
                 <p className="text-gray-600 mb-4">
-                  Vérification terminée ! Vous pouvez maintenant continuer.
+                  Verification complete. You can continue now.
                 </p>
                 <button
                   onClick={handleContinue}
                   className="w-full bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold py-3 px-6 rounded-lg hover:from-primary-600 hover:to-secondary-600 transition-all duration-200 flex items-center justify-center space-x-2"
                 >
-                  <span>Continuer vers le site</span>
+                  <span>Continue to website</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -148,7 +148,7 @@ export default function ShieldPage({ link }: ShieldPageProps) {
             <div className="border-t border-gray-200 pt-6 mt-6">
               <div className="flex items-center space-x-3 text-sm text-gray-500">
                 <Shield className="w-4 h-4" />
-                <span>Protégé par TapLinkr Shield</span>
+                <span>Protected by TapLinkr Shield</span>
               </div>
             </div>
           </div>

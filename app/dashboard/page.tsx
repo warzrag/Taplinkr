@@ -31,7 +31,7 @@ export default function Dashboard() {
   const { profile } = useProfile()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
 
-  const name = profile?.name || session?.user?.name || session?.user?.email?.split('@')[0] || 'créateur'
+  const name = profile?.name || session?.user?.name || session?.user?.email?.split('@')[0] || 'creator'
   const totalClicks = links.reduce((sum, item) => sum + (item.clicks || 0), 0)
   const totalViews = links.reduce((sum, item) => sum + (item.views || 0), 0)
   const activeLinks = links.filter(item => item.isActive).length
@@ -39,10 +39,10 @@ export default function Dashboard() {
   const recentLinks = links.slice(0, 4)
 
   const stats = [
-    { label: 'Clics totaux', value: totalClicks, icon: MousePointer2, color: 'text-violet-400' },
-    { label: 'Vues totales', value: totalViews, icon: Eye, color: 'text-sky-400' },
-    { label: 'Liens actifs', value: activeLinks, icon: Link2, color: 'text-emerald-400' },
-    { label: 'Liens directs', value: directLinks, icon: Zap, color: 'text-amber-400' },
+    { label: 'Total clicks', value: totalClicks, icon: MousePointer2, color: 'text-violet-400' },
+    { label: 'Total views', value: totalViews, icon: Eye, color: 'text-sky-400' },
+    { label: 'Active links', value: activeLinks, icon: Link2, color: 'text-emerald-400' },
+    { label: 'Direct links', value: directLinks, icon: Zap, color: 'text-amber-400' },
   ]
 
   return (
@@ -50,8 +50,8 @@ export default function Dashboard() {
       <div className="mx-auto max-w-[1500px]">
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-[#8e8ea2]">Vue d’ensemble · 30 derniers jours</p>
-            <h1 className="mt-2 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Bonjour, {name}</h1>
+            <p className="text-sm font-semibold text-[#8e8ea2]">Overview · Last 30 days</p>
+            <h1 className="mt-2 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Welcome, {name}</h1>
           </div>
           <div className="flex flex-wrap gap-3">
             <button
@@ -59,14 +59,14 @@ export default function Dashboard() {
               className="inline-flex items-center gap-2 rounded-xl border border-[#2b2b39] bg-[#11111a] px-4 py-3 text-sm font-semibold text-white transition hover:border-violet-500/50"
             >
               <Plus className="h-4 w-4" />
-              Créer une page
+              Create a page
             </button>
             <button
               onClick={() => setCreateMode('direct')}
               className="inline-flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-violet-400"
             >
               <Zap className="h-4 w-4" />
-              Créer un lien direct
+              Create a direct link
             </button>
           </div>
         </header>
@@ -78,7 +78,7 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-[#a4a4b5]">{stat.label}</p>
                 <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </div>
-              <p className="mt-7 text-4xl font-bold tracking-tight">{loading ? '—' : stat.value.toLocaleString('fr-FR')}</p>
+              <p className="mt-7 text-4xl font-bold tracking-tight">{loading ? '—' : stat.value.toLocaleString('en-US')}</p>
             </article>
           ))}
         </section>
@@ -87,11 +87,11 @@ export default function Dashboard() {
           <div className={`${cardClass} p-0`}>
             <div className="flex items-center justify-between border-b border-[#252532] px-6 py-5">
               <div>
-                <h2 className="text-lg font-semibold">Vos derniers liens</h2>
-                <p className="mt-1 text-sm text-[#858598]">Accès rapide à vos pages et redirections.</p>
+                <h2 className="text-lg font-semibold">Your latest links</h2>
+                <p className="mt-1 text-sm text-[#858598]">Quick access to your pages and redirects.</p>
               </div>
               <Link href="/dashboard/links" className="inline-flex items-center gap-2 text-sm font-semibold text-violet-400 hover:text-violet-300">
-                Tout voir
+                View all
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
             </div>
@@ -110,13 +110,13 @@ export default function Dashboard() {
                   <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${item.isDirect ? 'bg-violet-500/10 text-violet-300' : 'bg-sky-500/10 text-sky-300'}`}>
                     {item.isDirect ? 'Direct' : 'Page'}
                   </span>
-                  <span className="hidden text-sm text-[#a4a4b5] sm:block">{item.clicks || 0} clics</span>
+                  <span className="hidden text-sm text-[#a4a4b5] sm:block">{item.clicks || 0} clicks</span>
                 </Link>
               )) : (
                 <div className="px-6 py-14 text-center">
                   <Link2 className="mx-auto h-8 w-8 text-[#555568]" />
-                  <p className="mt-4 font-semibold">Aucun lien pour le moment</p>
-                  <p className="mt-1 text-sm text-[#858598]">Créez votre première page ou redirection.</p>
+                  <p className="mt-4 font-semibold">No links yet</p>
+                  <p className="mt-1 text-sm text-[#858598]">Create your first page or redirect.</p>
                 </div>
               )}
             </div>
@@ -127,13 +127,13 @@ export default function Dashboard() {
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-500/10 text-violet-400">
                 <BarChart3 className="h-5 w-5" />
               </span>
-              <h2 className="mt-6 text-xl font-semibold">Comprendre votre trafic</h2>
+              <h2 className="mt-6 text-xl font-semibold">Understand your traffic</h2>
               <p className="mt-3 text-sm leading-6 text-[#9393a5]">
-                Consultez l’évolution des clics, les visiteurs et les performances de chaque lien.
+                Review click trends, visitors, and the performance of each link.
               </p>
             </div>
             <Link href="/dashboard/analytics" className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl border border-[#30303e] px-4 py-3 text-sm font-semibold transition hover:border-violet-500/50 hover:bg-violet-500/5">
-              Voir les analytics
+              View analytics
               <ExternalLink className="h-4 w-4" />
             </Link>
           </aside>

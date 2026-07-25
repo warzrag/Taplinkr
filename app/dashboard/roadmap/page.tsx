@@ -14,43 +14,43 @@ interface RoadmapItem {
 
 const roadmapItems: RoadmapItem[] = [
   {
-    title: 'Analytics avancés',
-    description: 'Dashboard détaillé avec graphiques, heatmaps et insights visiteurs',
+    title: 'Advanced analytics',
+    description: 'Detailed dashboards with charts, heatmaps, and visitor insights',
     status: 'completed',
     quarter: 'Q4 2024',
     icon: Zap
   },
   {
-    title: 'Système de monétisation',
-    description: 'Intégration Stripe pour les abonnements et paiements',
+    title: 'Monetization',
+    description: 'Stripe integration for subscriptions and payments',
     status: 'in-progress',
     quarter: 'Q1 2025',
     icon: Shield
   },
   {
-    title: 'Domaines personnalisés',
-    description: 'Utilisez votre propre nom de domaine pour vos liens',
+    title: 'Custom domains',
+    description: 'Use your own domain name for links',
     status: 'planned',
     quarter: 'Q1 2025',
     icon: Globe
   },
   {
-    title: 'Mode équipe',
-    description: 'Collaboration en équipe avec rôles et permissions',
+    title: 'Team mode',
+    description: 'Team collaboration with roles and permissions',
     status: 'in-progress',
     quarter: 'Q1 2025',
     icon: Users
   },
   {
-    title: 'Application mobile',
-    description: 'App iOS et Android pour gérer vos liens en déplacement',
+    title: 'Mobile app',
+    description: 'iOS and Android apps for managing links on the go',
     status: 'planned',
     quarter: 'Q2 2025',
     icon: Zap
   },
   {
-    title: 'Intégrations avancées',
-    description: 'Webhooks, API publique et intégrations tierces',
+    title: 'Advanced integrations',
+    description: 'Webhooks, public API, and third-party integrations',
     status: 'planned',
     quarter: 'Q2 2025',
     icon: Shield
@@ -87,11 +87,11 @@ export default function RoadmapPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'Terminé'
+        return 'Completed'
       case 'in-progress':
-        return 'En cours'
+        return 'In progress'
       case 'planned':
-        return 'Planifié'
+        return 'Planned'
       default:
         return ''
     }
@@ -109,7 +109,7 @@ export default function RoadmapPage() {
           <Link href="/dashboard">
             <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6">
               <ArrowLeft className="w-4 h-4" />
-              Retour au dashboard
+              Back to dashboard
             </button>
           </Link>
           
@@ -122,7 +122,7 @@ export default function RoadmapPage() {
                 Roadmap
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Découvrez les futures fonctionnalités de TapLinkr
+                See what's coming next to TapLinkr
               </p>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function RoadmapPage() {
             <div className="text-3xl font-bold text-green-700 dark:text-green-400">
               {roadmapItems.filter(item => item.status === 'completed').length}
             </div>
-            <div className="text-green-600 dark:text-green-500">Terminées</div>
+            <div className="text-green-600 dark:text-green-500">Completed</div>
           </motion.div>
           
           <motion.div
@@ -151,7 +151,7 @@ export default function RoadmapPage() {
             <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">
               {roadmapItems.filter(item => item.status === 'in-progress').length}
             </div>
-            <div className="text-blue-600 dark:text-blue-500">En cours</div>
+            <div className="text-blue-600 dark:text-blue-500">In progress</div>
           </motion.div>
           
           <motion.div
@@ -163,7 +163,7 @@ export default function RoadmapPage() {
             <div className="text-3xl font-bold text-gray-700 dark:text-gray-400">
               {roadmapItems.filter(item => item.status === 'planned').length}
             </div>
-            <div className="text-gray-600 dark:text-gray-500">Planifiées</div>
+            <div className="text-gray-600 dark:text-gray-500">Planned</div>
           </motion.div>
         </div>
 
@@ -217,14 +217,14 @@ export default function RoadmapPage() {
           className="mt-12 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-8 text-center"
         >
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
-            Une idée de fonctionnalité ?
+            Have a feature idea?
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Nous adorons entendre vos suggestions pour améliorer TapLinkr
+            We'd love to hear how TapLinkr could work better for you
           </p>
           <Link href="/dashboard/support">
             <button className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all">
-              Suggérer une fonctionnalité
+              Suggest a feature
             </button>
           </Link>
         </motion.div>

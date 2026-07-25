@@ -25,7 +25,7 @@ export default function BillingPage() {
     const plan = searchParams.get('plan')
     
     if (success === 'true' && plan) {
-      toast.success(`Abonnement ${plan} activé avec succès !`)
+      toast.success(`${plan} subscription activated successfully!`)
       // Forcer la mise à jour de la session
       update()
       // Nettoyer l'URL
@@ -58,7 +58,7 @@ export default function BillingPage() {
       const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la création du portail')
+        throw new Error(data.error || 'Unable to open the billing portal.')
       }
 
       // Rediriger vers le portail Stripe
@@ -72,7 +72,7 @@ export default function BillingPage() {
   }
 
   const handleCancelSubscription = async () => {
-    if (!confirm('Êtes-vous sûr de vouloir annuler votre abonnement ? Vous conserverez l\'accès jusqu\'à la fin de la période de facturation actuelle.')) {
+    if (!confirm('Are you sure you want to cancel your subscription? You will keep access through the end of your current billing period.')) {
       return
     }
 
@@ -84,10 +84,10 @@ export default function BillingPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de l\'annulation')
+        throw new Error('Unable to cancel your subscription.')
       }
 
-      toast.success('Abonnement annulé. Vous conservez l\'accès jusqu\'à la fin de la période.')
+      toast.success('Subscription canceled. You will keep access through the end of the billing period.')
       fetchSubscription()
       update()
     } catch (error) {
@@ -103,13 +103,13 @@ export default function BillingPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Aucun abonnement actif
+            No active subscription
           </h1>
           <button
             onClick={() => router.push('/dashboard/pricing')}
             className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all"
           >
-            Voir les plans
+            View plans
           </button>
         </div>
       </div>
@@ -130,14 +130,14 @@ export default function BillingPage() {
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
-            Retour au dashboard
+            Back to dashboard
           </button>
           
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             Gestion de l'abonnement
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Gérez votre abonnement et vos informations de facturation
+            Manage your subscription and billing information
           </p>
         </motion.div>
 
@@ -151,7 +151,7 @@ export default function BillingPage() {
           >
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <Tag className="w-6 h-6 text-purple-600" />
-              Vous avez un code promo ?
+              Have a promo code?
             </h3>
             <PromoCodeInput onApply={(code, discount) => setSelectedPromo(discount)} />
             
@@ -177,10 +177,10 @@ export default function BillingPage() {
                         router.push('/dashboard')
                       }, 2000)
                     } else {
-                      toast.error(data.error || 'Erreur lors de l\'utilisation du code')
+                      toast.error(data.error || 'Unable to apply the promo code.')
                     }
                   } catch (error) {
-                    toast.error('Erreur de connexion')
+                    toast.error('Connection error.')
                   } finally {
                     setLoading(false)
                   }
@@ -188,7 +188,7 @@ export default function BillingPage() {
                 disabled={loading}
                 className="mt-4 w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all disabled:opacity-50 font-semibold"
               >
-                {loading ? 'Application...' : 'Utiliser ce code promo'}
+                {loading ? 'Applying...' : 'Apply promo code'}
               </motion.button>
             )}
           </motion.div>
@@ -202,14 +202,14 @@ export default function BillingPage() {
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6"
         >
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Abonnement actuel
+            Current subscription
           </h2>
           
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Plan</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 capitalize">
-                {userPlan === 'standard' ? 'Standard' : userPlan === 'premium' ? 'Premium' : 'Gratuit'}
+                {userPlan === 'standard' ? 'Standard' : userPlan === 'premium' ? 'Premium' : 'Free'}
               </p>
             </div>
             
@@ -221,12 +221,12 @@ export default function BillingPage() {
               {subscription?.cancel_at_period_end ? (
                 <>
                   <XCircle className="w-5 h-5" />
-                  <span className="font-medium">Annulé</span>
+                  <span className="font-medium">Canceled</span>
                 </>
               ) : (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  <span className="font-medium">Actif</span>
+                  <span className="font-medium">Active</span>
                 </>
               )}
             </div>
@@ -237,7 +237,7 @@ export default function BillingPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <Calendar className="w-5 h-5" />
-                  <span>Prochaine facturation</span>
+                  <span>Next billing date</span>
                 </div>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
                   {new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR')}
@@ -247,10 +247,10 @@ export default function BillingPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <CreditCard className="w-5 h-5" />
-                  <span>Montant</span>
+                  <span>Amount</span>
                 </div>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {userPlan === 'standard' ? '9.99€' : userPlan === 'premium' ? '24.99€' : '0€'} / mois
+                  {userPlan === 'standard' ? '€9.99' : userPlan === 'premium' ? '€24.99' : '€0'} / month
                 </span>
               </div>
             </div>
@@ -262,10 +262,10 @@ export default function BillingPage() {
                 <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">
-                    Abonnement annulé
+                    Subscription canceled
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                    Vous conservez l'accès à votre plan {userPlan} jusqu'au{' '}
+                    You keep access to your {userPlan} plan until{' '}
                     {new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR')}
                   </p>
                 </div>
@@ -284,12 +284,12 @@ export default function BillingPage() {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Chargement...
+                  Loading...
                 </>
               ) : (
                 <>
                   <ExternalLink className="w-5 h-5" />
-                  Gérer la facturation
+                  Manage billing
                 </>
               )}
             </motion.button>
@@ -302,7 +302,7 @@ export default function BillingPage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Annuler l'abonnement
+                Cancel subscription
               </motion.button>
             )}
           </div>
@@ -320,13 +320,13 @@ export default function BillingPage() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <Crown className="w-8 h-8" />
-                  <h2 className="text-2xl font-bold">Vous êtes Premium !</h2>
+                  <h2 className="text-2xl font-bold">You're Premium!</h2>
                 </div>
                 <p className="opacity-90">
-                  Profitez de toutes les fonctionnalités avancées de TapLinkr
+                  Enjoy all of TapLinkr's advanced features
                 </p>
                 <p className="text-sm opacity-75 mt-2">
-                  Expire le {new Date((session.user as any).planExpiresAt).toLocaleDateString()}
+                  Expires on {new Date((session.user as any).planExpiresAt).toLocaleDateString('en-US')}
                 </p>
               </div>
               <Zap className="w-16 h-16 opacity-20" />
@@ -342,13 +342,13 @@ export default function BillingPage() {
           className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6"
         >
           <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-            Informations importantes
+            Important information
           </h3>
           <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-400">
-            <li>• Vos données sont conservées même si vous annulez votre abonnement</li>
-            <li>• Vous pouvez réactiver votre abonnement à tout moment</li>
-            <li>• Les changements de plan prennent effet immédiatement</li>
-            <li>• La facturation est effectuée mensuellement</li>
+            <li>• Your data is retained even if you cancel your subscription</li>
+            <li>• You can reactivate your subscription at any time</li>
+            <li>• Plan changes take effect immediately</li>
+            <li>• Billing is monthly</li>
           </ul>
         </motion.div>
       </div>

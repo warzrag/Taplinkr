@@ -3,7 +3,7 @@ export default function Loading() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center">
       <div className="flex flex-col items-center space-y-4">
         <div className="w-12 h-12 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-600 font-medium">Chargement des analytics...</p>
+        <p className="text-gray-600 font-medium">Loading analytics...</p>
       </div>
     </div>
   )

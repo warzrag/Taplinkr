@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const link = await prisma.link.findFirst({
@@ -31,13 +31,13 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
     })
 
     if (!link) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     return NextResponse.json(link)
   } catch (error) {
     console.error('Erreur lors de la récupération du lien:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -92,15 +92,15 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     })
 
     if (!existingLink) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     if (shieldEnabled && !existingLink.shieldEnabled && !(await checkTeamPermission(session.user.id, 'hasShieldLink'))) {
-      return NextResponse.json({ error: 'Shield Protection nécessite le plan Premium' }, { status: 403 })
+      return NextResponse.json({ error: 'Shield Protection requires the Premium plan' }, { status: 403 })
     }
 
     if (isUltraLink && !existingLink.isUltraLink && !(await checkTeamPermission(session.user.id, 'hasUltraLink'))) {
-      return NextResponse.json({ error: 'Ultra Link nécessite le plan Premium' }, { status: 403 })
+      return NextResponse.json({ error: 'Ultra Link requires the Premium plan' }, { status: 403 })
     }
 
     const effectiveIsDirect = isDirect ?? existingLink.isDirect
@@ -108,7 +108,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       ? normalizeHttpURL(directUrl ?? existingLink.directUrl ?? '')
       : null
     if (effectiveIsDirect && (!effectiveDirectUrl || !validateURL(effectiveDirectUrl))) {
-      return NextResponse.json({ error: 'URL de redirection invalide. Seuls http:// et https:// sont autorisés.' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid redirect URL. Only http:// and https:// are allowed.' }, { status: 400 })
     }
 
     if (multiLinks !== undefined) {
@@ -125,10 +125,10 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     if (slug !== undefined) {
       const normalizedSlug = String(slug).trim().toLowerCase()
       if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(normalizedSlug) || RESERVED_USERNAMES.has(normalizedSlug)) {
-        return NextResponse.json({ error: 'Le slug doit contenir 3 à 50 caractères alphanumériques ou tirets.' }, { status: 400 })
+        return NextResponse.json({ error: 'The slug must be 3–50 characters and contain only letters, numbers, or hyphens.' }, { status: 400 })
       }
       const slugOwner = await prisma.link.findFirst({ where: { slug: normalizedSlug, id: { not: params.id } } })
-      if (slugOwner) return NextResponse.json({ error: 'Cette URL personnalisée est déjà utilisée.' }, { status: 409 })
+      if (slugOwner) return NextResponse.json({ error: 'This custom URL is already in use.' }, { status: 409 })
     }
 
     // Pas de validation d'URL car c'est un multi-link
@@ -219,8 +219,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       console.error('Stack trace:', error.stack)
     }
     return NextResponse.json({ 
-      error: 'Erreur serveur',
-      details: error instanceof Error ? error.message : 'Erreur inconnue'
+      error: 'Server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
@@ -231,7 +231,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -242,7 +242,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     })
 
     if (!existingLink) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     // Mise à jour partielle (utilisé pour le renommage rapide)
@@ -267,8 +267,8 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
   } catch (error) {
     console.error('Erreur lors de la mise à jour partielle du lien:', error)
     return NextResponse.json({
-      error: 'Erreur serveur',
-      details: error instanceof Error ? error.message : 'Erreur inconnue'
+      error: 'Server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
@@ -279,7 +279,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const [existingLink, currentUser] = await Promise.all([
@@ -293,7 +293,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     ])
 
     if (!existingLink) {
-      return NextResponse.json({ error: 'Lien non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     if (!canDeleteLink({
@@ -304,7 +304,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       linkTeamId: existingLink.teamId,
     })) {
       return NextResponse.json({
-        error: 'Vous n’avez pas la permission de supprimer ce lien',
+        error: 'You do not have permission to delete this link',
       }, { status: 403 })
     }
 
@@ -355,9 +355,9 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     }
     revalidatePath('/dashboard/links')
 
-    return NextResponse.json({ message: 'Lien supprimé' })
+    return NextResponse.json({ message: 'Link deleted' })
   } catch (error) {
     console.error('Erreur lors de la suppression du lien:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

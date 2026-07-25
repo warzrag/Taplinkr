@@ -29,12 +29,12 @@ export default function IconImageUpload({
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image')
+      toast.error('Select an image.')
       return
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('L\'image ne doit pas dépasser 2MB')
+      toast.error('The image must be 2 MB or smaller.')
       return
     }
 
@@ -59,15 +59,15 @@ export default function IconImageUpload({
 
       if (!uploadResponse.ok) {
         const error = await uploadResponse.json()
-        throw new Error(error.error || 'Erreur lors de l\'upload')
+        throw new Error(error.error || 'Unable to upload the image.')
       }
 
       const data = await uploadResponse.json()
       onChange(data.url)
-      toast.success('Icône mise à jour')
+      toast.success('Icon updated.')
     } catch (error) {
       console.error('Erreur upload:', error)
-      toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
+      toast.error(error instanceof Error ? error.message : 'Unable to upload the image.')
       setPreview(value || null)
     } finally {
       setIsUploading(false)
@@ -127,7 +127,7 @@ export default function IconImageUpload({
             whileTap={{ scale: 0.98 }}
           >
             <Upload className="w-3.5 h-3.5" />
-            {preview ? 'Changer' : 'Ajouter'}
+            {preview ? 'Change' : 'Add'}
           </motion.button>
           
           {preview && (
@@ -146,7 +146,7 @@ export default function IconImageUpload({
       </div>
 
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-        PNG, JPG ou WebP • Max 2MB • Format carré recommandé
+        PNG, JPG, or WebP • Max 2 MB • Square format recommended
       </p>
     </div>
   )

@@ -102,7 +102,7 @@ export default function TeamPage() {
       }
     } catch (error) {
       console.error('Erreur chargement équipe:', error)
-      toast.error('Erreur lors du chargement de l\'équipe')
+      toast.error('Unable to load the team.')
     } finally {
       setLoading(false)
     }
@@ -124,17 +124,17 @@ export default function TeamPage() {
       
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la création')
+        throw new Error(data.error || 'Unable to create the team.')
       }
       
       setTeam(data.team)
       setShowCreateModal(false)
       setTeamName('')
       setTeamDescription('')
-      toast.success('Équipe créée avec succès !')
+      toast.success('Team created successfully!')
       fetchTeam() // Recharger pour avoir toutes les infos
     } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de la création')
+      toast.error(error.message || 'Unable to create the team.')
     } finally {
       setCreateLoading(false)
     }
@@ -168,30 +168,30 @@ export default function TeamPage() {
       if (!response.ok) {
         console.error('Erreur invitation:', data)
         if (data.invitationCreated) {
-          toast.error(data.error || "L'invitation existe, mais l'email n'a pas été envoyé")
+          toast.error(data.error || 'The invitation was created, but the email could not be sent.')
           setShowInviteModal(false)
           setInviteEmail('')
           setInviteRole('member')
           await fetchTeam()
           return
         }
-        throw new Error(data.error || 'Erreur lors de l\'invitation')
+        throw new Error(data.error || 'Unable to send the invitation.')
       }
       
-      toast.success('Invitation envoyée avec succès !')
+      toast.success('Invitation sent successfully!')
       setShowInviteModal(false)
       setInviteEmail('')
       setInviteRole('member')
       fetchTeam()
     } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de l\'invitation')
+      toast.error(error.message || 'Unable to send the invitation.')
     } finally {
       setInviteLoading(false)
     }
   }
   
   const removeMember = async (memberId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir retirer ce membre ?')) return
+    if (!confirm('Are you sure you want to remove this member?')) return
 
     try {
       const response = await fetch(`/api/teams/members/${memberId}`, {
@@ -199,19 +199,19 @@ export default function TeamPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la suppression')
+        throw new Error('Unable to remove the member.')
       }
 
-      toast.success('Membre retiré de l\'équipe')
+      toast.success('Member removed from the team.')
       fetchTeam()
     } catch (error) {
-      toast.error('Erreur lors de la suppression du membre')
+      toast.error('Unable to remove the member.')
     }
   }
 
   const updateNickname = async (memberId: string, currentNickname: string | null, memberName: string) => {
     const newNickname = prompt(
-      'Surnom du membre (laissez vide pour utiliser le nom réel):',
+      "Member nickname (leave blank to use the person's real name):",
       currentNickname || ''
     )
 
@@ -229,16 +229,16 @@ export default function TeamPage() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Erreur lors de la mise à jour')
+        throw new Error(data.error || 'Unable to update the nickname.')
       }
 
-      toast.success('Surnom mis à jour !')
+      toast.success('Nickname updated!')
 
       // Vider le cache et rafraîchir
       localStorage.removeItem('team-cache')
       await fetchTeam()
     } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de la mise à jour du surnom')
+      toast.error(error.message || 'Unable to update the nickname.')
     }
   }
   
@@ -249,13 +249,13 @@ export default function TeamPage() {
       })
       
       if (!response.ok) {
-        throw new Error('Erreur lors de l\'annulation')
+        throw new Error('Unable to cancel the invitation.')
       }
       
-      toast.success('Invitation annulée')
+      toast.success('Invitation canceled.')
       fetchTeam()
     } catch (error) {
-      toast.error('Erreur lors de l\'annulation de l\'invitation')
+      toast.error('Unable to cancel the invitation.')
     }
   }
 
@@ -267,23 +267,23 @@ export default function TeamPage() {
       })
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.error || "Erreur lors du renvoi de l'invitation")
+        throw new Error(data.error || 'Unable to resend the invitation.')
       }
-      toast.success('Nouvelle invitation envoyée avec un lien valable 7 jours')
+      toast.success('New invitation sent with a link valid for 7 days.')
       await fetchTeam()
     } catch (error: any) {
-      toast.error(error.message || "Erreur lors du renvoi de l'invitation")
+      toast.error(error.message || 'Unable to resend the invitation.')
     } finally {
       setResendingInvitationId(null)
     }
   }
   
   const deleteTeam = async () => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer l\'équipe ? Cette action est irréversible et tous les membres seront retirés.')) {
+    if (!confirm('Are you sure you want to delete the team? This cannot be undone and all members will be removed.')) {
       return
     }
     
-    if (!confirm('Vraiment sûr ? Tapez "SUPPRIMER" pour confirmer.')) {
+    if (!confirm('Are you absolutely sure? Click OK to confirm.')) {
       return
     }
     
@@ -293,14 +293,14 @@ export default function TeamPage() {
       })
       
       if (!response.ok) {
-        throw new Error('Erreur lors de la suppression')
+        throw new Error('Unable to delete the team.')
       }
       
-      toast.success('Équipe supprimée avec succès')
+      toast.success('Team deleted successfully.')
       // Recharger la page pour afficher l'écran de création
       window.location.reload()
     } catch (error) {
-      toast.error('Erreur lors de la suppression de l\'équipe')
+      toast.error('Unable to delete the team.')
     }
   }
   
@@ -316,10 +316,10 @@ export default function TeamPage() {
   
   const getRoleLabel = (role: string) => {
     const labels = {
-      owner: 'Propriétaire',
-      admin: 'Administrateur',
-      member: 'Membre',
-      viewer: 'Observateur'
+      owner: 'Owner',
+      admin: 'Admin',
+      member: 'Member',
+      viewer: 'Viewer'
     }
     return labels[role as keyof typeof labels] || role
   }
@@ -347,16 +347,16 @@ export default function TeamPage() {
             <Users className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Fonctionnalité Premium
+            Premium feature
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">
-            Créez et gérez votre équipe avec le plan Premium. Collaborez efficacement sur TapLinkr !
+            Create and manage your team with Premium. Collaborate efficiently on TapLinkr.
           </p>
           <button
             onClick={() => window.location.href = '/dashboard/pricing'}
             className="w-full px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl font-semibold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
           >
-            Passer au Premium
+            Upgrade to Premium
           </button>
         </motion.div>
       </div>
@@ -383,17 +383,17 @@ export default function TeamPage() {
           <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-12">
             <Building className="w-24 h-24 text-purple-500 mx-auto mb-8" />
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Créez votre équipe
+              Create your team
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-10">
-              Commencez à collaborer avec votre équipe sur TapLinkr
+              Start collaborating with your team on TapLinkr
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="px-10 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl font-semibold text-lg hover:from-purple-600 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg inline-flex items-center gap-3"
             >
               <UserPlus className="w-6 h-6" />
-              Créer une équipe
+              Create a team
             </button>
           </div>
         </motion.div>
@@ -407,18 +407,18 @@ export default function TeamPage() {
               className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl shadow-2xl p-5 sm:p-8 max-w-md w-full"
             >
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6">
-                Créer votre équipe
+                Create your team
               </h2>
               <form onSubmit={createTeam} className="space-y-4 sm:space-y-6">
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nom de l'équipe *
+                    Team name *
                   </label>
                   <input
                     type="text"
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
-                    placeholder="Mon équipe"
+                    placeholder="My team"
                     required
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   />
@@ -430,7 +430,7 @@ export default function TeamPage() {
                   <textarea
                     value={teamDescription}
                     onChange={(e) => setTeamDescription(e.target.value)}
-                    placeholder="Description de votre équipe..."
+                    placeholder="Describe your team..."
                     rows={3}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
                   />
@@ -441,14 +441,14 @@ export default function TeamPage() {
                     onClick={() => setShowCreateModal(false)}
                     className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={createLoading}
                     className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg sm:rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {createLoading ? 'Création...' : 'Créer'}
+                    {createLoading ? 'Creating...' : 'Create'}
                   </button>
                 </div>
               </form>
@@ -489,20 +489,20 @@ export default function TeamPage() {
                 )}
               </h1>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 sm:mt-2 line-clamp-2">
-                {team.description || 'Gérez votre équipe et collaborez ensemble'}
+                {team.description || 'Manage your team and collaborate in one place'}
               </p>
               <div className="flex items-center gap-3 sm:gap-6 mt-3 sm:mt-4 text-xs sm:text-sm flex-wrap">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
                   <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                    {totalMembers}/{teamMembersLimit} membres
+                    {totalMembers}/{teamMembersLimit} members
                   </span>
                 </div>
                 {pendingInvitations > 0 && (
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
                     <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                      {pendingInvitations} invitation{pendingInvitations > 1 ? 's' : ''}
+                      {pendingInvitations} pending invitation{pendingInvitations > 1 ? 's' : ''}
                     </span>
                   </div>
                 )}
@@ -515,7 +515,7 @@ export default function TeamPage() {
                 className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all flex items-center justify-center gap-2 shadow-lg"
               >
                 <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span>Inviter</span>
+                <span>Invite</span>
               </button>
             )}
           </div>
@@ -533,7 +533,7 @@ export default function TeamPage() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                 }`}
               >
-                Membres ({totalMembers})
+                Members ({totalMembers})
               </button>
               <button
                 onClick={() => setActiveTab('links')}
@@ -545,7 +545,7 @@ export default function TeamPage() {
               >
                 <span className="flex items-center gap-1.5 sm:gap-2">
                   <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  Liens
+                  Links
                 </span>
               </button>
               <button
@@ -582,7 +582,7 @@ export default function TeamPage() {
                           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                     >
-                      Paramètres
+                      Settings
                     </button>
                   )}
                 </>
@@ -611,7 +611,7 @@ export default function TeamPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">
-                      {owner?.name || owner?.email || 'Propriétaire'}
+                      {owner?.name || owner?.email || 'Owner'}
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                       {owner?.email || ''}
@@ -648,7 +648,7 @@ export default function TeamPage() {
                           <button
                             onClick={() => updateNickname(member.id, (member as any).nickname, member.name || member.email)}
                             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors flex-shrink-0"
-                            title="Modifier le surnom"
+                            title="Edit nickname"
                           >
                             <Edit3 size={14} className="text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
                           </button>
@@ -707,12 +707,12 @@ export default function TeamPage() {
           >
             <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Le leaderboard complet est disponible sur une page dédiée
+              The full leaderboard is available on its own page
             </p>
             <Link href="/dashboard/team-leaderboard">
               <button className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-white rounded-xl font-semibold hover:from-yellow-500 hover:to-amber-600 transition-all shadow-lg inline-flex items-center gap-2">
                 <Trophy className="w-5 h-5" />
-                Voir le Leaderboard
+                View leaderboard
               </button>
             </Link>
           </motion.div>
@@ -733,11 +733,11 @@ export default function TeamPage() {
                         {invitation.email}
                       </h3>
                       <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
-                        Invité le {new Date(invitation.createdAt).toLocaleDateString()}
+                        Invited on {new Date(invitation.createdAt).toLocaleDateString('en-US')}
                       </p>
                       {invitation.expiresAt && (
                         <p className="mt-1 text-xs text-gray-400">
-                          Expire le {new Date(invitation.expiresAt).toLocaleDateString()}
+                          Expires on {new Date(invitation.expiresAt).toLocaleDateString('en-US')}
                         </p>
                       )}
                     </div>
@@ -754,7 +754,7 @@ export default function TeamPage() {
                         className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-purple-600 transition-colors hover:bg-purple-50 disabled:opacity-50 dark:text-purple-300 dark:hover:bg-purple-900/20"
                       >
                         <RefreshCw className={`h-3.5 w-3.5 ${resendingInvitationId === invitation.id ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">Renvoyer</span>
+                        <span className="hidden sm:inline">Resend</span>
                       </button>
                       <button
                         onClick={() => cancelInvitation(invitation.id)}
@@ -770,7 +770,7 @@ export default function TeamPage() {
               <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-8 sm:p-12 text-center">
                 <Mail className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
                 <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
-                  Aucune invitation en attente
+                  No pending invitations
                 </p>
               </div>
             )}
@@ -784,12 +784,12 @@ export default function TeamPage() {
             className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-8"
           >
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6">
-              Paramètres de l'équipe
+              Team settings
             </h2>
             <div className="space-y-4 sm:space-y-6">
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Nom de l'équipe
+                  Team name
                 </label>
                 <input
                   type="text"
@@ -811,19 +811,19 @@ export default function TeamPage() {
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Limite de membres
+                  Member limit
                 </label>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                   <div className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                     <span className="text-sm sm:text-base text-gray-900 dark:text-gray-100 font-medium">
-                      {totalMembers} / {team.maxMembers} membres
+                      {totalMembers} / {team.maxMembers} members
                     </span>
                   </div>
                   <button
                     onClick={() => window.location.href = '/dashboard/pricing'}
                     className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg sm:rounded-xl transition-colors font-medium whitespace-nowrap"
                   >
-                    Augmenter la limite
+                    Increase limit
                   </button>
                 </div>
               </div>
@@ -832,18 +832,18 @@ export default function TeamPage() {
               {isOwner && (
                 <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-red-200 dark:border-red-800">
                   <h3 className="text-base sm:text-lg font-semibold text-red-600 dark:text-red-400 mb-3 sm:mb-4">
-                    Zone Danger
+                    Danger zone
                   </h3>
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg sm:rounded-xl p-4 sm:p-6">
                     <p className="text-xs sm:text-sm text-red-700 dark:text-red-300 mb-3 sm:mb-4">
-                      La suppression de l'équipe est irréversible. Tous les membres seront retirés et toutes les données seront perdues.
+                      Deleting the team cannot be undone. All members will be removed and all team data will be lost.
                     </p>
                     <button
                       onClick={deleteTeam}
                       className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg sm:rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
                     >
                       <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Supprimer l'équipe
+                      Delete team
                     </button>
                   </div>
                 </div>
@@ -862,12 +862,12 @@ export default function TeamPage() {
             className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl shadow-2xl p-5 sm:p-8 max-w-md w-full"
           >
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6">
-              Inviter un membre
+              Invite a member
             </h2>
             <form onSubmit={inviteMember} className="space-y-4 sm:space-y-6">
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Adresse email *
+                  Email address *
                 </label>
                 <input
                   type="email"
@@ -880,16 +880,16 @@ export default function TeamPage() {
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Rôle
+                  Role
                 </label>
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value)}
                   className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 >
-                  <option value="admin">Administrateur</option>
-                  <option value="member">Membre</option>
-                  <option value="viewer">Observateur</option>
+                  <option value="admin">Admin</option>
+                  <option value="member">Member</option>
+                  <option value="viewer">Viewer</option>
                 </select>
               </div>
               <div className="flex gap-2 sm:gap-3">
@@ -898,7 +898,7 @@ export default function TeamPage() {
                   onClick={() => setShowInviteModal(false)}
                   className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                 >
-                  Annuler
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -908,14 +908,14 @@ export default function TeamPage() {
                   {inviteLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                      <span className="hidden sm:inline">Envoi...</span>
+                      <span className="hidden sm:inline">Sending...</span>
                       <span className="sm:hidden">...</span>
                     </>
                   ) : (
                     <>
                       <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Envoyer l'invitation</span>
-                      <span className="sm:hidden">Envoyer</span>
+                      <span className="hidden sm:inline">Send invitation</span>
+                      <span className="sm:hidden">Send</span>
                     </>
                   )}
                 </button>

@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Ne pas révéler si l'email existe ou non pour des raisons de sécurité
     if (!user) {
       return NextResponse.json({
-        message: 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.'
+        message: 'If an account exists for this email, you will receive a reset link.'
       })
     }
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      message: 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.'
+      message: 'If an account exists for this email, you will receive a reset link.'
     })
   } catch (error) {
     console.error('Erreur forgot password:', error)

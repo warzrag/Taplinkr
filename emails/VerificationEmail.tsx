@@ -20,10 +20,10 @@ interface VerificationEmailProps {
 }
 
 export const VerificationEmail = ({
-  userName = 'là',
+  userName = 'there',
   verificationUrl,
 }: VerificationEmailProps) => {
-  const previewText = `Vérifiez votre adresse email pour TapLinkr`
+  const previewText = `Verify your email address for TapLinkr`
 
   return (
     <Html>
@@ -41,15 +41,15 @@ export const VerificationEmail = ({
             />
           </Section>
           
-          <Heading style={h1}>Vérifiez votre adresse email</Heading>
+          <Heading style={h1}>Verify your email address</Heading>
           
           <Text style={text}>
-            Salut {userName},
+            Hi {userName},
           </Text>
           
           <Text style={text}>
-            Pour terminer la configuration de votre compte TapLinkr, nous devons vérifier
-            votre adresse email. Cliquez sur le bouton ci-dessous pour confirmer.
+            To finish setting up your TapLinkr account, we need to verify your email
+            address. Click the button below to confirm it.
           </Text>
 
           <Section style={buttonContainer}>
@@ -57,12 +57,12 @@ export const VerificationEmail = ({
               style={button}
               href={verificationUrl}
             >
-              Vérifier mon email
+              Verify my email
             </Button>
           </Section>
 
           <Text style={text}>
-            Ou copiez et collez ce lien dans votre navigateur :
+            Or copy and paste this link into your browser:
           </Text>
           
           <Text style={linkText}>
@@ -72,19 +72,19 @@ export const VerificationEmail = ({
           <Hr style={hr} />
 
           <Text style={text}>
-            Ce lien expirera dans 24 heures. Si vous n'avez pas créé de compte TapLinkr,
-            vous pouvez ignorer cet email en toute sécurité.
+            This link expires in 24 hours. If you did not create a TapLinkr account,
+            you can safely ignore this email.
           </Text>
 
           <Text style={footer}>
-            Des questions ? Contactez-nous à{' '}
+            Questions? Contact us at{' '}
             <Link href="mailto:support@taplinkr.com" style={link}>
               support@taplinkr.com
             </Link>
           </Text>
 
           <Text style={footer}>
-            TapLinkr - One tap, tout accessible
+            TapLinkr — One tap, everything accessible
           </Text>
         </Container>
       </Body>

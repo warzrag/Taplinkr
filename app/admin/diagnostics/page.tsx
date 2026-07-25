@@ -73,12 +73,12 @@ export default function DiagnosticsPage() {
       // Monitoring des erreurs JavaScript
       window.addEventListener('error', (e) => {
         console.error('🔴 Erreur capturée:', e.message, e.filename, e.lineno)
-        toast.error(`Erreur JS: ${e.message}`)
+        toast.error(`JavaScript error: ${e.message}`)
       })
 
       window.addEventListener('unhandledrejection', (e) => {
         console.error('🔴 Promise rejetée:', e.reason)
-        toast.error(`Promise rejetée: ${e.reason}`)
+        toast.error(`Rejected promise: ${e.reason}`)
       })
     }
   }, [])
@@ -95,7 +95,7 @@ export default function DiagnosticsPage() {
       setDiagnostics(prev => ({ ...prev, performance: performanceData }))
     } catch (error) {
       console.error('Erreur chargement diagnostics:', error)
-      toast.error('Erreur lors du chargement des diagnostics')
+      toast.error('Unable to load diagnostics.')
     } finally {
       setLoading(false)
     }
@@ -179,8 +179,8 @@ export default function DiagnosticsPage() {
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">🔍 Diagnostics Système</h1>
-            <p className="text-gray-600 mt-1">Analyse complète de TapLinkr</p>
+            <h1 className="text-3xl font-bold text-gray-900">🔍 System diagnostics</h1>
+            <p className="text-gray-600 mt-1">Complete TapLinkr health overview</p>
           </div>
           
           <div className="flex gap-3">
@@ -211,7 +211,7 @@ export default function DiagnosticsPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">Base de données</p>
+                <p className="text-gray-500 text-sm">Database</p>
                 <p className="text-2xl font-bold">
                   {diagnostics?.database?.status || 'N/A'}
                 </p>
@@ -223,7 +223,7 @@ export default function DiagnosticsPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">Utilisateurs</p>
+                <p className="text-gray-500 text-sm">Users</p>
                 <p className="text-2xl font-bold">
                   {diagnostics?.database?.stats?.users || 0}
                 </p>
@@ -235,7 +235,7 @@ export default function DiagnosticsPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">Liens créés</p>
+                <p className="text-gray-500 text-sm">Links created</p>
                 <p className="text-2xl font-bold">
                   {diagnostics?.database?.stats?.links || 0}
                 </p>
@@ -247,7 +247,7 @@ export default function DiagnosticsPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">Clics totaux</p>
+                <p className="text-gray-500 text-sm">Total clicks</p>
                 <p className="text-2xl font-bold">
                   {diagnostics?.database?.stats?.clicks || 0}
                 </p>
@@ -281,7 +281,7 @@ export default function DiagnosticsPage() {
                   <span className="font-medium">{diagnostics.system.cpu.cores} cores</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Mémoire utilisée</span>
+                  <span className="text-gray-600">Memory used</span>
                   <span className="font-medium">{diagnostics.system.memory.usage}</span>
                 </div>
                 <div className="flex justify-between">
@@ -298,18 +298,18 @@ export default function DiagnosticsPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Globe className="w-5 h-5 mr-2 text-gray-600" />
-              Client (Vous)
+              Client (You)
             </h2>
             
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">Écran</span>
+                <span className="text-gray-600">Screen</span>
                 <span className="font-medium">
                   {clientInfo.screen?.width}x{clientInfo.screen?.height}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Fenêtre</span>
+                <span className="text-gray-600">Window</span>
                 <span className="font-medium">
                   {clientInfo.viewport?.width}x{clientInfo.viewport?.height}
                 </span>
@@ -327,7 +327,7 @@ export default function DiagnosticsPage() {
               <div className="flex justify-between">
                 <span className="text-gray-600">Stockage local</span>
                 <span className="font-medium">
-                  {clientInfo.localStorage?.items || 0} éléments
+                  {clientInfo.localStorage?.items || 0} items
                 </span>
               </div>
             </div>
@@ -347,7 +347,7 @@ export default function DiagnosticsPage() {
                     <span className="text-gray-600">{data.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">
-                        {data.time > 0 ? `${data.time}ms` : 'Erreur'}
+                        {data.time > 0 ? `${data.time}ms` : 'Error'}
                       </span>
                       {getStatusIcon(data.status)}
                     </div>

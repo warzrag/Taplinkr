@@ -10,7 +10,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
@@ -25,13 +25,13 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     })
 
     if (!invitation) {
-      return NextResponse.json({ error: 'Invitation non trouvée' }, { status: 404 })
+      return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
     }
     const canManage = invitation.team.ownerId === session.user.id || (
       user?.teamId === invitation.teamId && user.teamRole === 'admin'
     )
     if (!canManage) {
-      return NextResponse.json({ error: 'Permission refusée' }, { status: 403 })
+      return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
     }
 
     // Supprimer l'invitation
@@ -43,7 +43,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
   } catch (error) {
     console.error('Erreur lors de l\'annulation de l\'invitation:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de l\'annulation de l\'invitation' },
+      { error: 'Unable to cancel the invitation' },
       { status: 500 }
     )
   }

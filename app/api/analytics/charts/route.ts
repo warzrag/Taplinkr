@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     
     if (!session?.user?.email) {
       console.error('No session found in analytics/charts')
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       console.error('User not found:', session.user.email)
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -239,6 +239,6 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Erreur lors de la récupération des données de graphiques:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

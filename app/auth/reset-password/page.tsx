@@ -22,7 +22,7 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const tokenParam = searchParams.get('token')
     if (!tokenParam) {
-      toast.error('Lien invalide ou expiré')
+      toast.error('Invalid or expired link.')
       router.push('/auth/forgot-password')
     } else {
       setToken(tokenParam)
@@ -38,7 +38,7 @@ export default function ResetPasswordPage() {
     }
 
     if (password.length < 8) {
-      toast.error('Le mot de passe doit contenir au moins 8 caractères')
+      toast.error('Your password must be at least 8 characters.')
       return
     }
 
@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
       }
 
       setResetSuccess(true)
-      toast.success('Mot de passe réinitialisé avec succès')
+      toast.success('Password reset successfully.')
       
       // Rediriger vers la page de connexion après 3 secondes
       setTimeout(() => {
@@ -90,11 +90,11 @@ export default function ResetPasswordPage() {
             </motion.div>
 
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Mot de passe réinitialisé !
+              Password reset!
             </h2>
             
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              Votre mot de passe a été réinitialisé avec succès. Vous allez être redirigé vers la page de connexion...
+              Your password has been reset. You will be redirected to the login page...
             </p>
 
             <motion.div
@@ -128,7 +128,7 @@ export default function ResetPasswordPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Réinitialiser votre mot de passe
+            Reset your password
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             Entrez votre nouveau mot de passe ci-dessous.
@@ -204,8 +204,8 @@ export default function ResetPasswordPage() {
                 <div className="text-sm text-blue-700 dark:text-blue-300">
                   <p className="font-medium mb-1">Exigences du mot de passe :</p>
                   <ul className="list-disc list-inside space-y-0.5 text-xs">
-                    <li>Au moins 8 caractères</li>
-                    <li>Recommandé : lettres, chiffres et symboles</li>
+                    <li>At least 8 characters</li>
+                    <li>Recommended: letters, numbers, and symbols</li>
                   </ul>
                 </div>
               </div>
@@ -224,7 +224,7 @@ export default function ResetPasswordPage() {
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 />
               ) : (
-                'Réinitialiser le mot de passe'
+                'Reset password'
               )}
             </motion.button>
           </form>
@@ -234,7 +234,7 @@ export default function ResetPasswordPage() {
               href="/auth/signin"
               className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
             >
-              Retour à la connexion
+              Back to login
             </Link>
           </div>
         </div>

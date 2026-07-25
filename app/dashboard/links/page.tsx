@@ -27,7 +27,7 @@ const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
 })
 
 function destinationLabel(url?: string | null) {
-  if (!url) return 'Destination à définir'
+  if (!url) return 'Destination not set'
   try {
     const parsed = new URL(url)
     return `${parsed.hostname.replace(/^www\./, '')}${parsed.pathname === '/' ? '' : parsed.pathname}`
@@ -44,7 +44,7 @@ export default function LinksDashboard() {
 
   const copyUrl = async (slug: string) => {
     await navigator.clipboard.writeText(`${window.location.origin}/${slug}`)
-    toast.success('URL copiée')
+    toast.success('URL copied')
   }
 
   const toggleLink = async (item: LinkType) => {
@@ -55,17 +55,17 @@ export default function LinksDashboard() {
     })
 
     if (!response.ok) {
-      toast.error('Impossible de modifier le statut')
+      toast.error('Unable to update link status')
       return
     }
 
-    toast.success(item.isActive ? 'Lien désactivé' : 'Lien activé')
+    toast.success(item.isActive ? 'Link disabled' : 'Link enabled')
     await refreshLinks()
   }
 
   const deleteLink = async (item: LinkType) => {
     const confirmed = window.confirm(
-      `Supprimer « ${item.internalName || item.title} » ? Cette action est irréversible.`,
+      `Delete “${item.internalName || item.title}”? This action cannot be undone.`,
     )
     if (!confirmed) return
 
@@ -77,17 +77,17 @@ export default function LinksDashboard() {
       const data = await response.json().catch(() => ({}))
 
       if (!response.ok) {
-        toast.error(data.error || 'Impossible de supprimer ce lien')
+        toast.error(data.error || 'Unable to delete this link')
         return
       }
 
       localStorage.removeItem('links-cache')
       localStorage.removeItem('dashboard-stats')
       if (editingLink?.id === item.id) setEditingLink(null)
-      toast.success('Lien supprimé')
+      toast.success('Link deleted')
       await refreshLinks()
     } catch {
-      toast.error('Impossible de supprimer ce lien')
+      toast.error('Unable to delete this link')
     } finally {
       setDeletingLinkId(null)
     }
@@ -98,8 +98,8 @@ export default function LinksDashboard() {
       <div className="mx-auto max-w-[1500px]">
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Liens</h1>
-            <p className="mt-2 text-base text-[#9494a7]">Créez des pages de liens ou des redirections directes.</p>
+            <h1 className="text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Links</h1>
+            <p className="mt-2 text-base text-[#9494a7]">Create link pages or direct redirects.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button
@@ -107,14 +107,14 @@ export default function LinksDashboard() {
               className="inline-flex items-center gap-2 rounded-xl border border-[#2c2c3a] bg-[#101019] px-4 py-3 text-sm font-semibold transition hover:border-violet-500/50"
             >
               <LayoutGrid className="h-4 w-4" />
-              Nouvelle page
+              New page
             </button>
             <button
               onClick={() => setCreateMode('direct')}
               className="inline-flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold transition hover:bg-violet-400"
             >
               <Plus className="h-4 w-4" />
-              Nouveau lien direct
+              New direct link
             </button>
           </div>
         </header>
@@ -164,21 +164,21 @@ export default function LinksDashboard() {
                     className="inline-flex items-center gap-2 text-sm font-medium text-[#d6d6e0] transition hover:text-violet-300"
                   >
                     <BarChart3 className="h-4 w-4" />
-                    {item.clicks || 0} clics
+                    {item.clicks || 0} clicks
                   </Link>
 
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => toggleLink(item)}
                       className={`relative h-7 w-12 rounded-full transition ${item.isActive ? 'bg-violet-500' : 'bg-[#343443]'}`}
-                      aria-label={item.isActive ? 'Désactiver le lien' : 'Activer le lien'}
+                      aria-label={item.isActive ? 'Disable link' : 'Enable link'}
                     >
                       <span className={`absolute top-1 h-5 w-5 rounded-full bg-[#0b0b12] transition-transform ${item.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
                     <button
                       onClick={() => setEditingLink(item)}
                       className="rounded-lg p-2 text-[#8d8d9f] transition hover:bg-white/5 hover:text-white"
-                      aria-label="Modifier"
+                      aria-label="Edit"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
@@ -187,8 +187,8 @@ export default function LinksDashboard() {
                         onClick={() => deleteLink(item)}
                         disabled={deletingLinkId === item.id}
                         className="rounded-lg p-2 text-[#8d8d9f] transition hover:bg-red-500/10 hover:text-red-400 disabled:cursor-wait disabled:opacity-50"
-                        aria-label={`Supprimer ${item.internalName || item.title}`}
-                        title="Supprimer le lien"
+                        aria-label={`Delete ${item.internalName || item.title}`}
+                        title="Delete link"
                       >
                         {deletingLinkId === item.id
                           ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -204,17 +204,17 @@ export default function LinksDashboard() {
               <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-violet-500/10 text-violet-400">
                 <Link2 className="h-6 w-6" />
               </span>
-              <h2 className="mt-5 text-xl font-semibold">Créez votre premier lien</h2>
+              <h2 className="mt-5 text-xl font-semibold">Create your first link</h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#8e8ea1]">
-                Une page regroupe plusieurs boutons. Un lien direct redirige immédiatement vers une destination.
+                A page groups several buttons. A direct link immediately redirects to a destination.
               </p>
               <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
                 <button onClick={() => setCreateMode('landing')} className="rounded-xl border border-[#30303e] px-4 py-3 text-sm font-semibold hover:border-violet-500/50">
-                  Créer une page
+                  Create a page
                 </button>
                 <button onClick={() => setCreateMode('direct')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold hover:bg-violet-400">
                   <Zap className="h-4 w-4" />
-                  Créer un lien direct
+                  Create a direct link
                 </button>
               </div>
             </div>
@@ -223,7 +223,7 @@ export default function LinksDashboard() {
 
         <p className="mt-4 flex items-center gap-2 text-xs text-[#6f6f81]">
           <ExternalLink className="h-3.5 w-3.5" />
-          Les modifications de statut sont appliquées immédiatement.
+          Status changes are applied immediately.
         </p>
       </div>
 

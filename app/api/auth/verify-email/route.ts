@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
 
     if (!token) {
       return NextResponse.json(
-        { message: 'Token de vérification requis' },
+        { message: 'Verification token required' },
         { status: 400 }
       )
     }
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (!verificationToken) {
       return NextResponse.json(
-        { message: 'Token invalide ou déjà utilisé' },
+        { message: 'Invalid or already used token' },
         { status: 404 }
       )
     }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       })
       
       return NextResponse.json(
-        { message: 'Le lien de vérification a expiré' },
+        { message: 'The verification link has expired' },
         { status: 400 }
       )
     }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json(
         { 
-          message: 'Email déjà vérifié. Vous pouvez vous connecter.',
+          message: 'Email already verified. You can log in.',
           success: true
         },
         { status: 200 }
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { 
-        message: 'Email vérifié avec succès ! Vous pouvez maintenant vous connecter.',
+        message: 'Email verified successfully. You can now log in.',
         success: true
       },
       { status: 200 }
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors de la vérification de l\'email:', error)
     return NextResponse.json(
-      { message: 'Erreur serveur' },
+      { message: 'Server error' },
       { status: 500 }
     )
   }

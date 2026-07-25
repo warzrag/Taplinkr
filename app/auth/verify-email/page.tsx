@@ -18,7 +18,7 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     if (!token) {
       setStatus('error')
-      setMessage('Token de vérification manquant')
+      setMessage('Missing verification token.')
       return
     }
 
@@ -37,7 +37,7 @@ export default function VerifyEmailPage() {
 
       if (response.ok) {
         setStatus('success')
-        setMessage(data.message || 'Email vérifié avec succès !')
+        setMessage(data.message || 'Email verified successfully!')
         
         // Essayer de se connecter automatiquement avec l'email retourné
         if (data.email) {
@@ -67,11 +67,11 @@ export default function VerifyEmailPage() {
         }
       } else {
         setStatus('error')
-        setMessage(data.message || 'Erreur lors de la vérification')
+        setMessage(data.message || 'Unable to verify your email.')
       }
     } catch (error) {
       setStatus('error')
-      setMessage('Erreur de connexion au serveur')
+      setMessage('Unable to connect to the server.')
     }
   }
 
@@ -119,9 +119,9 @@ export default function VerifyEmailPage() {
 
           {/* Title */}
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {status === 'loading' && 'Vérification en cours...'}
-            {status === 'success' && 'Email vérifié !'}
-            {status === 'error' && 'Échec de la vérification'}
+            {status === 'loading' && 'Verifying your email...'}
+            {status === 'success' && 'Email verified!'}
+            {status === 'error' && 'Verification failed'}
           </h1>
 
           {/* Message */}
@@ -150,7 +150,7 @@ export default function VerifyEmailPage() {
             <div className="space-y-4">
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <p className="text-sm text-amber-800">
-                  Le lien a peut-être expiré ou a déjà été utilisé.
+                  The link may have expired or already been used.
                 </p>
               </div>
               
@@ -161,13 +161,13 @@ export default function VerifyEmailPage() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Mail className="w-4 h-4" />
-                  Renvoyer l'email
+                  Resend email
                 </motion.button>
               </Link>
               
               <Link href="/auth/signin">
                 <button className="w-full text-gray-600 hover:text-gray-900 font-medium">
-                  Retour à la connexion
+                  Back to login
                 </button>
               </Link>
             </div>

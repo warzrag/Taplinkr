@@ -22,7 +22,7 @@ export default function ResendVerificationPage() {
     e.preventDefault()
     
     if (!email) {
-      toast.error('Veuillez entrer votre adresse email')
+      toast.error('Please enter your email address.')
       return
     }
 
@@ -39,12 +39,12 @@ export default function ResendVerificationPage() {
 
       if (response.ok) {
         setSent(true)
-        toast.success('Email de vérification envoyé !')
+        toast.success('Verification email sent!')
       } else {
-        toast.error(data.error || 'Erreur lors de l\'envoi')
+        toast.error(data.error || 'Unable to send the email.')
       }
     } catch (error) {
-      toast.error('Erreur de connexion au serveur')
+      toast.error('Unable to connect to the server.')
     } finally {
       setLoading(false)
     }
@@ -68,12 +68,12 @@ export default function ResendVerificationPage() {
           </motion.div>
           
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Email envoyé !
+            Email sent!
           </h1>
           
           <p className="text-gray-600 mb-8">
-            Nous avons envoyé un nouveau lien de vérification à <strong>{email}</strong>.
-            Vérifiez votre boîte de réception et vos spams.
+            We sent a new verification link to <strong>{email}</strong>.
+            Check your inbox and spam folder.
           </p>
           
           <Link href="/auth/signin">
@@ -82,7 +82,7 @@ export default function ResendVerificationPage() {
               whileTap={{ scale: 0.98 }}
               className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium"
             >
-              Retour à la connexion
+              Back to login
             </motion.button>
           </Link>
         </motion.div>
@@ -104,7 +104,7 @@ export default function ResendVerificationPage() {
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="w-4 h-4" />
-              Retour
+              Back
             </motion.button>
           </Link>
         </div>
@@ -120,18 +120,18 @@ export default function ResendVerificationPage() {
           </motion.div>
           
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Renvoyer l'email de vérification
+            Resend verification email
           </h1>
           
           <p className="text-gray-600">
-            Entrez votre adresse email pour recevoir un nouveau lien de vérification
+            Enter your email address to receive a new verification link
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Adresse email
+              Email address
             </label>
             <input
               type="email"
@@ -158,14 +158,14 @@ export default function ResendVerificationPage() {
             ) : (
               <>
                 <Send className="w-5 h-5" />
-                Renvoyer l'email
+                Resend email
               </>
             )}
           </motion.button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          Vous avez déjà vérifié votre email ?{' '}
+          Already verified your email?{' '}
           <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 font-medium">
             Se connecter
           </Link>

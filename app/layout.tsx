@@ -12,17 +12,17 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://taplinkr.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: 'TapLinkr — Un seul lien qui convertit', template: '%s | TapLinkr' },
-  description: 'Cr\u00e9ez une page mobile propre, partagez vos liens importants et suivez vos clics depuis un dashboard simple.',
+  title: { default: 'TapLinkr — One link that converts', template: '%s | TapLinkr' },
+  description: 'Create a polished mobile page, share your most important links, and track clicks from one simple dashboard.',
   openGraph: {
-    title: 'TapLinkr — Un seul lien qui convertit',
-    description: 'Créez une page élégante pour vos contenus, vos offres et vos réseaux.',
+    title: 'TapLinkr — One link that converts',
+    description: 'Create a polished page for your content, offers, and social profiles.',
     url: '/',
     siteName: 'TapLinkr',
-    locale: 'fr_FR',
+    locale: 'en_US',
     type: 'website',
   },
-  twitter: { card: 'summary', title: 'TapLinkr — Un seul lien qui convertit', description: 'Créez une page élégante pour tous vos liens.' },
+  twitter: { card: 'summary', title: 'TapLinkr — One link that converts', description: 'Create a polished page for all your links.' },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -49,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" className="h-full">
+    <html lang="en-US" className="h-full">
       <head>
         <link rel="apple-touch-icon" href="/final.png" />
         <meta name="mobile-web-app-capable" content="yes" />

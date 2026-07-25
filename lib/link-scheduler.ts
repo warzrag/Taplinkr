@@ -183,16 +183,16 @@ export class LinkScheduler {
       case 'notify_start':
         await this.sendNotification(user.id, {
           type: 'schedule',
-          title: 'Lien activé',
-          message: `Votre lien "${link.title}" est maintenant actif selon la planification.`
+          title: 'Link activated',
+          message: `Your link "${link.title}" is now active according to its schedule.`
         })
         break
 
       case 'notify_end':
         await this.sendNotification(user.id, {
           type: 'schedule',
-          title: 'Lien désactivé',
-          message: `Votre lien "${link.title}" a été désactivé selon la planification.`
+          title: 'Link deactivated',
+          message: `Your link "${link.title}" was deactivated according to its schedule.`
         })
         break
 

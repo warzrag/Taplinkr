@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'équipe:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la récupération de l\'équipe' },
+      { error: 'Unable to load the team' },
       { status: 500 }
     )
   }
@@ -76,14 +76,14 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
     const { name, description } = body
 
     if (!name) {
-      return NextResponse.json({ error: 'Le nom de l\'équipe est requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Team name is required' }, { status: 400 })
     }
 
     // Vérifier les permissions Premium
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     console.log('Utilisateur trouvé:', user ? { id: user.id, plan: user.plan, role: user.role } : 'null')
 
     if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     const permissions = getUserPermissions(user)
@@ -108,8 +108,8 @@ export async function POST(request: NextRequest) {
     
     if (!hasTeamAccess) {
       return NextResponse.json({ 
-        error: 'Fonctionnalité équipe requise',
-        message: 'Les équipes sont disponibles avec le plan Standard ou Premium'
+        error: 'Team feature required',
+        message: 'Teams are available on the Standard and Premium plans'
       }, { status: 403 })
     }
 
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     if (existingTeam) {
       console.log('❌ Équipe existante trouvée:', { id: existingTeam.id, name: existingTeam.name })
       return NextResponse.json({ 
-        error: 'Vous possédez déjà une équipe',
+        error: 'You already own a team',
         existingTeam: { id: existingTeam.id, name: existingTeam.name }
       }, { status: 400 })
     }
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors de la création de l\'équipe:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la création de l\'équipe' },
+      { error: 'Unable to create the team' },
       { status: 500 }
     )
   }

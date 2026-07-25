@@ -56,7 +56,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const profileImage = link?.profileImage || null
   const coverImage = link?.coverImage || null
   const backgroundImage = link?.profileStyle === 'beacon' ? profileImage : coverImage
-  const title = link?.title || link?.user?.name || link?.user?.username || 'Mes liens'
+  const title = link?.title || link?.user?.name || link?.user?.username || 'My links'
   const bio = link?.description || link?.user?.bio || null
   const multiLinks = useMemo(() => {
     return Array.isArray(link?.multiLinks)
@@ -83,7 +83,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         referrer: document.referrer,
         userAgent: navigator.userAgent,
         screenResolution: `${window.screen.width}x${window.screen.height}`,
-        language: navigator.language || 'fr',
+        language: navigator.language || 'en-US',
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
       keepalive: true,
@@ -116,7 +116,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           multiLinkId: itemId,
           sessionId,
           screenResolution: `${window.screen.width}x${window.screen.height}`,
-          language: navigator.language || 'fr',
+          language: navigator.language || 'en-US',
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
         keepalive: true,
@@ -177,7 +177,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           {multiLinks.length > 0 ? (
             multiLinks.map((item: any) => {
               const itemId = item?.id || item?.url || item?.title
-              const itemTitle = item?.title || 'Ouvrir le lien'
+              const itemTitle = item?.title || 'Open link'
               const itemIcon = item?.iconImage || item?.icon || null
               const ageRestricted = isAgeRestricted(item, link)
               const isConfirmed = confirmedLinks.includes(itemId)
@@ -192,9 +192,9 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                     <div className="flex items-start gap-3">
                       <ShieldAlert className="mt-0.5 h-5 w-5 flex-shrink-0 text-rose-100" />
                       <div className="min-w-0 flex-1 text-left">
-                        <p className="font-semibold text-white">Contenu réservé aux adultes</p>
+                        <p className="font-semibold text-white">Adults-only content</p>
                         <p className="mt-1 text-sm leading-5 text-white/70">
-                          Confirmez que vous avez l'âge requis avant d'ouvrir ce lien.
+                          Confirm that you meet the age requirement before opening this link.
                         </p>
                       </div>
                     </div>
@@ -203,7 +203,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                         onClick={() => setConfirmingLink(null)}
                         className="rounded-xl border border-white/15 px-3 py-2 text-sm font-medium text-white/85 transition hover:bg-white/10"
                       >
-                        Annuler
+                        Cancel
                       </button>
                       <button
                         onClick={() => {
@@ -213,7 +213,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                         }}
                         className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
                       >
-                        Confirmer
+                        Confirm
                       </button>
                     </div>
                   </div>
@@ -249,7 +249,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                       {isClicked && (
                         <span className="inline-flex items-center gap-1 text-emerald-600">
                           <Check className="h-3 w-3" />
-                          Visité
+                          Visited
                         </span>
                       )}
                     </span>
@@ -261,7 +261,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
             })
           ) : (
             <div className="rounded-2xl border border-white/12 bg-white/10 p-6 text-center text-sm text-white/70 backdrop-blur">
-              Aucun lien disponible pour le moment.
+              No links are available right now.
             </div>
           )}
         </div>
@@ -272,7 +272,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           rel="noopener noreferrer"
           className="mx-auto mt-8 inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/20 px-4 py-2 text-xs font-medium text-white/55 backdrop-blur transition hover:text-white"
         >
-          Créé avec TapLinkr
+          Made with TapLinkr
         </a>
       </section>
     </main>

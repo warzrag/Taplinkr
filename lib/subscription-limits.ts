@@ -63,7 +63,7 @@ export async function checkUserLimits(userId: string, prisma: any) {
   })
 
   if (!user) {
-    throw new Error('Utilisateur non trouvé')
+    throw new Error('User not found')
   }
 
   // Plan par défaut : gratuit
@@ -99,12 +99,12 @@ export async function checkUserLimits(userId: string, prisma: any) {
 export function getLimitMessage(limitType: 'links' | 'multiLinks', plan: string) {
   const messages = {
     links: {
-      free: 'Vous avez atteint la limite de 1 lien du plan gratuit. Passez au plan Pro pour créer des liens illimités.',
+      free: 'You reached the free plan limit of 1 link. Upgrade to create unlimited links.',
       pro: 'Limite de liens atteinte.',
       business: 'Limite de liens atteinte.'
     },
     multiLinks: {
-      free: 'Vous avez atteint la limite de 1 multi-link du plan gratuit. Passez au plan Pro pour créer des multi-links illimités.',
+      free: 'You reached the free plan limit of 1 multi-link. Upgrade to create unlimited multi-links.',
       pro: 'Limite de multi-links atteinte.',
       business: 'Limite de multi-links atteinte.'
     }

@@ -19,10 +19,10 @@ export default function ShareFoldersPage() {
       if (response.ok) {
         setResult(data)
       } else {
-        alert('Erreur: ' + data.error)
+        alert('Error: ' + data.error)
       }
     } catch (error) {
-      alert('Erreur: ' + error)
+      alert('Error: ' + error)
     } finally {
       setLoading(false)
     }
@@ -41,7 +41,7 @@ export default function ShareFoldersPage() {
                 Partager les dossiers
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Partagez tous vos dossiers avec votre équipe
+                Share all your folders with your team
               </p>
             </div>
           </div>
@@ -53,8 +53,8 @@ export default function ShareFoldersPage() {
                   ℹ️ Information
                 </h3>
                 <p className="text-sm text-indigo-700 dark:text-indigo-400">
-                  Cette action partagera TOUS vos dossiers personnels avec votre équipe.
-                  Les membres de l'équipe pourront voir et accéder à ces dossiers.
+                  This action shares ALL of your personal folders with your team.
+                  Team members will be able to view and access these folders.
                 </p>
               </div>
 
@@ -88,7 +88,7 @@ export default function ShareFoldersPage() {
                       {result.message}
                     </h3>
                     <p className="text-sm text-green-700 dark:text-green-400">
-                      Total partagé: {result.totalShared} dossier(s)
+                      Total shared: {result.totalShared} folder(s)
                     </p>
                   </div>
                 </div>
@@ -96,7 +96,7 @@ export default function ShareFoldersPage() {
                 {result.folders && result.folders.length > 0 && (
                   <div className="mt-4">
                     <p className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2">
-                      Dossiers partagés:
+                      Shared folders:
                     </p>
                     <div className="space-y-1">
                       {result.folders.map((name: string, i: number) => (
@@ -114,7 +114,7 @@ export default function ShareFoldersPage() {
                 onClick={() => window.location.href = '/dashboard/folders'}
                 className="w-full px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all"
               >
-                Retour aux dossiers
+                Back to folders
               </button>
             </div>
           )}

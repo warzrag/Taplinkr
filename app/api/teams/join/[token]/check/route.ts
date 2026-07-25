@@ -32,7 +32,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ token
     })
 
     if (!invitation) {
-      return NextResponse.json({ error: 'Invitation invalide ou expirée' }, { status: 404 })
+      return NextResponse.json({ error: 'Invalid or expired invitation' }, { status: 404 })
     }
 
     // Vérifier le statut
@@ -40,14 +40,14 @@ export async function GET(request: NextRequest, props: { params: Promise<{ token
     if (invitationStatus !== 'pending') {
       return NextResponse.json({ 
         error: invitationStatus === 'accepted'
-          ? 'Cette invitation a déjà été acceptée' 
+          ? 'This invitation has already been accepted'
           : 'Cette invitation n\'est plus valide'
       }, { status: 400 })
     }
 
     // Vérifier l'expiration
     if (new Date() > invitation.expiresAt) {
-      return NextResponse.json({ error: 'Cette invitation a expiré' }, { status: 400 })
+      return NextResponse.json({ error: 'This invitation has expired' }, { status: 400 })
     }
 
     // Vérifier si l'utilisateur existe déjà
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ token
   } catch (error) {
     console.error('Erreur vérification invitation:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la vérification' },
+      { error: 'Unable to verify the invitation' },
       { status: 500 }
     )
   }

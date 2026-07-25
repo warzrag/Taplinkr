@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Récupérer l'utilisateur avec l'ID de souscription
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!user?.stripeSubscriptionId) {
-      return NextResponse.json({ error: 'Aucune souscription trouvée' }, { status: 404 })
+      return NextResponse.json({ error: 'No subscription found' }, { status: 404 })
     }
 
     // Annuler la souscription à la fin de la période
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors de l\'annulation:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de l\'annulation de la souscription' },
+      { error: 'Unable to cancel the subscription' },
       { status: 500 }
     )
   }

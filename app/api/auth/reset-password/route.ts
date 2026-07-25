@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     ])
 
     return NextResponse.json({
-      message: 'Mot de passe réinitialisé avec succès'
+      message: 'Password reset successfully'
     })
   } catch (error) {
     console.error('Erreur reset password:', error)

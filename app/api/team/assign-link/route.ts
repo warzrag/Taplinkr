@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({
-      message: assignedToUserId ? 'Lien assigné avec succès' : 'Assignation retirée',
+      message: assignedToUserId ? 'Link assigned successfully' : 'Assignment removed',
       link: updatedLink
     })
   } catch (error) {

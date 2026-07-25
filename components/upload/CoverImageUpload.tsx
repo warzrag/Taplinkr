@@ -62,12 +62,12 @@ export default function CoverImageUpload({
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image')
+      toast.error('Select an image.')
       return
     }
 
     if (file.size > 4 * 1024 * 1024) {
-      toast.error('L\'image ne doit pas dépasser 4MB')
+      toast.error('The image must be 4 MB or smaller.')
       return
     }
 
@@ -94,15 +94,15 @@ export default function CoverImageUpload({
 
       if (!uploadResponse.ok) {
         const error = await uploadResponse.json()
-        throw new Error(error.error || 'Erreur lors de l\'upload')
+        throw new Error(error.error || 'Unable to upload the image.')
       }
 
       const data = await uploadResponse.json()
       onChange(data.url)
-      toast.success('Photo de couverture mise à jour')
+      toast.success('Cover image updated.')
     } catch (error) {
       console.error('Erreur upload:', error)
-      toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
+      toast.error(error instanceof Error ? error.message : 'Unable to upload the image.')
       setPreview(value || null)
       onChange(value || '')
     } finally {
@@ -209,7 +209,7 @@ export default function CoverImageUpload({
 
             {/* Info text */}
             <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-              Format recommandé : 16:9 (paysage) ou 9:16 (portrait) • Max 4MB
+              Recommended: 16:9 landscape or 9:16 portrait • Max 4 MB
             </p>
           </motion.div>
         ) : (
@@ -252,10 +252,10 @@ export default function CoverImageUpload({
                 
                 <div className="text-center">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {isDragging ? 'Déposer l\'image ici' : 'Ajouter une photo de couverture'}
+                    {isDragging ? 'Drop the image here' : 'Add a cover image'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Cliquer ou glisser-déposer • JPG, PNG, WebP
+                    Click or drag and drop • JPG, PNG, WebP
                   </p>
                 </div>
               </motion.div>

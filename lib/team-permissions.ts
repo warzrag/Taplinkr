@@ -43,7 +43,7 @@ export async function requireTeamPermission(
     if (!session?.user?.id) {
       return {
         authorized: false,
-        error: NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+        error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
     }
 
@@ -55,7 +55,7 @@ export async function requireTeamPermission(
     if (!user?.teamId) {
       return {
         authorized: false,
-        error: NextResponse.json({ error: 'Pas d\'équipe' }, { status: 404 })
+        error: NextResponse.json({ error: 'No team found' }, { status: 404 })
       }
     }
 
@@ -65,7 +65,7 @@ export async function requireTeamPermission(
     if (!hasPermission) {
       return {
         authorized: false,
-        error: NextResponse.json({ error: 'Permission refusée' }, { status: 403 })
+        error: NextResponse.json({ error: 'Permission denied' }, { status: 403 })
       }
     }
 
@@ -78,7 +78,7 @@ export async function requireTeamPermission(
     console.error('Erreur middleware permission:', error)
     return {
       authorized: false,
-      error: NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+      error: NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
   }
 }

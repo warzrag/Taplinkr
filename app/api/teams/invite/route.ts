@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Valider le rôle
     const validRoles: TeamInviteRole[] = ['admin', 'member', 'viewer']
     if (!validRoles.includes(role)) {
-      return NextResponse.json({ error: 'Rôle invalide' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
     const requester = await prisma.user.findUnique({
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       || (requester?.teamId === team.id && requester.teamRole === 'admin')
     )
     if (!team || !canInvite) {
-      return NextResponse.json({ error: 'Seuls le propriétaire et les administrateurs peuvent inviter des membres' }, { status: 403 })
+      return NextResponse.json({ error: 'Only the owner and admins can invite members' }, { status: 403 })
     }
 
     // Vérifier les limites d'équipe en tenant compte du plan du propriétaire
@@ -66,8 +66,8 @@ export async function POST(request: NextRequest) {
       const { PLAN_LIMITS } = await import('@/lib/permissions')
       const maxMembers = PLAN_LIMITS[permissions.plan].maxTeamMembers
       return NextResponse.json({ 
-        error: 'Limite d\'équipe atteinte',
-        message: `Le plan de l'équipe permet maximum ${maxMembers} membres`
+        error: 'Team limit reached',
+        message: `This team's plan supports up to ${maxMembers} members`
       }, { status: 403 })
     }
 
@@ -85,16 +85,16 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingUser && existingUser.teamId === team.id) {
-      return NextResponse.json({ error: 'Cet utilisateur est déjà membre de l\'équipe' }, { status: 400 })
+      return NextResponse.json({ error: 'This user is already a member of the team' }, { status: 400 })
     }
     if (existingUser?.teamId && existingUser.teamId !== team.id) {
-      return NextResponse.json({ error: 'Cet utilisateur est déjà membre d’une autre équipe' }, { status: 400 })
+      return NextResponse.json({ error: 'This user is already a member of another team' }, { status: 400 })
     }
 
     if (existingInvitation) {
       // Si l'invitation est toujours en attente et non expirée
       if (isPendingTeamInvitation(existingInvitation.status) && new Date(existingInvitation.expiresAt) > new Date()) {
-        return NextResponse.json({ error: 'Une invitation est déjà en attente pour cet email' }, { status: 400 })
+        return NextResponse.json({ error: 'An invitation is already pending for this email address' }, { status: 400 })
       }
       
       // Dans tous les autres cas (acceptée mais pas dans l'équipe, expirée, déclinée), supprimer l'ancienne invitation
@@ -105,8 +105,8 @@ export async function POST(request: NextRequest) {
       } catch (deleteError) {
         console.error('Erreur lors de la suppression de l\'ancienne invitation:', deleteError)
         return NextResponse.json({ 
-          error: 'Impossible de créer une nouvelle invitation', 
-          details: 'Une invitation existe déjà pour cet email' 
+          error: 'Unable to create a new invitation',
+          details: 'An invitation already exists for this email address'
         }, { status: 400 })
       }
     }
@@ -150,8 +150,8 @@ export async function POST(request: NextRequest) {
       // Si c'est une erreur de contrainte, essayer sans relations
       if (createError.code === 'P2003') {
         return NextResponse.json({ 
-          error: 'L\'utilisateur invité doit d\'abord créer un compte sur TapLinkr',
-          details: 'Demandez à la personne de s\'inscrire avec l\'email ' + email
+          error: 'The invited user must create a TapLinkr account first',
+          details: 'Ask them to sign up with ' + email
         }, { status: 400 })
       }
       throw createError
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
       })
       if (!delivery.success) {
         return NextResponse.json({
-          error: "L'invitation a été créée, mais l'email n'a pas pu être envoyé. Utilisez « Renvoyer ».",
+          error: 'The invitation was created, but the email could not be sent. Use Resend.',
           invitationCreated: true,
           invitationId: invitation.id,
         }, { status: 502 })
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
     } catch (emailError) {
       console.error('Erreur envoi email:', emailError)
       return NextResponse.json({
-        error: "L'invitation a été créée, mais l'email n'a pas pu être envoyé. Utilisez « Renvoyer ».",
+        error: 'The invitation was created, but the email could not be sent. Use Resend.',
         invitationCreated: true,
         invitationId: invitation.id,
       }, { status: 502 })
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erreur lors de l\'invitation:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de l\'invitation', details: error instanceof Error ? error.message : 'Erreur inconnue' },
+      { error: 'Unable to send the invitation', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

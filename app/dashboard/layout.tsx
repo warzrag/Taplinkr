@@ -41,7 +41,7 @@ export default function DashboardLayoutWrapper({
       <div className="min-h-screen bg-[#09090f] text-white flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="h-10 w-10 mx-auto animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-brand-500" />
-          <div className="text-[#9696a8]">Chargement...</div>
+          <div className="text-[#9696a8]">Loading...</div>
         </div>
       </div>
     )

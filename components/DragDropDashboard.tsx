@@ -222,7 +222,7 @@ function SortableFolder({
           {/* Drag Handle for Folders */}
           <div
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-grab active:cursor-grabbing"
-            title="Glisser pour déplacer"
+            title="Drag to move"
             {...attributes}
             {...listeners}
           >
@@ -233,7 +233,7 @@ function SortableFolder({
             <motion.button
               onClick={onCreateLink}
               className="p-2 hover:bg-green-100 rounded-lg transition-colors text-green-600 hover:text-green-700"
-              title="Créer un lien dans ce dossier"
+              title="Create a link in this folder"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -243,7 +243,7 @@ function SortableFolder({
           <motion.button
             onClick={onCreateSubfolder}
             className="p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-700"
-            title="Créer un sous-dossier"
+            title="Create a subfolder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -277,7 +277,7 @@ function SortableFolder({
           <motion.button
             onClick={onEdit}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-700"
-            title="Modifier le dossier"
+            title="Edit folder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -286,7 +286,7 @@ function SortableFolder({
           <motion.button
             onClick={onDelete}
             className="p-2 hover:bg-red-100 rounded-lg transition-colors text-red-600 hover:text-red-700"
-            title="Supprimer le dossier"
+            title="Delete folder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -431,7 +431,7 @@ export default function DragDropDashboard({
 
   const handleCreateFolder = async (parentId?: string) => {
     if (!newFolderName.trim()) {
-      toast.error('Veuillez entrer un nom pour le dossier')
+      toast.error('Enter a folder name.')
       return
     }
 
@@ -511,7 +511,7 @@ export default function DragDropDashboard({
         setNewFolderName('')
         setShowCreateForm(false)
         setCreateInParent(null)
-        toast.success('Dossier créé avec succès')
+        toast.success('Folder created successfully.')
 
         // ⚡ Appeler le callback pour recharger les données
         onFolderCreated?.()
@@ -519,11 +519,11 @@ export default function DragDropDashboard({
       } else {
         const errorData = await response.json()
         console.error('❌ [DragDropDashboard] Erreur API:', errorData)
-        toast.error(errorData.error || 'Erreur lors de la création du dossier')
+        toast.error(errorData.error || 'Unable to create the folder.')
       }
     } catch (error) {
       console.error('❌ [DragDropDashboard] Erreur catch:', error)
-      toast.error('Erreur lors de la création du dossier')
+      toast.error('Unable to create the folder.')
     }
   }
 
@@ -626,11 +626,11 @@ export default function DragDropDashboard({
           onFoldersChange(addToTargetFolder(folders))
         }
         
-        toast.success(`"${link.title}" déplacé dans "${targetFolder.name}"`)
+        toast.success(`"${link.title}" moved to "${targetFolder.name}"`)
         
         // Appel API en arrière-plan
         onMoveLink(link.id, targetFolder.id).catch(error => {
-          toast.error('Erreur lors de la sauvegarde')
+          toast.error('Unable to save changes.')
           refreshLinksContext() // Recharger en cas d'erreur
         })
       }
@@ -658,11 +658,11 @@ export default function DragDropDashboard({
           onFoldersChange(removeLinkFromFolder(folders))
           onLinksChange([...unorganizedLinks, { ...link, folderId: null }])
           
-          toast.success(`"${link.title}" retiré du dossier`)
+          toast.success(`"${link.title}" removed from the folder`)
           
           // Appel API en arrière-plan
           onMoveLink(link.id, null).catch(error => {
-            toast.error('Erreur lors de la sauvegarde')
+            toast.error('Unable to save changes.')
             refreshLinksContext()
           })
         }
@@ -690,7 +690,7 @@ export default function DragDropDashboard({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ linkIds })
               }).catch(error => {
-                toast.error('Erreur lors de la sauvegarde de l\'ordre')
+                toast.error('Unable to save the order.')
               })
             }
           }
@@ -741,7 +741,7 @@ export default function DragDropDashboard({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ linkIds })
               }).catch(error => {
-                toast.error('Erreur lors de la sauvegarde de l\'ordre')
+                toast.error('Unable to save the order.')
               })
             }
           }
@@ -755,7 +755,7 @@ export default function DragDropDashboard({
       
       if (activeFolder.id !== overFolder.id) {
         // Demander confirmation avant de déplacer un dossier dans un autre
-        if (confirm(`Voulez-vous déplacer le dossier "${activeFolder.name}" dans "${overFolder.name}" ?`)) {
+        if (confirm(`Move the folder "${activeFolder.name}" into "${overFolder.name}"?`)) {
           try {
             const response = await fetch(`/api/folders/${activeFolder.id}/move`, {
               method: 'PUT',
@@ -810,10 +810,10 @@ export default function DragDropDashboard({
               
               onFoldersChange(updateFolderMove(folders, activeFolder.id, overFolder.id))
               refreshLinksContext()
-              toast.success('Dossier déplacé avec succès')
+              toast.success('Folder moved successfully.')
             }
           } catch (error) {
-            toast.error('Erreur lors du déplacement')
+            toast.error('Unable to move the folder.')
           }
         }
       }
@@ -911,7 +911,7 @@ export default function DragDropDashboard({
                       onRemoveFromFolder={async (linkId) => {
                         await onMoveLink(linkId, null)
                         refreshLinksContext()
-                        toast.success('Lien retiré du dossier')
+                        toast.success('Link removed from the folder.')
                       }}
                     />
                   ))}
@@ -936,8 +936,8 @@ export default function DragDropDashboard({
                 <div className="p-3 bg-gray-100 rounded-xl mb-3">
                   <FolderIcon className="w-8 h-8 text-gray-400" />
                 </div>
-                <p className="text-sm text-gray-500 font-medium">Dossier vide</p>
-                <p className="text-xs text-gray-400 mt-1">Glissez des liens ou créez des sous-dossiers</p>
+                <p className="text-sm text-gray-500 font-medium">Empty folder</p>
+                <p className="text-xs text-gray-400 mt-1">Drag links here or create subfolders</p>
               </motion.div>
             )}
           </div>
@@ -964,7 +964,7 @@ export default function DragDropDashboard({
                 <FolderIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Dossiers</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Folders</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Organisez vos liens</p>
               </div>
             </div>
@@ -1013,7 +1013,7 @@ export default function DragDropDashboard({
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        Créer
+                        Create
                       </motion.button>
                       <motion.button
                         onClick={() => {
@@ -1025,14 +1025,14 @@ export default function DragDropDashboard({
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        Annuler
+                        Cancel
                       </motion.button>
                     </div>
                   </div>
                   {createInParent && (
                     <p className="text-sm text-gray-600 flex items-center">
                       <FolderIcon className="w-4 h-4 mr-1" />
-                      Sera créé dans: <span className="font-medium ml-1">{folders.find(f => f.id === createInParent)?.name}</span>
+                      Will be created in: <span className="font-medium ml-1">{folders.find(f => f.id === createInParent)?.name}</span>
                     </p>
                   )}
                 </div>
@@ -1050,15 +1050,15 @@ export default function DragDropDashboard({
                   <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
                     <FolderIcon className="w-12 h-12 text-blue-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucun dossier encore</h3>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No folders yet</h3>
                   <p className="text-gray-500 mb-4 max-w-xs">
-                    Créez votre premier dossier pour organiser vos liens
+                    Create your first folder to organize your links
                   </p>
                   <button
                     onClick={() => setShowCreateForm(true)}
                     className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-shadow"
                   >
-                    Créer mon premier dossier
+                    Create my first folder
                   </button>
                 </div>
               ) : (
@@ -1079,8 +1079,8 @@ export default function DragDropDashboard({
               <Link2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Liens libres</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{unorganizedLinks.length} liens non organisés</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Unorganized links</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{unorganizedLinks.length} unorganized links</p>
             </div>
           </div>
 
@@ -1108,9 +1108,9 @@ export default function DragDropDashboard({
                     <Link2 className="w-12 h-12 text-emerald-600" />
                   </div>
                 </motion.div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Parfaitement organisé !</h3>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Everything is organized!</h3>
                 <p className="text-gray-500">
-                  Tous vos liens sont bien rangés dans des dossiers
+                  All your links are neatly organized into folders
                 </p>
               </div>
             ) : (

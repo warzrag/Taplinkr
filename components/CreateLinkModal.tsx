@@ -194,20 +194,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
   const panelSteps = pageMode === 'direct'
     ? [
-        ['start', 'Type', 'Page ou redirection'],
-        ['identity', 'Destination', 'Nom, URL et destination'],
+        ['start', 'Type', 'Page or redirect'],
+        ['identity', 'Destination', 'Name, URL, and destination'],
       ]
     : [
         ['start', 'Modele', 'Choisir une base'],
-        ['identity', 'Profil', 'Nom, bio, photo'],
-        ['links', 'Boutons', 'Liens a publier'],
-        ['style', 'Design', 'Couleurs et rendu'],
+        ['identity', 'Profile', 'Name, bio, photo'],
+        ['links', 'Buttons', 'Links to publish'],
+        ['style', 'Design', 'Colors and appearance'],
       ]
 
   const previewLink = useMemo(() => ({
     id: editingLink?.id || 'preview',
     slug: slug || 'votre-page',
-    title: title || 'Votre nom',
+    title: title || 'Your name',
     description,
     profileImage,
     profileStyle: 'circle',
@@ -227,7 +227,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     multiLinks: links.map((link, index) => ({
       id: `${index}`,
       parentLinkId: '',
-      title: link.title || inferTitleFromUrl(link.url) || `Lien ${index + 1}`,
+      title: link.title || inferTitleFromUrl(link.url) || `Link ${index + 1}`,
       url: link.url || '#',
       description: link.description || '',
       icon: link.icon || '',
@@ -339,7 +339,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     }
 
     if (!slug.trim()) {
-      toast.error('Choisissez une URL publique')
+      toast.error('Choose a public URL.')
       return
     }
 
@@ -410,14 +410,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message || errorData.error || 'Erreur lors de la sauvegarde')
+        throw new Error(errorData.message || errorData.error || 'Unable to save your link')
       }
 
       const savedLink = await response.json()
       toast.success(
         pageMode === 'direct'
-          ? (editingLink ? 'Lien direct mis a jour' : 'Lien direct publie')
-          : (editingLink ? 'Page mise a jour' : 'Page publiee')
+          ? (editingLink ? 'Direct link updated' : 'Direct link published')
+          : (editingLink ? 'Page updated' : 'Page published')
       )
       onSuccess(savedLink)
       onClose()
@@ -442,17 +442,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2">
                 <Sparkles className="w-3.5 h-3.5" />
-                Création Taplinkr
+                Taplinkr creator
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-950 dark:text-white">
                 {editingLink
-                  ? (pageMode === 'direct' ? 'Modifier mon lien direct' : 'Modifier ma page')
-                  : (pageMode === 'direct' ? 'Créer un lien direct' : 'Créer une page de liens')}
+                  ? (pageMode === 'direct' ? 'Edit my direct link' : 'Edit my page')
+                  : (pageMode === 'direct' ? 'Create a direct link' : 'Create a link page')}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {pageMode === 'direct'
-                  ? 'Une URL Taplinkr courte qui redirige immédiatement vers votre destination.'
-                  : 'Profil, boutons, design et publication au meme endroit.'}
+                  ? 'A short Taplinkr URL that instantly redirects to your destination.'
+                  : 'Profile, buttons, design, and publishing in one place.'}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {panelSteps.map(([value, label]) => (
@@ -508,10 +508,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 <div className="max-w-2xl">
                   <p className="text-sm font-bold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Nouveau</p>
                   <h3 className="mt-2 text-3xl font-bold leading-tight text-gray-950 dark:text-white">
-                    Choisissez un modèle de page
+                    Choose a page template
                   </h3>
                   <p className="mt-2 text-base text-gray-600 dark:text-gray-300">
-                    Choisissez le type de page. Les boutons de base seront pre-remplis, vous n'aurez plus qu'a remplacer les URLs.
+                    Choose a page type. Starter buttons are prefilled, so you only need to replace the URLs.
                   </p>
                 </div>
 
@@ -557,21 +557,21 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-amber-500 text-white">
                       <Zap className="h-5 w-5" />
                     </div>
-                    <h4 className="font-bold text-gray-950 dark:text-white">Lien direct</h4>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Une URL courte qui redirige sans page intermédiaire.</p>
+                    <h4 className="font-bold text-gray-950 dark:text-white">Direct link</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">A short URL that redirects without an intermediate page.</p>
                   </button>
                 </div>
 
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 dark:bg-gray-950">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Vous pouvez aussi partir de zero.
+                    You can also start from scratch.
                   </p>
                   <button
                     type="button"
                     onClick={() => setActivePanel('identity')}
                     className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"
                   >
-                    Créer une page vide
+                    Create a blank page
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -581,20 +581,20 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 {pageMode === 'direct' ? (
                   <>
                     <div className="mb-5">
-                      <p className="text-sm font-bold uppercase tracking-wide text-amber-600 dark:text-amber-300">Lien direct</p>
-                      <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Choisissez la destination</h3>
+                      <p className="text-sm font-bold uppercase tracking-wide text-amber-600 dark:text-amber-300">Direct link</p>
+                      <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Choose the destination</h3>
                       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Le visiteur clique sur votre URL Taplinkr et arrive directement sur cette adresse.</p>
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Nom interne</label>
+                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Internal name</label>
                         <input
                           value={title}
                           onChange={(event) => setTitle(event.target.value)}
                           placeholder="Ex : Ma boutique, Mon offre..."
                           className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-950 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                         />
-                        <p className="mt-1.5 text-xs text-gray-500">Ce nom sert à retrouver le lien dans votre tableau de bord.</p>
+                        <p className="mt-1.5 text-xs text-gray-500">This name helps you find the link in your dashboard. It is never shown publicly.</p>
                       </div>
                       <div>
                         <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">URL de destination</label>
@@ -608,7 +608,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         />
                       </div>
                       <div>
-                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Adresse publique</label>
+                        <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Public address</label>
                         <div className="flex overflow-hidden rounded-xl border border-gray-300 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 dark:border-gray-700">
                           <span className="hidden items-center bg-gray-50 px-3 text-sm text-gray-500 dark:bg-gray-950 sm:flex">taplinkr.com/</span>
                           <input
@@ -627,17 +627,17 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                               setSlug(createShortPublicSlug())
                             }}
                             className="border-l border-gray-200 bg-gray-50 px-3 text-gray-500 transition hover:text-indigo-600 dark:border-gray-700 dark:bg-gray-950"
-                            title="Générer une nouvelle adresse"
-                            aria-label="Générer une nouvelle adresse publique"
+                            title="Generate a new address"
+                            aria-label="Generate a new public address"
                           >
                             <RefreshCw className="h-4 w-4" />
                           </button>
                         </div>
                         <p className="mt-1.5 text-xs text-gray-500">Cette adresse est publique. Elle ne reprend jamais votre nom interne.</p>
                         <div className="mt-2 min-h-5 text-xs">
-                          {checkingSlug && <span className="inline-flex items-center gap-1 text-gray-500"><Loader2 className="h-3 w-3 animate-spin" /> Vérification...</span>}
+                          {checkingSlug && <span className="inline-flex items-center gap-1 text-gray-500"><Loader2 className="h-3 w-3 animate-spin" /> Checking...</span>}
                           {!checkingSlug && slugAvailable === true && <span className="inline-flex items-center gap-1 text-green-600"><Check className="h-3 w-3" /> URL disponible</span>}
-                          {!checkingSlug && slugAvailable === false && <span className="inline-flex items-center gap-1 text-red-600"><AlertCircle className="h-3 w-3" /> URL déjà prise</span>}
+                          {!checkingSlug && slugAvailable === false && <span className="inline-flex items-center gap-1 text-red-600"><AlertCircle className="h-3 w-3" /> URL already taken</span>}
                         </div>
                       </div>
                     </div>
@@ -649,7 +649,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-60"
                       >
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                        {editingLink ? 'Mettre à jour' : 'Publier le lien direct'}
+                        {editingLink ? 'Update' : 'Publish direct link'}
                       </button>
                     </div>
                   </>
@@ -673,7 +673,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
-                        Nom affiche
+                        Display name
                       </label>
                       <input
                         value={title}
@@ -702,7 +702,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         onClick={() => setActivePanel('links')}
                         className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"
                       >
-                        Continuer vers les liens
+                        Continue to links
                         <ArrowRight className="h-4 w-4" />
                       </button>
                     </div>
@@ -723,7 +723,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
                   >
                     <Plus className="w-4 h-4" />
-                    Ajouter
+                    Add
                   </button>
                 </div>
                 <div className="mb-4 flex flex-wrap gap-2">
@@ -759,7 +759,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           <input
                             value={link.title}
                             onChange={(event) => updateLink(index, 'title', event.target.value)}
-                            placeholder="Titre du bouton"
+                            placeholder="Button title"
                             className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                           />
                           <input
@@ -771,7 +771,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           <input
                             value={link.description || ''}
                             onChange={(event) => updateLink(index, 'description', event.target.value)}
-                            placeholder="Description optionnelle"
+                            placeholder="Optional description"
                             className="sm:col-span-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                           />
                         </div>
@@ -791,7 +791,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   ))}
                 </div>
                 <div className="mt-5 flex justify-between">
-                  <button type="button" onClick={() => setActivePanel('identity')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Retour</button>
+                  <button type="button" onClick={() => setActivePanel('identity')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Back</button>
                   <button type="button" onClick={() => setActivePanel('style')} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700">
                     Choisir le style
                     <ArrowRight className="h-4 w-4" />
@@ -801,8 +801,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
 
               <section className={`${activePanel === 'style' ? 'block' : 'hidden'} rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-5`}>
                 <p className="text-sm font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Etape 3</p>
-                <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Choisissez l'ambiance</h3>
-                <p className="mb-4 mt-1 text-sm text-gray-500 dark:text-gray-400">Vous pourrez modifier le style plus tard. Le plus important est de publier une page claire.</p>
+                <h3 className="mt-1 text-2xl font-bold text-gray-950 dark:text-white">Choose a style</h3>
+                <p className="mb-4 mt-1 text-sm text-gray-500 dark:text-gray-400">You can change the style later. Start by publishing a clear, focused page.</p>
                 <div className="grid sm:grid-cols-4 gap-3 mb-5">
                   {themes.map(theme => (
                     <button
@@ -839,14 +839,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   </label>
                 </div>
                 <div className="mt-5 flex justify-between">
-                  <button type="button" onClick={() => setActivePanel('links')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Retour</button>
+                  <button type="button" onClick={() => setActivePanel('links')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Back</button>
                   <button
                     type="submit"
                     disabled={loading || imageUploading}
                     className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-60"
                   >
                     {loading || imageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    {imageUploading ? 'Upload en cours' : editingLink ? 'Mettre a jour' : 'Publier ma page'}
+                    {imageUploading ? 'Uploading...' : editingLink ? 'Update' : 'Publish my page'}
                   </button>
                 </div>
               </section>
@@ -947,7 +947,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <div className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-500">
                       <Zap className="h-6 w-6" />
                     </div>
-                    <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-white/45">Votre lien court</p>
+                    <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-white/45">Your short link</p>
                     <p className="mt-2 break-all text-lg font-bold">taplinkr.com/{slug || 'mon-offre'}</p>
                     <div className="my-6 flex items-center gap-3 text-white/45">
                       <div className="h-px flex-1 bg-white/15" />
@@ -957,7 +957,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/45">Destination</p>
                     <p className="mt-2 break-all text-sm text-white/80">{directUrl || 'https://votre-site.com/offre'}</p>
                     <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-200">
-                      Redirection immédiate, suivi des clics inclus.
+                      Instant redirect with click tracking included.
                     </div>
                   </div>
                 )}
@@ -979,8 +979,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           <div className="mx-auto h-20 w-20 rounded-full border-4 border-white bg-gray-100 overflow-hidden shadow-lg">
                             {profileImage ? <img src={profileImage} alt="" className="h-full w-full object-cover" /> : <ImageIcon className="m-6 h-8 w-8 text-gray-400" />}
                           </div>
-                          <h4 className="mt-3 text-xl font-bold">{title || 'Votre nom'}</h4>
-                          <p className="mt-1 text-sm opacity-75">{description || 'Votre bio apparaîtra ici.'}</p>
+                          <h4 className="mt-3 text-xl font-bold">{title || 'Your name'}</h4>
+                          <p className="mt-1 text-sm opacity-75">{description || 'Your bio will appear here.'}</p>
                           <div className="mt-5 space-y-3">
                             {links.map((link, index) => (
                               <div key={index} className={`flex items-center justify-between px-4 py-3 shadow-sm ${borderRadius}`} style={{ backgroundColor: accentColor, color: '#fff' }}>
@@ -1010,8 +1010,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     : editingLink
                       ? 'Mettre a jour'
                       : pageMode === 'direct'
-                        ? 'Publier le lien direct'
-                        : 'Publier ma page'}
+                        ? 'Publish direct link'
+                        : 'Publish my page'}
                 </button>
               ) : (
                 <button
@@ -1019,7 +1019,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   onClick={() => setActivePanel(activePanel === 'start' ? 'identity' : activePanel === 'identity' ? 'links' : 'style')}
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white"
                 >
-                  Continuer
+                  Continue
                   <ArrowRight className="h-4 w-4" />
                 </button>
               )}
@@ -1028,7 +1028,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             <div className="hidden lg:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-2xl dark:border-gray-800 dark:bg-gray-950">
               <div className="text-sm text-gray-500">
                 {pageMode === 'direct'
-                  ? (directUrl ? 'Destination prête' : 'Destination à compléter')
+                  ? (directUrl ? 'Destination ready' : 'Add a destination')
                   : `${validLinks.length} lien${validLinks.length > 1 ? 's' : ''} pret${validLinks.length > 1 ? 's' : ''}`}
               </div>
               <button
@@ -1037,7 +1037,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 disabled={loading}
                 className="rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
               >
-                Annuler
+                Cancel
               </button>
               <button
                 type="submit"
@@ -1050,8 +1050,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   : editingLink
                     ? 'Mettre a jour'
                     : pageMode === 'direct'
-                      ? 'Publier le lien direct'
-                      : 'Publier ma page'}
+                      ? 'Publish direct link'
+                      : 'Publish my page'}
               </button>
             </div>
           </form>

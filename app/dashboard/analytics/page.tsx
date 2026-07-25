@@ -80,7 +80,7 @@ export default function AnalyticsPage() {
         totals: payload.totals || emptyData.totals,
       })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur de chargement')
+      toast.error(error instanceof Error ? error.message : 'Unable to load analytics.')
     } finally {
       setLoading(false)
     }
@@ -92,14 +92,14 @@ export default function AnalyticsPage() {
 
   const exportCsv = () => {
     const rows = [
-      ['date', 'clics', 'vues'],
+      ['date', 'clicks', 'views'],
       ...data.summary.map(item => [item.date, item.clicks, item.views]),
     ]
     const blob = new Blob([rows.map(row => row.join(',')).join('\n')], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = `taplinkr-analytics-${days}j.csv`
+    anchor.download = `taplinkr-analytics-${days}d.csv`
     anchor.click()
     URL.revokeObjectURL(url)
   }
@@ -109,13 +109,13 @@ export default function AnalyticsPage() {
     : 0
 
   const cards = [
-    { label: 'Clics totaux', value: data.totals.clicks, icon: MousePointer2, color: 'text-violet-400' },
-    { label: 'Visiteurs uniques', value: data.totals.uniqueVisitors, icon: Users, color: 'text-sky-400' },
-    { label: 'Vues', value: data.totals.views, icon: Eye, color: 'text-emerald-400' },
-    { label: 'Clics filtrés', value: data.totals.filteredClicks, icon: ShieldCheck, color: 'text-emerald-300' },
-    { label: 'Bots / aperçus', value: data.totals.botsFiltered, icon: Bot, color: 'text-rose-400' },
-    { label: 'Doublons / spam', value: data.totals.duplicatesFiltered, icon: Activity, color: 'text-amber-400' },
-    { label: 'Clics / visiteur', value: clicksPerVisitor, icon: Activity, color: 'text-amber-400' },
+    { label: 'Total clicks', value: data.totals.clicks, icon: MousePointer2, color: 'text-violet-400' },
+    { label: 'Unique visitors', value: data.totals.uniqueVisitors, icon: Users, color: 'text-sky-400' },
+    { label: 'Views', value: data.totals.views, icon: Eye, color: 'text-emerald-400' },
+    { label: 'Filtered clicks', value: data.totals.filteredClicks, icon: ShieldCheck, color: 'text-emerald-300' },
+    { label: 'Bots / previews', value: data.totals.botsFiltered, icon: Bot, color: 'text-rose-400' },
+    { label: 'Duplicates / spam', value: data.totals.duplicatesFiltered, icon: Activity, color: 'text-amber-400' },
+    { label: 'Clicks / visitor', value: clicksPerVisitor, icon: Activity, color: 'text-amber-400' },
   ]
 
   return (
@@ -128,9 +128,9 @@ export default function AnalyticsPage() {
               Analytics
             </p>
             <h1 className="mt-3 text-4xl font-bold tracking-[-0.05em] sm:text-5xl">
-              Votre trafic, <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">en un coup d’œil.</span>
+              Your traffic, <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">at a glance.</span>
             </h1>
-            <p className="mt-3 text-base text-[#9696a8]">Des clics réels : robots, aperçus automatiques, doublons et rafales sont filtrés.</p>
+            <p className="mt-3 text-base text-[#9696a8]">Real clicks only: bots, automatic previews, duplicates, and bursts are filtered out.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex rounded-xl border border-[#292936] bg-[#101018] p-1">
@@ -140,14 +140,14 @@ export default function AnalyticsPage() {
                   onClick={() => setDays(value)}
                   className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${days === value ? 'bg-violet-500 text-white' : 'text-[#858598] hover:text-white'}`}
                 >
-                  {value === 1 ? '24h' : `${value}j`}
+                  {value === 1 ? '24h' : `${value}d`}
                 </button>
               ))}
             </div>
             <button
               onClick={loadAnalytics}
               className="rounded-xl border border-[#292936] p-3 text-[#aaaabc] transition hover:border-violet-500/50 hover:text-white"
-              aria-label="Actualiser"
+              aria-label="Refresh"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
               className="inline-flex items-center gap-2 rounded-xl border border-[#292936] px-4 py-3 text-sm font-semibold transition hover:border-violet-500/50"
             >
               <Download className="h-4 w-4" />
-              Exporter CSV
+              Export CSV
             </button>
           </div>
         </header>
@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
                 <card.icon className={`h-5 w-5 ${card.color}`} />
               </div>
               <p className="mt-7 text-4xl font-bold tracking-tight">
-                {loading ? '—' : typeof card.value === 'number' ? card.value.toLocaleString('fr-FR') : card.value}
+                {loading ? '—' : typeof card.value === 'number' ? card.value.toLocaleString('en-US') : card.value}
               </p>
             </article>
           ))}
@@ -177,8 +177,8 @@ export default function AnalyticsPage() {
 
         <section className="mt-6 rounded-2xl border border-[#252532] bg-[#11111a] p-5 sm:p-7">
           <div>
-            <h2 className="text-xl font-semibold">Trafic dans le temps</h2>
-            <p className="mt-1 text-sm text-[#8e8ea1]">Clics et vues sur les {days === 1 ? 'dernières 24 heures' : `${days} derniers jours`}.</p>
+            <h2 className="text-xl font-semibold">Traffic over time</h2>
+            <p className="mt-1 text-sm text-[#8e8ea1]">Clicks and views over the {days === 1 ? 'last 24 hours' : `last ${days} days`}.</p>
           </div>
           <div className="mt-8 h-[360px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -200,16 +200,16 @@ export default function AnalyticsPage() {
                   contentStyle={{ background: '#15151f', border: '1px solid #30303e', borderRadius: 12, color: '#fff' }}
                   labelStyle={{ color: '#aaaabc' }}
                 />
-                <Area type="monotone" dataKey="clicks" name="Clics" stroke="#8b5cf6" strokeWidth={3} fill="url(#clicksGradient)" />
-                <Area type="monotone" dataKey="views" name="Vues" stroke="#38bdf8" strokeWidth={2.5} fill="url(#viewsGradient)" />
+                <Area type="monotone" dataKey="clicks" name="Clicks" stroke="#8b5cf6" strokeWidth={3} fill="url(#clicksGradient)" />
+                <Area type="monotone" dataKey="views" name="Views" stroke="#38bdf8" strokeWidth={2.5} fill="url(#viewsGradient)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </section>
 
         <section className="mt-6 grid gap-6 lg:grid-cols-2">
-          <Ranking title="Principaux pays" items={data.stats.topCountries} />
-          <Ranking title="Principales sources" items={data.stats.topSources} />
+          <Ranking title="Top countries" items={data.stats.topCountries} />
+          <Ranking title="Top sources" items={data.stats.topSources} />
         </section>
       </div>
     </div>
@@ -232,7 +232,7 @@ function Ranking({ title, items }: { title: string; items: Array<[string, number
               <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-sky-400" style={{ width: `${(count / max) * 100}%` }} />
             </div>
           </div>
-        )) : <p className="py-8 text-center text-sm text-[#77778a]">Pas encore assez de données.</p>}
+        )) : <p className="py-8 text-center text-sm text-[#77778a]">Not enough data yet.</p>}
       </div>
     </article>
   )

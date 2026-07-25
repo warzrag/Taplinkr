@@ -32,23 +32,23 @@ const benefits = [
   {
     icon: Shield,
     title: 'Protection et confiance',
-    description: 'Contrôlez vos deeplinks, activez une garde 18+ et gardez vos pages sous votre marque.'
+    description: 'Control your deep links, enable an 18+ gate, and keep every page on brand.'
   },
   {
     icon: UserPlus,
     title: 'Pages qui vendent',
-    description: 'Composez une page fidèle à votre identité, adaptée à chaque offre, réseau et campagne.'
+    description: 'Build an on-brand page tailored to every offer, network, and campaign.'
   },
   {
     icon: Mail,
     title: 'Mise en ligne rapide',
-    description: 'Créez votre compte, branchez vos liens importants et commencez à lire vos statistiques.'
+    description: 'Create your account, add your key links, and start tracking performance.'
   },
 ]
 
 const steps = [
-  { label: 'Votre profil', description: 'Présentez votre activité' },
-  { label: 'Sécurité', description: 'Créez votre mot de passe' },
+  { label: 'Your profile', description: 'Introduce your business' },
+  { label: 'Security', description: 'Create your password' },
 ]
 
 export default function SignUp() {
@@ -86,14 +86,14 @@ export default function SignUp() {
 
       if (!response.ok) {
         const error = await response.json()
-        toast.error(error.message || "Erreur lors de l'inscription")
+        toast.error(error.message || 'Unable to create your account.')
         return
       }
 
-      toast.success('Compte créé avec succès ! Vérifiez vos emails pour finaliser.')
+      toast.success('Account created. Check your email to finish setup.')
       router.push('/auth/verify-email-waiting?email=' + encodeURIComponent(data.email))
     } catch {
-      toast.error("Erreur lors de l'inscription")
+      toast.error('Unable to create your account.')
     } finally {
       setLoading(false)
     }
@@ -115,8 +115,8 @@ export default function SignUp() {
             className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-[hsl(var(--surface))] p-10 shadow-card lg:flex"
           >
             <div className="space-y-4">
-              <span className="badge-pill bg-brand-500/10 text-brand-600">Votre hub en quelques minutes</span>
-              <h2 className="text-3xl font-semibold">Construisez une page créateur prête à convertir</h2>
+              <span className="badge-pill bg-brand-500/10 text-brand-600">Your hub in minutes</span>
+              <h2 className="text-3xl font-semibold">Build a creator page designed to convert</h2>
               <p className="text-sm text-foreground/65">
                 Centralisez vos offres, contenus, deeplinks et protections dans une page rapide, claire et mesurable.
               </p>
@@ -149,13 +149,13 @@ export default function SignUp() {
                 className="inline-flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Retour
+                Back
               </Link>
               <Link
                 href="/auth/signin"
                 className="text-foreground/70 transition-colors hover:text-foreground"
               >
-                J’ai déjà un compte
+                I already have an account
               </Link>
             </div>
 
@@ -163,11 +163,11 @@ export default function SignUp() {
               <div className="flex justify-center">
                 <Logo size="md" showText={false} />
               </div>
-              <h1 className="text-2xl font-semibold">Créez votre compte</h1>
+              <h1 className="text-2xl font-semibold">Create your account</h1>
               <p className="text-sm text-foreground/60">
                 {suggestedUsername
-                  ? `Votre URL réservée : taplinkr.com/${suggestedUsername}`
-                  : 'Lancez votre page créateur, vos deeplinks et vos statistiques.'}
+                  ? `Your reserved URL: taplinkr.com/${suggestedUsername}`
+                  : 'Launch your creator page, deep links, and analytics.'}
               </p>
             </div>
 
@@ -211,7 +211,7 @@ export default function SignUp() {
                           type="text"
                           {...register('name', { required: 'Le nom est requis' })}
                           className="input pl-12"
-                          placeholder="Votre nom"
+                          placeholder="Your name"
                         />
                       </div>
                       <AnimatePresence>
@@ -229,7 +229,7 @@ export default function SignUp() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Adresse email</label>
+                      <label className="text-sm font-medium text-foreground">Email address</label>
                       <div className="relative">
                         <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
                         <input
@@ -238,7 +238,7 @@ export default function SignUp() {
                             required: "L'email est requis",
                             pattern: {
                               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                              message: 'Email invalide',
+                              message: 'Invalid email address',
                             },
                           })}
                           className="input pl-12"
@@ -260,7 +260,7 @@ export default function SignUp() {
                     </div>
 
                     <Button type="button" fullWidth onClick={nextStep}>
-                      Continuer
+                      Continue
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </motion.div>
@@ -273,17 +273,17 @@ export default function SignUp() {
                     className="space-y-5"
                   >
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Mot de passe</label>
+                      <label className="text-sm font-medium text-foreground">Password</label>
                       <div className="relative">
                         <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
                         <input
                           type={showPassword ? 'text' : 'password'}
                           {...register('password', {
                             required: 'Le mot de passe est requis',
-                            minLength: { value: 8, message: 'Au moins 8 caractères' },
+                            minLength: { value: 8, message: 'At least 8 characters' },
                           })}
                           className="input pl-12 pr-12"
-                          placeholder="Créer un mot de passe"
+                          placeholder="Create a password"
                         />
                         <button
                           type="button"
@@ -308,7 +308,7 @@ export default function SignUp() {
                     </div>
 
                     <Button type="submit" fullWidth loading={loading}>
-                      Créer mon compte
+                      Create my account
                       <UserPlus className="h-4 w-4" />
                     </Button>
 
@@ -317,7 +317,7 @@ export default function SignUp() {
                       onClick={() => setStep(0)}
                       className="w-full text-sm text-foreground/50 transition-colors hover:text-foreground/70"
                     >
-                      Retour à l’étape précédente
+                      Back to the previous step
                     </button>
                   </motion.div>
                 )}
@@ -327,7 +327,7 @@ export default function SignUp() {
             <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
               <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Conseil</p>
               <p className="mt-2 text-sm text-foreground/70">
-                Une fois inscrit, ajoutez vos deeplinks, activez la garde 18+ si besoin et suivez les clics dès la première campagne.
+                Once signed up, add your deep links, enable the 18+ gate if needed, and track clicks from your first campaign.
               </p>
             </div>
           </motion.div>

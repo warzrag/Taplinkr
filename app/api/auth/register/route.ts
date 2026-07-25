@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     // Validation basique
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8 || password.length > 128) {
       return NextResponse.json(
-        { message: 'Email valide et mot de passe de 8 à 128 caractères requis' },
+        { message: 'A valid email and a password between 8 and 128 characters are required' },
         { status: 400 }
       )
     }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: 'Un utilisateur avec cet email existe déjà' },
+        { message: 'An account with this email already exists' },
         { status: 400 }
       )
     }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     while (await prisma.user.findUnique({ where: { username } })) {
       if (preferredUsername && 'username' in preferredUsername) {
-        return NextResponse.json({ message: "Ce nom d’utilisateur vient d’être pris. Choisissez-en un autre." }, { status: 409 })
+        return NextResponse.json({ message: 'This username was just taken. Choose another one.' }, { status: 409 })
       }
       username = `${baseUsername}${counter}`
       counter++
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     // Retourner l'utilisateur sans le mot de passe
     return NextResponse.json(
       { 
-        message: 'Compte créé avec succès ! Vérifiez votre email pour activer votre compte.',
+        message: 'Account created successfully. Check your email to activate it.',
         user: { id: user.id, email: user.email, name: user.name, username: user.username },
         requiresEmailVerification: true
       },
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     console.error('Erreur lors de l\'inscription:', error)
     return NextResponse.json(
       { 
-        message: 'Erreur serveur',
+        message: 'Server error',
         error: error.message,
         details: process.env.NODE_ENV === 'development' ? error : undefined
       },
