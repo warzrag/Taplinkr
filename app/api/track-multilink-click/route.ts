@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { assessClickRequest, recordFilteredClick } from '@/lib/click-quality'
-import { getLocationFromIP } from '@/lib/geo-location-helper'
+import { buildClickMetadata } from '@/lib/click-metadata'
 import { prisma } from '@/lib/prisma'
-import { parseUserAgent } from '@/lib/user-agent-parser'
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,8 +42,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const location = await getLocationFromIP(assessment.rawIp)
-    const parsed = parseUserAgent(assessment.userAgent)
+    const clickMetadata = await buildClickMetadata({
+      assessment,
+      headers: request.headers,
+      client: { sessionId, screenResolution, language, timezone },
+    })
 
     await prisma.$transaction([
       prisma.click.create({
@@ -52,21 +54,7 @@ export async function POST(request: NextRequest) {
           linkId: multiLink.parentLinkId,
           userId: multiLink.parentLink.userId,
           multiLinkId,
-          sessionId: typeof sessionId === 'string' ? sessionId.slice(0, 128) : null,
-          ip: assessment.visitorHash,
-          userAgent: assessment.userAgent.slice(0, 512),
-          referer: assessment.referer,
-          device: parsed.device.type,
-          browser: parsed.browser.name,
-          os: parsed.os.name,
-          screenResolution: String(screenResolution || '').slice(0, 32) || null,
-          language: String(language || '').slice(0, 32) || null,
-          timezone: String(timezone || '').slice(0, 64) || null,
-          country: location.country,
-          city: location.city || null,
-          region: location.region || null,
-          latitude: location.lat || null,
-          longitude: location.lon || null,
+          ...clickMetadata,
         },
       }),
       prisma.multiLink.update({

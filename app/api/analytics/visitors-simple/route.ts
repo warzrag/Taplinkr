@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -16,10 +16,33 @@ export async function GET(request: Request) {
     const device = searchParams.get('device') || 'all'
     const offset = (page - 1) * limit
 
-    // Récupérer tous les liens de l'utilisateur
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { teamId: true },
+    })
+    const teamMembers = currentUser?.teamId
+      ? await prisma.user.findMany({
+          where: { teamId: currentUser.teamId },
+          select: { id: true },
+        })
+      : []
+    const visibleUserIds = [...new Set([session.user.id, ...teamMembers.map(member => member.id)])]
+
     const userLinks = await prisma.link.findMany({
-      where: { userId: session.user.id },
-      select: { id: true, slug: true, title: true }
+      where: currentUser?.teamId
+        ? {
+            OR: [
+              { userId: { in: visibleUserIds } },
+              { teamId: currentUser.teamId, teamShared: true },
+            ],
+          }
+        : { userId: session.user.id },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        multiLinks: { select: { id: true, title: true } },
+      },
     })
 
     const linkIds = userLinks.map(link => link.id)
@@ -34,8 +57,8 @@ export async function GET(request: Request) {
     }
     
     // Créer un map pour accès rapide aux infos des liens
-    const linkMap = new Map<string, { slug: string; title: string }>(
-      (userLinks as Array<{ id: string; slug: string; title: string }>).map(link => [link.id, link])
+    const linkMap = new Map<string, { slug: string; title: string; multiLinks: Array<{ id: string; title: string }> }>(
+      userLinks.map(link => [link.id, link])
     )
 
     // Construire les conditions de filtre
@@ -43,19 +66,10 @@ export async function GET(request: Request) {
       linkId: { in: linkIds }
     }
 
-    // Filtrage par device si spécifié (basé sur userAgent car 'device' contient le nom)
     if (device === 'mobile') {
-      whereConditions.OR = [
-        { userAgent: { contains: 'Mobile', mode: 'insensitive' } },
-        { userAgent: { contains: 'Android', mode: 'insensitive' } },
-        { userAgent: { contains: 'iPhone', mode: 'insensitive' } }
-      ]
+      whereConditions.device = { in: ['mobile', 'tablet'] }
     } else if (device === 'desktop') {
-      whereConditions.AND = [
-        { userAgent: { not: { contains: 'Mobile', mode: 'insensitive' } } },
-        { userAgent: { not: { contains: 'Tablet', mode: 'insensitive' } } },
-        { userAgent: { not: { contains: 'iPad', mode: 'insensitive' } } }
-      ]
+      whereConditions.device = 'desktop'
     }
 
     // Récupérer les clics avec toutes les données nécessaires
@@ -102,13 +116,14 @@ export async function GET(request: Request) {
       const os = click.os || 'Unknown'
       const deviceName = click.device || 'Unknown'
 
-      // Déterminer le type d'appareil
-      let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop'
-      if (userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone')) {
-        deviceType = 'mobile'
-      } else if (userAgent.includes('Tablet') || userAgent.includes('iPad')) {
-        deviceType = 'tablet'
-      }
+      const deviceType: 'mobile' | 'tablet' | 'desktop' =
+        deviceName === 'tablet' || deviceName === 'mobile' || deviceName === 'desktop'
+          ? deviceName
+          : userAgent.includes('Tablet') || userAgent.includes('iPad')
+            ? 'tablet'
+            : userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone')
+              ? 'mobile'
+              : 'desktop'
 
       // Extraire le code pays (2 lettres) depuis le nom du pays si possible
       let countryCode = 'XX'
@@ -128,7 +143,7 @@ export async function GET(request: Request) {
         'Switzerland': 'CH',
         'Unknown': 'XX'
       }
-      countryCode = countryToCode[country] || 'XX'
+      countryCode = /^[A-Z]{2}$/i.test(country) ? country.toUpperCase() : countryToCode[country] || 'XX'
 
       // Extraction sécurisée du referrer domain
       let referrerDomain = 'Direct'
@@ -139,6 +154,21 @@ export async function GET(request: Request) {
           referrerDomain = 'Direct'
         }
       }
+      const normalizedReferrer = referrerDomain.toLowerCase()
+      const trafficSource = normalizedReferrer.includes('instagram')
+        ? 'Instagram'
+        : normalizedReferrer === 't.co' || normalizedReferrer.includes('twitter') || normalizedReferrer.includes('x.com')
+          ? 'X / Twitter'
+          : normalizedReferrer.includes('tiktok')
+            ? 'TikTok'
+            : normalizedReferrer.includes('facebook')
+              ? 'Facebook'
+              : normalizedReferrer.includes('google')
+                ? 'Google'
+                : normalizedReferrer === 'direct'
+                  ? 'Direct'
+                  : referrerDomain
+      const multiLink = link?.multiLinks.find(item => item.id === click.multiLinkId)
 
       return {
         id: click.id,
@@ -152,11 +182,12 @@ export async function GET(request: Request) {
           longitude: click.longitude || undefined
         },
         linkSlug: link?.slug || 'unknown',
-        linkTitle: link?.title || 'Lien supprimé',
+        linkTitle: link?.title || 'Deleted link',
         browser: browser,
         os: os,
         referrer: click.referer || '',
         referrerDomain: referrerDomain,
+        trafficSource,
         device: deviceName,
         deviceType: deviceType,
         status: 'success' as const,
@@ -166,7 +197,7 @@ export async function GET(request: Request) {
         language: click.language || undefined,
         timezone: click.timezone || undefined,
         duration: click.duration || undefined,
-        multiLinkClicked: click.multiLinkId || undefined
+        multiLinkClicked: multiLink?.title || undefined
       }
     })
 
@@ -178,9 +209,9 @@ export async function GET(request: Request) {
     })
 
   } catch (error) {
-    console.error('Erreur lors de la récupération des visiteurs:', error)
+    console.error('Unable to fetch click log:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la récupération des visiteurs' },
+      { error: 'Unable to load the click log' },
       { status: 500 }
     )
   }

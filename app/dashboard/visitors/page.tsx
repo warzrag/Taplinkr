@@ -23,7 +23,8 @@ import {
   X,
   Timer,
   Languages,
-  Maximize2
+  Maximize2,
+  Download,
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { enUS } from 'date-fns/locale'
@@ -47,6 +48,7 @@ interface Visitor {
   os: string
   referrer: string
   referrerDomain: string
+  trafficSource: string
   device: string
   deviceType: 'mobile' | 'tablet' | 'desktop'
   status: 'success' | 'blocked' | 'bot'
@@ -65,6 +67,7 @@ export default function VisitorsPage() {
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [totalClicks, setTotalClicks] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
   const [filter, setFilter] = useState<'all' | 'mobile' | 'desktop'>('all')
   const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null)
@@ -96,6 +99,7 @@ export default function VisitorsPage() {
 
       if (response.ok) {
         setVisitors(data.visitors || [])
+        setTotalClicks(data.total || 0)
         setTotalPages(Math.ceil(data.total / itemsPerPage))
       } else {
         console.error('Erreur API:', data.error)
@@ -161,6 +165,32 @@ export default function VisitorsPage() {
     return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`
   }
 
+  const exportCurrentPage = () => {
+    const headers = ['Time', 'Link', 'Sub-link', 'Source', 'Country', 'Region', 'City', 'Device', 'Browser', 'OS', 'Language', 'Timezone']
+    const rows = visitors.map(visitor => [
+      new Date(visitor.timestamp).toISOString(),
+      visitor.linkTitle,
+      visitor.multiLinkClicked || '',
+      visitor.trafficSource,
+      visitor.location.country,
+      visitor.location.region,
+      visitor.location.city,
+      visitor.device,
+      visitor.browser,
+      visitor.os,
+      visitor.language || '',
+      visitor.timezone || '',
+    ])
+    const escapeCell = (value: string) => `"${value.replaceAll('"', '""')}"`
+    const csv = [headers, ...rows].map(row => row.map(value => escapeCell(String(value))).join(',')).join('\n')
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `taplinkr-clicks-${new Date().toISOString().slice(0, 10)}.csv`
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }
+
   if (loading && !refreshing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -190,10 +220,13 @@ export default function VisitorsPage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                Latest 100 visitors
+                Every click
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Real-time visitor data
+                See exactly when, where, and how every real visitor clicked.
+              </p>
+              <p className="mt-2 text-sm text-emerald-600 dark:text-emerald-400">
+                {totalClicks.toLocaleString('en-US')} real clicks · bots, previews, duplicates, and spam excluded
               </p>
             </div>
           </div>
@@ -211,7 +244,7 @@ export default function VisitorsPage() {
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
-                  Tous
+                  All
                 </button>
                 <button
                   onClick={() => setFilter('mobile')}
@@ -238,15 +271,24 @@ export default function VisitorsPage() {
               </div>
             </div>
 
-            {/* Refresh Button */}
-            <button
-              onClick={() => fetchVisitors(true)}
-              disabled={refreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              <span className="text-sm font-medium">Actualiser</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={exportCurrentPage}
+                disabled={visitors.length === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                <span className="text-sm font-medium">Export CSV</span>
+              </button>
+              <button
+                onClick={() => fetchVisitors(true)}
+                disabled={refreshing}
+                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="text-sm font-medium">Refresh</span>
+              </button>
+            </div>
           </div>
         </motion.div>
 
@@ -280,7 +322,7 @@ export default function VisitorsPage() {
                       Time
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Localisation
+                      Location
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Link
@@ -363,7 +405,7 @@ export default function VisitorsPage() {
                       <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4 text-gray-400" />
                         <span className="text-sm text-gray-900 dark:text-gray-100">
-                          {visitor.referrerDomain || 'Direct'}
+                          {visitor.trafficSource || 'Direct'}
                         </span>
                       </div>
                     </td>
@@ -381,7 +423,7 @@ export default function VisitorsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                         <Eye className="w-4 h-4" />
-                        <span className="text-sm">Voir plus</span>
+                        <span className="text-sm">View details</span>
                       </button>
                     </td>
                   </motion.tr>
@@ -444,7 +486,7 @@ export default function VisitorsPage() {
                 {/* Informations principales */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Date de visite</h4>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Click time</h4>
                     <p className="text-gray-900 dark:text-gray-100">
                       {format(new Date(selectedVisitor.timestamp), 'MMMM d, yyyy h:mm a', { locale: enUS })}
                     </p>
@@ -464,7 +506,7 @@ export default function VisitorsPage() {
 
                 {/* Localisation */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Localisation</h4>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Location</h4>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                     <div className="flex items-start gap-3">
                       <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
@@ -504,7 +546,7 @@ export default function VisitorsPage() {
 
                 {/* Informations techniques */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Informations techniques</h4>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Technical details</h4>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-3">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -536,14 +578,14 @@ export default function VisitorsPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Langue</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Language</p>
                         <div className="flex items-center gap-2">
                           <Languages className="w-4 h-4 text-gray-400" />
                           <p className="text-gray-900 dark:text-gray-100">{selectedVisitor.language || 'N/A'}</p>
                         </div>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Fuseau horaire</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Timezone</p>
                         <p className="text-gray-900 dark:text-gray-100 text-sm">{selectedVisitor.timezone || 'N/A'}</p>
                       </div>
                     </div>
@@ -558,7 +600,7 @@ export default function VisitorsPage() {
                       <Globe className="w-5 h-5 text-gray-400 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-gray-900 dark:text-gray-100">
-                          {selectedVisitor.referrerDomain || 'Trafic direct'}
+                          {selectedVisitor.trafficSource || 'Direct'}
                         </p>
                         {selectedVisitor.referrer && (
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 break-all">
@@ -572,7 +614,7 @@ export default function VisitorsPage() {
 
                 {/* IP et User Agent */}
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <p className="mb-1">IP: {selectedVisitor.ip}</p>
+                  <p className="mb-1">Anonymous visitor ID: {selectedVisitor.ip}</p>
                   <p className="break-all">User Agent: {selectedVisitor.userAgent}</p>
                 </div>
               </div>

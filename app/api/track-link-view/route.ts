@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { analyticsService } from '@/lib/analytics-service'
 import { assessClickRequest, recordFilteredClick } from '@/lib/click-quality'
-import { getLocationFromIP } from '@/lib/geo-location-helper'
+import { buildClickMetadata } from '@/lib/click-metadata'
 import { prisma } from '@/lib/prisma'
-import { parseUserAgent } from '@/lib/user-agent-parser'
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,8 +35,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, counted: false, reason: assessment.reason })
     }
 
-    const location = await getLocationFromIP(assessment.rawIp)
-    const parsed = parseUserAgent(assessment.userAgent)
+    const clickMetadata = await buildClickMetadata({
+      assessment,
+      headers: request.headers,
+      client: { screenResolution, language, timezone },
+    })
     const [updatedLink, clickRecord] = await prisma.$transaction([
       prisma.link.update({
         where: { id: linkId },
@@ -51,20 +53,7 @@ export async function POST(request: NextRequest) {
         data: {
           linkId,
           userId: link.userId,
-          ip: assessment.visitorHash,
-          userAgent: assessment.userAgent,
-          referer: assessment.referer,
-          device: parsed.device.type,
-          browser: parsed.browser.name,
-          os: parsed.os.name,
-          screenResolution: typeof screenResolution === 'string' ? screenResolution.slice(0, 32) : null,
-          language: typeof language === 'string' ? language.slice(0, 32) : null,
-          timezone: typeof timezone === 'string' ? timezone.slice(0, 64) : null,
-          country: location.country,
-          city: location.city || null,
-          region: location.region || null,
-          latitude: location.lat || null,
-          longitude: location.lon || null,
+          ...clickMetadata,
         },
       }),
     ])

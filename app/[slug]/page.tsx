@@ -14,6 +14,7 @@ import {
 } from '@/lib/external-browser'
 import { prisma } from '@/lib/prisma'
 import { assessClickRequest, recordFilteredClick } from '@/lib/click-quality'
+import { buildClickMetadata } from '@/lib/click-metadata'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 
@@ -118,16 +119,16 @@ export default async function LinkPage(props: PageProps) {
       })
 
       if (assessment.counted) {
+        const clickMetadata = await buildClickMetadata({
+          assessment,
+          headers: requestHeaders,
+        })
         await prisma.$transaction([
           prisma.click.create({
             data: {
               linkId: link.id,
               userId: link.userId,
-              ip: assessment.visitorHash,
-              userAgent: assessment.userAgent,
-              referer: assessment.referer,
-              country: requestHeaders.get('x-vercel-ip-country') || 'Unknown',
-              device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
+              ...clickMetadata,
             },
           }),
           prisma.link.update({

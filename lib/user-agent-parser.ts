@@ -71,6 +71,10 @@ export function parseUserAgent(userAgent: string): ParsedUserAgent {
     osVersion = '11'
   } else if (ua.includes('windows')) {
     osName = 'Windows'
+  } else if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
+    osName = 'iOS'
+    const match = ua.match(/os (\d+)_(\d+)/)
+    if (match) osVersion = `${match[1]}.${match[2]}`
   } else if (ua.includes('mac os x')) {
     osName = 'macOS'
     const match = ua.match(/mac os x (\d+)[._](\d+)/)
@@ -79,10 +83,6 @@ export function parseUserAgent(userAgent: string): ParsedUserAgent {
     osName = 'Android'
     const match = ua.match(/android (\d+)/)
     if (match) osVersion = match[1]
-  } else if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
-    osName = 'iOS'
-    const match = ua.match(/os (\d+)_(\d+)/)
-    if (match) osVersion = `${match[1]}.${match[2]}`
   } else if (ua.includes('linux')) {
     osName = 'Linux'
   }

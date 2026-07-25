@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { assessClickRequest, recordFilteredClick } from '@/lib/click-quality'
+import { buildClickMetadata } from '@/lib/click-metadata'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
@@ -39,16 +40,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, counted: false, reason: assessment.reason })
     }
 
+    const clickMetadata = await buildClickMetadata({
+      assessment,
+      headers: request.headers,
+    })
     await prisma.click.create({
       data: {
         linkId,
         userId: link.userId,
         multiLinkId: multiLinkId || null,
-        country: request.headers.get('x-vercel-ip-country') || 'Unknown',
-        device: /mobile/i.test(assessment.userAgent) ? 'mobile' : 'desktop',
-        referer: assessment.referer,
-        userAgent: assessment.userAgent,
-        ip: assessment.visitorHash,
+        ...clickMetadata,
       },
     })
 
