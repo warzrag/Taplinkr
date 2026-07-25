@@ -167,7 +167,7 @@ export default function ResendVerificationPage() {
         <p className="text-center text-sm text-gray-500 mt-6">
           Already verified your email?{' '}
           <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 font-medium">
-            Se connecter
+            Log in
           </Link>
         </p>
       </motion.div>

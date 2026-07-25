@@ -36,7 +36,7 @@ const benefits = [
   {
     icon: BarChart3,
     title: 'Creator analytics',
-    description: 'Tableaux de bord clairs pour mesurer vues, clics, sources et conversions'
+    description: 'Clear dashboards for views, clicks, sources, and conversions'
   },
   {
     icon: Shield,
@@ -53,8 +53,8 @@ const benefits = [
 const metrics = [
   { value: 'Pages', label: 'Creator pages', icon: Users },
   { value: 'Stats', label: 'Clicks and views', icon: TrendingUp },
-  { value: 'Geo', label: 'Sources et appareils', icon: Globe },
-  { value: 'Teams', label: 'Agences', icon: Zap },
+  { value: 'Geo', label: 'Sources and devices', icon: Globe },
+  { value: 'Teams', label: 'Agencies', icon: Zap },
 ]
 
 export default function SignIn() {
@@ -282,7 +282,7 @@ export default function SignIn() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">
-                    Bon retour
+                    Welcome back
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Log in to manage your pages, deep links, and analytics
@@ -309,7 +309,7 @@ export default function SignIn() {
                         },
                       })}
                       className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-12 pr-4 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
-                      placeholder="vous@entreprise.com"
+                      placeholder="you@company.com"
                     />
                   </div>
                   <AnimatePresence>
@@ -376,7 +376,7 @@ export default function SignIn() {
                   loading={loading}
                   className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900"
                 >
-                  Se connecter
+                  Log in
                   <LogIn className="h-4 w-4" />
                 </Button>
               </form>
@@ -388,7 +388,7 @@ export default function SignIn() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">
-                    Pas encore de compte ?
+                    Don&apos;t have an account?
                   </span>
                 </div>
               </div>
@@ -421,9 +421,9 @@ export default function SignIn() {
 
             {/* Support Link */}
             <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
-              Besoin d'aide ?{' '}
+              Need help?{' '}
               <Link href="mailto:hello@taplinkr.com" className="font-medium text-brand-600 hover:text-brand-500 transition-colors">
-                Contactez notre support
+                Contact support
               </Link>
             </p>
           </motion.div>

@@ -339,7 +339,7 @@ export default function EditLinkPage() {
                       whileTap={{ scale: 0.98 }}
                     >
                       <Plus className="w-4 h-4" />
-                      <span>Ajouter un lien</span>
+                      <span>Add a link</span>
                     </motion.button>
                   </div>
 

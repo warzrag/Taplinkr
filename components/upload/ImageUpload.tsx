@@ -271,7 +271,7 @@ export default function ImageUpload({
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ajouter une photo</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Add a photo</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Optionnel, modifiable plus tard</p>
             </div>
           </motion.button>

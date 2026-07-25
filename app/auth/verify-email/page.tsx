@@ -139,7 +139,7 @@ export default function VerifyEmailPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Se connecter maintenant
+                  Log in now
                   <ArrowRight className="w-4 h-4" />
                 </motion.button>
               </Link>

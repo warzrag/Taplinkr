@@ -329,7 +329,7 @@ export default function LinkCard({
               <button
                 onClick={handleEdit}
                 className="p-1.5 sm:p-2.5 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg sm:rounded-xl transition-all duration-200 hover:shadow-md"
-                title="Modifier"
+                title="Edit"
               >
                 <Edit size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>

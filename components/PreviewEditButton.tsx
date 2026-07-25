@@ -33,7 +33,7 @@ export default function PreviewEditButton({ onClick, variant = 'option1' }: Prev
               className="flex items-center gap-2"
             >
               <Edit size={16} />
-              <span className="text-sm font-medium">Modifier</span>
+              <span className="text-sm font-medium">Edit</span>
             </motion.div>
           ) : (
             <motion.div
@@ -62,7 +62,7 @@ export default function PreviewEditButton({ onClick, variant = 'option1' }: Prev
           className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-l-xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors flex items-center gap-2"
         >
           <Edit size={16} className="text-gray-600 dark:text-gray-400" />
-          <span className="text-sm text-gray-700 dark:text-gray-300">Modifier</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">Edit</span>
         </button>
         <button
           onClick={onClick}
@@ -124,7 +124,7 @@ export default function PreviewEditButton({ onClick, variant = 'option1' }: Prev
       >
         <div className="px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 flex items-center gap-2">
           <Edit size={16} className="text-gray-600 dark:text-gray-400" />
-          <span className="text-sm text-gray-700 dark:text-gray-300">Modifier</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">Edit</span>
         </div>
         <div className="absolute -top-1 -right-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] px-2 py-0.5 rounded-full font-medium animate-pulse">
           LIVE

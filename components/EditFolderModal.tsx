@@ -124,7 +124,7 @@ export default function EditFolderModal({ isOpen, folder, onClose, onSave }: Edi
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-900">
-                {folder ? 'Modifier le dossier' : 'Nouveau dossier'}
+                {folder ? 'Edit folder' : 'New folder'}
               </h2>
               <button
                 onClick={handleClose}
