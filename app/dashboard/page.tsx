@@ -6,14 +6,16 @@ import { useSession } from 'next-auth/react'
 import {
   ArrowUpRight,
   BarChart3,
+  Bot,
   Eye,
   ExternalLink,
   Link2,
-  MousePointer2,
+  Percent,
   Plus,
+  Users,
   Zap,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useLinks } from '@/contexts/LinksContext'
 import { useProfile } from '@/contexts/ProfileContext'
@@ -25,24 +27,78 @@ const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
 
 const cardClass = 'rounded-2xl border border-[#252532] bg-[#11111a] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.12)]'
 
+type Period = 'today' | '7d' | '30d'
+
+interface DashboardMetrics {
+  pageViews: number
+  visitsWithClick: number
+  clickThroughRate: number
+  botsFiltered: number
+}
+
+const periodLabels: Record<Period, string> = {
+  today: 'Today',
+  '7d': 'Last 7 days',
+  '30d': 'Last 30 days',
+}
+
+function periodStart(period: Period) {
+  const start = new Date()
+  if (period !== 'today') {
+    start.setDate(start.getDate() - (period === '7d' ? 6 : 29))
+  }
+  start.setHours(0, 0, 0, 0)
+  return start.toISOString()
+}
+
 export default function Dashboard() {
   const { data: session } = useSession()
-  const { links, loading, refreshLinks } = useLinks()
+  const { links, refreshLinks } = useLinks()
   const { profile } = useProfile()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
+  const [period, setPeriod] = useState<Period>('30d')
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
+    pageViews: 0,
+    visitsWithClick: 0,
+    clickThroughRate: 0,
+    botsFiltered: 0,
+  })
+  const [metricsLoading, setMetricsLoading] = useState(true)
+  const [metricsError, setMetricsError] = useState('')
 
   const name = profile?.name || session?.user?.name || session?.user?.email?.split('@')[0] || 'creator'
-  const totalClicks = links.reduce((sum, item) => sum + (item.clicks || 0), 0)
-  const totalViews = links.reduce((sum, item) => sum + (item.views || 0), 0)
-  const activeLinks = links.filter(item => item.isActive).length
-  const directLinks = links.filter(item => item.isDirect).length
   const recentLinks = links.slice(0, 4)
 
+  useEffect(() => {
+    const controller = new AbortController()
+    const loadMetrics = async () => {
+      setMetricsLoading(true)
+      setMetricsError('')
+      try {
+        const response = await fetch(
+          `/api/dashboard/metrics?period=${period}&start=${encodeURIComponent(periodStart(period))}`,
+          { signal: controller.signal, cache: 'no-store' },
+        )
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || 'Unable to load dashboard metrics')
+        setMetrics(data)
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return
+        setMetricsError(error instanceof Error ? error.message : 'Unable to load dashboard metrics')
+      } finally {
+        if (!controller.signal.aborted) setMetricsLoading(false)
+      }
+    }
+
+    loadMetrics()
+    return () => controller.abort()
+  }, [period])
+
   const stats = [
-    { label: 'Total clicks', value: totalClicks, icon: MousePointer2, color: 'text-violet-400' },
-    { label: 'Total views', value: totalViews, icon: Eye, color: 'text-sky-400' },
-    { label: 'Active links', value: activeLinks, icon: Link2, color: 'text-emerald-400' },
-    { label: 'Direct links', value: directLinks, icon: Zap, color: 'text-amber-400' },
+    { label: 'Page views', value: metrics.pageViews, suffix: '', icon: Eye, color: 'text-sky-400' },
+    { label: 'Visits with a click', value: metrics.visitsWithClick, suffix: '', icon: Users, color: 'text-violet-400' },
+    { label: 'Click-through rate', value: metrics.clickThroughRate, suffix: '%', icon: Percent, color: 'text-emerald-400' },
+    { label: 'Bots filtered', value: metrics.botsFiltered, suffix: '', icon: Bot, color: 'text-amber-400' },
   ]
 
   return (
@@ -50,7 +106,7 @@ export default function Dashboard() {
       <div className="mx-auto max-w-[1500px]">
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-[#8e8ea2]">Overview · Last 30 days</p>
+            <p className="text-sm font-semibold text-[#8e8ea2]">Overview · {periodLabels[period]}</p>
             <h1 className="mt-2 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Welcome, {name}</h1>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -71,6 +127,36 @@ export default function Dashboard() {
           </div>
         </header>
 
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+          <div className="inline-flex rounded-xl border border-[#2b2b39] bg-[#11111a] p-1">
+            {([
+              ['today', 'Today'],
+              ['7d', '7 days'],
+              ['30d', '30 days'],
+            ] as Array<[Period, string]>).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setPeriod(value)}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                  period === value
+                    ? 'bg-violet-500 text-white shadow-lg shadow-violet-950/30'
+                    : 'text-[#8e8ea2] hover:text-white'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="text-sm text-[#77778a]">Real traffic only · updates when the period changes</p>
+        </div>
+
+        {metricsError && (
+          <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {metricsError}
+          </div>
+        )}
+
         <section className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map(stat => (
             <article key={stat.label} className={cardClass}>
@@ -78,7 +164,9 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-[#a4a4b5]">{stat.label}</p>
                 <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </div>
-              <p className="mt-7 text-4xl font-bold tracking-tight">{loading ? '—' : stat.value.toLocaleString('en-US')}</p>
+              <p className="mt-7 text-4xl font-bold tracking-tight">
+                {metricsLoading ? '—' : `${stat.value.toLocaleString('en-US', { maximumFractionDigits: 1 })}${stat.suffix}`}
+              </p>
             </article>
           ))}
         </section>
