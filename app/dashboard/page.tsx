@@ -34,6 +34,16 @@ interface DashboardMetrics {
   visitsWithClick: number
   clickThroughRate: number
   botsFiltered: number
+  links: Array<{
+    id: string
+    name: string
+    slug: string
+  }>
+  dailyClicks: Array<{
+    date: string
+    clicks: Record<string, number>
+    total: number
+  }>
 }
 
 const periodLabels: Record<Period, string> = {
@@ -62,6 +72,8 @@ export default function Dashboard() {
     visitsWithClick: 0,
     clickThroughRate: 0,
     botsFiltered: 0,
+    links: [],
+    dailyClicks: [],
   })
   const [metricsLoading, setMetricsLoading] = useState(true)
   const [metricsError, setMetricsError] = useState('')
@@ -75,8 +87,9 @@ export default function Dashboard() {
       setMetricsLoading(true)
       setMetricsError('')
       try {
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
         const response = await fetch(
-          `/api/dashboard/metrics?period=${period}&start=${encodeURIComponent(periodStart(period))}`,
+          `/api/dashboard/metrics?period=${period}&start=${encodeURIComponent(periodStart(period))}&timeZone=${encodeURIComponent(timeZone)}`,
           { signal: controller.signal, cache: 'no-store' },
         )
         const data = await response.json()
@@ -169,6 +182,73 @@ export default function Dashboard() {
               </p>
             </article>
           ))}
+        </section>
+
+        <section className={`${cardClass} mt-8 p-0`}>
+          <div className="border-b border-[#252532] px-6 py-5">
+            <h2 className="text-lg font-semibold">Daily clicks by link</h2>
+            <p className="mt-1 text-sm text-[#858598]">
+              Real clicks for each link, shown in your local time zone.
+            </p>
+          </div>
+          {metricsLoading ? (
+            <div className="space-y-3 p-6">
+              {[1, 2, 3].map(row => <div key={row} className="h-10 animate-pulse rounded-lg bg-white/[0.035]" />)}
+            </div>
+          ) : metrics.links.length ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-[#252532] text-left text-xs uppercase tracking-[0.12em] text-[#77778a]">
+                    <th className="sticky left-0 z-10 min-w-36 bg-[#11111a] px-6 py-4 font-semibold">Date</th>
+                    {metrics.links.map(link => (
+                      <th key={link.id} className="min-w-40 px-5 py-4 font-semibold">
+                        <span className="block max-w-48 truncate normal-case tracking-normal text-[#b7b7c6]" title={link.name}>
+                          {link.name}
+                        </span>
+                        <span className="mt-1 block max-w-48 truncate normal-case tracking-normal text-[#666679]">
+                          /{link.slug}
+                        </span>
+                      </th>
+                    ))}
+                    <th className="min-w-24 px-6 py-4 text-right font-semibold">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#20202b]">
+                  {[...metrics.dailyClicks].reverse().map(day => (
+                    <tr key={day.date} className="transition hover:bg-white/[0.02]">
+                      <th className="sticky left-0 z-10 whitespace-nowrap bg-[#11111a] px-6 py-4 text-left font-semibold text-[#d8d8e2]">
+                        {new Intl.DateTimeFormat('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: period === '30d' ? 'numeric' : undefined,
+                        }).format(new Date(`${day.date}T12:00:00`))}
+                      </th>
+                      {metrics.links.map(link => {
+                        const clicks = day.clicks[link.id] || 0
+                        return (
+                          <td key={link.id} className="px-5 py-4">
+                            <span className={`inline-flex min-w-10 justify-center rounded-lg px-2.5 py-1 font-semibold ${
+                              clicks > 0 ? 'bg-violet-500/12 text-violet-300' : 'text-[#555568]'
+                            }`}>
+                              {clicks.toLocaleString('en-US')}
+                            </span>
+                          </td>
+                        )
+                      })}
+                      <td className="px-6 py-4 text-right font-bold text-white">
+                        {day.total.toLocaleString('en-US')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="px-6 py-12 text-center text-sm text-[#77778a]">
+              Create a link to start tracking daily clicks.
+            </div>
+          )}
         </section>
 
         <section className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">

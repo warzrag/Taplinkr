@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 
 import { authOptions } from '@/lib/auth'
 import {
+  calculateDailyLinkClicks,
   calculateDashboardMetrics,
   dashboardPeriodStart,
   type DashboardPeriod,
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
 
     const requestedPeriod = request.nextUrl.searchParams.get('period') as DashboardPeriod | null
     const period = requestedPeriod && periods.has(requestedPeriod) ? requestedPeriod : '30d'
+    const timeZone = request.nextUrl.searchParams.get('timeZone') || 'UTC'
     const now = new Date()
     const requestedStart = request.nextUrl.searchParams.get('start')
     const parsedStart = requestedStart ? new Date(requestedStart) : null
@@ -50,7 +52,14 @@ export async function GET(request: NextRequest) {
             ],
           }
         : { userId: session.user.id },
-      select: { id: true, isDirect: true },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        internalName: true,
+        isDirect: true,
+      },
+      orderBy: { order: 'asc' },
     })
     const linkIds = new Set(links.map(link => link.id))
 
@@ -62,6 +71,8 @@ export async function GET(request: NextRequest) {
           filteredClicks: [],
           directLinkIds: new Set(),
         }),
+        links: [],
+        dailyClicks: [],
       })
     }
 
@@ -73,6 +84,7 @@ export async function GET(request: NextRequest) {
         select: {
           id: true,
           linkId: true,
+          createdAt: true,
           ip: true,
           sessionId: true,
           multiLinkId: true,
@@ -92,12 +104,25 @@ export async function GET(request: NextRequest) {
       filteredClicks: recentFilteredClicks.filter(click => linkIds.has(click.linkId)),
       directLinkIds: new Set(links.filter(link => link.isDirect).map(link => link.id)),
     })
+    const dailyBreakdown = calculateDailyLinkClicks({
+      period,
+      now,
+      timeZone,
+      clicks: recentClicks.filter(click => linkIds.has(click.linkId)),
+      links: links.map(link => ({
+        id: link.id,
+        name: link.internalName?.trim() || link.title,
+        slug: link.slug,
+        isDirect: link.isDirect,
+      })),
+    })
 
     return NextResponse.json({
       period,
       start: start.toISOString(),
       end: now.toISOString(),
       ...metrics,
+      ...dailyBreakdown,
     }, {
       headers: {
         'Cache-Control': 'private, no-store, max-age=0, must-revalidate',

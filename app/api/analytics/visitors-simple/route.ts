@@ -41,6 +41,7 @@ export async function GET(request: Request) {
         id: true,
         slug: true,
         title: true,
+        internalName: true,
         multiLinks: { select: { id: true, title: true } },
       },
     })
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
     }
     
     // Créer un map pour accès rapide aux infos des liens
-    const linkMap = new Map<string, { slug: string; title: string; multiLinks: Array<{ id: string; title: string }> }>(
+    const linkMap = new Map<string, { slug: string; title: string; internalName: string | null; multiLinks: Array<{ id: string; title: string }> }>(
       userLinks.map(link => [link.id, link])
     )
 
@@ -205,7 +206,7 @@ export async function GET(request: Request) {
           longitude: click.longitude || undefined
         },
         linkSlug: link?.slug || 'unknown',
-        linkTitle: link?.title || 'Deleted link',
+        linkTitle: link?.internalName?.trim() || link?.title || 'Deleted link',
         browser: browser,
         os: os,
         referrer: click.referer || '',
