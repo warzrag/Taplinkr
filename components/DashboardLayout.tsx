@@ -32,7 +32,7 @@ interface DashboardLayoutProps {
 const navItems = [
   { icon: LayoutGrid, label: 'Overview', href: '/dashboard' },
   { icon: ExternalLink, label: 'Links', href: '/dashboard/links' },
-  { icon: FolderKanban, label: 'Clients', href: '/dashboard/folders' },
+  { icon: FolderKanban, label: 'Folders', href: '/dashboard/folders' },
   { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' },
   { icon: MousePointerClick, label: 'Click log', href: '/dashboard/visitors' },
   { icon: Users, label: 'Team', href: '/dashboard/team' },

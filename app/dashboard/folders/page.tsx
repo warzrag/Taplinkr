@@ -446,12 +446,12 @@ export default function FoldersPage() {
               </button>
             </Link>
             <div className="flex-1">
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-violet-400">Client organization</p>
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-violet-400">Link organization</p>
               <h1 className="mt-2 text-4xl font-bold tracking-[-0.04em] text-white">
-                Clients, categories & links
+                Folders, categories & links
               </h1>
               <p className="mt-2 text-[#9696a8]">
-                Create one client folder, add platform categories, then drag links where they belong.
+                Group links by niche, platform, campaign, or any structure that fits your workflow.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -469,7 +469,7 @@ export default function FoldersPage() {
               </motion.button>
               <div className="flex items-center gap-2 text-sm text-[#9696a8]">
                 <FolderPlus className="w-4 h-4" />
-                <span>Use subfolders for Twitter, Instagram, Reddit, and more</span>
+                <span>Create subfolders for niches, platforms, campaigns, and more</span>
               </div>
             </div>
           </div>
@@ -480,7 +480,7 @@ export default function FoldersPage() {
             <div>
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-violet-400" />
-                <h2 className="text-xl font-semibold">Clicks by client and category</h2>
+                <h2 className="text-xl font-semibold">Clicks by folder and category</h2>
               </div>
               <p className="mt-1 text-sm text-[#858598]">Real clicks only. Historical clicks stay with the folder they belonged to.</p>
             </div>
@@ -505,23 +505,23 @@ export default function FoldersPage() {
           </div>
 
           <div className="mt-6 grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-            {folders.length ? folders.map(client => {
-              const clientInsight = insights.find(item => item.id === client.id)
-              const categories = (client.children || []).map(category => ({
+            {folders.length ? folders.map(rootFolder => {
+              const folderInsight = insights.find(item => item.id === rootFolder.id)
+              const categories = (rootFolder.children || []).map(category => ({
                 folder: category,
                 insight: insights.find(item => item.id === category.id),
               }))
               return (
-                <article key={client.id} className="rounded-2xl border border-[#292936] bg-[#0b0b12] p-5">
+                <article key={rootFolder.id} className="rounded-2xl border border-[#292936] bg-[#0b0b12] p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="truncate text-lg font-semibold">{client.icon} {client.name}</p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-[#6f6f81]">Client total</p>
+                      <p className="truncate text-lg font-semibold">{rootFolder.icon} {rootFolder.name}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-[#6f6f81]">Folder total</p>
                     </div>
                     <div className="flex items-center gap-2 rounded-xl bg-violet-500/10 px-3 py-2 text-violet-300">
                       <MousePointerClick className="h-4 w-4" />
                       <span className="text-2xl font-bold">
-                        {insightsLoading ? '—' : (clientInsight?.totalClicks || 0).toLocaleString('en-US')}
+                        {insightsLoading ? '—' : (folderInsight?.totalClicks || 0).toLocaleString('en-US')}
                       </span>
                     </div>
                   </div>
@@ -538,22 +538,22 @@ export default function FoldersPage() {
                       </button>
                     )) : (
                       <p className="rounded-xl border border-dashed border-[#30303e] px-3 py-4 text-center text-sm text-[#77778a]">
-                        Add platform subfolders to compare channels.
+                        Add subfolders to compare categories.
                       </p>
                     )}
                   </div>
                   <button
                     type="button"
-                    onClick={() => setSelectedAnalyticsFolderId(client.id)}
+                    onClick={() => setSelectedAnalyticsFolderId(rootFolder.id)}
                     className="mt-4 w-full rounded-xl border border-[#30303e] px-3 py-2 text-sm font-semibold text-violet-300 transition hover:border-violet-500/50 hover:bg-violet-500/[0.06]"
                   >
-                    View client breakdown
+                    View folder breakdown
                   </button>
                 </article>
               )
             }) : (
               <div className="col-span-full rounded-xl border border-dashed border-[#30303e] px-5 py-10 text-center text-sm text-[#77778a]">
-                Create your first client folder below.
+                Create your first folder below.
               </div>
             )}
           </div>

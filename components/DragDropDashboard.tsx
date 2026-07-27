@@ -926,7 +926,7 @@ export default function DragDropDashboard({
                   <FolderIcon className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-sm text-gray-500 font-medium">Empty folder</p>
-                <p className="text-xs text-gray-400 mt-1">Drag links here or create platform categories</p>
+                <p className="text-xs text-gray-400 mt-1">Drag links here or create subfolders</p>
               </motion.div>
             )}
           </div>
@@ -953,8 +953,8 @@ export default function DragDropDashboard({
                 <FolderIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Clients & categories</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Drag links into the right platform category</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Folders & categories</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Organize links by niche, platform, campaign, or any structure you choose</p>
               </div>
             </div>
             <motion.button
@@ -964,7 +964,7 @@ export default function DragDropDashboard({
               whileTap={{ scale: 0.95 }}
             >
               <FolderPlus className="w-4 h-4" />
-              <span className="font-medium">New client</span>
+              <span className="font-medium">New folder</span>
             </motion.button>
           </div>
 
@@ -984,7 +984,7 @@ export default function DragDropDashboard({
                       <FolderPlus className="w-5 h-5 text-blue-600" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {createInParent ? 'New category' : 'New client'}
+                      {createInParent ? 'New subfolder' : 'New folder'}
                     </h3>
                   </div>
                   <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
@@ -993,7 +993,7 @@ export default function DragDropDashboard({
                       value={newFolderName}
                       onChange={(e) => setNewFolderName(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleCreateFolder()}
-                      placeholder={createInParent ? 'Category name (Twitter, Instagram...)' : 'Client name'}
+                      placeholder={createInParent ? 'Subfolder name (niche, platform, campaign...)' : 'Folder name'}
                       className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
                       autoFocus
                     />
@@ -1041,7 +1041,7 @@ export default function DragDropDashboard({
                   <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
                     <FolderIcon className="w-12 h-12 text-blue-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No clients yet</h3>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No folders yet</h3>
                   <p className="text-gray-500 mb-4 max-w-xs">
                     Create your first folder to organize your links
                   </p>
@@ -1049,7 +1049,7 @@ export default function DragDropDashboard({
                     onClick={() => setShowCreateForm(true)}
                     className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-shadow"
                   >
-                    Create my first client
+                    Create my first folder
                   </button>
                 </div>
               ) : (
