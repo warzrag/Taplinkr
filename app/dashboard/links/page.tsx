@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 
 import { useLinks } from '@/contexts/LinksContext'
+import { reconcileLiveClickCounts } from '@/lib/live-click-counts'
 import { Link as LinkType } from '@/types'
 
 const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
@@ -47,7 +48,9 @@ export default function LinksDashboard() {
   const [deletingLinkId, setDeletingLinkId] = useState<string | null>(null)
   const [liveClicks, setLiveClicks] = useState<Record<string, number>>({})
   const [clickDeltas, setClickDeltas] = useState<Record<string, number>>({})
+  const [clickCountsReady, setClickCountsReady] = useState(false)
   const liveClicksRef = useRef<Record<string, number>>({})
+  const clickCountsInitializedRef = useRef(false)
 
   useEffect(() => {
     setLiveClicks(current => {
@@ -87,23 +90,24 @@ export default function LinksDashboard() {
         const response = await fetch('/api/links/click-counts', {
           cache: 'no-store',
         })
-        if (!response.ok) return
+        if (!response.ok) {
+          if (!stopped) setClickCountsReady(true)
+          return
+        }
         const data = await response.json()
         const latestCounts: Array<{ id: string; clicks: number }> = data.counts || []
         if (!stopped) {
-          const nextClicks = Object.fromEntries(
-            latestCounts.map(item => [item.id, item.clicks || 0]),
+          const { nextClicks, increases } = reconcileLiveClickCounts(
+            latestCounts,
+            liveClicksRef.current,
+            clickCountsInitializedRef.current,
           )
-          const increases = latestCounts
-            .map(item => ({
-              id: item.id,
-              delta: (item.clicks || 0) - (liveClicksRef.current[item.id] ?? (item.clicks || 0)),
-            }))
-            .filter(item => item.delta > 0)
 
           unchangedRefreshes = increases.length ? 0 : unchangedRefreshes + 1
+          clickCountsInitializedRef.current = true
           liveClicksRef.current = nextClicks
           setLiveClicks(nextClicks)
+          setClickCountsReady(true)
 
           if (increases.length) {
             setClickDeltas(current => ({
@@ -127,6 +131,7 @@ export default function LinksDashboard() {
       } catch {
         // Keep the last known values and retry silently after the safe delay.
         unchangedRefreshes = Math.max(unchangedRefreshes, 8)
+        if (!stopped) setClickCountsReady(true)
       } finally {
         requestInProgress = false
         scheduleNextRefresh()
@@ -146,7 +151,7 @@ export default function LinksDashboard() {
       refreshClickCounts()
     }
 
-    scheduleNextRefresh()
+    void refreshClickCounts()
     window.addEventListener('focus', handleFocus)
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
@@ -243,7 +248,12 @@ export default function LinksDashboard() {
             </div>
           ) : personalLinks.length ? (
             <div className="space-y-2">
-              {personalLinks.map(item => (
+              {personalLinks.map(item => {
+                const displayedClicks = clickCountsReady
+                  ? (liveClicks[item.id] ?? item.clicks ?? 0)
+                  : null
+
+                return (
                 <article
                   key={item.id}
                   className="group grid min-h-[88px] items-center gap-4 rounded-xl border border-[#282835] bg-[#0b0b12] px-4 py-3 transition hover:border-[#3a3a4a] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_170px_132px]"
@@ -286,13 +296,13 @@ export default function LinksDashboard() {
                   >
                     <BarChart3 className="h-5 w-5 shrink-0 text-violet-400" />
                     <motion.span
-                      key={`${item.id}-${liveClicks[item.id] ?? item.clicks ?? 0}`}
+                      key={`${item.id}-${displayedClicks ?? 'loading'}`}
                       initial={clickDeltas[item.id] ? { opacity: 0.35, scale: 0.6, y: 8 } : false}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       transition={{ type: 'spring', stiffness: 480, damping: 22 }}
                       className="text-xl font-bold leading-none"
                     >
-                      {(liveClicks[item.id] ?? item.clicks ?? 0).toLocaleString('en-US')}
+                      {displayedClicks === null ? '—' : displayedClicks.toLocaleString('en-US')}
                     </motion.span>
                     <span className="text-xs font-semibold uppercase tracking-wide text-[#89899c]">clicks</span>
                     <AnimatePresence>
@@ -341,7 +351,8 @@ export default function LinksDashboard() {
                     )}
                   </div>
                 </article>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="px-6 py-20 text-center">
