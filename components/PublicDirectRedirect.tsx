@@ -4,11 +4,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { ArrowUpRight, Loader2 } from 'lucide-react'
 
 interface PublicDirectRedirectProps {
+  linkId: string
   destination: string
   externalBrowserUrl: string | null
 }
 
 export default function PublicDirectRedirect({
+  linkId,
   destination,
   externalBrowserUrl,
 }: PublicDirectRedirectProps) {
@@ -27,6 +29,18 @@ export default function PublicDirectRedirect({
   }, [automaticUrl])
 
   useEffect(() => {
+    const payload = JSON.stringify({ linkId })
+    const beacon = new Blob([payload], { type: 'application/json' })
+    const queued = navigator.sendBeacon?.('/api/track-link-click', beacon) ?? false
+    if (!queued) {
+      void fetch('/api/track-link-click', {
+        method: 'POST',
+        body: payload,
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+      }).catch(() => undefined)
+    }
+
     // A tiny client-side transition lets the browser register TapLinkr's title
     // and favicon while remaining effectively instant for the visitor.
     const redirectTimer = window.setTimeout(() => {
@@ -38,7 +52,7 @@ export default function PublicDirectRedirect({
       window.clearTimeout(redirectTimer)
       window.clearTimeout(fallbackTimer)
     }
-  }, [automaticUrl])
+  }, [automaticUrl, linkId])
 
   return (
     <>

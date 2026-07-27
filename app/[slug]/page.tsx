@@ -1,5 +1,5 @@
-import { cache } from 'react'
 import { cookies, headers } from 'next/headers'
+import { unstable_cache } from 'next/cache'
 import { notFound, redirect } from 'next/navigation'
 
 import PublicDirectRedirect from '@/components/PublicDirectRedirect'
@@ -13,8 +13,6 @@ import {
   isInstagramInAppBrowser,
 } from '@/lib/external-browser'
 import { prisma } from '@/lib/prisma'
-import { assessClickRequest, recordFilteredClick } from '@/lib/click-quality'
-import { buildClickMetadata } from '@/lib/click-metadata'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 
@@ -38,27 +36,48 @@ const publicUserSelect = {
   bio: true,
 } as const
 
-async function attachMultiLinks(link: any) {
-  const multiLinks = await prisma.multiLink.findMany({
-    where: { parentLinkId: link.id },
-  })
+async function hydrateLandingPage(link: any, knownUser?: any) {
+  const [user, passwordProtection, multiLinks] = await Promise.all([
+    knownUser
+      ? Promise.resolve(knownUser)
+      : prisma.user.findUnique({
+          where: { id: link.userId },
+          select: publicUserSelect,
+        }),
+    prisma.passwordProtection.findUnique({
+      where: { linkId: link.id },
+      select: { hint: true },
+    }),
+    prisma.multiLink.findMany({
+      where: { parentLinkId: link.id },
+    }),
+  ])
 
   return {
     ...link,
+    user,
+    passwordProtection,
     multiLinks: [...multiLinks].sort((a: any, b: any) => (a.order ?? 999) - (b.order ?? 999)),
   }
 }
 
-const getLinkData = cache(async (slug: string) => {
+const getLinkData = unstable_cache(async (slug: string) => {
   const link = await prisma.link.findUnique({
     where: { slug },
-    include: {
-      user: { select: publicUserSelect },
-      passwordProtection: { select: { hint: true } },
-    },
   })
 
-  if (link) return attachMultiLinks(link)
+  if (link) {
+    // Direct links only need the destination and optional password gate.
+    // Avoid hydrating the owner and child links on the critical redirect path.
+    if (link.isDirect) {
+      const passwordProtection = await prisma.passwordProtection.findUnique({
+        where: { linkId: link.id },
+        select: { hint: true },
+      })
+      return toPlainObject({ ...link, passwordProtection, multiLinks: [] })
+    }
+    return toPlainObject(await hydrateLandingPage(link))
+  }
 
   // Users expect /username to work. When no link slug matches, render the
   // first active public page owned by that username.
@@ -79,12 +98,8 @@ const getLinkData = cache(async (slug: string) => {
 
   const preferredLink = activeLinks.find((item: any) => !item.isDirect) || activeLinks[0]
   if (!preferredLink) return null
-  const passwordProtection = await prisma.passwordProtection.findUnique({
-    where: { linkId: preferredLink.id },
-    select: { hint: true },
-  })
-  return attachMultiLinks({ ...preferredLink, user, passwordProtection })
-})
+  return toPlainObject(await hydrateLandingPage(preferredLink, user))
+}, ['public-link-by-slug'], { revalidate: 15 })
 
 export default async function LinkPage(props: PageProps) {
   const params = await props.params;
@@ -112,42 +127,6 @@ export default async function LinkPage(props: PageProps) {
     const requestHeaders = await headers()
     const userAgent = (requestHeaders.get('user-agent') || '').slice(0, 1000)
 
-    try {
-      const assessment = await assessClickRequest({
-        request: { headers: requestHeaders },
-        linkId: link.id,
-      })
-
-      if (assessment.counted) {
-        const clickMetadata = await buildClickMetadata({
-          assessment,
-          headers: requestHeaders,
-        })
-        await prisma.$transaction([
-          prisma.click.create({
-            data: {
-              linkId: link.id,
-              userId: link.userId,
-              folderIdAtClick: link.folderId || null,
-              ...clickMetadata,
-            },
-          }),
-          prisma.link.update({
-            where: { id: link.id },
-            data: { clicks: { increment: 1 } },
-          }),
-        ])
-      } else {
-        await recordFilteredClick({
-          linkId: link.id,
-          userId: link.userId,
-          assessment,
-        })
-      }
-    } catch (error) {
-      console.error('Error tracking direct link:', error)
-    }
-
     const referer = requestHeaders.get('referer') || ''
     let externalBrowserUrl: string | null = null
 
@@ -167,6 +146,7 @@ export default async function LinkPage(props: PageProps) {
     // browsers associate the destination's branding with it.
     return (
       <PublicDirectRedirect
+        linkId={link.id}
         destination={destination}
         externalBrowserUrl={externalBrowserUrl}
       />
