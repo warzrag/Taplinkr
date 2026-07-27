@@ -358,71 +358,81 @@ function SortableLink({
     <div
       ref={setNodeRef}
       style={style}
-      className={`mb-2 flex items-center gap-3 rounded-xl border border-[#292936] bg-[#151520] p-3 transition hover:border-[#3a3a4a] ${
+      className={`mb-2 rounded-xl border border-[#292936] bg-[#151520] p-3 transition hover:border-[#3a3a4a] ${
         isDragging ? 'cursor-grabbing opacity-40' : ''
       }`}
     >
-      <button
-        type="button"
-        className="cursor-grab rounded-lg p-2 text-[#666679] hover:bg-white/5 hover:text-white active:cursor-grabbing"
-        title="Drag this link"
-        {...listeners}
-        {...attributes}
-      >
-        <GripVertical className="h-4 w-4" />
-      </button>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-base">
-        {link.icon || <Link2 className="h-4 w-4 text-violet-300" />}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-white">{link.internalName || link.title}</p>
-        <p className="mt-0.5 truncate text-xs text-[#77778a]">/{link.slug}</p>
-      </div>
-      <span className="hidden rounded-lg bg-violet-500/10 px-2.5 py-1.5 text-xs font-semibold text-violet-300 sm:inline">
-        {(link.clicks || 0).toLocaleString()} clicks
-      </span>
-      <button
-        type="button"
-        onClick={() => onToggle(link.id, !link.isActive)}
-        className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
-          link.isActive
-            ? 'bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20'
-            : 'bg-white/5 text-[#858598] hover:bg-white/10'
-        }`}
-        title={link.isActive ? 'Click to pause this link' : 'Click to activate this link'}
-      >
-        {link.isActive ? 'Active' : 'Paused'}
-      </button>
-      <button
-        type="button"
-        onClick={() => onEdit(link)}
-        className="rounded-lg p-2 text-[#858598] hover:bg-white/5 hover:text-white"
-        title="Edit link"
-      >
-        <Edit2 className="h-4 w-4" />
-      </button>
-      {onRemoveFromFolder && (
+      <div className="flex min-w-0 items-center gap-2.5">
         <button
           type="button"
-          onClick={() => onRemoveFromFolder(link.id)}
-          className="rounded-lg p-2 text-[#858598] hover:bg-cyan-500/10 hover:text-cyan-300"
-          title="Move back to Inbox"
+          className="cursor-grab rounded-lg p-2 text-[#666679] hover:bg-white/5 hover:text-white active:cursor-grabbing"
+          title="Drag this link"
+          {...listeners}
+          {...attributes}
         >
-          <Link2 className="h-4 w-4" />
+          <GripVertical className="h-4 w-4" />
         </button>
-      )}
-      <button
-        type="button"
-        onClick={() => {
-          if (confirm(`Delete "${link.internalName || link.title}" permanently?`)) {
-            onDelete(link.id)
-          }
-        }}
-        className="rounded-lg p-2 text-[#858598] hover:bg-red-500/10 hover:text-red-300"
-        title="Delete link"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-base">
+          {link.icon || <Link2 className="h-4 w-4 text-violet-300" />}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#666679]">
+            {link.internalName ? 'Internal name' : 'Link name'}
+          </p>
+          <p className="mt-0.5 truncate text-sm font-semibold text-white">{link.internalName || link.title}</p>
+          <p className="mt-0.5 truncate text-xs text-[#77778a]">/{link.slug}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onEdit(link)}
+          className="shrink-0 rounded-lg p-2 text-[#858598] hover:bg-white/5 hover:text-white"
+          title="Edit link"
+        >
+          <Edit2 className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#292936] pt-3">
+        <span className="rounded-lg bg-violet-500/10 px-2.5 py-1.5 text-xs font-semibold text-violet-300">
+          {(link.clicks || 0).toLocaleString()} clicks
+        </span>
+        <button
+          type="button"
+          onClick={() => onToggle(link.id, !link.isActive)}
+          className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
+            link.isActive
+              ? 'bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20'
+              : 'bg-white/5 text-[#858598] hover:bg-white/10'
+          }`}
+          title={link.isActive ? 'Click to pause this link' : 'Click to activate this link'}
+        >
+          {link.isActive ? 'Active' : 'Paused'}
+        </button>
+        <span className="flex-1" />
+        {onRemoveFromFolder && (
+          <button
+            type="button"
+            onClick={() => onRemoveFromFolder(link.id)}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#858598] hover:bg-cyan-500/10 hover:text-cyan-300"
+            title="Move back to Inbox"
+          >
+            <Link2 className="h-3.5 w-3.5" />
+            Inbox
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            if (confirm(`Delete "${link.internalName || link.title}" permanently?`)) {
+              onDelete(link.id)
+            }
+          }}
+          className="rounded-lg p-2 text-[#858598] hover:bg-red-500/10 hover:text-red-300"
+          title="Delete link"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   )
 }
