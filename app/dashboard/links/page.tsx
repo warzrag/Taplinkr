@@ -2,13 +2,13 @@
 
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import {
   BarChart3,
   Copy,
   Edit3,
-  ExternalLink,
   GripVertical,
   LayoutGrid,
   Link2,
@@ -45,6 +45,92 @@ export default function LinksDashboard() {
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
   const [deletingLinkId, setDeletingLinkId] = useState<string | null>(null)
+  const [liveClicks, setLiveClicks] = useState<Record<string, number>>({})
+  const [clickDeltas, setClickDeltas] = useState<Record<string, number>>({})
+  const liveClicksRef = useRef<Record<string, number>>({})
+
+  useEffect(() => {
+    setLiveClicks(current => {
+      const next = { ...current }
+      personalLinks.forEach(item => {
+        if (next[item.id] === undefined) next[item.id] = item.clicks || 0
+      })
+      liveClicksRef.current = next
+      return next
+    })
+  }, [personalLinks])
+
+  useEffect(() => {
+    let stopped = false
+    let requestInProgress = false
+    const animationTimers = new Map<string, number>()
+
+    const refreshClickCounts = async () => {
+      if (requestInProgress || document.visibilityState === 'hidden') return
+      requestInProgress = true
+      try {
+        const response = await fetch(`/api/links/fast?live=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+        })
+        if (!response.ok) return
+        const data = await response.json()
+        const latestLinks: LinkType[] = data.links || data.personalLinks || (Array.isArray(data) ? data : [])
+        if (!stopped) {
+          const nextClicks = Object.fromEntries(
+            latestLinks.map(item => [item.id, item.clicks || 0]),
+          )
+          const increases = latestLinks
+            .map(item => ({
+              id: item.id,
+              delta: (item.clicks || 0) - (liveClicksRef.current[item.id] ?? (item.clicks || 0)),
+            }))
+            .filter(item => item.delta > 0)
+
+          liveClicksRef.current = nextClicks
+          setLiveClicks(nextClicks)
+
+          if (increases.length) {
+            setClickDeltas(current => ({
+              ...current,
+              ...Object.fromEntries(increases.map(item => [item.id, item.delta])),
+            }))
+            increases.forEach(item => {
+              const existingTimer = animationTimers.get(item.id)
+              if (existingTimer) window.clearTimeout(existingTimer)
+              animationTimers.set(item.id, window.setTimeout(() => {
+                setClickDeltas(current => {
+                  const next = { ...current }
+                  delete next[item.id]
+                  return next
+                })
+                animationTimers.delete(item.id)
+              }, 1400))
+            })
+          }
+        }
+      } catch {
+        // Keep the last known values and retry silently on the next interval.
+      } finally {
+        requestInProgress = false
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') refreshClickCounts()
+    }
+    const interval = window.setInterval(refreshClickCounts, 5000)
+    window.addEventListener('focus', refreshClickCounts)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      stopped = true
+      window.clearInterval(interval)
+      animationTimers.forEach(timer => window.clearTimeout(timer))
+      window.removeEventListener('focus', refreshClickCounts)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
 
   const copyUrl = async (slug: string) => {
     await navigator.clipboard.writeText(`${window.location.origin}/${slug}`)
@@ -133,7 +219,7 @@ export default function LinksDashboard() {
               {personalLinks.map(item => (
                 <article
                   key={item.id}
-                  className="group grid min-h-[88px] items-center gap-4 rounded-xl border border-[#282835] bg-[#0b0b12] px-4 py-3 transition hover:border-[#3a3a4a] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_140px_132px]"
+                  className="group grid min-h-[88px] items-center gap-4 rounded-xl border border-[#282835] bg-[#0b0b12] px-4 py-3 transition hover:border-[#3a3a4a] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_170px_132px]"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <GripVertical className="hidden h-5 w-5 shrink-0 text-[#5e5e70] sm:block" />
@@ -165,10 +251,37 @@ export default function LinksDashboard() {
 
                   <Link
                     href={`/dashboard/analytics/${item.id}`}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-[#d6d6e0] transition hover:text-violet-300"
+                    className={`relative inline-flex items-center gap-2.5 rounded-xl border px-3 py-2 text-[#d6d6e0] transition duration-500 hover:text-violet-200 ${
+                      clickDeltas[item.id]
+                        ? 'scale-[1.04] border-emerald-400/50 bg-emerald-400/10 shadow-[0_0_28px_rgba(52,211,153,0.22)]'
+                        : 'border-violet-500/15 bg-violet-500/[0.07] hover:border-violet-500/35 hover:bg-violet-500/10'
+                    }`}
                   >
-                    <BarChart3 className="h-4 w-4" />
-                    {item.clicks || 0} clicks
+                    <BarChart3 className="h-5 w-5 shrink-0 text-violet-400" />
+                    <motion.span
+                      key={`${item.id}-${liveClicks[item.id] ?? item.clicks ?? 0}`}
+                      initial={clickDeltas[item.id] ? { opacity: 0.35, scale: 0.6, y: 8 } : false}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ type: 'spring', stiffness: 480, damping: 22 }}
+                      className="text-xl font-bold leading-none"
+                    >
+                      {(liveClicks[item.id] ?? item.clicks ?? 0).toLocaleString('en-US')}
+                    </motion.span>
+                    <span className="text-xs font-semibold uppercase tracking-wide text-[#89899c]">clicks</span>
+                    <AnimatePresence>
+                      {clickDeltas[item.id] ? (
+                        <motion.span
+                          key={`delta-${item.id}-${liveClicks[item.id]}`}
+                          initial={{ opacity: 0, y: 4, scale: 0.7 }}
+                          animate={{ opacity: 1, y: -18, scale: 1 }}
+                          exit={{ opacity: 0, y: -30, scale: 0.85 }}
+                          transition={{ duration: 0.55, ease: 'easeOut' }}
+                          className="pointer-events-none absolute -right-1 -top-1 rounded-full bg-emerald-400 px-2 py-0.5 text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/30"
+                        >
+                          +{clickDeltas[item.id]}
+                        </motion.span>
+                      ) : null}
+                    </AnimatePresence>
                   </Link>
 
                   <div className="flex items-center justify-end gap-2">
@@ -226,8 +339,8 @@ export default function LinksDashboard() {
         </section>
 
         <p className="mt-4 flex items-center gap-2 text-xs text-[#6f6f81]">
-          <ExternalLink className="h-3.5 w-3.5" />
-          Status changes are applied immediately.
+          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+          Click counts update automatically every 5 seconds. Status changes are applied immediately.
         </p>
       </div>
 
