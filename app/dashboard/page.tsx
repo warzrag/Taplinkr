@@ -192,7 +192,7 @@ export default function Dashboard() {
                 >
                   <span className={`h-2.5 w-2.5 rounded-full ${item.isActive ? 'bg-emerald-400' : 'bg-[#4d4d5c]'}`} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{item.title}</p>
+                    <p className="truncate font-semibold">{item.internalName?.trim() || item.title}</p>
                     <p className="mt-1 truncate text-sm text-[#858598]">taplinkr.com/{item.slug}</p>
                   </div>
                   <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${item.isDirect ? 'bg-violet-500/10 text-violet-300' : 'bg-sky-500/10 text-sky-300'}`}>

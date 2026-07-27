@@ -36,6 +36,10 @@ function destinationLabel(url?: string | null) {
   }
 }
 
+function dashboardLinkName(item: LinkType) {
+  return item.internalName?.trim() || item.title
+}
+
 export default function LinksDashboard() {
   const { personalLinks, loading, refreshLinks } = useLinks()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
@@ -135,7 +139,7 @@ export default function LinksDashboard() {
                     <GripVertical className="hidden h-5 w-5 shrink-0 text-[#5e5e70] sm:block" />
                     <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.35)]' : 'bg-[#505060]'}`} />
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-white">{item.title}</p>
+                      <p className="truncate font-semibold text-white">{dashboardLinkName(item)}</p>
                       <button
                         onClick={() => copyUrl(item.slug)}
                         className="mt-1 flex max-w-full items-center gap-1.5 text-left text-sm text-[#8e8ea1] transition hover:text-violet-300"
