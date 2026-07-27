@@ -77,8 +77,6 @@ export default function FoldersPage() {
   useEffect(() => {
     setInsightsLoading(true)
     fetchInsights()
-    const interval = window.setInterval(fetchInsights, 10000)
-    return () => window.clearInterval(interval)
   }, [fetchInsights])
 
   // Récupérer les dossiers et les liens

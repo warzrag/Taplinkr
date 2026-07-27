@@ -127,6 +127,9 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Erreur API fast links:', error)
-    return NextResponse.json({ links: [] })
+    return NextResponse.json(
+      { error: 'Unable to load links right now' },
+      { status: 503 },
+    )
   }
 }

@@ -81,17 +81,20 @@ export async function GET(request: NextRequest) {
 
     const linkIds = new Set(links.map(link => link.id))
     const folderIds = new Set(folders.map(folder => folder.id))
-    const recentClicks = linkIds.size
-      ? await prisma.click.findMany({
-          where: { createdAt: { gte: start, lte: now } },
+    const clickGroups = linkIds.size
+      ? await Promise.all([...linkIds].map(linkId => prisma.click.findMany({
+          where: { linkId },
           select: {
             linkId: true,
             folderIdAtClick: true,
             multiLinkId: true,
             createdAt: true,
           },
-        })
+        })))
       : []
+    const recentClicks = clickGroups
+      .flat()
+      .filter(click => click.createdAt >= start && click.createdAt <= now)
 
     const insights = buildFolderInsights({
       period,

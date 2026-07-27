@@ -101,7 +101,9 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
             plan: user.plan,
             planExpiresAt: user.planExpiresAt,
-            sessionVersion: user.sessionVersion
+            sessionVersion: user.sessionVersion,
+            teamId: user.teamId,
+            teamRole: user.teamRole,
           }
         } catch (error) {
           console.error('❌ Auth error:', error)
@@ -177,6 +179,8 @@ export const authOptions: NextAuthOptions = {
           ;(user as any).plan = dbUser.plan
           ;(user as any).planExpiresAt = dbUser.planExpiresAt
           ;(user as any).sessionVersion = dbUser.sessionVersion
+          ;(user as any).teamId = dbUser.teamId
+          ;(user as any).teamRole = dbUser.teamRole
           
           return true
         } catch (error) {
@@ -196,44 +200,8 @@ export const authOptions: NextAuthOptions = {
         token.plan = (user as any).plan
         token.planExpiresAt = (user as any).planExpiresAt
         token.sessionVersion = (user as any).sessionVersion
-      } else if (token.id) {
-        // Vérifier si la session est toujours valide
-        try {
-          const currentUser = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: {
-              sessionVersion: true,
-              banned: true,
-              teamId: true,
-              teamRole: true,
-              role: true,
-              plan: true,
-              planExpiresAt: true
-            }
-          })
-
-          // Si l'utilisateur n'existe plus, est banni, ou sa session a été invalidée
-          if (!currentUser || currentUser.banned || currentUser.sessionVersion !== token.sessionVersion) {
-            console.log('🚫 Session invalidée pour:', token.id, {
-              exists: !!currentUser,
-              banned: currentUser?.banned,
-              sessionMismatch: currentUser?.sessionVersion !== token.sessionVersion
-            })
-            // Marquer le token comme invalide au lieu de retourner null
-            token.invalid = true
-            return token
-          }
-
-          // Mettre à jour les infos qui peuvent avoir changé
-          token.role = currentUser.role
-          token.plan = currentUser.plan
-          token.planExpiresAt = currentUser.planExpiresAt
-          token.teamId = currentUser.teamId
-          token.teamRole = currentUser.teamRole
-        } catch (error) {
-          console.error('❌ Erreur lors de la vérification du token JWT:', error)
-          // En cas d'erreur DB, garder le token tel quel
-        }
+        token.teamId = (user as any).teamId
+        token.teamRole = (user as any).teamRole
       }
       return token
     },

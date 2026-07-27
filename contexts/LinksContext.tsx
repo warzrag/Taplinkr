@@ -56,8 +56,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
       if (cached) {
         try {
           const { data, timestamp } = JSON.parse(cached)
-          // Cache valide pendant 5 secondes seulement (pour mises à jour rapides)
-          if (Date.now() - timestamp < 5000) {
+          // A recent snapshot prevents repeated Firestore reads on every navigation.
+          if (Date.now() - timestamp < 15 * 60 * 1000 && (data.links?.length || 0) > 0) {
             setLinks(data.links || [])
             setPersonalLinks(data.personalLinks || [])
             setTeamLinks(data.teamLinks || [])
@@ -65,9 +65,42 @@ export function LinksProvider({ children }: { children: ReactNode }) {
             setLoading(false)
             setHasLoaded(true)
             console.log('⚡ Liens chargés depuis cache:', data.links?.length || 0)
+            return
           }
         } catch (e) {
           console.error('Cache invalide:', e)
+        }
+      }
+
+      // The folders workspace keeps a second snapshot. It can restore visible
+      // links if a temporary database outage occurred after the main cache was cleared.
+      const folderSnapshot = localStorage.getItem('folders-page-cache')
+      if (folderSnapshot) {
+        try {
+          const parsed = JSON.parse(folderSnapshot)
+          const collectFolderLinks = (items: any[]): LinkType[] => items.flatMap(folder => [
+            ...(folder.links || []),
+            ...collectFolderLinks(folder.children || []),
+          ])
+          const recoveredLinks = [
+            ...(parsed.folders || []).flatMap((folder: any) => [
+              ...(folder.links || []),
+              ...collectFolderLinks(folder.children || []),
+            ]),
+            ...(parsed.unorganizedLinks || []),
+          ].filter((link: LinkType, index: number, all: LinkType[]) =>
+            all.findIndex(candidate => candidate.id === link.id) === index
+          )
+          if (recoveredLinks.length) {
+            setLinks(recoveredLinks)
+            setPersonalLinks(recoveredLinks)
+            setTeamLinks([])
+            setLoading(false)
+            setHasLoaded(true)
+            return
+          }
+        } catch (error) {
+          console.error('Unable to restore the folders snapshot:', error)
         }
       }
     } else {
@@ -211,7 +244,7 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     // Charger une seule fois au montage
     if (!hasLoaded) {
       console.log('🚀 Chargement initial des données')
-      refreshAll()
+      fetchLinks(false)
     }
   }, []) // Dépendances vides = une seule fois
 

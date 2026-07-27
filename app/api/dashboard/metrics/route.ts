@@ -76,11 +76,11 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Query only by date so Firestore can use its automatic single-field index,
-    // then apply team/link visibility in memory.
-    const [recentClicks, recentFilteredClicks] = await Promise.all([
-      prisma.click.findMany({
-        where: { createdAt: { gte: start, lte: now } },
+    // Read only clicks belonging to visible links. A global date query makes every
+    // dashboard visit consume reads for the entire platform.
+    const [clickGroups, filteredClickGroups] = await Promise.all([
+      Promise.all([...linkIds].map(linkId => prisma.click.findMany({
+        where: { linkId },
         select: {
           id: true,
           linkId: true,
@@ -89,26 +89,33 @@ export async function GET(request: NextRequest) {
           sessionId: true,
           multiLinkId: true,
         },
-      }),
-      prisma.filteredClick.findMany({
-        where: { createdAt: { gte: start, lte: now } },
+      }))),
+      Promise.all([...linkIds].map(linkId => prisma.filteredClick.findMany({
+        where: { linkId },
         select: {
           linkId: true,
           reason: true,
+          createdAt: true,
         },
-      }),
+      }))),
     ])
+    const recentClicks = clickGroups
+      .flat()
+      .filter(click => click.createdAt >= start && click.createdAt <= now)
+    const recentFilteredClicks = filteredClickGroups
+      .flat()
+      .filter(click => click.createdAt >= start && click.createdAt <= now)
 
     const metrics = calculateDashboardMetrics({
-      clicks: recentClicks.filter(click => linkIds.has(click.linkId)),
-      filteredClicks: recentFilteredClicks.filter(click => linkIds.has(click.linkId)),
+      clicks: recentClicks,
+      filteredClicks: recentFilteredClicks,
       directLinkIds: new Set(links.filter(link => link.isDirect).map(link => link.id)),
     })
     const dailyBreakdown = calculateDailyLinkClicks({
       period,
       now,
       timeZone,
-      clicks: recentClicks.filter(click => linkIds.has(click.linkId)),
+      clicks: recentClicks,
       links: links.map(link => ({
         id: link.id,
         name: link.internalName?.trim() || link.title,
