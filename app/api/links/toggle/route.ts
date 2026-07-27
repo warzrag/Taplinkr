@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -38,6 +39,7 @@ export async function PATCH(request: NextRequest) {
       data: { isActive }
     })
 
+    invalidatePublicLinkCache(existingLink.slug)
     return NextResponse.json(link)
   } catch (error) {
     console.error('Erreur lors du toggle du lien:', error)

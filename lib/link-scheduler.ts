@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { invalidatePublicLinkCache } from './public-link-cache'
 
 export interface ScheduleConfig {
   startDate?: Date
@@ -171,6 +172,7 @@ export class LinkScheduler {
           where: { id: link.id },
           data: { isActive: true }
         })
+        invalidatePublicLinkCache(link.slug)
         break
 
       case 'deactivate':
@@ -178,6 +180,7 @@ export class LinkScheduler {
           where: { id: link.id },
           data: { isActive: false }
         })
+        invalidatePublicLinkCache(link.slug)
         break
 
       case 'notify_start':

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 import {
   requireTeamPermission,
   TeamAction,
@@ -309,6 +310,7 @@ export async function PUT(request: Request) {
       request
     )
 
+    invalidatePublicLinkCache(link.slug, updatedLink.slug)
     return NextResponse.json({
       message: 'Link updated successfully',
       link: updatedLink

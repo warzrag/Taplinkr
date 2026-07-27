@@ -9,6 +9,7 @@ import { hasTeamActionPermission, TeamAction } from '@/lib/team-roles'
 import { getUpgradeMessage } from '@/lib/permissions'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import { RESERVED_USERNAMES } from '@/lib/username'
+import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 
 export async function POST(request: NextRequest) {
   try {
@@ -131,6 +132,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    invalidatePublicLinkCache(newLink.slug)
     return NextResponse.json({ ...newLink, multiLinks })
   } catch (error: any) {
     console.error('Erreur creation lien FINAL:', error)

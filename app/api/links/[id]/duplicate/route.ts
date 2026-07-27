@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { nanoid } from 'nanoid'
 import { getUpgradeMessage } from '@/lib/permissions'
 import { checkTeamLimit } from '@/lib/team-permissions'
+import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 
 export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
       }
     })
 
+    invalidatePublicLinkCache(duplicatedLink.slug)
     return NextResponse.json(duplicatedLink, { status: 201 })
   } catch (error) {
     console.error('Erreur lors de la duplication du lien:', error)

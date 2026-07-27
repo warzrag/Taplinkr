@@ -9,6 +9,10 @@ import {
   getExternalBrowserTarget,
 } from '@/lib/external-browser'
 import { prisma } from '@/lib/prisma'
+import {
+  PUBLIC_LINK_CACHE_SECONDS,
+  PUBLIC_LINK_CACHE_TAG,
+} from '@/lib/public-link-cache'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 
@@ -95,7 +99,10 @@ const getLinkData = unstable_cache(async (slug: string) => {
   const preferredLink = activeLinks.find((item: any) => !item.isDirect) || activeLinks[0]
   if (!preferredLink) return null
   return toPlainObject(await hydrateLandingPage(preferredLink, user))
-}, ['public-link-by-slug'], { revalidate: 15 })
+}, ['public-link-by-slug-v2'], {
+  revalidate: PUBLIC_LINK_CACHE_SECONDS,
+  tags: [PUBLIC_LINK_CACHE_TAG],
+})
 
 export default async function LinkPage(props: PageProps) {
   const params = await props.params;

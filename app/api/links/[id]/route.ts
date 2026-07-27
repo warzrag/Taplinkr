@@ -8,6 +8,7 @@ import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import { checkTeamPermission } from '@/lib/team-permissions'
 import { canDeleteLink } from '@/lib/team-links'
 import { RESERVED_USERNAMES } from '@/lib/username'
+import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -205,10 +206,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     console.log(`🗑️ Cache invalidé pour user ${session.user.id}`)
 
     // ⚡ Revalider la page publique pour mise à jour instantanée
-    if (existingLink.slug) {
-      revalidatePath(`/${existingLink.slug}`, 'page')
-      console.log(`🔄 Page revalidée: /${existingLink.slug}`)
-    }
+    invalidatePublicLinkCache(existingLink.slug, link.slug)
 
     return NextResponse.json(link)
   } catch (error) {
@@ -350,9 +348,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       affectedUsers.map(user => cache.del(`links:user:${user.id}`)),
     )
 
-    if (existingLink.slug) {
-      revalidatePath(`/${existingLink.slug}`, 'page')
-    }
+    invalidatePublicLinkCache(existingLink.slug)
     revalidatePath('/dashboard/links')
 
     return NextResponse.json({ message: 'Link deleted' })

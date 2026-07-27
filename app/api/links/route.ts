@@ -8,6 +8,7 @@ import { checkTeamLimit } from '@/lib/team-permissions'
 import { getTeamLinkCreationFields, uniqueTeamMemberIds } from '@/lib/team-links'
 import { hasTeamActionPermission, TeamAction } from '@/lib/team-roles'
 import { validateURL } from '@/lib/url-validator'
+import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 
 export async function GET() {
   
@@ -321,6 +322,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    invalidatePublicLinkCache(link.slug)
     return NextResponse.json(link, { status: 201 })
   } catch (error) {
     console.error('Erreur lors de la création du lien:', error)

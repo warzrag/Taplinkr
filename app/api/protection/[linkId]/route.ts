@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { passwordProtectionService } from '@/lib/password-protection'
+import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 
 export async function POST(request: NextRequest, props: { params: Promise<{ linkId: string }> }) {
   const params = await props.params;
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ link
       hint
     )
 
+    invalidatePublicLinkCache(link.slug)
     return NextResponse.json({ 
       success: true,
       hint: protection.hint 
@@ -66,6 +68,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ li
       return NextResponse.json({ error: 'Protection non trouvée' }, { status: 404 })
     }
 
+    invalidatePublicLinkCache()
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Erreur lors de la suppression de la protection:', error)
