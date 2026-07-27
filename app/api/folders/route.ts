@@ -143,26 +143,24 @@ export async function POST(request: NextRequest) {
 
     // Vérifier que le dossier parent existe si fourni
     if (parentId) {
-      const parentFolder = await prisma.folder.findFirst({
-        where: { 
-          id: parentId,
-          userId: user.id 
-        }
+      const parentFolder = await prisma.folder.findUnique({
+        where: { id: parentId },
+        select: { userId: true },
       })
       
-      if (!parentFolder) {
+      if (!parentFolder || parentFolder.userId !== user.id) {
         return NextResponse.json({ error: 'Parent folder not found' }, { status: 404 })
       }
     }
 
     // Calculer l'ordre pour le nouveau dossier
-    const lastFolder = await prisma.folder.findFirst({
-      where: { 
-        userId: user.id,
-        parentId: parentId || null
-      },
-      orderBy: { order: 'desc' }
+    const ownedFolders = await prisma.folder.findMany({
+      where: { userId: user.id },
+      select: { parentId: true, order: true },
     })
+    const highestSiblingOrder = ownedFolders
+      .filter(folder => (folder.parentId || null) === (parentId || null))
+      .reduce((highest, folder) => Math.max(highest, folder.order || 0), 0)
 
     const folderData = {
       name: name.trim(),
@@ -171,23 +169,13 @@ export async function POST(request: NextRequest) {
       icon: icon || '📁',
       userId: user.id,
       parentId: parentId || null,
-      order: (lastFolder?.order || 0) + 1
+      order: highestSiblingOrder + 1
     }
     
     console.log('📁 [API FOLDERS] Création du dossier avec les données:', folderData)
     
     const folder = await prisma.folder.create({
       data: folderData,
-      include: {
-        links: {
-          include: {
-            multiLinks: {
-              orderBy: { order: 'asc' }
-            }
-          },
-          orderBy: { order: 'asc' }
-        }
-      }
     })
     
     console.log('✅ [API FOLDERS] Dossier créé avec succès:', {
@@ -199,7 +187,7 @@ export async function POST(request: NextRequest) {
     // 🔥 Pas besoin d'invalider cache Redis (désactivé)
     // Le cache localStorage sera invalidé côté client
 
-    return NextResponse.json(folder)
+    return NextResponse.json({ ...folder, links: [], children: [] })
   } catch (error) {
     console.error('Erreur lors de la création du dossier:', error)
     

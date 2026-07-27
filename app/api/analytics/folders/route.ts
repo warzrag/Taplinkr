@@ -58,7 +58,6 @@ export async function GET(request: NextRequest) {
           name: true,
           parentId: true,
         },
-        orderBy: { order: 'asc' },
       }),
       prisma.link.findMany({
         where: currentUser?.teamId

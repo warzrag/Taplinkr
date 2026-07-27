@@ -26,27 +26,21 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     }
 
     // Vérifier que le dossier à déplacer appartient à l'utilisateur
-    const folder = await prisma.folder.findFirst({
-      where: {
-        id: folderId,
-        userId: user.id
-      }
+    const folder = await prisma.folder.findUnique({
+      where: { id: folderId },
     })
 
-    if (!folder) {
+    if (!folder || folder.userId !== user.id) {
       return NextResponse.json({ error: 'Folder not found' }, { status: 404 })
     }
 
     // Vérifier que le dossier parent existe si fourni
     if (parentId) {
-      const parentFolder = await prisma.folder.findFirst({
-        where: {
-          id: parentId,
-          userId: user.id
-        }
+      const parentFolder = await prisma.folder.findUnique({
+        where: { id: parentId },
       })
 
-      if (!parentFolder) {
+      if (!parentFolder || parentFolder.userId !== user.id) {
         return NextResponse.json({ error: 'Parent folder not found' }, { status: 404 })
       }
 
@@ -58,20 +52,21 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     }
 
     // Calculer le nouvel ordre
-    const lastFolder = await prisma.folder.findFirst({
-      where: {
-        userId: user.id,
-        parentId: parentId || null
-      },
-      orderBy: { order: 'desc' }
+    const ownedFolders = await prisma.folder.findMany({
+      where: { userId: user.id },
+      select: { id: true, parentId: true, order: true },
     })
+    const highestSiblingOrder = ownedFolders
+      .filter(candidate => candidate.id !== folderId)
+      .filter(candidate => (candidate.parentId || null) === (parentId || null))
+      .reduce((highest, candidate) => Math.max(highest, candidate.order || 0), 0)
 
     // Déplacer le dossier
     const updatedFolder = await prisma.folder.update({
       where: { id: folderId },
       data: {
         parentId: parentId || null,
-        order: (lastFolder?.order || 0) + 1
+        order: highestSiblingOrder + 1
       }
     })
 
