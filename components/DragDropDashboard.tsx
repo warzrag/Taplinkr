@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DndContext,
@@ -27,7 +27,6 @@ import { CSS } from '@dnd-kit/utilities'
 import {
   Folder as FolderIcon,
   Plus,
-  ChevronDown,
   ChevronRight,
   Edit2,
   Trash2,
@@ -35,11 +34,9 @@ import {
   FolderPlus,
   Share2,
   MousePointer,
-  GripVertical,
-  XCircle
+  GripVertical
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
-import LinkCard from './LinkCard'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 
@@ -139,16 +136,14 @@ function SortableFolder({
         ...style,
         marginLeft: `${depth * 20}px`,
       }}
-      className={`group relative rounded-xl overflow-hidden transition-all duration-150 ${
-        isDragging ? 'opacity-50 shadow-2xl' : 'hover:shadow-lg'
-      } ${isOver ? 'ring-2 ring-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 scale-[1.02]' : 'bg-white border border-gray-100 hover:border-gray-200'}`}
-      whileHover={!isDragging ? { scale: 1.01 } : undefined}
-      whileTap={!isDragging ? { scale: 0.99 } : undefined}
+      className={`group relative overflow-hidden rounded-2xl border transition-all duration-150 ${
+        isDragging ? 'opacity-50 shadow-2xl' : ''
+      } ${isOver ? 'border-violet-400 bg-violet-500/10 ring-2 ring-violet-400/30' : 'border-[#2a2a38] bg-[#11111a] hover:border-[#3a3a4a]'}`}
     >
       {/* En-tête du dossier */}
       <div
-        className={`flex items-center justify-between p-4 transition-all duration-100 ${
-          isOver ? 'bg-gradient-to-r from-blue-50 to-indigo-50' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100'
+        className={`flex items-center justify-between gap-3 p-4 transition-all duration-100 ${
+          isOver ? 'bg-violet-500/10' : 'hover:bg-white/[0.025]'
         }`}
         style={{
           background: isOver ? undefined : `linear-gradient(135deg, ${folder.color}08, ${folder.color}15)`,
@@ -162,7 +157,7 @@ function SortableFolder({
             transition={{ duration: 0.2 }}
             className="flex-shrink-0"
           >
-            <ChevronRight className="w-5 h-5 text-gray-500" />
+            <ChevronRight className="h-5 w-5 text-[#77778a]" />
           </motion.div>
           
           <div className="flex items-center space-x-3">
@@ -175,12 +170,12 @@ function SortableFolder({
             </motion.div>
             
             <div className="select-none min-w-0 flex-1">
-              <h3 className="font-semibold text-gray-900 truncate">{folder.name}</h3>
+              <h3 className="truncate font-semibold text-white">{folder.name}</h3>
               {folder.description && (
-                <p className="text-sm text-gray-600 truncate">{folder.description}</p>
+                <p className="truncate text-sm text-[#858598]">{folder.description}</p>
               )}
               <div className="flex items-center space-x-3 mt-1">
-                <span className="text-xs text-gray-500 flex items-center">
+                <span className="flex items-center text-xs text-[#858598]">
                   <Link2 className="w-3 h-3 mr-1" />
                   {(() => {
                     // 🔥 FIX: Compter TOUS les liens (directs + dans sous-dossiers)
@@ -189,12 +184,12 @@ function SortableFolder({
                     const totalLinks = directLinks + childrenLinks
 
                     if (directLinks > 0 && childrenLinks > 0) {
-                      return `${totalLinks} lien${totalLinks > 1 ? 's' : ''} (${directLinks} ici, ${childrenLinks} dans sous-dossiers)`
+                      return `${totalLinks} links (${directLinks} here, ${childrenLinks} nested)`
                     }
-                    return `${totalLinks} lien${totalLinks > 1 ? 's' : ''}`
+                    return `${totalLinks} link${totalLinks !== 1 ? 's' : ''}`
                   })()}
                 </span>
-                <span className="text-xs text-purple-600 font-medium flex items-center">
+                <span className="flex items-center text-xs font-semibold text-violet-300">
                   <MousePointer className="w-3 h-3 mr-1" />
                   {(() => {
                     // 🔥 FIX: Compter TOUS les clics (directs + dans sous-dossiers)
@@ -205,7 +200,7 @@ function SortableFolder({
                     const totalClicks = directClicks + childrenClicks
 
                     return (clickCount ?? totalClicks).toLocaleString()
-                  })()} clic{(() => {
+                  })()} click{(() => {
                     const directClicks = folder.links.reduce((sum, link) => sum + (link.clicks || 0), 0)
                     const childrenClicks = folder.children?.reduce((sum, child) => {
                       return sum + (child.links?.reduce((linkSum, link) => linkSum + (link.clicks || 0), 0) || 0)
@@ -214,9 +209,9 @@ function SortableFolder({
                   })()} {periodLabel ? `· ${periodLabel}` : ''}
                 </span>
                 {folder.children && folder.children.length > 0 && (
-                  <span className="text-xs text-gray-500 flex items-center">
+                  <span className="flex items-center text-xs text-[#858598]">
                     <FolderIcon className="w-3 h-3 mr-1" />
-                    {folder.children.length} dossier{folder.children.length > 1 ? 's' : ''}
+                    {folder.children.length} subfolder{folder.children.length !== 1 ? 's' : ''}
                   </span>
                 )}
               </div>
@@ -224,43 +219,45 @@ function SortableFolder({
           </div>
         </div>
         
-        <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
           {/* Drag Handle for Folders */}
           <div
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-grab active:cursor-grabbing"
-            title="Drag to move"
+            className="cursor-grab rounded-lg p-2 text-[#77778a] transition-colors hover:bg-white/5 hover:text-white active:cursor-grabbing"
+            title="Drag folder"
             {...attributes}
             {...listeners}
           >
-            <GripVertical className="w-4 h-4 text-gray-400" />
+            <GripVertical className="h-4 w-4" />
           </div>
 
           {onCreateLink && (
             <motion.button
               onClick={onCreateLink}
-              className="p-2 hover:bg-green-100 rounded-lg transition-colors text-green-600 hover:text-green-700"
-              title="Create a link in this folder"
+              className="flex items-center gap-1.5 rounded-lg bg-violet-500/10 px-2.5 py-2 text-xs font-semibold text-violet-300 transition hover:bg-violet-500/20"
+              title="Add a link to this folder"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="h-3.5 w-3.5" />
+              <span>Link</span>
             </motion.button>
           )}
           <motion.button
             onClick={onCreateSubfolder}
-            className="p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-700"
-            title="Create a category"
+            className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-2 text-xs font-semibold text-[#c7c7d2] transition hover:bg-white/10 hover:text-white"
+            title="Add a subfolder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <FolderPlus className="w-4 h-4" />
+            <FolderPlus className="h-3.5 w-3.5" />
+            <span>Subfolder</span>
           </motion.button>
           {(folder as any).teamShared ? (
             onUnshare && (
               <motion.button
                 onClick={onUnshare}
-                className="p-2 hover:bg-orange-100 rounded-lg transition-colors text-orange-600 hover:text-orange-700"
-                title="Retirer du partage"
+                className="rounded-lg p-2 text-orange-300 transition hover:bg-orange-500/10"
+                title="Stop sharing with the team"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -271,8 +268,8 @@ function SortableFolder({
             onShare && (
               <motion.button
                 onClick={onShare}
-                className="p-2 hover:bg-indigo-100 rounded-lg transition-colors text-indigo-600 hover:text-indigo-700"
-                title="Partager avec la team"
+                className="rounded-lg p-2 text-[#77778a] transition hover:bg-white/5 hover:text-white"
+                title="Share with the team"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -282,7 +279,7 @@ function SortableFolder({
           )}
           <motion.button
             onClick={onEdit}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-700"
+            className="rounded-lg p-2 text-[#77778a] transition hover:bg-white/5 hover:text-white"
             title="Edit folder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -291,7 +288,7 @@ function SortableFolder({
           </motion.button>
           <motion.button
             onClick={onDelete}
-            className="p-2 hover:bg-red-100 rounded-lg transition-colors text-red-600 hover:text-red-700"
+            className="rounded-lg p-2 text-[#77778a] transition hover:bg-red-500/10 hover:text-red-300"
             title="Delete folder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -309,7 +306,7 @@ function SortableFolder({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="border-t border-gray-100 bg-gradient-to-br from-gray-50/30 to-gray-100/20 backdrop-blur-sm"
+            className="border-t border-[#252532] bg-[#0b0b12]"
           >
             <div className="p-4">
               {children}
@@ -361,18 +358,71 @@ function SortableLink({
     <div
       ref={setNodeRef}
       style={style}
-      className={`mb-4 ${isDragging ? 'cursor-grabbing' : ''}`}
+      className={`mb-2 flex items-center gap-3 rounded-xl border border-[#292936] bg-[#151520] p-3 transition hover:border-[#3a3a4a] ${
+        isDragging ? 'cursor-grabbing opacity-40' : ''
+      }`}
     >
-      <LinkCard
-        link={link}
-        onToggle={onToggle}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onRemoveFromFolder={onRemoveFromFolder}
-        isDragging={isDragging}
-        listeners={listeners}
-        attributes={attributes}
-      />
+      <button
+        type="button"
+        className="cursor-grab rounded-lg p-2 text-[#666679] hover:bg-white/5 hover:text-white active:cursor-grabbing"
+        title="Drag this link"
+        {...listeners}
+        {...attributes}
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-base">
+        {link.icon || <Link2 className="h-4 w-4 text-violet-300" />}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-white">{link.internalName || link.title}</p>
+        <p className="mt-0.5 truncate text-xs text-[#77778a]">/{link.slug}</p>
+      </div>
+      <span className="hidden rounded-lg bg-violet-500/10 px-2.5 py-1.5 text-xs font-semibold text-violet-300 sm:inline">
+        {(link.clicks || 0).toLocaleString()} clicks
+      </span>
+      <button
+        type="button"
+        onClick={() => onToggle(link.id, !link.isActive)}
+        className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
+          link.isActive
+            ? 'bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20'
+            : 'bg-white/5 text-[#858598] hover:bg-white/10'
+        }`}
+        title={link.isActive ? 'Click to pause this link' : 'Click to activate this link'}
+      >
+        {link.isActive ? 'Active' : 'Paused'}
+      </button>
+      <button
+        type="button"
+        onClick={() => onEdit(link)}
+        className="rounded-lg p-2 text-[#858598] hover:bg-white/5 hover:text-white"
+        title="Edit link"
+      >
+        <Edit2 className="h-4 w-4" />
+      </button>
+      {onRemoveFromFolder && (
+        <button
+          type="button"
+          onClick={() => onRemoveFromFolder(link.id)}
+          className="rounded-lg p-2 text-[#858598] hover:bg-cyan-500/10 hover:text-cyan-300"
+          title="Move back to Inbox"
+        >
+          <Link2 className="h-4 w-4" />
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={() => {
+          if (confirm(`Delete "${link.internalName || link.title}" permanently?`)) {
+            onDelete(link.id)
+          }
+        }}
+        className="rounded-lg p-2 text-[#858598] hover:bg-red-500/10 hover:text-red-300"
+        title="Delete link"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
     </div>
   )
 }
@@ -864,7 +914,7 @@ export default function DragDropDashboard({
   // Fonction récursive pour afficher les dossiers imbriqués
   const renderFolder = (folder: Folder, depth: number = 0): React.ReactNode => {
     return (
-      <div key={folder.id} style={{ marginLeft: `${depth * 16}px` }}>
+      <div key={folder.id}>
         <SortableFolder
           folder={folder}
           onEdit={() => onEditFolder(folder)}
@@ -922,11 +972,11 @@ export default function DragDropDashboard({
                 animate={{ opacity: 1 }}
                 className="flex flex-col items-center justify-center py-8 text-center"
               >
-                <div className="p-3 bg-gray-100 rounded-xl mb-3">
-                  <FolderIcon className="w-8 h-8 text-gray-400" />
+                <div className="mb-3 rounded-xl bg-white/5 p-3">
+                  <FolderIcon className="h-7 w-7 text-[#77778a]" />
                 </div>
-                <p className="text-sm text-gray-500 font-medium">Empty folder</p>
-                <p className="text-xs text-gray-400 mt-1">Drag links here or create subfolders</p>
+                <p className="text-sm font-medium text-[#b0b0bf]">This folder is empty</p>
+                <p className="mt-1 text-xs text-[#6f6f81]">Drop a link here, or add a subfolder.</p>
               </motion.div>
             )}
           </div>
@@ -944,22 +994,21 @@ export default function DragDropDashboard({
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
-        {/* Colonne des dossiers */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
+        <section className="space-y-5 rounded-3xl border border-[#252532] bg-[#0b0b12] p-4 sm:p-5">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+              <div className="rounded-xl bg-violet-500/15 p-2.5">
                 <FolderIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Folders & categories</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Organize links by niche, platform, campaign, or any structure you choose</p>
+                <h2 className="text-xl font-bold text-white">Your folders</h2>
+                <p className="text-sm text-[#858598]">Open a folder to see its links and subfolders.</p>
               </div>
             </div>
             <motion.button
               onClick={() => setShowCreateForm(true)}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-xl flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-500 px-4 py-2.5 font-semibold text-white shadow-lg shadow-violet-500/15 transition hover:bg-violet-400 sm:w-auto"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -976,14 +1025,14 @@ export default function DragDropDashboard({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl p-6 shadow-lg"
+                className="rounded-2xl border border-violet-500/30 bg-[#151520] p-5 shadow-xl"
               >
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <FolderPlus className="w-5 h-5 text-blue-600" />
+                    <div className="rounded-lg bg-violet-500/15 p-2">
+                      <FolderPlus className="h-5 w-5 text-violet-300" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-white">
                       {createInParent ? 'New subfolder' : 'New folder'}
                     </h3>
                   </div>
@@ -994,13 +1043,13 @@ export default function DragDropDashboard({
                       onChange={(e) => setNewFolderName(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleCreateFolder()}
                       placeholder={createInParent ? 'Subfolder name (niche, platform, campaign...)' : 'Folder name'}
-                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                      className="flex-1 rounded-xl border border-[#343444] bg-[#0b0b12] px-4 py-3 text-sm text-white outline-none placeholder:text-[#686879] focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20"
                       autoFocus
                     />
                     <div className="flex space-x-2 sm:space-x-3">
                       <motion.button
                         onClick={() => handleCreateFolder()}
-                        className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
+                        className="flex-1 rounded-xl bg-violet-500 px-6 py-3 text-sm font-semibold text-white hover:bg-violet-400 sm:flex-none"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -1012,7 +1061,7 @@ export default function DragDropDashboard({
                           setNewFolderName('')
                           setCreateInParent(null)
                         }}
-                        className="flex-1 sm:flex-none px-6 py-3 bg-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                        className="flex-1 rounded-xl border border-[#343444] px-6 py-3 text-sm font-semibold text-[#b0b0bf] hover:bg-white/5 hover:text-white sm:flex-none"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -1021,7 +1070,7 @@ export default function DragDropDashboard({
                     </div>
                   </div>
                   {createInParent && (
-                    <p className="text-sm text-gray-600 flex items-center">
+                    <p className="flex items-center text-sm text-[#858598]">
                       <FolderIcon className="w-4 h-4 mr-1" />
                       Will be created in: <span className="font-medium ml-1">{folders.find(f => f.id === createInParent)?.name}</span>
                     </p>
@@ -1037,19 +1086,19 @@ export default function DragDropDashboard({
           >
             <div className="space-y-4">
               {folders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
-                    <FolderIcon className="w-12 h-12 text-blue-600" />
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#343444] py-12 text-center">
+                  <div className="mb-4 rounded-2xl bg-violet-500/10 p-4">
+                    <FolderIcon className="h-10 w-10 text-violet-300" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No folders yet</h3>
-                  <p className="text-gray-500 mb-4 max-w-xs">
-                    Create your first folder to organize your links
+                  <h3 className="mb-2 text-lg font-semibold text-white">Create your first folder</h3>
+                  <p className="mb-4 max-w-xs text-sm text-[#858598]">
+                    Name it after a niche, platform, campaign, or anything useful to you.
                   </p>
                   <button
                     onClick={() => setShowCreateForm(true)}
-                    className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-shadow"
+                    className="rounded-xl bg-violet-500 px-6 py-3 font-semibold text-white transition hover:bg-violet-400"
                   >
-                    Create my first folder
+                    Create folder
                   </button>
                 </div>
               ) : (
@@ -1061,17 +1110,20 @@ export default function DragDropDashboard({
               )}
             </div>
           </SortableContext>
-        </div>
+        </section>
 
-        {/* Colonne des liens sans dossier */}
-        <div className="space-y-6">
+        <aside className="space-y-5 rounded-3xl border border-[#252532] bg-[#0b0b12] p-4 sm:p-5">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg">
+            <div className="rounded-xl bg-cyan-500/10 p-2.5">
               <Link2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Unorganized links</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{unorganizedLinks.length} unorganized links</p>
+              <h2 className="text-xl font-bold text-white">Inbox</h2>
+              <p className="text-sm text-[#858598]">
+                {unorganizedLinks.length
+                  ? `${unorganizedLinks.length} link${unorganizedLinks.length !== 1 ? 's' : ''} waiting to be filed`
+                  : 'No links waiting to be filed'}
+              </p>
             </div>
           </div>
 
@@ -1081,11 +1133,11 @@ export default function DragDropDashboard({
             data-type="droppable"
             className={`min-h-[300px] rounded-2xl transition-all duration-150 ${
               isUnorganizedOver || overId === 'unorganized'
-                ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg scale-[1.01]' 
-                : 'border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50/50 to-gray-100/30'
+                ? 'border-2 border-violet-400 bg-violet-500/10 shadow-lg shadow-violet-500/10'
+                : 'border-2 border-dashed border-[#343444] bg-[#11111a]'
             }`}
             animate={{
-              borderColor: isUnorganizedOver || overId === 'unorganized' ? '#60a5fa' : '#d1d5db'
+              borderColor: isUnorganizedOver || overId === 'unorganized' ? '#a78bfa' : '#343444'
             }}
           >
             {unorganizedLinks.length === 0 ? (
@@ -1096,13 +1148,13 @@ export default function DragDropDashboard({
                   transition={{ delay: 0.2, type: "spring" }}
                   className="mb-4"
                 >
-                  <div className="p-4 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl">
-                    <Link2 className="w-12 h-12 text-emerald-600" />
+                  <div className="rounded-2xl bg-emerald-500/10 p-4">
+                    <Link2 className="h-10 w-10 text-emerald-300" />
                   </div>
                 </motion.div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Everything is organized!</h3>
-                <p className="text-gray-500">
-                  All your links are neatly organized into folders
+                <h3 className="mb-2 text-lg font-semibold text-white">Inbox cleared</h3>
+                <p className="max-w-xs text-sm text-[#858598]">
+                  New links without a folder will appear here automatically.
                 </p>
               </div>
             ) : (
@@ -1126,20 +1178,20 @@ export default function DragDropDashboard({
               </div>
             )}
           </motion.div>
-        </div>
+        </aside>
       </div>
 
       {/* Overlay pendant le drag */}
       <DragOverlay dropAnimation={dropAnimationConfig}>
         {activeItem && activeId?.startsWith('link-') ? (
-          <div className="opacity-95 shadow-2xl transform scale-105 cursor-grabbing">
-            <LinkCard
-              link={activeItem as LinkType}
-              onToggle={() => {}}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              isDragging
-            />
+          <div className="flex min-w-[320px] cursor-grabbing items-center gap-3 rounded-xl border border-violet-400 bg-[#151520] p-3 shadow-2xl shadow-violet-500/20">
+            <GripVertical className="h-4 w-4 text-violet-300" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">
+                {(activeItem as LinkType).internalName || (activeItem as LinkType).title}
+              </p>
+              <p className="truncate text-xs text-[#858598]">/{(activeItem as LinkType).slug}</p>
+            </div>
           </div>
         ) : null}
       </DragOverlay>

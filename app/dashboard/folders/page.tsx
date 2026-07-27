@@ -3,7 +3,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { BarChart3, ChevronLeft, FolderPlus, MousePointerClick, Plus } from 'lucide-react'
+import { BarChart3, ChevronLeft, MousePointerClick, Plus } from 'lucide-react'
 import Link from 'next/link'
 import DragDropDashboard from '@/components/DragDropDashboard'
 import CreateLinkModal from '@/components/CreateLinkModal'
@@ -446,12 +446,12 @@ export default function FoldersPage() {
               </button>
             </Link>
             <div className="flex-1">
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-violet-400">Link organization</p>
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-violet-400">Link workspace</p>
               <h1 className="mt-2 text-4xl font-bold tracking-[-0.04em] text-white">
-                Folders, categories & links
+                Organize your links
               </h1>
               <p className="mt-2 text-[#9696a8]">
-                Group links by niche, platform, campaign, or any structure that fits your workflow.
+                Create folders, then drag each link into the right place.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -467,15 +467,69 @@ export default function FoldersPage() {
                 <Plus className="w-4 h-4" />
                 <span>Create a link</span>
               </motion.button>
-              <div className="flex items-center gap-2 text-sm text-[#9696a8]">
-                <FolderPlus className="w-4 h-4" />
-                <span>Create subfolders for niches, platforms, campaigns, and more</span>
-              </div>
             </div>
           </div>
         </motion.div>
 
-        <section className="mb-8 rounded-2xl border border-[#252532] bg-[#11111a] p-5 sm:p-6">
+        <div className="mb-5 grid gap-3 sm:grid-cols-3">
+          {[
+            ['1', 'Create a folder', 'Use any name: niche, platform, campaign...'],
+            ['2', 'Find links in Inbox', 'Every link without a folder appears there.'],
+            ['3', 'Drag and drop', 'Drop a link directly into its destination folder.'],
+          ].map(([step, title, description]) => (
+            <div key={step} className="flex gap-3 rounded-2xl border border-[#252532] bg-[#11111a] p-4">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-sm font-bold text-violet-300">{step}</span>
+              <div>
+                <p className="text-sm font-semibold text-white">{title}</p>
+                <p className="mt-1 text-xs leading-5 text-[#858598]">{description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <DragDropDashboard
+          folders={folders}
+          unorganizedLinks={unorganizedLinks}
+          onFoldersChange={setFolders}
+          onLinksChange={setUnorganizedLinks}
+          onToggleLink={handleToggleLink}
+          onEditLink={handleEditLink}
+          onDeleteLink={handleDeleteLink}
+          onMoveLink={handleMoveLink}
+          onCreateFolder={handleCreateFolder}
+          onEditFolder={handleEditFolder}
+          onDeleteFolder={handleDeleteFolder}
+          onToggleFolder={handleToggleFolder}
+          onShareFolder={handleShareFolder}
+          onUnshareFolder={handleUnshareFolder}
+          onCreateLinkInFolder={(folderId) => {
+            setSelectedFolderId(folderId)
+            setShowCreateModal(true)
+          }}
+          onFolderCreated={async () => {
+            localStorage.removeItem('folders-page-cache')
+            await fetchData(true)
+            await fetchInsights()
+          }}
+          folderClickCounts={Object.fromEntries(insights.map(item => [item.id, item.totalClicks]))}
+          periodLabel={period === 'today' ? 'today' : `last ${period === '7d' ? 7 : 30} days`}
+        />
+
+        <details className="group mt-8 rounded-2xl border border-[#252532] bg-[#11111a] p-5 sm:p-6">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="rounded-xl bg-violet-500/10 p-2.5 text-violet-300">
+                <BarChart3 className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-semibold text-white">Click analytics</p>
+                <p className="mt-0.5 text-sm text-[#858598]">Open the detailed breakdown by folder and category.</p>
+              </div>
+            </div>
+            <span className="text-sm font-semibold text-violet-300 group-open:hidden">View details</span>
+            <span className="hidden text-sm font-semibold text-violet-300 group-open:inline">Hide details</span>
+          </summary>
+          <div className="mt-6 border-t border-[#252532] pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -601,38 +655,9 @@ export default function FoldersPage() {
               </div>
             </div>
           )}
-        </section>
+          </div>
+        </details>
 
-        {/* DragDropDashboard Component */}
-        <DragDropDashboard
-          folders={folders}
-          unorganizedLinks={unorganizedLinks}
-          onFoldersChange={setFolders}
-          onLinksChange={setUnorganizedLinks}
-          onToggleLink={handleToggleLink}
-          onEditLink={handleEditLink}
-          onDeleteLink={handleDeleteLink}
-          onMoveLink={handleMoveLink}
-          onCreateFolder={handleCreateFolder}
-          onEditFolder={handleEditFolder}
-          onDeleteFolder={handleDeleteFolder}
-          onToggleFolder={handleToggleFolder}
-          onShareFolder={handleShareFolder}
-          onUnshareFolder={handleUnshareFolder}
-          onCreateLinkInFolder={(folderId) => {
-            setSelectedFolderId(folderId)
-            setShowCreateModal(true)
-          }}
-          onFolderCreated={async () => {
-            // 🔥 FIX: Invalider le cache localStorage AVANT de recharger
-            localStorage.removeItem('folders-page-cache')
-            // Recharger avec bypass cache après création
-            await fetchData(true)
-            await fetchInsights()
-          }}
-          folderClickCounts={Object.fromEntries(insights.map(item => [item.id, item.totalClicks]))}
-          periodLabel={period === 'today' ? 'today' : `last ${period === '7d' ? 7 : 30} days`}
-        />
       </div>
 
       {/* Modals */}
