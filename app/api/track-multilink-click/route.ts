@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
         data: {
           linkId: multiLink.parentLinkId,
           userId: multiLink.parentLink.userId,
+          folderIdAtClick: multiLink.parentLink.folderId,
           multiLinkId,
           ...clickMetadata,
         },

@@ -180,6 +180,7 @@ model Click {
   duration        Int?     // Durée de visite en secondes
   multiLinkId     String?  // ID du lien spécifique cliqué
   sessionId       String?  // 🔥 Session ID pour déduplication (comme GetMySocial)
+  folderIdAtClick String?
   latitude        Float?
   longitude       Float?
   createdAt       DateTime @default(now())
@@ -191,6 +192,7 @@ model Click {
   @@index([linkId, country])
   @@index([ip])
   @@index([multiLinkId, sessionId]) // 🔥 Index pour déduplication rapide
+  @@index([folderIdAtClick, createdAt])
   @@map("clicks")
 }
 

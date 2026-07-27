@@ -128,6 +128,7 @@ export default async function LinkPage(props: PageProps) {
             data: {
               linkId: link.id,
               userId: link.userId,
+              folderIdAtClick: link.folderId || null,
               ...clickMetadata,
             },
           }),

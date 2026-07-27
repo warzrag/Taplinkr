@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
+import { hasTeamActionPermission, TeamAction } from '@/lib/team-roles'
 
 // PUT - Déplacer un lien vers un dossier
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -16,24 +17,42 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     const { folderId } = body
 
     // Vérifier que le lien appartient à l'utilisateur
-    const existingLink = await prisma.link.findFirst({
-      where: { 
-        id: params.id, 
-        user: { email: session.user.email } 
-      }
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, teamId: true, teamRole: true },
     })
+    if (!currentUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
 
-    if (!existingLink) {
+    const existingLink = await prisma.link.findUnique({
+      where: { id: params.id },
+    })
+    const canMoveLink = existingLink && (
+      existingLink.userId === currentUser.id
+      || (
+        currentUser.teamId
+        && existingLink.teamId === currentUser.teamId
+        && hasTeamActionPermission(currentUser.teamRole, TeamAction.EDIT_LINK)
+      )
+    )
+
+    if (!canMoveLink) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
     // Si folderId est fourni, vérifier que le dossier appartient à l'utilisateur
     if (folderId) {
       const folder = await prisma.folder.findFirst({
-        where: { 
-          id: folderId, 
-          user: { email: session.user.email } 
-        }
+        where: currentUser.teamId
+          ? {
+              id: folderId,
+              OR: [
+                { userId: currentUser.id },
+                { teamId: currentUser.teamId, teamShared: true },
+              ],
+            }
+          : { id: folderId, userId: currentUser.id },
       })
 
       if (!folder) {

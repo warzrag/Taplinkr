@@ -14,6 +14,7 @@ import {
   DragOverEvent,
   DragOverlay,
   defaultDropAnimationSideEffects,
+  useDroppable,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -39,7 +40,6 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import LinkCard from './LinkCard'
-import FolderAnalyticsTooltip from './FolderAnalyticsTooltip'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
 
@@ -75,6 +75,8 @@ interface DragDropDashboardProps {
   onUnshareFolder?: (folderId: string, folderName: string) => void
   onCreateLinkInFolder?: (folderId: string) => void
   onFolderCreated?: () => void
+  folderClickCounts?: Record<string, number>
+  periodLabel?: string
 }
 
 function SortableFolder({
@@ -90,6 +92,8 @@ function SortableFolder({
   onMouseEnter,
   onMouseLeave,
   isOver,
+  clickCount,
+  periodLabel,
   depth = 0
 }: {
   folder: Folder
@@ -104,6 +108,8 @@ function SortableFolder({
   onMouseEnter?: (event: React.MouseEvent) => void
   onMouseLeave?: () => void
   isOver?: boolean
+  clickCount?: number
+  periodLabel?: string
   depth?: number
 }) {
   const {
@@ -198,14 +204,14 @@ function SortableFolder({
                     }, 0) || 0
                     const totalClicks = directClicks + childrenClicks
 
-                    return totalClicks.toLocaleString()
+                    return (clickCount ?? totalClicks).toLocaleString()
                   })()} clic{(() => {
                     const directClicks = folder.links.reduce((sum, link) => sum + (link.clicks || 0), 0)
                     const childrenClicks = folder.children?.reduce((sum, child) => {
                       return sum + (child.links?.reduce((linkSum, link) => linkSum + (link.clicks || 0), 0) || 0)
                     }, 0) || 0
-                    return (directClicks + childrenClicks) > 1 ? 's' : ''
-                  })()}
+                    return (clickCount ?? (directClicks + childrenClicks)) !== 1 ? 's' : ''
+                  })()} {periodLabel ? `· ${periodLabel}` : ''}
                 </span>
                 {folder.children && folder.children.length > 0 && (
                   <span className="text-xs text-gray-500 flex items-center">
@@ -243,7 +249,7 @@ function SortableFolder({
           <motion.button
             onClick={onCreateSubfolder}
             className="p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-700"
-            title="Create a subfolder"
+            title="Create a category"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -388,6 +394,8 @@ export default function DragDropDashboard({
   onUnshareFolder,
   onCreateLinkInFolder,
   onFolderCreated,
+  folderClickCounts = {},
+  periodLabel,
 }: DragDropDashboardProps) {
   const { refreshAll: refreshLinksContext } = useLinks()
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -395,40 +403,13 @@ export default function DragDropDashboard({
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const [createInParent, setCreateInParent] = useState<string | null>(null)
-  const [tooltipState, setTooltipState] = useState<{
-    visible: boolean
-    folderId: string | null
-    folderName: string
-    position: { x: number; y: number }
-  }>({
-    visible: false,
-    folderId: null,
-    folderName: '',
-    position: { x: 0, y: 0 }
+  const {
+    setNodeRef: setUnorganizedRef,
+    isOver: isUnorganizedOver,
+  } = useDroppable({
+    id: 'unorganized',
+    data: { type: 'unorganized' },
   })
-
-  const handleFolderMouseEnter = (event: React.MouseEvent, folderId: string, folderName: string) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    setTooltipState({
-      visible: true,
-      folderId,
-      folderName,
-      position: {
-        x: rect.right,
-        y: rect.top
-      }
-    })
-  }
-
-  const handleFolderMouseLeave = () => {
-    setTooltipState({
-      visible: false,
-      folderId: null,
-      folderName: '',
-      position: { x: 0, y: 0 }
-    })
-  }
-
   const handleCreateFolder = async (parentId?: string) => {
     if (!newFolderName.trim()) {
       toast.error('Enter a folder name.')
@@ -626,7 +607,7 @@ export default function DragDropDashboard({
           onFoldersChange(addToTargetFolder(folders))
         }
         
-        toast.success(`"${link.title}" moved to "${targetFolder.name}"`)
+        toast.success(`"${link.internalName || link.title}" moved to "${targetFolder.name}"`)
         
         // Appel API en arrière-plan
         onMoveLink(link.id, targetFolder.id).catch(error => {
@@ -658,7 +639,7 @@ export default function DragDropDashboard({
           onFoldersChange(removeLinkFromFolder(folders))
           onLinksChange([...unorganizedLinks, { ...link, folderId: null }])
           
-          toast.success(`"${link.title}" removed from the folder`)
+          toast.success(`"${link.internalName || link.title}" removed from the folder`)
           
           // Appel API en arrière-plan
           onMoveLink(link.id, null).catch(error => {
@@ -854,7 +835,15 @@ export default function DragDropDashboard({
       }
     } else if (activeId.startsWith('folder-')) {
       const folderId = activeId.replace('folder-', '')
-      activeItem = folders.find(f => f.id === folderId)
+      const findFolderRecursive = (folderList: Folder[]): Folder | undefined => {
+        for (const folder of folderList) {
+          if (folder.id === folderId) return folder
+          const child = folder.children?.length ? findFolderRecursive(folder.children) : undefined
+          if (child) return child
+        }
+        return undefined
+      }
+      activeItem = findFolderRecursive(folders)
     }
   }
 
@@ -888,9 +877,9 @@ export default function DragDropDashboard({
           onCreateLink={onCreateLinkInFolder ? () => onCreateLinkInFolder(folder.id) : undefined}
           onShare={onShareFolder ? () => onShareFolder(folder.id, folder.name) : undefined}
           onUnshare={onUnshareFolder ? () => onUnshareFolder(folder.id, folder.name) : undefined}
-          onMouseEnter={(event) => handleFolderMouseEnter(event, folder.id, folder.name)}
-          onMouseLeave={handleFolderMouseLeave}
           isOver={overId === `folder-${folder.id}`}
+          clickCount={folderClickCounts[folder.id]}
+          periodLabel={periodLabel}
           depth={depth}
         >
           <div className="space-y-2">
@@ -937,7 +926,7 @@ export default function DragDropDashboard({
                   <FolderIcon className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-sm text-gray-500 font-medium">Empty folder</p>
-                <p className="text-xs text-gray-400 mt-1">Drag links here or create subfolders</p>
+                <p className="text-xs text-gray-400 mt-1">Drag links here or create platform categories</p>
               </motion.div>
             )}
           </div>
@@ -964,8 +953,8 @@ export default function DragDropDashboard({
                 <FolderIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Folders</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Organisez vos liens</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Clients & categories</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Drag links into the right platform category</p>
               </div>
             </div>
             <motion.button
@@ -975,7 +964,7 @@ export default function DragDropDashboard({
               whileTap={{ scale: 0.95 }}
             >
               <FolderPlus className="w-4 h-4" />
-              <span className="font-medium">Nouveau</span>
+              <span className="font-medium">New client</span>
             </motion.button>
           </div>
 
@@ -994,7 +983,9 @@ export default function DragDropDashboard({
                     <div className="p-2 bg-blue-100 rounded-lg">
                       <FolderPlus className="w-5 h-5 text-blue-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900">Nouveau dossier</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {createInParent ? 'New category' : 'New client'}
+                    </h3>
                   </div>
                   <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                     <input
@@ -1002,7 +993,7 @@ export default function DragDropDashboard({
                       value={newFolderName}
                       onChange={(e) => setNewFolderName(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleCreateFolder()}
-                      placeholder="Nom du dossier"
+                      placeholder={createInParent ? 'Category name (Twitter, Instagram...)' : 'Client name'}
                       className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
                       autoFocus
                     />
@@ -1050,7 +1041,7 @@ export default function DragDropDashboard({
                   <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
                     <FolderIcon className="w-12 h-12 text-blue-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No folders yet</h3>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No clients yet</h3>
                   <p className="text-gray-500 mb-4 max-w-xs">
                     Create your first folder to organize your links
                   </p>
@@ -1058,7 +1049,7 @@ export default function DragDropDashboard({
                     onClick={() => setShowCreateForm(true)}
                     className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-shadow"
                   >
-                    Create my first folder
+                    Create my first client
                   </button>
                 </div>
               ) : (
@@ -1085,15 +1076,16 @@ export default function DragDropDashboard({
           </div>
 
           <motion.div
+            ref={setUnorganizedRef}
             id="unorganized"
             data-type="droppable"
             className={`min-h-[300px] rounded-2xl transition-all duration-150 ${
-              overId === 'unorganized' 
+              isUnorganizedOver || overId === 'unorganized'
                 ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg scale-[1.01]' 
                 : 'border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50/50 to-gray-100/30'
             }`}
             animate={{
-              borderColor: overId === 'unorganized' ? '#60a5fa' : '#d1d5db'
+              borderColor: isUnorganizedOver || overId === 'unorganized' ? '#60a5fa' : '#d1d5db'
             }}
           >
             {unorganizedLinks.length === 0 ? (
@@ -1152,15 +1144,6 @@ export default function DragDropDashboard({
         ) : null}
       </DragOverlay>
 
-      {/* Tooltip d'analytics */}
-      {tooltipState.folderId && (
-        <FolderAnalyticsTooltip
-          folderId={tooltipState.folderId}
-          folderName={tooltipState.folderName}
-          isVisible={tooltipState.visible}
-          position={tooltipState.position}
-        />
-      )}
     </DndContext>
   )
 }

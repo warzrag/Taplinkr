@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ChevronLeft, FolderPlus, Plus } from 'lucide-react'
+import { BarChart3, ChevronLeft, FolderPlus, MousePointerClick, Plus } from 'lucide-react'
 import Link from 'next/link'
 import DragDropDashboard from '@/components/DragDropDashboard'
 import CreateLinkModal from '@/components/CreateLinkModal'
@@ -26,6 +26,25 @@ interface Folder {
   teamId?: string | null
 }
 
+type Period = 'today' | '7d' | '30d'
+
+interface FolderInsight {
+  id: string
+  name: string
+  parentId: string | null
+  directClicks: number
+  totalClicks: number
+  dailyClicks: Array<{ date: string; clicks: number }>
+  topLinks: Array<{ id: string; name: string; slug: string; clicks: number }>
+}
+
+function periodStart(period: Period) {
+  const start = new Date()
+  if (period !== 'today') start.setDate(start.getDate() - (period === '7d' ? 6 : 29))
+  start.setHours(0, 0, 0, 0)
+  return start.toISOString()
+}
+
 export default function FoldersPage() {
   const router = useRouter()
   const [folders, setFolders] = useState<Folder[]>([])
@@ -33,6 +52,34 @@ export default function FoldersPage() {
   const [loading, setLoading] = useState(false) // Commencer à false pour affichage immédiat
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
+  const [period, setPeriod] = useState<Period>('7d')
+  const [insights, setInsights] = useState<FolderInsight[]>([])
+  const [insightsLoading, setInsightsLoading] = useState(true)
+  const [selectedAnalyticsFolderId, setSelectedAnalyticsFolderId] = useState<string | null>(null)
+
+  const fetchInsights = useCallback(async () => {
+    try {
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+      const response = await fetch(
+        `/api/analytics/folders?period=${period}&start=${encodeURIComponent(periodStart(period))}&timeZone=${encodeURIComponent(timeZone)}`,
+        { cache: 'no-store' },
+      )
+      if (!response.ok) return
+      const data = await response.json()
+      setInsights(data.insights || [])
+    } catch {
+      // Keep the latest successful folder analytics visible.
+    } finally {
+      setInsightsLoading(false)
+    }
+  }, [period])
+
+  useEffect(() => {
+    setInsightsLoading(true)
+    fetchInsights()
+    const interval = window.setInterval(fetchInsights, 10000)
+    return () => window.clearInterval(interval)
+  }, [fetchInsights])
 
   // Récupérer les dossiers et les liens
   useEffect(() => {
@@ -221,7 +268,8 @@ export default function FoldersPage() {
       })
       
       if (response.ok) {
-        fetchData()
+        await fetchData(true)
+        await fetchInsights()
       }
     } catch (error) {
       toast.error('Unable to move the link.')
@@ -272,7 +320,7 @@ export default function FoldersPage() {
   }
 
   const handleDeleteFolder = async (folderId: string) => {
-    if (!confirm('Are you sure you want to delete this folder and all of its links?')) return
+    if (!confirm('Delete this folder? Its links and click history will be kept in Unorganized links.')) return
 
     try {
       // Optimistic update - Retirer immédiatement du state
@@ -379,9 +427,12 @@ export default function FoldersPage() {
     }
   }
 
+  const selectedInsight = insights.find(item => item.id === selectedAnalyticsFolderId)
+    || insights.find(item => !item.parentId)
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto p-4 lg:p-8">
+    <div className="min-h-screen bg-[#09090f] text-white">
+      <div className="mx-auto max-w-[1500px] p-4 lg:p-10">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -395,11 +446,12 @@ export default function FoldersPage() {
               </button>
             </Link>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Mes dossiers et liens
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-violet-400">Client organization</p>
+              <h1 className="mt-2 text-4xl font-bold tracking-[-0.04em] text-white">
+                Clients, categories & links
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Organize links with folders and drag and drop to reorder
+              <p className="mt-2 text-[#9696a8]">
+                Create one client folder, add platform categories, then drag links where they belong.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -415,13 +467,141 @@ export default function FoldersPage() {
                 <Plus className="w-4 h-4" />
                 <span>Create a link</span>
               </motion.button>
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+              <div className="flex items-center gap-2 text-sm text-[#9696a8]">
                 <FolderPlus className="w-4 h-4" />
-                <span>Click "New" to create folders</span>
+                <span>Use subfolders for Twitter, Instagram, Reddit, and more</span>
               </div>
             </div>
           </div>
         </motion.div>
+
+        <section className="mb-8 rounded-2xl border border-[#252532] bg-[#11111a] p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-violet-400" />
+                <h2 className="text-xl font-semibold">Clicks by client and category</h2>
+              </div>
+              <p className="mt-1 text-sm text-[#858598]">Real clicks only. Historical clicks stay with the folder they belonged to.</p>
+            </div>
+            <div className="inline-flex self-start rounded-xl border border-[#2b2b39] bg-[#0b0b12] p-1">
+              {([
+                ['today', 'Today'],
+                ['7d', '7 days'],
+                ['30d', '30 days'],
+              ] as Array<[Period, string]>).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setPeriod(value)}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                    period === value ? 'bg-violet-500 text-white' : 'text-[#8e8ea2] hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+            {folders.length ? folders.map(client => {
+              const clientInsight = insights.find(item => item.id === client.id)
+              const categories = (client.children || []).map(category => ({
+                folder: category,
+                insight: insights.find(item => item.id === category.id),
+              }))
+              return (
+                <article key={client.id} className="rounded-2xl border border-[#292936] bg-[#0b0b12] p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="truncate text-lg font-semibold">{client.icon} {client.name}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-[#6f6f81]">Client total</p>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl bg-violet-500/10 px-3 py-2 text-violet-300">
+                      <MousePointerClick className="h-4 w-4" />
+                      <span className="text-2xl font-bold">
+                        {insightsLoading ? '—' : (clientInsight?.totalClicks || 0).toLocaleString('en-US')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-5 space-y-2">
+                    {categories.length ? categories.map(({ folder, insight }) => (
+                      <button
+                        key={folder.id}
+                        type="button"
+                        onClick={() => setSelectedAnalyticsFolderId(folder.id)}
+                        className="flex w-full items-center justify-between rounded-xl border border-[#242431] bg-white/[0.025] px-3 py-2.5 text-left transition hover:border-violet-500/40 hover:bg-violet-500/[0.06]"
+                      >
+                        <span className="truncate text-sm font-medium text-[#cfcfda]">{folder.icon} {folder.name}</span>
+                        <span className="ml-3 font-bold text-white">{(insight?.totalClicks || 0).toLocaleString('en-US')}</span>
+                      </button>
+                    )) : (
+                      <p className="rounded-xl border border-dashed border-[#30303e] px-3 py-4 text-center text-sm text-[#77778a]">
+                        Add platform subfolders to compare channels.
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAnalyticsFolderId(client.id)}
+                    className="mt-4 w-full rounded-xl border border-[#30303e] px-3 py-2 text-sm font-semibold text-violet-300 transition hover:border-violet-500/50 hover:bg-violet-500/[0.06]"
+                  >
+                    View client breakdown
+                  </button>
+                </article>
+              )
+            }) : (
+              <div className="col-span-full rounded-xl border border-dashed border-[#30303e] px-5 py-10 text-center text-sm text-[#77778a]">
+                Create your first client folder below.
+              </div>
+            )}
+          </div>
+
+          {selectedInsight && (
+            <div className="mt-6 rounded-2xl border border-[#292936] bg-[#0b0b12] p-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-400">Folder breakdown</p>
+                  <h3 className="mt-1 text-xl font-semibold">{selectedInsight.name}</h3>
+                </div>
+                <p className="text-sm text-[#858598]">
+                  {selectedInsight.totalClicks.toLocaleString('en-US')} real clicks · {selectedInsight.directClicks.toLocaleString('en-US')} directly in this folder
+                </p>
+              </div>
+              <div className="mt-5 overflow-x-auto pb-2">
+                <div className="flex min-w-max gap-2">
+                  {selectedInsight.dailyClicks.map(day => (
+                    <div key={day.date} className="w-24 rounded-xl border border-[#242431] bg-white/[0.025] p-3 text-center">
+                      <p className="text-xs text-[#77778a]">
+                        {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(`${day.date}T12:00:00`))}
+                      </p>
+                      <p className={`mt-2 text-xl font-bold ${day.clicks ? 'text-violet-300' : 'text-[#555568]'}`}>
+                        {day.clicks.toLocaleString('en-US')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-5 border-t border-[#242431] pt-4">
+                <p className="text-sm font-semibold text-[#b8b8c7]">Links in this breakdown</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                  {selectedInsight.topLinks.length ? selectedInsight.topLinks.map(link => (
+                    <div key={link.id} className="flex items-center justify-between rounded-xl bg-white/[0.03] px-3 py-2.5">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{link.name}</p>
+                        <p className="truncate text-xs text-[#666679]">/{link.slug}</p>
+                      </div>
+                      <span className="ml-3 text-lg font-bold text-violet-300">{link.clicks.toLocaleString('en-US')}</span>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-[#77778a]">No clicks in this period.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
 
         {/* DragDropDashboard Component */}
         <DragDropDashboard
@@ -448,7 +628,10 @@ export default function FoldersPage() {
             localStorage.removeItem('folders-page-cache')
             // Recharger avec bypass cache après création
             await fetchData(true)
+            await fetchInsights()
           }}
+          folderClickCounts={Object.fromEntries(insights.map(item => [item.id, item.totalClicks]))}
+          periodLabel={period === 'today' ? 'today' : `last ${period === '7d' ? 7 : 30} days`}
         />
       </div>
 
@@ -468,6 +651,7 @@ export default function FoldersPage() {
           setShowCreateModal(false)
           setSelectedFolderId(null)
           await fetchData()
+          await fetchInsights()
         }}
       />
     </div>

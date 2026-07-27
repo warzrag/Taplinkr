@@ -81,8 +81,21 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     }
 
     // Déplacer tous les liens du dossier vers "sans dossier" (folderId = null)
+    const descendantIds: string[] = []
+    let pendingParentIds = [params.id]
+    while (pendingParentIds.length) {
+      const children = await prisma.folder.findMany({
+        where: { parentId: { in: pendingParentIds }, userId: existingFolder.userId },
+        select: { id: true },
+      })
+      const childIds = children.map(child => child.id)
+      descendantIds.push(...childIds)
+      pendingParentIds = childIds
+    }
+
+    // Deleting a client or category never deletes its links or click history.
     await prisma.link.updateMany({
-      where: { folderId: params.id },
+      where: { folderId: { in: [params.id, ...descendantIds] } },
       data: { folderId: null }
     })
 

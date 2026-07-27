@@ -51,8 +51,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       }
 
       // Empêcher de déplacer un dossier dans lui-même ou dans ses descendants
-      const isDescendant = await checkIfDescendant(folderId, parentId)
-      if (folderId === parentId || isDescendant) {
+      const createsCycle = await wouldCreateCycle(folderId, parentId)
+      if (folderId === parentId || createsCycle) {
         return NextResponse.json({ error: 'A folder cannot be moved into itself or one of its subfolders' }, { status: 400 })
       }
     }
@@ -83,19 +83,19 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 }
 
 // Fonction pour vérifier si un dossier est un descendant d'un autre
-async function checkIfDescendant(folderId: string, potentialAncestorId: string): Promise<boolean> {
-  const folder = await prisma.folder.findUnique({
-    where: { id: folderId },
-    include: { parent: true }
-  })
+async function wouldCreateCycle(folderId: string, proposedParentId: string): Promise<boolean> {
+  const visited = new Set<string>()
+  let currentId: string | null = proposedParentId
 
-  if (!folder || !folder.parent) {
-    return false
+  while (currentId && !visited.has(currentId)) {
+    if (currentId === folderId) return true
+    visited.add(currentId)
+    const folder = await prisma.folder.findUnique({
+      where: { id: currentId },
+      select: { parentId: true },
+    })
+    currentId = folder?.parentId || null
   }
 
-  if (folder.parent.id === potentialAncestorId) {
-    return true
-  }
-
-  return checkIfDescendant(folder.parent.id, potentialAncestorId)
+  return false
 }

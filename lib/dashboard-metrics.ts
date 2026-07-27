@@ -13,7 +13,7 @@ type FilteredMetricEvent = {
   reason: string
 }
 
-function dateKeyInTimeZone(date: Date, timeZone: string) {
+export function dateKeyInTimeZone(date: Date, timeZone: string) {
   let formatter: Intl.DateTimeFormat
   try {
     formatter = new Intl.DateTimeFormat('en-US', {

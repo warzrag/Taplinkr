@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     const link = await prisma.link.findUnique({
       where: { id: linkId },
-      select: { id: true, userId: true, isActive: true, isDirect: true },
+      select: { id: true, userId: true, folderId: true, isActive: true, isDirect: true },
     })
     if (!link?.isActive || !link.isDirect) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
         data: {
           linkId,
           userId: link.userId,
+          folderIdAtClick: link.folderId,
           ...clickMetadata,
         },
       }),
