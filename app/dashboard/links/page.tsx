@@ -63,30 +63,45 @@ export default function LinksDashboard() {
   useEffect(() => {
     let stopped = false
     let requestInProgress = false
+    let refreshTimer: number | undefined
+    let unchangedRefreshes = 0
     const animationTimers = new Map<string, number>()
 
+    const scheduleNextRefresh = () => {
+      if (stopped) return
+      if (refreshTimer) window.clearTimeout(refreshTimer)
+      // Stay responsive while a creator is actively watching new traffic, then
+      // back off automatically when nothing changes. This keeps the free
+      // Firestore quota healthy without losing the live counter experience.
+      const delay = unchangedRefreshes < 8 ? 15_000 : 60_000
+      refreshTimer = window.setTimeout(refreshClickCounts, delay)
+    }
+
     const refreshClickCounts = async () => {
-      if (requestInProgress || document.visibilityState === 'hidden') return
+      if (requestInProgress || document.visibilityState === 'hidden') {
+        scheduleNextRefresh()
+        return
+      }
       requestInProgress = true
       try {
-        const response = await fetch(`/api/links/fast?live=${Date.now()}`, {
+        const response = await fetch('/api/links/click-counts', {
           cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
         })
         if (!response.ok) return
         const data = await response.json()
-        const latestLinks: LinkType[] = data.links || data.personalLinks || (Array.isArray(data) ? data : [])
+        const latestCounts: Array<{ id: string; clicks: number }> = data.counts || []
         if (!stopped) {
           const nextClicks = Object.fromEntries(
-            latestLinks.map(item => [item.id, item.clicks || 0]),
+            latestCounts.map(item => [item.id, item.clicks || 0]),
           )
-          const increases = latestLinks
+          const increases = latestCounts
             .map(item => ({
               id: item.id,
               delta: (item.clicks || 0) - (liveClicksRef.current[item.id] ?? (item.clicks || 0)),
             }))
             .filter(item => item.delta > 0)
 
+          unchangedRefreshes = increases.length ? 0 : unchangedRefreshes + 1
           liveClicksRef.current = nextClicks
           setLiveClicks(nextClicks)
 
@@ -110,24 +125,36 @@ export default function LinksDashboard() {
           }
         }
       } catch {
-        // Keep the last known values and retry silently on the next interval.
+        // Keep the last known values and retry silently after the safe delay.
+        unchangedRefreshes = Math.max(unchangedRefreshes, 8)
       } finally {
         requestInProgress = false
+        scheduleNextRefresh()
       }
     }
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') refreshClickCounts()
+      if (document.visibilityState === 'visible') {
+        unchangedRefreshes = 0
+        if (refreshTimer) window.clearTimeout(refreshTimer)
+        refreshClickCounts()
+      }
     }
-    const interval = window.setInterval(refreshClickCounts, 5000)
-    window.addEventListener('focus', refreshClickCounts)
+    const handleFocus = () => {
+      unchangedRefreshes = 0
+      if (refreshTimer) window.clearTimeout(refreshTimer)
+      refreshClickCounts()
+    }
+
+    scheduleNextRefresh()
+    window.addEventListener('focus', handleFocus)
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       stopped = true
-      window.clearInterval(interval)
+      if (refreshTimer) window.clearTimeout(refreshTimer)
       animationTimers.forEach(timer => window.clearTimeout(timer))
-      window.removeEventListener('focus', refreshClickCounts)
+      window.removeEventListener('focus', handleFocus)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
