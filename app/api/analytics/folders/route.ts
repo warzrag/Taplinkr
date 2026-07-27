@@ -7,14 +7,12 @@ import {
   type DashboardPeriod,
 } from '@/lib/dashboard-metrics'
 import { buildFolderInsights } from '@/lib/folder-insights'
-import { ensureFolderAttributionSchema } from '@/lib/ensure-folder-attribution'
 import { prisma } from '@/lib/prisma'
 
 const periods = new Set<DashboardPeriod>(['today', '7d', '30d'])
 
 export async function GET(request: NextRequest) {
   try {
-    await ensureFolderAttributionSchema()
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
