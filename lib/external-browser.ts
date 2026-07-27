@@ -49,3 +49,18 @@ export function getExternalBrowserUrl(currentUrl: string, platform: MobilePlatfo
 
   return null
 }
+
+export function getExternalBrowserTarget(input: {
+  currentUrl: string
+  userAgent: string
+  referer?: string
+}): string | null {
+  const { currentUrl, userAgent, referer = '' } = input
+  if (!isInAppBrowser(userAgent, referer)) return null
+
+  if (isInstagramInAppBrowser(userAgent, referer)) {
+    return getInstagramExternalBrowserUrl(currentUrl)
+  }
+
+  return getExternalBrowserUrl(currentUrl, getMobilePlatform(userAgent))
+}

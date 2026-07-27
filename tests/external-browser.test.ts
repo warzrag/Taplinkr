@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   getDirectRedirectLocale,
+  getExternalBrowserTarget,
   getExternalBrowserUrl,
   getInstagramExternalBrowserUrl,
   getMobilePlatform,
@@ -62,5 +63,56 @@ describe('external browser redirects', () => {
     expect(getMobilePlatform('Mozilla/5.0 (Linux; Android 15) TwitterAndroid')).toBe('android')
     expect(getExternalBrowserUrl('https://www.taplinkr.com/creator?ref=x', 'android'))
       .toBe('intent://www.taplinkr.com/creator?ref=x#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end')
+  })
+
+  it('keeps the complete public URL when handing Instagram iOS to the external browser', () => {
+    expect(getExternalBrowserTarget({
+      currentUrl: 'https://www.taplinkr.com/private-garden?campaign=ig#join',
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) Instagram 392.0.0',
+      referer: 'https://www.instagram.com/',
+    })).toBe(
+      'instagram://extbrowser/?url=https%3A%2F%2Fwww.taplinkr.com%2Fprivate-garden%3Fcampaign%3Dig%23join',
+    )
+  })
+
+  it('hands the disguised X iOS browser to Safari without changing the TapLinkr URL', () => {
+    expect(getExternalBrowserTarget({
+      currentUrl: 'https://www.taplinkr.com/private-garden?campaign=x',
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 Version/18.6 Mobile/15E148 Safari/604.1',
+      referer: 'https://t.co/',
+    })).toBe('x-safari-https://www.taplinkr.com/private-garden?campaign=x')
+  })
+
+  it('hands X Android to the default browser with an Android intent', () => {
+    expect(getExternalBrowserTarget({
+      currentUrl: 'https://www.taplinkr.com/private-garden?campaign=x',
+      userAgent: 'Mozilla/5.0 (Linux; Android 15) TwitterAndroid',
+      referer: 'https://t.co/',
+    })).toBe(
+      'intent://www.taplinkr.com/private-garden?campaign=x#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end',
+    )
+  })
+
+  it('does not alter normal Safari, Chrome, desktop, or preview-bot navigation', () => {
+    const currentUrl = 'https://www.taplinkr.com/private-garden'
+
+    expect(getExternalBrowserTarget({
+      currentUrl,
+      userAgent: 'Mozilla/5.0 (iPhone) Version/18.0 Mobile Safari/604.1',
+    })).toBeNull()
+    expect(getExternalBrowserTarget({
+      currentUrl,
+      userAgent: 'Mozilla/5.0 (Linux; Android 15) Chrome/136 Mobile Safari/537.36',
+    })).toBeNull()
+    expect(getExternalBrowserTarget({
+      currentUrl,
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/136 Safari/537.36',
+      referer: 'https://t.co/',
+    })).toBeNull()
+    expect(getExternalBrowserTarget({
+      currentUrl,
+      userAgent: 'Twitterbot/1.0',
+      referer: 'https://t.co/',
+    })).toBeNull()
   })
 })

@@ -6,11 +6,7 @@ import PublicDirectRedirect from '@/components/PublicDirectRedirect'
 import PublicLinkPreviewFinal from '@/components/PublicLinkPreviewFinal'
 import PublicPasswordGate from '@/components/PublicPasswordGate'
 import {
-  getExternalBrowserUrl,
-  getInstagramExternalBrowserUrl,
-  getMobilePlatform,
-  isInAppBrowser,
-  isInstagramInAppBrowser,
+  getExternalBrowserTarget,
 } from '@/lib/external-browser'
 import { prisma } from '@/lib/prisma'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
@@ -117,28 +113,37 @@ export default async function LinkPage(props: PageProps) {
   }
 
   if (link.isDirect && link.directUrl) {
-    if (link.shieldEnabled || link.isUltraLink) {
-      redirect(`/shield/${link.slug}`)
-    }
-
     const destination = normalizeHttpURL(link.directUrl)
     if (!validateURL(destination)) notFound()
 
     const requestHeaders = await headers()
     const userAgent = (requestHeaders.get('user-agent') || '').slice(0, 1000)
-
     const referer = requestHeaders.get('referer') || ''
-    let externalBrowserUrl: string | null = null
+    const forwardedHost = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host')
+    const host = forwardedHost?.split(',')[0]?.trim() || 'www.taplinkr.com'
+    const forwardedProto = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim()
+    const protocol = forwardedProto === 'http' ? 'http' : 'https'
+    const publicUrl = `${protocol}://${host}/${encodeURIComponent(params.slug)}`
+    const externalBrowserUrl = getExternalBrowserTarget({
+      currentUrl: publicUrl,
+      userAgent,
+      referer,
+    })
 
-    if (isInAppBrowser(userAgent, referer)) {
-      const forwardedHost = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host')
-      const host = forwardedHost?.split(',')[0]?.trim() || 'www.taplinkr.com'
-      const forwardedProto = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim()
-      const protocol = forwardedProto === 'http' ? 'http' : 'https'
-      const publicUrl = `${protocol}://${host}/${encodeURIComponent(params.slug)}`
-      externalBrowserUrl = isInstagramInAppBrowser(userAgent, referer)
-        ? getInstagramExternalBrowserUrl(publicUrl)
-        : getExternalBrowserUrl(publicUrl, getMobilePlatform(userAgent))
+    if (link.shieldEnabled || link.isUltraLink) {
+      // Preserve the native-browser handoff before entering Shield. Once Safari
+      // or the Android browser reloads the public URL, this request is no
+      // longer in-app and can safely continue to the Shield verification page.
+      if (externalBrowserUrl) {
+        return (
+          <PublicDirectRedirect
+            linkId={link.id}
+            destination={`/shield/${encodeURIComponent(link.slug)}`}
+            externalBrowserUrl={externalBrowserUrl}
+          />
+        )
+      }
+      redirect(`/shield/${link.slug}`)
     }
 
     // Always serve a real TapLinkr page before navigating. This keeps TapLinkr's
