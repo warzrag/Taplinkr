@@ -88,7 +88,7 @@ export default function PasswordProtectionModal({
           {hint && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-blue-800 text-sm">
-                <span className="font-medium">Indice :</span> {hint}
+                <span className="font-medium">Hint:</span> {hint}
               </p>
             </div>
           )}
@@ -99,7 +99,7 @@ export default function PasswordProtectionModal({
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Entrez le mot de passe"
+              placeholder="Enter the password"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
               disabled={loading || isLocked}
             />

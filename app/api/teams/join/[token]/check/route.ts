@@ -41,7 +41,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ token
       return NextResponse.json({ 
         error: invitationStatus === 'accepted'
           ? 'This invitation has already been accepted'
-          : 'Cette invitation n\'est plus valide'
+          : 'This invitation is no longer valid'
       }, { status: 400 })
     }
 

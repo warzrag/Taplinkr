@@ -298,7 +298,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       ])
     }
     if (kind === 'social') {
-      setDescription(description || 'Retrouvez-moi sur toutes mes plateformes.')
+      setDescription(description || 'Find all my links in one place.')
       setLinks([
         { title: 'Instagram', url: 'https://instagram.com/', description: '', icon: '', iconImage: '' },
         { title: 'TikTok', url: 'https://tiktok.com/@', description: '', icon: '', iconImage: '' },
@@ -344,7 +344,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     }
 
     if (slugAvailable === false) {
-      toast.error('Cette URL est deja utilisee')
+      toast.error('This public URL is already in use')
       return
     }
 
@@ -591,7 +591,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         <input
                           value={title}
                           onChange={(event) => setTitle(event.target.value)}
-                          placeholder="Ex : Ma boutique, Mon offre..."
+                          placeholder="Example: My shop, Summer offer..."
                           className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-950 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                         />
                         <p className="mt-1.5 text-xs text-gray-500">This name helps you find the link in your dashboard. It is never shown publicly.</p>
@@ -603,7 +603,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           inputMode="url"
                           value={directUrl}
                           onChange={(event) => setDirectUrl(event.target.value)}
-                          placeholder="https://votre-site.com/offre"
+                          placeholder="https://your-site.com/offer"
                           className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-950 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                         />
                       </div>
@@ -617,7 +617,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                               setCustomSlugTouched(true)
                               setSlug(slugify(event.target.value))
                             }}
-                            placeholder="mon-offre"
+                            placeholder="my-offer"
                             className="min-w-0 flex-1 bg-white px-3 py-3 text-gray-950 outline-none dark:bg-gray-900 dark:text-white"
                           />
                           <button
@@ -633,7 +633,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             <RefreshCw className="h-4 w-4" />
                           </button>
                         </div>
-                        <p className="mt-1.5 text-xs text-gray-500">Cette adresse est publique. Elle ne reprend jamais votre nom interne.</p>
+                        <p className="mt-1.5 text-xs text-gray-500">This address is public. Your internal name is never shown here.</p>
                         <div className="mt-2 min-h-5 text-xs">
                           {checkingSlug && <span className="inline-flex items-center gap-1 text-gray-500"><Loader2 className="h-3 w-3 animate-spin" /> Checking...</span>}
                           {!checkingSlug && slugAvailable === true && <span className="inline-flex items-center gap-1 text-green-600"><Check className="h-3 w-3" /> URL disponible</span>}
@@ -678,7 +678,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       <input
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
-                        placeholder="Ex : Florent, Taplinkr, votre pseudo..."
+                        placeholder="Example: Madison, Taplinkr, your handle..."
                         className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                       />
                     </div>
@@ -689,7 +689,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       <textarea
                         value={description}
                         onChange={(event) => setDescription(event.target.value)}
-                        placeholder="Ex : Retrouvez tous mes contenus, offres et reseaux ici."
+                        placeholder="Example: Find all my content, offers, and social profiles here."
                         rows={3}
                         className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-gray-950 dark:text-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                       />
@@ -880,7 +880,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                             setSlug(slugify(event.target.value))
                           }}
                           className="min-w-0 flex-1 bg-white dark:bg-gray-950 px-3 py-3 text-gray-950 dark:text-white outline-none"
-                          placeholder="mon-pseudo"
+                          placeholder="my-handle"
                         />
                         <button type="button" onClick={handleCopyPreviewUrl} className="px-3 text-gray-500 hover:text-indigo-600">
                           <Copy className="w-4 h-4" />
@@ -948,14 +948,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       <Zap className="h-6 w-6" />
                     </div>
                     <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-white/45">Your short link</p>
-                    <p className="mt-2 break-all text-lg font-bold">taplinkr.com/{slug || 'mon-offre'}</p>
+                    <p className="mt-2 break-all text-lg font-bold">taplinkr.com/{slug || 'my-offer'}</p>
                     <div className="my-6 flex items-center gap-3 text-white/45">
                       <div className="h-px flex-1 bg-white/15" />
                       <ArrowRight className="h-5 w-5" />
                       <div className="h-px flex-1 bg-white/15" />
                     </div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/45">Destination</p>
-                    <p className="mt-2 break-all text-sm text-white/80">{directUrl || 'https://votre-site.com/offre'}</p>
+                    <p className="mt-2 break-all text-sm text-white/80">{directUrl || 'https://your-site.com/offer'}</p>
                     <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-200">
                       Instant redirect with click tracking included.
                     </div>

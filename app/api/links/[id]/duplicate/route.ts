@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
       data: {
         slug: newSlug,
         url: existingLink.url,
-        title: existingLink.title ? `${existingLink.title} (copie)` : null,
+        title: existingLink.title ? `${existingLink.title} (copy)` : null,
         description: existingLink.description,
         type: existingLink.type,
         shield: existingLink.shield,

@@ -46,7 +46,7 @@ const benefits = [
   {
     icon: Users,
     title: 'Collaboration',
-    description: 'Team management for multiple pages, campaigns, and domains'
+    description: 'Team management for multiple pages and campaigns'
   },
 ]
 
@@ -110,7 +110,7 @@ export default function SignIn() {
       const inviteToken = searchParams.get('invite')
       const welcomeTeam = searchParams.get('welcome') === 'team'
       const callbackUrl = inviteToken
-        ? `/dashboard/accept-invitation?token=${inviteToken}`
+        ? `/dashboard/accept-invitation?token=${encodeURIComponent(inviteToken)}`
         : welcomeTeam
         ? '/dashboard/team/welcome'
         : '/dashboard'
@@ -196,7 +196,7 @@ export default function SignIn() {
                 </h1>
 
                 <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Manage your pages, deep links, protection, custom domains, and analytics from one dashboard.
+                  Manage your pages, direct links, protection, teams, and analytics from one dashboard.
                 </p>
               </div>
             </div>
@@ -302,7 +302,7 @@ export default function SignIn() {
                     <input
                       type="email"
                       {...register('email', {
-                        required: 'L\'email est requis',
+                        required: 'Your email is required',
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                           message: 'Invalid email address',
@@ -343,7 +343,7 @@ export default function SignIn() {
                     <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      {...register('password', { required: 'Le mot de passe est requis' })}
+                      {...register('password', { required: 'Your password is required' })}
                       className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-12 pr-12 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
                       placeholder="••••••••"
                     />

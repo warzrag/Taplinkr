@@ -76,7 +76,7 @@ export default function TodayClicksChart() {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Clics d'aujourd'hui
+              Today's clicks
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               No links found
@@ -158,7 +158,7 @@ export default function TodayClicksChart() {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                {data.hasClicksToday ? "Clics d'aujourd'hui" : "Vos meilleurs liens"}
+                {data.hasClicksToday ? "Today's clicks" : "Your top links"}
                 {data.hasClicksToday && <Sparkles className="w-4 h-4 text-yellow-500" />}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
@@ -174,7 +174,7 @@ export default function TodayClicksChart() {
               {totalTodayClicks}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {data.hasClicksToday ? "Total aujourd'hui" : "Clics aujourd'hui"}
+              {data.hasClicksToday ? "Total today" : "Clicks today"}
             </p>
           </div>
         </div>

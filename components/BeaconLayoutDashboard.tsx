@@ -41,9 +41,9 @@ export default function BeaconLayoutDashboard({
     },
     {
       id: '2', 
-      title: 'MON TELEGRAM PRIVÉ',
+      title: 'MY PRIVATE TELEGRAM',
       url: '#',
-      description: 'Messages privés',
+      description: 'Private messages',
       icon: '✈️',
       isActive: true
     },

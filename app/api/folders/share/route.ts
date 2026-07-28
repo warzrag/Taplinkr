@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Le cache localStorage sera invalidé côté client
 
     return NextResponse.json({
-      message: 'Dossier partagé avec succès',
+      message: 'Folder shared successfully',
       folder: updatedFolder
     })
   } catch (error) {
@@ -113,7 +113,7 @@ export async function DELETE(request: NextRequest) {
     // Le cache localStorage sera invalidé côté client
 
     return NextResponse.json({
-      message: 'Dossier retiré du partage',
+      message: 'Folder sharing removed',
       folder: updatedFolder
     })
   } catch (error) {

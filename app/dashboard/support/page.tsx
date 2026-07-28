@@ -23,13 +23,26 @@ export default function SupportPage() {
     }
 
     setLoading(true)
-    
-    // Simuler l'envoi
-    setTimeout(() => {
+
+    try {
+      const response = await fetch('/api/support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Unable to send your message.')
+      }
+
       toast.success("Message sent! We'll respond within 24 hours.")
       setFormData({ subject: '', category: 'general', message: '' })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to send your message.')
+    } finally {
       setLoading(false)
-    }, 1500)
+    }
   }
 
   return (
@@ -92,10 +105,10 @@ export default function SupportPage() {
                 </h3>
               </div>
               <a 
-                href="mailto:support@taplinkr.com"
+                href="mailto:hello@taplinkr.com"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
-                support@taplinkr.com
+                hello@taplinkr.com
               </a>
             </div>
 

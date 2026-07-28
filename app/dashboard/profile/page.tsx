@@ -7,18 +7,14 @@ import { motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import { 
   User,
-  Mail,
   Shield,
   Camera,
   Check,
   Crown,
   Sparkles,
   Lock,
-  Calendar,
-  AlertCircle,
   ChevronRight,
   Upload,
-  Trash2,
   BadgeCheck,
   Zap,
   BarChart3,
@@ -28,6 +24,7 @@ import {
   ShieldCheck
 } from 'lucide-react'
 import Image from 'next/image'
+import { PLAN_LIMITS, type UserPlan } from '@/lib/permissions'
 
 interface ProfileData {
   name: string
@@ -55,19 +52,11 @@ export default function ProfilePage() {
     emailVerified: true,
     createdAt: new Date().toISOString()
   })
-  const [showPasswordModal, setShowPasswordModal] = useState(false)
-
-  // Limites selon le plan
-  const limits = {
-    deepLinks: session?.user?.plan === 'premium' ? 50 : 1,
-    landingPages: session?.user?.plan === 'premium' ? 10 : 1
-  }
-
-  // Usage actuel (à récupérer depuis l'API)
-  const usage = {
-    deepLinks: 1,
-    landingPages: 1
-  }
+  const [linkCount, setLinkCount] = useState<number | null>(null)
+  const currentPlan = (['free', 'standard', 'premium'].includes(profile.plan)
+    ? profile.plan
+    : 'free') as UserPlan
+  const maxPages = PLAN_LIMITS[currentPlan].maxPages
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -88,6 +77,11 @@ export default function ProfilePage() {
             emailVerified: Boolean(data.emailVerified),
             createdAt: data.createdAt || new Date().toISOString()
           })
+          const linksResponse = await fetch('/api/links/fast', { cache: 'no-store' })
+          if (linksResponse.ok) {
+            const linksData = await linksResponse.json()
+            setLinkCount(Number(linksData.count ?? linksData.links?.length ?? 0))
+          }
         } catch {
           setProfile({
             name: session.user.name || '',
@@ -361,7 +355,7 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Contactez le support pour modifier votre adresse email
+                    Contact support to change your email address
                   </p>
                 </div>
               </div>
@@ -373,7 +367,7 @@ export default function ProfilePage() {
                 disabled={saving}
                 className="mt-6 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-blue-600/25 disabled:opacity-50"
               >
-                {saving ? 'Sauvegarde...' : 'Sauvegarder le profil'}
+                {saving ? 'Saving...' : 'Save profile'}
               </motion.button>
             </motion.div>
 
@@ -405,10 +399,10 @@ export default function ProfilePage() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowPasswordModal(true)}
+                    onClick={() => router.push(`/auth/forgot-password?email=${encodeURIComponent(profile.email)}`)}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600 flex items-center gap-2"
                   >
-                    Change
+                    Reset password
                     <ChevronRight className="w-4 h-4" />
                   </motion.button>
                 </div>
@@ -445,11 +439,11 @@ export default function ProfilePage() {
                         <Sparkles className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       )}
                       <h3 className={`font-semibold ${isPaid ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                        Plan {isPremium ? 'Premium' : isStandard ? 'Standard' : 'Gratuit'}
+                        Plan {isPremium ? 'Premium' : isStandard ? 'Standard' : 'Free'}
                       </h3>
                     </div>
                     <p className={`text-2xl font-bold ${isPaid ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                      {isPremium ? '24,99€' : isStandard ? '9,99€' : 'Gratuit'}
+                      {isPremium ? '€24.99' : isStandard ? '€9.99' : 'Free'}
                     </p>
                   </div>
                   {isPaid && (
@@ -461,7 +455,9 @@ export default function ProfilePage() {
                 
                 <div className={`text-sm ${isPaid ? 'text-white/80' : 'text-gray-600 dark:text-gray-400'} mb-4`}>
                   {isPaid ? (
-                    <>Renouvellement le {new Date(profile.planExpiresAt || '').toLocaleDateString()}</>
+                    profile.planExpiresAt
+                      ? <>Access through {new Date(profile.planExpiresAt).toLocaleDateString('en-US')}</>
+                      : <>Billed monthly</>
                   ) : (
                     <>No renewal</>
                   )}
@@ -489,45 +485,26 @@ export default function ProfilePage() {
               transition={{ delay: 0.3 }}
               className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
             >
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Utilisation du plan</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Plan usage</h3>
               
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">Direct links</span>
+                    <span className="text-sm font-medium text-gray-700">Created links</span>
                     <span className="text-sm font-bold text-gray-900">
-                      {usage.deepLinks} / {limits.deepLinks}
+                      {linkCount ?? '—'} / {maxPages === -1 ? 'Unlimited' : maxPages}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                  {maxPages !== -1 && linkCount !== null && <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all ${
-                        usage.deepLinks >= limits.deepLinks 
+                        linkCount >= maxPages
                           ? 'bg-red-500' 
                           : 'bg-gradient-to-r from-blue-500 to-indigo-500'
                       }`}
-                      style={{ width: `${(usage.deepLinks / limits.deepLinks) * 100}%` }}
+                      style={{ width: `${Math.min(100, (linkCount / maxPages) * 100)}%` }}
                     />
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">Landing Pages</span>
-                    <span className="text-sm font-bold text-gray-900">
-                      {usage.landingPages} / {limits.landingPages}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all ${
-                        usage.landingPages >= limits.landingPages 
-                          ? 'bg-red-500' 
-                          : 'bg-gradient-to-r from-blue-500 to-indigo-500'
-                      }`}
-                      style={{ width: `${(usage.landingPages / limits.landingPages) * 100}%` }}
-                    />
-                  </div>
+                  </div>}
                 </div>
               </div>
             </motion.div>
@@ -540,15 +517,15 @@ export default function ProfilePage() {
               className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
             >
               <h3 className="font-semibold mb-4">
-                {isPremium ? 'Premium' : 'Free'} features
+                {currentPlan === 'premium' ? 'Premium' : currentPlan === 'standard' ? 'Standard' : 'Free'} features
               </h3>
               
               <div className="space-y-3">
                 {[
-                  { icon: Link, label: `${limits.landingPages} Landing Page${limits.landingPages > 1 ? 's' : ''}`, available: true },
-                  { icon: BarChart3, label: 'Analytics de base', available: true },
+                  { icon: Link, label: maxPages === -1 ? 'Unlimited pages' : `${maxPages} page${maxPages > 1 ? 's' : ''}`, available: true },
+                  { icon: BarChart3, label: isPaid ? 'Advanced analytics' : 'Basic analytics', available: true },
                   { icon: Globe, label: 'Direct links', available: true },
-                  { icon: Globe, label: 'Custom domains', available: isPremium },
+                  { icon: Globe, label: 'Campaign organization', available: isPaid },
                   { icon: Palette, label: 'Advanced customization', available: isPremium },
                   { icon: ShieldCheck, label: 'Full Shield protection', available: isPremium },
                 ].map((feature, index) => (

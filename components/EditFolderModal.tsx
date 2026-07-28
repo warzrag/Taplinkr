@@ -146,7 +146,7 @@ export default function EditFolderModal({ isOpen, folder, onClose, onSave }: Edi
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-semibold text-gray-900 truncate">
-                    {name || 'Nom du dossier'}
+                    {name || 'Folder name'}
                   </h3>
                   {description && (
                     <p className="text-sm text-gray-600 truncate">{description}</p>
@@ -161,13 +161,13 @@ export default function EditFolderModal({ isOpen, folder, onClose, onSave }: Edi
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom du dossier
+                  Folder name
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Entrez le nom du dossier"
+                  placeholder="Enter a folder name"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -175,12 +175,12 @@ export default function EditFolderModal({ isOpen, folder, onClose, onSave }: Edi
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description (optionnelle)
+                  Description (optional)
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Description du dossier"
+                  placeholder="Folder description"
                   rows={3}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 />

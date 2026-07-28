@@ -245,7 +245,7 @@ export default function EditLinkPage() {
               whileTap={{ scale: 0.98 }}
             >
               <Save className="w-4 h-4" />
-              <span>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</span>
+              <span>{saving ? 'Saving...' : 'Save changes'}</span>
             </motion.button>
           </div>
         </div>
@@ -270,14 +270,14 @@ export default function EditLinkPage() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Titre du lien
+                        Link title
                       </label>
                       <input
                         type="text"
                         value={linkData.title}
                         onChange={(e) => setLinkData({ ...linkData, title: e.target.value })}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Mon super lien"
+                        placeholder="My featured link"
                       />
                     </div>
 
@@ -290,7 +290,7 @@ export default function EditLinkPage() {
                         onChange={(e) => setLinkData({ ...linkData, description: e.target.value })}
                         rows={3}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Description de votre lien..."
+                        placeholder="Describe your link..."
                       />
                     </div>
 
@@ -370,7 +370,7 @@ export default function EditLinkPage() {
                                           value={multiLink.title}
                                           onChange={(e) => updateMultiLink(multiLink.id, 'title', e.target.value)}
                                           className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                          placeholder="Titre du lien"
+                                          placeholder="Link title"
                                         />
                                         <input
                                           type="text"
@@ -394,7 +394,7 @@ export default function EditLinkPage() {
                                         value={multiLink.description || ''}
                                         onChange={(e) => updateMultiLink(multiLink.id, 'description', e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Description (optionnelle)"
+                                        placeholder="Description (optional)"
                                       />
                                     </div>
                                     

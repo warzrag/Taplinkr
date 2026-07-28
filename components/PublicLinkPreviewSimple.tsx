@@ -129,7 +129,7 @@ export default function PublicLinkPreviewSimple({ link }: PublicLinkPreviewProps
               className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
             >
               <Share2 className="w-4 h-4" />
-              <span className="text-sm">Partager</span>
+              <span className="text-sm">Share</span>
             </button>
           </div>
         </div>

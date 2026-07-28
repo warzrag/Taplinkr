@@ -44,7 +44,7 @@ export default function PublicPasswordGate({ linkId, title, hint }: {
         </div>
         <h1 className="text-center text-2xl font-bold text-slate-900">{title}</h1>
         <p className="mt-2 text-center text-sm text-slate-600">This page is password protected.</p>
-        {hint && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">Indice : {hint}</p>}
+        {hint && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">Hint: {hint}</p>}
         <label htmlFor="page-password" className="mt-6 block text-sm font-medium text-slate-800">Password</label>
         <input
           id="page-password"

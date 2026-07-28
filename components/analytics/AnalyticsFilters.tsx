@@ -248,7 +248,7 @@ export default function AnalyticsFilters({ onFiltersChange, initialFilters = {} 
                 <div>
                   <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     <TrendingUp className="w-4 h-4" />
-                    <span>Clics minimum</span>
+                    <span>Minimum clicks</span>
                   </label>
                   <input
                     type="number"

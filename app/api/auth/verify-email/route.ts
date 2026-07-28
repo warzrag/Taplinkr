@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { EmailService } from '@/lib/email-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,6 +71,11 @@ export async function POST(request: NextRequest) {
     await prisma.verificationToken.delete({
       where: { id: verificationToken.id }
     })
+
+    await EmailService.sendWelcomeEmail(
+      verificationToken.user.email,
+      verificationToken.user.name || verificationToken.user.username || 'there',
+    )
 
     return NextResponse.json(
       { 

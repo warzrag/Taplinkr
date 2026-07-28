@@ -177,7 +177,7 @@ export default function PublicLinkPreviewWorking({ link }: PublicLinkPreviewProp
                 ) : (
                   <>
                     <Share2 className="w-4 h-4 inline mr-1.5" />
-                    Partager
+                    Share
                   </>
                 )}
               </button>

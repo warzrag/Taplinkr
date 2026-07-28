@@ -6,9 +6,10 @@ interface SendEmailOptions {
   to: string
   subject: string
   html: string
+  replyTo?: string
 }
 
-export async function sendEmailWithResend({ to, subject, html }: SendEmailOptions) {
+export async function sendEmailWithResend({ to, subject, html, replyTo }: SendEmailOptions) {
   try {
     if (!resend) {
       console.warn('RESEND_API_KEY not configured - email not sent')
@@ -20,6 +21,7 @@ export async function sendEmailWithResend({ to, subject, html }: SendEmailOption
       to,
       subject,
       html,
+      ...(replyTo ? { replyTo } : {}),
     })
 
     if (error) {

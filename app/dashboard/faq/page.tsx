@@ -35,7 +35,7 @@ const faqs: FAQItem[] = [
   {
     category: 'Plans and pricing',
     question: 'What is the difference between plans?',
-    answer: 'The free plan includes core features. Paid plans add premium themes, more links, custom domains, and advanced features.'
+    answer: 'The free plan includes core features. Paid plans add premium themes, more links, teams, and advanced analytics.'
   },
   {
     category: 'Support',

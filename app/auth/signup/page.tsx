@@ -31,17 +31,17 @@ interface FormData {
 const benefits = [
   {
     icon: Shield,
-    title: 'Protection et confiance',
+    title: 'Protection and trust',
     description: 'Control your deep links, enable an 18+ gate, and keep every page on brand.'
   },
   {
     icon: UserPlus,
-    title: 'Pages qui vendent',
+    title: 'Pages built to convert',
     description: 'Build an on-brand page tailored to every offer, network, and campaign.'
   },
   {
     icon: Mail,
-    title: 'Mise en ligne rapide',
+    title: 'Launch in minutes',
     description: 'Create your account, add your key links, and start tracking performance.'
   },
 ]
@@ -90,8 +90,17 @@ export default function SignUp() {
         return
       }
 
-      toast.success('Account created. Check your email to finish setup.')
-      router.push('/auth/verify-email-waiting?email=' + encodeURIComponent(data.email))
+      const result = await response.json()
+      if (result.emailSent === false) {
+        toast.error('Your account was created, but email delivery is delayed. Use Resend email on the next screen.')
+      } else {
+        toast.success('Account created. Check your email to finish setup.')
+      }
+      router.push(
+        '/auth/verify-email-waiting?email='
+        + encodeURIComponent(data.email)
+        + (result.emailSent === false ? '&delivery=delayed' : ''),
+      )
     } catch {
       toast.error('Unable to create your account.')
     } finally {
@@ -118,7 +127,7 @@ export default function SignUp() {
               <span className="badge-pill bg-brand-500/10 text-brand-600">Your hub in minutes</span>
               <h2 className="text-3xl font-semibold">Build a creator page designed to convert</h2>
               <p className="text-sm text-foreground/65">
-                Centralisez vos offres, contenus, deeplinks et protections dans une page rapide, claire et mesurable.
+                Bring your offers, content, direct links, and analytics together in one fast, measurable workspace.
               </p>
             </div>
 
@@ -204,12 +213,12 @@ export default function SignUp() {
                     className="space-y-5"
                   >
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Nom complet</label>
+                      <label className="text-sm font-medium text-foreground">Full name</label>
                       <div className="relative">
                         <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
                         <input
                           type="text"
-                          {...register('name', { required: 'Le nom est requis' })}
+                          {...register('name', { required: 'Your name is required' })}
                           className="input pl-12"
                           placeholder="Your name"
                         />
@@ -235,14 +244,14 @@ export default function SignUp() {
                         <input
                           type="email"
                           {...register('email', {
-                            required: "L'email est requis",
+                            required: 'Your email is required',
                             pattern: {
                               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                               message: 'Invalid email address',
                             },
                           })}
                           className="input pl-12"
-                          placeholder="vous@exemple.com"
+                          placeholder="you@example.com"
                         />
                       </div>
                       <AnimatePresence>
@@ -279,7 +288,7 @@ export default function SignUp() {
                         <input
                           type={showPassword ? 'text' : 'password'}
                           {...register('password', {
-                            required: 'Le mot de passe est requis',
+                            required: 'Your password is required',
                             minLength: { value: 8, message: 'At least 8 characters' },
                           })}
                           className="input pl-12 pr-12"

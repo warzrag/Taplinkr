@@ -61,6 +61,8 @@ export function middleware(request: NextRequest) {
   if (pathname === '/sw.js') {
     response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate')
     response.headers.set('Clear-Site-Data', '"cache"')
+  } else if (pathname === '/api/health') {
+    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
   } else if (pathname.startsWith('/api/')) {
     response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate')
   } else if (pathname.startsWith('/_next/static')) {

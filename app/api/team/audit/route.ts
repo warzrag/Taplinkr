@@ -213,8 +213,8 @@ export async function POST(request: Request) {
             data: {
               userId: admin.id,
               type: 'critical_action',
-              title: `Action critique: ${action}`,
-              message: `${log.user.name || log.user.email} a effectué une action critique`,
+              title: `Critical action: ${action}`,
+              message: `${log.user.name || log.user.email} performed a critical action`,
               data: JSON.stringify({ logId: log.id, action, severity })
             }
           })
@@ -223,13 +223,13 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      message: 'Log créé avec succès',
+      message: 'Log created successfully',
       log
     })
   } catch (error) {
     console.error('Erreur création audit log:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la création du log' },
+      { error: 'Unable to create the log' },
       { status: 500 }
     )
   }
@@ -260,14 +260,14 @@ export async function DELETE(request: Request) {
     })
 
     return NextResponse.json({
-      message: `${result.count} logs supprimés`,
+      message: `${result.count} logs deleted`,
       deletedCount: result.count,
       cutoffDate
     })
   } catch (error) {
     console.error('Erreur suppression logs:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la suppression des logs' },
+      { error: 'Unable to delete the logs' },
       { status: 500 }
     )
   }

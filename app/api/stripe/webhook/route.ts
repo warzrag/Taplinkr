@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
+import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-import Stripe from 'stripe'
+import { syncStripeSubscription } from '@/lib/sync-stripe-subscription'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -28,93 +29,40 @@ export async function POST(request: NextRequest) {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session
-        const userId = session.client_reference_id!
-        const plan = session.metadata?.plan as 'standard' | 'premium'
+        const checkout = event.data.object as Stripe.Checkout.Session
+        const userId = checkout.client_reference_id
+        const subscriptionId =
+          typeof checkout.subscription === 'string'
+            ? checkout.subscription
+            : checkout.subscription?.id
 
-        // Mettre à jour l'utilisateur avec le nouveau plan
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            plan,
-            stripeCustomerId: session.customer as string,
-            stripeSubscriptionId: session.subscription as string,
-            planExpiresAt: null, // L'abonnement est maintenant géré par Stripe
-          }
-        })
-
-        console.log(`User ${userId} upgraded to ${plan} plan`)
-        break
-      }
-
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription
-        
-        // Trouver l'utilisateur par l'ID de souscription
-        const user = await prisma.user.findFirst({
-          where: { stripeSubscriptionId: subscription.id }
-        })
-
-        if (user) {
-          // Déterminer le plan basé sur le prix
-          const priceId = subscription.items.data[0].price.id
-          let plan: 'free' | 'standard' | 'premium' = 'free'
-          
-          if (priceId === process.env.STRIPE_STANDARD_PRICE_ID) {
-            plan = 'standard'
-          } else if (priceId === process.env.STRIPE_PREMIUM_PRICE_ID) {
-            plan = 'premium'
-          }
-
-          // Mettre à jour le plan de l'utilisateur
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              plan,
-              planExpiresAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000) : null
-            }
-          })
-
-          console.log(`User ${user.id} subscription updated to ${plan}`)
+        if (!userId || !subscriptionId) {
+          throw new Error('Completed Checkout session is missing its account or subscription')
         }
+
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+        await syncStripeSubscription(subscription, userId)
         break
       }
 
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription
-        
-        // Trouver l'utilisateur par l'ID de souscription
-        const user = await prisma.user.findFirst({
-          where: { stripeSubscriptionId: subscription.id }
-        })
-
-        if (user) {
-          // Rétrograder au plan gratuit
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              plan: 'free',
-              stripeSubscriptionId: null,
-              planExpiresAt: null
-            }
-          })
-
-          console.log(`User ${user.id} subscription cancelled, downgraded to free`)
-        }
+        await syncStripeSubscription(event.data.object as Stripe.Subscription)
         break
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
-        
-        // Trouver l'utilisateur par l'ID client
-        const user = await prisma.user.findFirst({
-          where: { stripeCustomerId: invoice.customer as string }
-        })
+        const customerId =
+          typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id
 
-        if (user) {
-          // Vous pouvez envoyer un email à l'utilisateur ici
-          console.log(`Payment failed for user ${user.id}`)
+        if (customerId) {
+          const user = await prisma.user.findFirst({
+            where: { stripeCustomerId: customerId },
+            select: { id: true },
+          })
+          if (user) console.warn(`Stripe payment failed for user ${user.id}`)
         }
         break
       }
@@ -123,9 +71,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true })
   } catch (error) {
     console.error('Webhook handler failed:', error)
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 })
   }
 }

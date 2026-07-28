@@ -146,7 +146,7 @@ export default function PromoCodesManager({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold text-gray-900">
-          Gestion des codes promo
+          Promo code management
         </h3>
         <button
           onClick={onClose}
@@ -211,7 +211,7 @@ export default function PromoCodesManager({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {formData.discountType === 'fixed_days' ? 'Nombre de jours' : 'Pourcentage (%)'}
+                    {formData.discountType === 'fixed_days' ? 'Number of days' : 'Percentage (%)'}
                   </label>
                   <input
                     type="number"
@@ -239,7 +239,7 @@ export default function PromoCodesManager({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre max d'utilisations
+                    Maximum uses
                   </label>
                   <input
                     type="number"
@@ -253,15 +253,15 @@ export default function PromoCodesManager({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Plan requis
+                    Required plan
                   </label>
                   <select
                     value={formData.requiredPlan}
                     onChange={(e) => setFormData({ ...formData, requiredPlan: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    <option value="">Tous les plans</option>
-                    <option value="free">Gratuit seulement</option>
+                    <option value="">All plans</option>
+                    <option value="free">Free only</option>
                     <option value="premium">Premium seulement</option>
                   </select>
                 </div>
@@ -333,12 +333,12 @@ export default function PromoCodesManager({
                     {promo.isActive ? (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <CheckCircle className="w-3 h-3 mr-1" />
-                        Actif
+                        Active
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                         <AlertCircle className="w-3 h-3 mr-1" />
-                        Inactif
+                        Inactive
                       </span>
                     )}
                   </div>
@@ -352,7 +352,7 @@ export default function PromoCodesManager({
                       {promo.discountType === 'fixed_days' ? (
                         <>
                           <Clock className="w-4 h-4" />
-                          <span>{promo.discountValue} jours gratuits</span>
+                          <span>{promo.discountValue} free days</span>
                         </>
                       ) : (
                         <>
@@ -366,7 +366,7 @@ export default function PromoCodesManager({
                       <Users className="w-4 h-4" />
                       <span>
                         {promo._count?.promoRedemptions || promo.currentUses || 0}
-                        {promo.maxUses && `/${promo.maxUses}`} utilisations
+                        {promo.maxUses && `/${promo.maxUses}`} uses
                       </span>
                     </div>
 
@@ -382,7 +382,7 @@ export default function PromoCodesManager({
                     {promo.requiredPlan && (
                       <div className="flex items-center gap-1">
                         <Tag className="w-4 h-4" />
-                        <span>Plan {promo.requiredPlan} requis</span>
+                        <span>{promo.requiredPlan} plan required</span>
                       </div>
                     )}
                   </div>

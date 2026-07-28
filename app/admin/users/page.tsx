@@ -243,7 +243,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
-                Gestion des utilisateurs
+                User management
               </h1>
               <p className="text-gray-600 mt-1">Manage user accounts and permissions</p>
             </div>
@@ -293,7 +293,7 @@ export default function AdminUsersPage() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Actifs</p>
+                  <p className="text-sm text-gray-500">Active</p>
                   <p className="text-2xl font-bold text-green-600">{stats.active}</p>
                 </div>
                 <UserCheck className="w-8 h-8 text-green-400" />
@@ -345,9 +345,9 @@ export default function AdminUsersPage() {
               onChange={(e) => setFilter(e.target.value)}
               className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">Tous les utilisateurs</option>
-              <option value="active">Actifs seulement</option>
-              <option value="inactive">Inactifs seulement</option>
+              <option value="all">All users</option>
+              <option value="active">Active only</option>
+              <option value="inactive">Inactive only</option>
               <option value="verified">Email verified</option>
               <option value="unverified">Email not verified</option>
               <option value="premium">Premium seulement</option>
@@ -427,7 +427,7 @@ export default function AdminUsersPage() {
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {user.isActive ? 'Actif' : 'Inactif'}
+                          {user.isActive ? 'Active' : 'Inactive'}
                         </span>
                         {user.emailVerified ? (
                           <span className="inline-flex items-center gap-1 text-xs text-green-600">
@@ -455,7 +455,7 @@ export default function AdminUsersPage() {
                               Premium
                             </>
                           ) : (
-                            'Gratuit'
+                            'Free'
                           )}
                         </span>
                         {user.plan === 'premium' && user.planExpiresAt && (
@@ -699,8 +699,8 @@ export default function AdminUsersPage() {
                     </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    Plan actuel : <span className="font-medium text-gray-900">
-                      {users.find(u => u.id === showPlanModal)?.plan === 'premium' ? 'Premium' : 'Gratuit'}
+                    Current plan: <span className="font-medium text-gray-900">
+                      {users.find(u => u.id === showPlanModal)?.plan === 'premium' ? 'Premium' : 'Free'}
                     </span>
                   </p>
                 </div>
@@ -718,7 +718,7 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-3">
                       <Users className="w-5 h-5 text-gray-600" />
                       <div>
-                        <p className="font-medium text-gray-900">Plan Gratuit</p>
+                        <p className="font-medium text-gray-900">Free plan</p>
                         <p className="text-sm text-gray-500">Access to core features</p>
                       </div>
                     </div>

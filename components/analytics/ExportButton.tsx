@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Download, FileText, FileSpreadsheet, BarChart3, Calendar } from 'lucide-react'
+import { Download, FileSpreadsheet, BarChart3 } from 'lucide-react'
 
 interface ExportButtonProps {
   data: any
@@ -22,22 +22,28 @@ export default function ExportButton({ data, type, linkId }: ExportButtonProps) 
       let filename = ""
       
       if (type === 'dashboard' && data.summary) {
-        csvContent = "Date,Clics,Vues,Taux d'engagement\n"
+        csvContent = "Date,Clicks,Views,Engagement rate\n"
         data.summary.forEach((item: any) => {
           const engagementRate = item.views > 0 ? (item.clicks / item.views * 100).toFixed(2) : 0
           csvContent += `${new Date(item.date).toLocaleDateString()},${item.clicks},${item.views},${engagementRate}%\n`
         })
         filename = `analytics-dashboard-${new Date().toISOString().split('T')[0]}.csv`
       } else if (type === 'link' && data.summary) {
-        csvContent = "Date,Clics,Vues,Croissance\n"
+        csvContent = "Date,Clicks,Views,Growth\n"
         data.summary.forEach((item: any) => {
           csvContent += `${new Date(item.date).toLocaleDateString()},${item.clicks},${item.views},${item.clickGrowth || 0}%\n`
         })
         filename = `analytics-link-${linkId}-${new Date().toISOString().split('T')[0]}.csv`
       } else if (type === 'folder') {
         csvContent = "Folder,Total Clicks,Links,Growth Rate\n"
-        // Simulated folder data
-        csvContent += "Exemple,100,5,15%\n"
+        const folders = Array.isArray(data) ? data : data?.folders || []
+        folders.forEach((folder: any) => {
+          const name = String(folder.name || 'Untitled').replaceAll('"', '""')
+          const links = Array.isArray(folder.links) ? folder.links.length : Number(folder.linkCount || 0)
+          const clicks = Number(folder.totalClicks ?? folder.clicks ?? 0)
+          const growth = Number(folder.growthRate ?? folder.growth ?? 0)
+          csvContent += `"${name}",${clicks},${links},${growth}%\n`
+        })
         filename = `analytics-folders-${new Date().toISOString().split('T')[0]}.csv`
       }
 
@@ -52,24 +58,6 @@ export default function ExportButton({ data, type, linkId }: ExportButtonProps) 
       document.body.removeChild(link)
     } catch (error) {
       console.error('Erreur lors de l\'export:', error)
-    } finally {
-      setIsExporting(false)
-      setShowOptions(false)
-    }
-  }
-
-  const exportToPDF = async () => {
-    setIsExporting(true)
-    
-    try {
-      // Simuler l'export PDF
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // En réalité, ici on utiliserait une librairie comme jsPDF
-      console.log('Export PDF non implémenté dans cette démo')
-      
-    } catch (error) {
-      console.error('Erreur lors de l\'export PDF:', error)
     } finally {
       setIsExporting(false)
       setShowOptions(false)
@@ -116,7 +104,7 @@ export default function ExportButton({ data, type, linkId }: ExportButtonProps) 
         ) : (
           <Download className="w-4 h-4" />
         )}
-        <span>Exporter</span>
+        <span>Export</span>
       </motion.button>
 
       {showOptions && (
@@ -133,18 +121,7 @@ export default function ExportButton({ data, type, linkId }: ExportButtonProps) 
             <FileSpreadsheet className="w-4 h-4 text-green-600" />
             <div>
               <p className="font-medium text-gray-900 dark:text-gray-100">CSV</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Pour Excel/Google Sheets</p>
-            </div>
-          </button>
-
-          <button
-            onClick={exportToPDF}
-            className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-3 transition-colors"
-          >
-            <FileText className="w-4 h-4 text-red-600" />
-            <div>
-              <p className="font-medium text-gray-900 dark:text-gray-100">PDF</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Rapport complet</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">For Excel or Google Sheets</p>
             </div>
           </button>
 

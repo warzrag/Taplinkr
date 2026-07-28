@@ -35,7 +35,7 @@ const benefits = [
 const useCases = [
   ['Creators', 'Bring your content, offers, and social profiles together in a professional showcase.'],
   ['Sensitive content', 'Add a warning or protection whenever your audience needs it.'],
-  ['Teams and agencies', 'Manage multiple pages, campaigns, domains, and collaborators in one place.'],
+  ['Teams and agencies', 'Manage multiple pages, campaigns, and collaborators in one place.'],
 ]
 
 export default function Home() {
@@ -165,7 +165,7 @@ export default function Home() {
 
         <section id="cas-usages" className="border-y border-neutral-200 bg-neutral-50 py-16 dark:border-white/10 dark:bg-white/[.03] sm:py-24">
           <Container className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center">
-            <div><p className="text-sm font-semibold uppercase tracking-[.16em] text-brand-600">For every business</p><h2 className="mt-3 text-3xl font-semibold sm:text-4xl">Simple enough to start. Powerful enough to grow.</h2><div className="mt-6 flex flex-wrap gap-2 text-sm text-neutral-600 dark:text-white/60"><span className="rounded-full border px-3 py-1"><Palette className="mr-1 inline h-4 w-4" /> Design</span><span className="rounded-full border px-3 py-1"><Globe2 className="mr-1 inline h-4 w-4" /> Domain</span><span className="rounded-full border px-3 py-1"><ShieldCheck className="mr-1 inline h-4 w-4" /> Protection</span></div></div>
+            <div><p className="text-sm font-semibold uppercase tracking-[.16em] text-brand-600">For every business</p><h2 className="mt-3 text-3xl font-semibold sm:text-4xl">Simple enough to start. Powerful enough to grow.</h2><div className="mt-6 flex flex-wrap gap-2 text-sm text-neutral-600 dark:text-white/60"><span className="rounded-full border px-3 py-1"><Palette className="mr-1 inline h-4 w-4" /> Design</span><span className="rounded-full border px-3 py-1"><Globe2 className="mr-1 inline h-4 w-4" /> Campaigns</span><span className="rounded-full border px-3 py-1"><ShieldCheck className="mr-1 inline h-4 w-4" /> Protection</span></div></div>
             <div className="grid gap-4 sm:grid-cols-3">{useCases.map(([title, text]) => <div key={title} className="rounded-2xl border border-neutral-200 bg-white p-5 dark:border-white/10 dark:bg-neutral-950"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-white/60">{text}</p></div>)}</div>
           </Container>
         </section>

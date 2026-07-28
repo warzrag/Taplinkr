@@ -137,7 +137,7 @@ export default function ResendVerificationPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="vous@exemple.com"
+              placeholder="you@example.com"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
@@ -153,7 +153,7 @@ export default function ResendVerificationPage() {
             {loading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Envoi en cours...
+                Sending...
               </>
             ) : (
               <>

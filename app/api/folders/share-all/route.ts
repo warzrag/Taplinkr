@@ -44,7 +44,7 @@ export async function POST() {
 
     if (foldersToShare.length === 0) {
       return NextResponse.json({
-        message: 'Tous vos dossiers sont déjà partagés',
+        message: 'All your folders are already shared',
         count: 0
       })
     }
@@ -77,7 +77,7 @@ export async function POST() {
     })
 
     return NextResponse.json({
-      message: `${result.count} dossier(s) partagés avec succès`,
+      message: `${result.count} folder(s) shared successfully`,
       count: result.count,
       totalShared: sharedFolders.length,
       folders: sharedFolders.map(f => f.name)
@@ -86,7 +86,7 @@ export async function POST() {
     console.error('❌ Erreur partage dossiers:', error)
     return NextResponse.json({
       error: 'Unable to share folders',
-      details: error instanceof Error ? error.message : 'Erreur inconnue'
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }

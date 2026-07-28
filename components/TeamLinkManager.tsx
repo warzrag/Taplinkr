@@ -390,7 +390,7 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
                     <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1">
                         <UserCheck className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate max-w-[120px] sm:max-w-none">{link.user?.name || link.user?.email || 'Utilisateur'}</span>
+                        <span className="truncate max-w-[120px] sm:max-w-none">{link.user?.name || link.user?.email || 'User'}</span>
                       </span>
                       {link.lastModifier && link.lastModifier.id !== link.user?.id && (
                         <span className="flex items-center gap-1">

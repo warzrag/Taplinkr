@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { CheckCircle, XCircle, Loader2, Mail, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { signIn } from 'next-auth/react'
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams()
@@ -22,58 +21,45 @@ export default function VerifyEmailPage() {
       return
     }
 
-    verifyEmail()
-  }, [token])
+    let cancelled = false
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined
 
-  const verifyEmail = async () => {
-    try {
-      const response = await fetch('/api/auth/verify-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
-      })
+    const verifyEmail = async () => {
+      try {
+        const response = await fetch('/api/auth/verify-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        })
 
-      const data = await response.json()
+        const data = await response.json()
 
-      if (response.ok) {
-        setStatus('success')
-        setMessage(data.message || 'Email verified successfully!')
-        
-        // Essayer de se connecter automatiquement avec l'email retourné
-        if (data.email) {
-          setTimeout(async () => {
-            try {
-              // Connexion automatique avec juste l'email (sans mot de passe car déjà vérifié)
-              const result = await signIn('credentials', {
-                email: data.email,
-                verified: true,
-                redirect: false
-              })
-              
-              if (result?.ok) {
-                router.push('/dashboard')
-              } else {
-                router.push('/auth/signin?verified=true')
-              }
-            } catch (error) {
-              router.push('/auth/signin?verified=true')
-            }
-          }, 1500)
-        } else {
-          // Rediriger vers la page de connexion après 3 secondes
-          setTimeout(() => {
+        if (cancelled) return
+
+        if (response.ok) {
+          setStatus('success')
+          setMessage(data.message || 'Email verified successfully!')
+          redirectTimer = setTimeout(() => {
             router.push('/auth/signin?verified=true')
-          }, 3000)
+          }, 2000)
+        } else {
+          setStatus('error')
+          setMessage(data.message || 'Unable to verify your email.')
         }
-      } else {
+      } catch {
+        if (cancelled) return
         setStatus('error')
-        setMessage(data.message || 'Unable to verify your email.')
+        setMessage('Unable to connect to the server.')
       }
-    } catch (error) {
-      setStatus('error')
-      setMessage('Unable to connect to the server.')
     }
-  }
+
+    void verifyEmail()
+
+    return () => {
+      cancelled = true
+      if (redirectTimer) clearTimeout(redirectTimer)
+    }
+  }, [router, token])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center p-4">
@@ -131,7 +117,7 @@ export default function VerifyEmailPage() {
           {status === 'success' && (
             <div className="space-y-3">
               <p className="text-sm text-gray-500">
-                Redirection automatique dans 3 secondes...
+                Redirecting you to login...
               </p>
               <Link href="/auth/signin">
                 <motion.button

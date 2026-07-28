@@ -2,7 +2,7 @@
 export const PLAN_LIMITS = {
   free: {
     maxLinks: 1,
-    maxMultiLinks: 1,
+    maxMultiLinks: 5,
     maxPages: 1,
     customDomain: false,
     analytics: 'basic',
@@ -99,16 +99,16 @@ export async function checkUserLimits(userId: string, prisma: any) {
 export function getLimitMessage(limitType: 'links' | 'multiLinks', plan: string) {
   const messages = {
     links: {
-      free: 'You reached the free plan limit of 1 link. Upgrade to create unlimited links.',
-      pro: 'Limite de liens atteinte.',
-      business: 'Limite de liens atteinte.'
+      free: 'You reached the free plan limit of 5 links. Upgrade to create unlimited links.',
+      pro: 'Link limit reached.',
+      business: 'Link limit reached.'
     },
     multiLinks: {
-      free: 'You reached the free plan limit of 1 multi-link. Upgrade to create unlimited multi-links.',
-      pro: 'Limite de multi-links atteinte.',
-      business: 'Limite de multi-links atteinte.'
+      free: 'You reached the free plan limit of 5 links per page. Upgrade to create unlimited links.',
+      pro: 'Multi-link limit reached.',
+      business: 'Multi-link limit reached.'
     }
   }
 
-  return messages[limitType][plan as keyof typeof messages[typeof limitType]] || 'Limite atteinte.'
+  return messages[limitType][plan as keyof typeof messages[typeof limitType]] || 'Plan limit reached.'
 }

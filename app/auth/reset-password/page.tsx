@@ -33,7 +33,7 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     
     if (password !== confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas')
+      toast.error('Passwords do not match')
       return
     }
 
@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Une erreur est survenue')
+        throw new Error(data.error || 'Something went wrong')
       }
 
       setResetSuccess(true)
@@ -131,13 +131,13 @@ export default function ResetPasswordPage() {
             Reset your password
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Entrez votre nouveau mot de passe ci-dessous.
+            Enter your new password below.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Nouveau mot de passe
+                New password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -168,7 +168,7 @@ export default function ResetPasswordPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Confirmer le mot de passe
+                Confirm password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -202,7 +202,7 @@ export default function ResetPasswordPage() {
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-blue-700 dark:text-blue-300">
-                  <p className="font-medium mb-1">Exigences du mot de passe :</p>
+                  <p className="font-medium mb-1">Password requirements:</p>
                   <ul className="list-disc list-inside space-y-0.5 text-xs">
                     <li>At least 8 characters</li>
                     <li>Recommended: letters, numbers, and symbols</li>

@@ -105,7 +105,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
       await tx.user.update({
         where: { id: user.id },
         data: {
-          bio: `Membre de l'équipe ${invitation.team.name}`,
+          bio: `Member of the ${invitation.team.name} team`,
           theme: 'gradient',
           primaryColor: '#3b82f6',
           secondaryColor: '#8b5cf6'

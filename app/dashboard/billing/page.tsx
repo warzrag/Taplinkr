@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -19,23 +19,7 @@ export default function BillingPage() {
   const [selectedPromo, setSelectedPromo] = useState<any>(null)
   
 
-  useEffect(() => {
-    // Vérifier si on revient de Stripe avec succès
-    const success = searchParams.get('success')
-    const plan = searchParams.get('plan')
-    
-    if (success === 'true' && plan) {
-      toast.success(`${plan} subscription activated successfully!`)
-      // Forcer la mise à jour de la session
-      update()
-      // Nettoyer l'URL
-      router.replace('/dashboard/billing')
-    }
-    
-    fetchSubscription()
-  }, [searchParams, update, router])
-
-  const fetchSubscription = async () => {
+  const fetchSubscription = useCallback(async () => {
     try {
       const response = await fetch('/api/stripe/subscription')
       if (response.ok) {
@@ -45,7 +29,53 @@ export default function BillingPage() {
     } catch (error) {
       console.error('Erreur lors de la récupération de l\'abonnement:', error)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const initializeBilling = async () => {
+      const success = searchParams.get('success')
+      const checkoutSessionId = searchParams.get('session_id')
+
+      if (success === 'true' && checkoutSessionId) {
+        let confirmed = false
+
+        for (let attempt = 0; attempt < 3 && !confirmed; attempt += 1) {
+          const response = await fetch('/api/stripe/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: checkoutSessionId }),
+          })
+
+          if (response.ok) {
+            const result = await response.json()
+            if (!cancelled) toast.success(`${result.plan} subscription activated successfully!`)
+            confirmed = true
+            break
+          }
+
+          if (response.status !== 409 || attempt === 2) {
+            const result = await response.json().catch(() => null)
+            if (!cancelled) toast.error(result?.error || 'Unable to confirm your subscription.')
+            break
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, 750))
+        }
+
+        if (confirmed && !cancelled) await update()
+        if (!cancelled) router.replace('/dashboard/billing')
+      }
+
+      if (!cancelled) await fetchSubscription()
+    }
+
+    void initializeBilling()
+    return () => {
+      cancelled = true
+    }
+  }, [fetchSubscription, router, searchParams, update])
 
   const handleManageSubscription = async () => {
     setLoading(true)
@@ -134,7 +164,7 @@ export default function BillingPage() {
           </button>
           
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Gestion de l'abonnement
+            Subscription & billing
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Manage your subscription and billing information
@@ -240,7 +270,7 @@ export default function BillingPage() {
                   <span>Next billing date</span>
                 </div>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR')}
+                  {new Date(subscription.current_period_end * 1000).toLocaleDateString('en-US')}
                 </span>
               </div>
               
@@ -266,7 +296,7 @@ export default function BillingPage() {
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
                     You keep access to your {userPlan} plan until{' '}
-                    {new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR')}
+                    {new Date(subscription.current_period_end * 1000).toLocaleDateString('en-US')}
                   </p>
                 </div>
               </div>
@@ -344,11 +374,11 @@ export default function BillingPage() {
           <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
             Important information
           </h3>
-          <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-400">
-            <li>• Your data is retained even if you cancel your subscription</li>
-            <li>• You can reactivate your subscription at any time</li>
-            <li>• Plan changes take effect immediately</li>
-            <li>• Billing is monthly</li>
+          <ul className="list-disc space-y-2 pl-5 text-sm text-blue-800 dark:text-blue-400">
+            <li>Your data is retained even if you cancel your subscription</li>
+            <li>You can reactivate your subscription at any time</li>
+            <li>Plan changes take effect immediately</li>
+            <li>Billing is monthly</li>
           </ul>
         </motion.div>
       </div>

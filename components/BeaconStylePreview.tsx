@@ -84,7 +84,7 @@ export default function BeaconStylePreview({
       gradient: 'from-blue-400 to-blue-600'
     },
     {
-      title: 'MON TELEGRAM PRIVÉ',
+      title: 'MY PRIVATE TELEGRAM',
       platform: 'telegram',
       icon: '✈️',
       gradient: 'from-gray-400 to-gray-600'

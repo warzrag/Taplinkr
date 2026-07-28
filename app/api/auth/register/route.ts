@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Envoyer l'email de vérification
-    await EmailService.sendVerificationEmail(
+    const emailResult = await EmailService.sendVerificationEmail(
       user.email,
       user.name || user.username,
       verificationToken.token
@@ -92,7 +92,8 @@ export async function POST(request: NextRequest) {
       { 
         message: 'Account created successfully. Check your email to activate it.',
         user: { id: user.id, email: user.email, name: user.name, username: user.username },
-        requiresEmailVerification: true
+        requiresEmailVerification: true,
+        emailSent: emailResult.success,
       },
       { status: 201 }
     )
@@ -101,7 +102,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         message: 'Server error',
-        error: error.message,
         details: process.env.NODE_ENV === 'development' ? error : undefined
       },
       { status: 500 }

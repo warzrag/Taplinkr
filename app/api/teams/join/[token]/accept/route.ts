@@ -35,7 +35,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ toke
     // Vérifier que l'email correspond
     if (invitation.email.trim().toLowerCase() !== session.user.email?.trim().toLowerCase()) {
       return NextResponse.json({ 
-        error: 'Cette invitation n\'est pas pour votre compte' 
+        error: 'This invitation was sent to a different account'
       }, { status: 403 })
     }
 

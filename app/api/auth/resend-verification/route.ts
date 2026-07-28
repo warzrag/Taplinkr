@@ -59,11 +59,18 @@ export async function POST(request: NextRequest) {
     })
 
     // Envoyer l'email
-    await EmailService.sendVerificationEmail(
+    const emailResult = await EmailService.sendVerificationEmail(
       user.email,
       user.name || user.username,
       verificationToken.token
     )
+
+    if (!emailResult.success) {
+      return NextResponse.json(
+        { error: 'We could not send the verification email. Please try again in a few minutes.' },
+        { status: 503 }
+      )
+    }
 
     return NextResponse.json(
       { message: 'A new verification link has been sent to your email address.' },

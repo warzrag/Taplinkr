@@ -110,7 +110,7 @@ export default function DashboardChart({ data }: DashboardChartProps) {
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorClicks)"
-            name="Clics"
+            name="Clicks"
           />
         </AreaChart>
       </ResponsiveContainer>

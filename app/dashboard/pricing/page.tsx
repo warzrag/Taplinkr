@@ -32,7 +32,7 @@ const features: PricingFeature[] = [
   { name: 'ULTRA LINK', free: false, standard: false, premium: true, icon: Zap },
   { name: 'Team members', free: '0', standard: '10', premium: '10', icon: Users },
   { name: 'Analytics', free: 'Basic', standard: 'Advanced', premium: 'Real-time', icon: BarChart3 },
-  { name: 'Support', free: 'Email', standard: 'Priority', premium: '24/7 VIP', icon: Clock },
+  { name: 'Support', free: 'Email', standard: 'Email', premium: 'Priority', icon: Clock },
 ]
 
 export default function PricingPage() {
@@ -74,10 +74,10 @@ export default function PricingPage() {
 
   const plans = [
     {
-      name: 'Gratuit',
+      name: 'Free',
       price: '0€',
-      period: 'pour toujours',
-      description: 'Parfait pour commencer',
+      period: 'forever',
+      description: 'Perfect for getting started',
       color: 'from-gray-400 to-gray-600',
       buttonText: userPlan === 'free' ? 'Current plan' : 'Downgrade',
       buttonAction: () => {},
@@ -99,7 +99,7 @@ export default function PricingPage() {
       name: 'Premium',
       price: '24.99€',
       period: '/month',
-      description: 'Pour les professionnels',
+      description: 'For professional teams',
       color: 'from-purple-500 to-pink-600',
       buttonText: userPlan === 'premium' ? 'Current plan' : 'Choose Premium',
       buttonAction: () => handleSubscribe('premium'),
@@ -139,7 +139,7 @@ export default function PricingPage() {
             >
               {plan.popular && (
                 <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-1 rounded-bl-xl text-sm font-bold">
-                  POPULAIRE
+                  MOST POPULAR
                 </div>
               )}
               
@@ -207,7 +207,7 @@ export default function PricingPage() {
                     Features
                   </th>
                   <th className="text-center p-4 font-semibold text-gray-600 dark:text-gray-400">
-                    Gratuit
+                    Free
                   </th>
                   <th className="text-center p-4 font-semibold text-blue-600 dark:text-blue-400">
                     Standard

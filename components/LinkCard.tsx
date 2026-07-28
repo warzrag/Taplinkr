@@ -229,7 +229,7 @@ export default function LinkCard({
                   )
                 })()}
                 {link.isDirect && link.isUltraLink && (
-                  <div className="px-3 py-1.5 bg-gradient-to-r from-purple-200 via-pink-200 to-orange-200 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-orange-900/40 rounded-lg flex items-center gap-1.5 shadow-md border border-purple-300 dark:border-purple-700 animate-pulse" title="Protection maximale - Timer 5s + Contenu adaptatif + Obfuscation JS">
+              <div className="px-3 py-1.5 bg-gradient-to-r from-purple-200 via-pink-200 to-orange-200 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-orange-900/40 rounded-lg flex items-center gap-1.5 shadow-md border border-purple-300 dark:border-purple-700 animate-pulse" title="Maximum protection - 5s timer, adaptive content, and JavaScript obfuscation">
                     <Zap size={16} className="text-purple-700 dark:text-purple-300" />
                     <span className="text-sm font-bold bg-gradient-to-r from-purple-700 to-pink-700 dark:from-purple-300 dark:to-pink-300 bg-clip-text text-transparent">ULTRA LVL 3</span>
                   </div>

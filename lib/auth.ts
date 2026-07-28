@@ -191,7 +191,7 @@ export const authOptions: NextAuthOptions = {
       
       return true
     },
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, user, trigger }) => {
       if (user) {
         // Première connexion : stocker les infos
         token.id = user.id
@@ -202,6 +202,50 @@ export const authOptions: NextAuthOptions = {
         token.sessionVersion = (user as any).sessionVersion
         token.teamId = (user as any).teamId
         token.teamRole = (user as any).teamRole
+        token.validatedAt = Date.now()
+      } else if (
+        token.id &&
+        (
+          trigger === 'update' ||
+          typeof token.validatedAt !== 'number' ||
+          Date.now() - token.validatedAt > 5 * 60 * 1000
+        )
+      ) {
+        const refreshedUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: {
+            username: true,
+            role: true,
+            plan: true,
+            planExpiresAt: true,
+            sessionVersion: true,
+            teamId: true,
+            teamRole: true,
+            isActive: true,
+          },
+        })
+
+        if (!refreshedUser || refreshedUser.isActive === false) {
+          token.invalid = true
+          return token
+        }
+
+        if (
+          token.sessionVersion !== undefined &&
+          token.sessionVersion !== refreshedUser.sessionVersion
+        ) {
+          token.invalid = true
+          return token
+        }
+
+        token.username = refreshedUser.username
+        token.role = refreshedUser.role
+        token.plan = refreshedUser.plan
+        token.planExpiresAt = refreshedUser.planExpiresAt
+        token.sessionVersion = refreshedUser.sessionVersion
+        token.teamId = refreshedUser.teamId
+        token.teamRole = refreshedUser.teamRole
+        token.validatedAt = Date.now()
       }
       return token
     },

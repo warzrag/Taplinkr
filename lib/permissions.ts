@@ -44,8 +44,8 @@ export interface PlanLimits {
 export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
   free: {
     maxPages: 1,
-    maxLinksPerPage: 1,
-    maxMultiLinks: 1,
+    maxLinksPerPage: 5,
+    maxMultiLinks: 5,
     maxFolders: 3, // Permettre 3 dossiers en gratuit
     hasAnalytics: true, // Basic analytics only
     hasAdvancedAnalytics: false,
@@ -222,8 +222,8 @@ export function getRemainingLimit(
 export function getUpgradeMessage(feature: keyof PlanLimits): string {
   const messages: Record<keyof PlanLimits, string> = {
     maxPages: 'Upgrade to Standard to create unlimited pages',
-    maxLinksPerPage: 'You reached the free plan limit of 1 link. Upgrade to create unlimited links',
-    maxMultiLinks: 'You reached the free plan limit of 1 multi-link. Upgrade to create unlimited multi-links',
+    maxLinksPerPage: 'You reached the free plan limit of 5 links. Upgrade to create unlimited links',
+    maxMultiLinks: 'You reached the free plan limit of 5 links per page. Upgrade to create unlimited links',
     maxFolders: 'Upgrade to Standard to create more folders',
     hasAnalytics: 'This feature requires a paid plan',
     hasAdvancedAnalytics: 'Advanced analytics require the Standard plan',
@@ -235,7 +235,7 @@ export function getUpgradeMessage(feature: keyof PlanLimits): string {
     hasApiAccess: 'API access requires the Premium plan',
     hasWhiteLabel: 'Removing TapLinkr branding requires the Standard plan',
     hasTeamMembers: 'Team members require the Standard plan or higher',
-    maxTeamMembers: 'Passez au plan Premium pour ajouter plus de membres (max 10)',
+    maxTeamMembers: 'Upgrade to Premium to add more team members (up to 10).',
     hasQRCode: 'QR codes require the Standard plan',
     hasCustomQRCode: 'Custom QR codes require the Standard plan',
     hasPrioritySupport: 'Priority support requires the Premium plan',

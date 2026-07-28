@@ -26,7 +26,7 @@ export const PRICING_PLANS = {
       'One-tap direct links',
       'Detailed mobile analytics',
       'Teams of up to 10 members',
-      'Priority support'
+      'Email support'
     ]
   },
   premium: {
@@ -45,7 +45,7 @@ export const PRICING_PLANS = {
       'Shield anti-bot protection',
       'Real-time analytics and tap heatmaps',
       'Teams of up to 10 members',
-      '24/7 VIP support'
+      'Priority support'
     ]
   }
 }
@@ -55,7 +55,8 @@ export async function createCheckoutSession(
   userEmail: string,
   plan: 'standard' | 'premium',
   successUrl: string,
-  cancelUrl: string
+  cancelUrl: string,
+  customerId?: string | null
 ) {
   const priceId = PRICING_PLANS[plan].priceId
   
@@ -64,7 +65,7 @@ export async function createCheckoutSession(
   }
 
   const session = await stripe.checkout.sessions.create({
-    customer_email: userEmail,
+    ...(customerId ? { customer: customerId } : { customer_email: userEmail }),
     client_reference_id: userId,
     payment_method_types: ['card'],
     line_items: [

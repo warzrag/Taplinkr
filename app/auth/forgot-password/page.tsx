@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
@@ -9,9 +9,9 @@ import { Mail, ArrowLeft, Send, CheckCircle } from 'lucide-react'
 import Logo from '@/components/Logo'
 
 export default function ForgotPasswordPage() {
-  const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(() => searchParams.get('email') || '')
   const [emailSent, setEmailSent] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Une erreur est survenue')
+        throw new Error(data.error || 'Something went wrong')
       }
 
       setEmailSent(true)
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
                 }}
                 className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
               >
-                Essayer avec une autre adresse
+                Try another email address
               </button>
             </div>
 
@@ -137,7 +137,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="vous@example.com"
+                  placeholder="you@example.com"
                   required
                 />
               </div>
@@ -156,7 +156,7 @@ export default function ForgotPasswordPage() {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   />
-                  Envoi en cours...
+                  Sending...
                 </>
               ) : (
                 <>

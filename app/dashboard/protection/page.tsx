@@ -119,28 +119,28 @@ function ProtectionModal({ isOpen, onClose, link, onSuccess }: ProtectionModalPr
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Entrez un mot de passe"
+              placeholder="Enter a password"
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Indice (optionnel)
+              Hint (optional)
             </label>
             <input
               type="text"
               value={hint}
               onChange={(e) => setHint(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Indice pour aider les utilisateurs"
+              placeholder="A hint for visitors"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tentatives max
+                Maximum attempts
               </label>
               <input
                 type="number"
@@ -153,7 +153,7 @@ function ProtectionModal({ isOpen, onClose, link, onSuccess }: ProtectionModalPr
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Verrouillage (min)
+                Lockout (minutes)
               </label>
               <input
                 type="number"
@@ -181,7 +181,7 @@ function ProtectionModal({ isOpen, onClose, link, onSuccess }: ProtectionModalPr
               disabled={loading}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Configuration...' : 'Configurer'}
+              {loading ? 'Saving...' : 'Save protection'}
             </button>
           </div>
         </form>
@@ -330,7 +330,7 @@ export default function ProtectionPage() {
         <div className="bg-white rounded-lg shadow">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
-              Gestion des protections
+              Link protection
             </h3>
           </div>
           
@@ -354,7 +354,7 @@ export default function ProtectionPage() {
                         <h4 className="font-medium text-gray-900">{link.title}</h4>
                         <p className="text-sm text-gray-500">/{link.slug}</p>
                         {link.isProtected && link.hint && (
-                          <p className="text-xs text-blue-600">Indice: {link.hint}</p>
+                          <p className="text-xs text-blue-600">Hint: {link.hint}</p>
                         )}
                       </div>
                     </div>

@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     const existingLink = await prisma.link.findUnique({ where: { slug } })
     if (existingLink) {
-      return NextResponse.json({ error: 'Cette URL personnalisee est deja utilisee' }, { status: 400 })
+      return NextResponse.json({ error: 'This custom URL is already in use' }, { status: 400 })
     }
 
     if (body.isDirect && (!directUrl || !validateURL(directUrl))) {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: session.user.id,
         ...getTeamLinkCreationFields(session.user.id, currentUser?.teamId),
-        title: body.title || 'Mon lien',
+        title: body.title || 'My link',
         internalName: body.internalName || null,
         slug,
         description: body.description || body.bio || '',

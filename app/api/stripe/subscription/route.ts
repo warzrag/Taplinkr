@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getSubscription } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { syncStripeSubscription } from '@/lib/sync-stripe-subscription'
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,10 +25,12 @@ export async function GET(request: NextRequest) {
 
     // Récupérer les détails de la souscription depuis Stripe
     const subscription = await getSubscription(user.stripeSubscriptionId)
+    const syncedUser = await syncStripeSubscription(subscription, session.user.id)
 
     return NextResponse.json({
       id: subscription.id,
       status: subscription.status,
+      plan: syncedUser?.plan ?? 'free',
       cancel_at_period_end: subscription.cancel_at_period_end,
        current_period_end: subscription.items.data[0]?.current_period_end ?? null,
        current_period_start: subscription.items.data[0]?.current_period_start ?? null,

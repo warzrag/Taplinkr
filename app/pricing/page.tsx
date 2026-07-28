@@ -32,13 +32,13 @@ const plans = [
     name: 'Standard',
     price: '€9.99',
     period: '/ month',
-    description: 'Convert more visitors with deep links, an 18+ gate, advanced analytics, and better campaign tracking.',
+    description: 'Convert more visitors with clean direct links, advanced analytics, teams, and better campaign tracking.',
     cta: 'Choose Standard',
     highlighted: true,
     features: [
       'Expanded pages and links',
       'Clean deep links',
-      '18+ protection and warnings',
+      'Campaign and folder organization',
       'Advanced analytics',
       'Teams of up to 10 members',
     ],
@@ -48,12 +48,12 @@ const plans = [
     name: 'Premium',
     price: '€24.99',
     period: '/ month',
-    description: 'For agencies and creators managing multiple pages, domains, offers, and campaigns.',
+    description: 'For agencies and creators managing multiple pages, offers, campaigns, and teams.',
     cta: 'Choose Premium',
     highlighted: false,
     features: [
       'Unlimited links',
-      'Custom themes, icons, and domains',
+      'Custom themes and icons',
       'Premium deep links',
       'Real-time analytics',
       'Priority support',
@@ -131,7 +131,7 @@ export default function PricingPage() {
               Choose the plan that turns clicks into revenue
             </h1>
             <p className="mx-auto mt-4 w-full max-w-[18rem] text-sm leading-7 text-neutral-600 dark:text-white/60 sm:max-w-2xl">
-              Start free, then upgrade to Standard or Premium as your deep links, protection, domains, and analytics grow.
+              Start free, then upgrade to Standard or Premium as your deep links, protection, team, and analytics needs grow.
             </p>
 
             <div className="mx-auto mt-8 grid w-full max-w-[18rem] gap-4 text-left sm:max-w-xl md:max-w-2xl lg:max-w-6xl lg:grid-cols-3">
@@ -210,7 +210,7 @@ export default function PricingPage() {
                 Frequently asked questions
               </h2>
               <p className="mt-3 max-w-[18rem] text-sm leading-7 text-neutral-600 dark:text-white/60 sm:max-w-xl">
-                The right plan depends on your link volume, protection needs, domains, and desired level of analytics.
+                The right plan depends on your link volume, protection needs, team size, and desired level of analytics.
               </p>
               <Link href="mailto:hello@taplinkr.com" className="mt-5 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-500">
                 Contact support
