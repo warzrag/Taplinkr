@@ -28,6 +28,7 @@ import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
 import IconUpload from './upload/IconUpload'
 import EditPhonePreview from './EditPhonePreview'
+import LandingPageVisual, { LandingActionCard } from './LandingPageVisual'
 
 interface CreateLinkModalProps {
   isOpen: boolean
@@ -46,15 +47,14 @@ interface PageLink {
 }
 
 const defaultLinks: PageLink[] = [
-  { title: 'Instagram', url: '', description: '', icon: '', iconImage: '' },
-  { title: 'Telegram', url: '', description: '', icon: '', iconImage: '' },
+  { title: '', url: '', description: '', icon: '', iconImage: '' },
 ]
 
 const themes = [
-  { label: 'Clean', backgroundColor: '#ffffff', textColor: '#111827', accent: '#6366f1' },
-  { label: 'Dark', backgroundColor: '#0f172a', textColor: '#f8fafc', accent: '#22c55e' },
-  { label: 'Rose', backgroundColor: '#fff1f2', textColor: '#881337', accent: '#f43f5e' },
-  { label: 'Mint', backgroundColor: '#ecfdf5', textColor: '#064e3b', accent: '#10b981' },
+  { label: 'Midnight', backgroundColor: '#070a12', textColor: '#f8fafc', accent: '#8b5cf6' },
+  { label: 'Cloud', backgroundColor: '#f8fafc', textColor: '#0f172a', accent: '#4f46e5' },
+  { label: 'Sunset', backgroundColor: '#2a102f', textColor: '#fff7ed', accent: '#fb7185' },
+  { label: 'Ocean', backgroundColor: '#071b2d', textColor: '#f0fdfa', accent: '#22d3ee' },
 ]
 
 function slugify(value: string) {
@@ -97,9 +97,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [tiktokUrl, setTiktokUrl] = useState('')
   const [twitterUrl, setTwitterUrl] = useState('')
   const [youtubeUrl, setYoutubeUrl] = useState('')
-  const [backgroundColor, setBackgroundColor] = useState('#ffffff')
-  const [textColor, setTextColor] = useState('#111827')
-  const [accentColor, setAccentColor] = useState('#6366f1')
+  const [backgroundColor, setBackgroundColor] = useState('#070a12')
+  const [textColor, setTextColor] = useState('#f8fafc')
+  const [accentColor, setAccentColor] = useState('#8b5cf6')
   const [borderRadius, setBorderRadius] = useState('rounded-2xl')
   const [customSlugTouched, setCustomSlugTouched] = useState(false)
 
@@ -130,9 +130,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setTiktokUrl(editingLink.tiktokUrl || '')
       setTwitterUrl(editingLink.twitterUrl || '')
       setYoutubeUrl(editingLink.youtubeUrl || '')
-      setBackgroundColor(editingLink.backgroundColor || '#ffffff')
-      setTextColor(editingLink.textColor || '#111827')
-      setAccentColor(editingLink.color || '#6366f1')
+      setBackgroundColor(editingLink.backgroundColor || '#070a12')
+      setTextColor(editingLink.textColor || '#f8fafc')
+      setAccentColor(editingLink.color || '#8b5cf6')
       setBorderRadius(editingLink.borderRadius || 'rounded-2xl')
       setCustomSlugTouched(true)
     } else {
@@ -148,21 +148,21 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setTiktokUrl('')
       setTwitterUrl('')
       setYoutubeUrl('')
-      setBackgroundColor('#ffffff')
-      setTextColor('#111827')
-      setAccentColor('#6366f1')
+      setBackgroundColor('#070a12')
+      setTextColor('#f8fafc')
+      setAccentColor('#8b5cf6')
       setBorderRadius('rounded-2xl')
       setCustomSlugTouched(false)
       setShowAdvanced(false)
-      setActivePanel(initialMode === 'direct' ? 'identity' : 'start')
+      setActivePanel('identity')
     }
   }, [isOpen, editingLink, initialMode])
 
   useEffect(() => {
-    if (!customSlugTouched && pageMode === 'landing') {
+    if (!editingLink && !customSlugTouched && pageMode === 'landing') {
       setSlug(slugify(title))
     }
-  }, [title, customSlugTouched, pageMode])
+  }, [title, customSlugTouched, pageMode, editingLink])
 
   useEffect(() => {
     if (!slug || slug === editingLink?.slug) {
@@ -429,6 +429,405 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   }
 
   if (!isOpen) return null
+
+  if (pageMode === 'landing') {
+    const landingSteps = [
+      { id: 'identity' as const, label: 'Page info', helper: 'Name, photo, and address' },
+      { id: 'links' as const, label: 'Links', helper: 'Add what visitors can open' },
+      { id: 'style' as const, label: 'Design', helper: 'Choose the final look' },
+    ]
+    const currentStep = Math.max(0, landingSteps.findIndex(step => step.id === activePanel))
+
+    const goToStep = (step: 'identity' | 'links' | 'style') => {
+      if ((step === 'links' || step === 'style') && (!title.trim() || !slug.trim())) {
+        toast.error('Add your page name and public address first')
+        setActivePanel('identity')
+        return
+      }
+      if ((step === 'links' || step === 'style') && slugAvailable === false) {
+        toast.error('Choose an available public address')
+        setActivePanel('identity')
+        return
+      }
+      if (step === 'style' && validLinks.length === 0) {
+        toast.error('Add at least one complete link first')
+        setActivePanel('links')
+        return
+      }
+      setActivePanel(step)
+    }
+
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-[#070a12] text-white">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen">
+          <header className="sticky top-0 z-30 border-b border-white/10 bg-[#070a12]/90 backdrop-blur-xl">
+            <div className="mx-auto flex max-w-[1480px] items-center justify-between gap-4 px-4 py-4 sm:px-7">
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-400">
+                  {editingLink ? 'Edit page' : 'Create a page'}
+                </p>
+                <h2 className="mt-1 truncate text-lg font-black sm:text-xl">
+                  {title.trim() || 'Your new page'}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+                <span className="hidden sm:inline">Close</span>
+              </button>
+            </div>
+          </header>
+
+          <form onSubmit={handleSubmit} className="mx-auto grid w-full max-w-[1480px] lg:grid-cols-[minmax(0,1fr)_430px]">
+            <div className="min-w-0 px-4 py-6 sm:px-7 lg:py-9">
+              <div className="mx-auto max-w-3xl">
+                <div className="mb-8">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-bold text-white">Step {currentStep + 1} of 3</span>
+                    <span className="text-white/45">{landingSteps[currentStep]?.label}</span>
+                  </div>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 transition-all duration-300"
+                      style={{ width: `${((currentStep + 1) / 3) * 100}%` }}
+                    />
+                  </div>
+                  <div className="mt-5 grid grid-cols-3 gap-2">
+                    {landingSteps.map((step, index) => (
+                      <button
+                        key={step.id}
+                        type="button"
+                        onClick={() => goToStep(step.id)}
+                        className={`rounded-2xl border px-3 py-3 text-left transition ${
+                          activePanel === step.id
+                            ? 'border-violet-500/60 bg-violet-500/15'
+                            : index < currentStep
+                              ? 'border-emerald-400/20 bg-emerald-400/5 hover:bg-emerald-400/10'
+                              : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 text-sm font-bold">
+                          <span className={`grid h-6 w-6 place-items-center rounded-full text-xs ${
+                            index < currentStep ? 'bg-emerald-400 text-emerald-950' : 'bg-white/10'
+                          }`}>
+                            {index < currentStep ? <Check className="h-3.5 w-3.5" /> : index + 1}
+                          </span>
+                          <span className="hidden sm:inline">{step.label}</span>
+                        </span>
+                        <span className="mt-1 hidden text-xs text-white/40 md:block">{step.helper}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {activePanel === 'identity' && (
+                  <section>
+                    <p className="text-sm font-bold text-violet-400">PAGE INFO</p>
+                    <h3 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Introduce yourself.</h3>
+                    <p className="mt-2 text-white/55">This is the first thing people will see. You can change it anytime.</p>
+
+                    <div className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-7">
+                      <div className="grid gap-5 sm:grid-cols-[160px_minmax(0,1fr)] sm:items-center">
+                        <ImageUpload
+                          value={profileImage}
+                          onChange={setProfileImage}
+                          type="avatar"
+                          compact
+                          onUploadingChange={setImageUploading}
+                        />
+                        <div>
+                          <h4 className="font-bold">Profile photo</h4>
+                          <p className="mt-1 text-sm leading-6 text-white/45">
+                            Use a clear portrait or logo. Square images work best.
+                          </p>
+                        </div>
+                      </div>
+
+                      <label className="block">
+                        <span className="text-sm font-bold">Display name</span>
+                        <input
+                          value={title}
+                          onChange={event => setTitle(event.target.value)}
+                          placeholder="e.g. Madison"
+                          autoFocus
+                          className="mt-2 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3.5 text-white outline-none transition placeholder:text-white/25 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="text-sm font-bold">Short bio <span className="font-normal text-white/35">(optional)</span></span>
+                        <textarea
+                          value={description}
+                          onChange={event => setDescription(event.target.value)}
+                          placeholder="Tell visitors what they will find here."
+                          rows={3}
+                          className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3.5 text-white outline-none transition placeholder:text-white/25 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="text-sm font-bold">Public page address</span>
+                        <div className="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-black/20 focus-within:border-violet-500 focus-within:ring-4 focus-within:ring-violet-500/10">
+                          <span className="hidden items-center border-r border-white/10 bg-white/5 px-4 text-sm text-white/40 sm:flex">taplinkr.com/</span>
+                          <input
+                            value={slug}
+                            onChange={event => {
+                              setCustomSlugTouched(true)
+                              setSlug(slugify(event.target.value))
+                            }}
+                            placeholder="your-name"
+                            className="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-white outline-none placeholder:text-white/25"
+                          />
+                          <span className="grid w-12 place-items-center">
+                            {checkingSlug ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-white/45" />
+                            ) : slug && slugAvailable === true ? (
+                              <Check className="h-4 w-4 text-emerald-400" />
+                            ) : slugAvailable === false ? (
+                              <X className="h-4 w-4 text-rose-400" />
+                            ) : null}
+                          </span>
+                        </div>
+                        <p className={`mt-2 text-xs ${slugAvailable === false ? 'text-rose-400' : 'text-white/35'}`}>
+                          {slugAvailable === false ? 'This address is already taken.' : 'Short, memorable, and easy to share.'}
+                        </p>
+                      </label>
+                    </div>
+                  </section>
+                )}
+
+                {activePanel === 'links' && (
+                  <section>
+                    <p className="text-sm font-bold text-violet-400">YOUR LINKS</p>
+                    <h3 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">What should people open?</h3>
+                    <p className="mt-2 text-white/55">Add one or more destinations. Only complete links will be published.</p>
+
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {['Instagram', 'TikTok', 'YouTube', 'Telegram', 'Website'].map(label => (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => addPresetLink({ title: label, url: '', description: '', icon: '', iconImage: '' })}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white/65 transition hover:border-violet-500/50 hover:bg-violet-500/10 hover:text-white"
+                        >
+                          + {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 space-y-4">
+                      {links.map((link, index) => (
+                        <div key={index} className="rounded-3xl border border-white/10 bg-white/[0.035] p-4 sm:p-5">
+                          <div className="mb-4 flex items-center justify-between">
+                            <span className="inline-flex items-center gap-2 text-sm font-bold text-white/55">
+                              <Link2 className="h-4 w-4 text-violet-400" />
+                              Link {index + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeLink(index)}
+                              disabled={links.length === 1}
+                              className="rounded-xl p-2 text-white/35 transition hover:bg-rose-500/10 hover:text-rose-400 disabled:cursor-not-allowed disabled:opacity-20"
+                              aria-label={`Remove link ${index + 1}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label>
+                              <span className="text-xs font-bold text-white/55">Button title</span>
+                              <input
+                                value={link.title}
+                                onChange={event => updateLink(index, 'title', event.target.value)}
+                                placeholder="e.g. Follow me on Instagram"
+                                className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500"
+                              />
+                            </label>
+                            <label>
+                              <span className="text-xs font-bold text-white/55">Destination URL</span>
+                              <input
+                                value={link.url}
+                                onChange={event => updateLink(index, 'url', event.target.value)}
+                                placeholder="https://..."
+                                inputMode="url"
+                                className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500"
+                              />
+                            </label>
+                          </div>
+                          <label className="mt-3 block">
+                            <span className="text-xs font-bold text-white/55">Description <span className="font-normal">(optional)</span></span>
+                            <input
+                              value={link.description || ''}
+                              onChange={event => updateLink(index, 'description', event.target.value)}
+                              placeholder="A short reason to click"
+                              className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500"
+                            />
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={addLink}
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-violet-400/35 bg-violet-500/5 px-4 py-4 text-sm font-bold text-violet-300 transition hover:bg-violet-500/10"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add another link
+                    </button>
+                  </section>
+                )}
+
+                {activePanel === 'style' && (
+                  <section>
+                    <p className="text-sm font-bold text-violet-400">DESIGN</p>
+                    <h3 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Make it feel like you.</h3>
+                    <p className="mt-2 text-white/55">Pick a polished style. Your preview updates instantly.</p>
+
+                    <div className="mt-8 space-y-7 rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-7">
+                      <div>
+                        <h4 className="text-sm font-bold">Choose a theme</h4>
+                        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                          {themes.map(theme => {
+                            const selected = backgroundColor === theme.backgroundColor && accentColor === theme.accent
+                            return (
+                              <button
+                                key={theme.label}
+                                type="button"
+                                onClick={() => {
+                                  setBackgroundColor(theme.backgroundColor)
+                                  setTextColor(theme.textColor)
+                                  setAccentColor(theme.accent)
+                                }}
+                                className={`rounded-2xl border p-2 text-left transition ${selected ? 'border-violet-400 ring-4 ring-violet-500/10' : 'border-white/10 hover:border-white/25'}`}
+                              >
+                                <span className="block h-20 rounded-xl p-2" style={{ backgroundColor: theme.backgroundColor }}>
+                                  <span className="mt-6 block h-3 rounded-full" style={{ backgroundColor: theme.accent }} />
+                                  <span className="mt-2 block h-2 w-2/3 rounded-full bg-white/15" />
+                                </span>
+                                <span className="mt-2 block px-1 text-xs font-bold">{theme.label}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-sm font-bold">Button shape</h4>
+                        <div className="mt-3 grid grid-cols-3 gap-2">
+                          {[
+                            ['rounded-xl', 'Soft'],
+                            ['rounded-2xl', 'Rounded'],
+                            ['rounded-full', 'Pill'],
+                          ].map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => setBorderRadius(value)}
+                              className={`border px-3 py-3 text-sm font-bold transition ${value} ${
+                                borderRadius === value ? 'border-violet-400 bg-violet-500/15 text-violet-200' : 'border-white/10 bg-white/5 text-white/55 hover:bg-white/10'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="mb-3 text-sm font-bold">Background image <span className="font-normal text-white/35">(optional)</span></h4>
+                        <CoverImageUpload
+                          value={coverImage}
+                          onChange={setCoverImage}
+                          onUploadingChange={setImageUploading}
+                        />
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                <div className="mt-8 flex items-center justify-between gap-3 border-t border-white/10 pt-6">
+                  <button
+                    type="button"
+                    onClick={() => activePanel === 'identity' ? onClose() : goToStep(activePanel === 'style' ? 'links' : 'identity')}
+                    className="rounded-xl px-4 py-3 text-sm font-bold text-white/55 transition hover:bg-white/5 hover:text-white"
+                  >
+                    {activePanel === 'identity' ? 'Cancel' : 'Back'}
+                  </button>
+                  {activePanel === 'style' ? (
+                    <button
+                      type="submit"
+                      disabled={loading || imageUploading || checkingSlug}
+                      className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                      {editingLink ? 'Save changes' : 'Publish my page'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => goToStep(activePanel === 'identity' ? 'links' : 'style')}
+                      disabled={checkingSlug}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-[#070a12] transition hover:bg-violet-100 disabled:opacity-50"
+                    >
+                      Continue
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <aside className="border-l border-white/10 bg-white/[0.025] p-5 lg:sticky lg:top-[81px] lg:h-[calc(100vh-81px)] lg:overflow-y-auto">
+              <div className="mx-auto max-w-[380px]">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/40">Live preview</p>
+                    <p className="mt-1 text-sm text-white/65">Exactly what visitors will see</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyPreviewUrl}
+                    className="rounded-xl border border-white/10 p-2.5 text-white/45 transition hover:bg-white/10 hover:text-white"
+                    aria-label="Copy page address"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="overflow-hidden rounded-[34px] border-[8px] border-[#171b26] bg-[#171b26] shadow-2xl">
+                  <LandingPageVisual
+                    compact
+                    title={title || 'Your name'}
+                    bio={description || 'Your bio will appear here.'}
+                    profileImage={profileImage}
+                    coverImage={coverImage}
+                    backgroundColor={backgroundColor}
+                    textColor={textColor}
+                    accentColor={accentColor}
+                  >
+                    {(validLinks.length ? validLinks : [{ title: 'Your first link', url: '#', description: '' }]).slice(0, 5).map((link, index) => (
+                      <LandingActionCard
+                        key={`${link.title}-${index}`}
+                        title={link.title || 'Untitled link'}
+                        description={link.description}
+                        accentColor={accentColor}
+                        borderRadius={borderRadius}
+                        disabled
+                      />
+                    ))}
+                  </LandingPageVisual>
+                </div>
+              </div>
+            </aside>
+          </form>
+        </motion.div>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-50 text-gray-950 dark:bg-gray-950 dark:text-white">
@@ -851,7 +1250,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                 </div>
               </section>
 
-              {pageMode === 'landing' && (
+              {(pageMode as 'landing' | 'direct') === 'landing' && (
               <section className="rounded-2xl border border-gray-200 dark:border-gray-800">
                 <button
                   type="button"
