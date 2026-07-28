@@ -44,6 +44,7 @@ function dashboardLinkName(item: LinkType) {
 export default function LinksDashboard() {
   const { personalLinks, loading, refreshLinks } = useLinks()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
+  const [showCreatePicker, setShowCreatePicker] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
   const [deletingLinkId, setDeletingLinkId] = useState<string | null>(null)
   const [liveClicks, setLiveClicks] = useState<Record<string, number>>({})
@@ -223,22 +224,13 @@ export default function LinksDashboard() {
             <h1 className="text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Links</h1>
             <p className="mt-2 text-base text-[#9494a7]">Create link pages or direct redirects.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setCreateMode('landing')}
-              className="inline-flex items-center gap-2 rounded-xl border border-[#2c2c3a] bg-[#101019] px-4 py-3 text-sm font-semibold transition hover:border-violet-500/50"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              New page
-            </button>
-            <button
-              onClick={() => setCreateMode('direct')}
-              className="inline-flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold transition hover:bg-violet-400"
-            >
-              <Plus className="h-4 w-4" />
-              New direct link
-            </button>
-          </div>
+          <button
+            onClick={() => setShowCreatePicker(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-500 px-5 py-3 text-sm font-bold transition hover:bg-violet-400"
+          >
+            <Plus className="h-4 w-4" />
+            Create link
+          </button>
         </header>
 
         <section className="mt-10 overflow-hidden rounded-2xl border border-[#252532] bg-[#0e0e16] p-3">
@@ -381,6 +373,73 @@ export default function LinksDashboard() {
           Click counts update automatically every 5 seconds. Status changes are applied immediately.
         </p>
       </div>
+
+      <AnimatePresence>
+        {showCreatePicker && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm"
+            onMouseDown={(event) => {
+              if (event.currentTarget === event.target) setShowCreatePicker(false)
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              className="w-full max-w-xl rounded-3xl border border-[#2a2a38] bg-[#0e0e17] p-5 shadow-2xl sm:p-7"
+            >
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-400">Create a new link</p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight">What do you want to create?</h2>
+                <p className="mt-2 text-sm text-[#9292a5]">Choose one option. Each has its own simple editor.</p>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreatePicker(false)
+                    setCreateMode('landing')
+                  }}
+                  className="group rounded-2xl border border-[#30303f] bg-white/[0.025] p-5 text-left transition hover:border-violet-400 hover:bg-violet-500/10"
+                >
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-500/15 text-violet-300 transition group-hover:bg-violet-500 group-hover:text-white">
+                    <LayoutGrid className="h-5 w-5" />
+                  </span>
+                  <span className="mt-5 block text-lg font-black">Landing page</span>
+                  <span className="mt-1 block text-sm leading-5 text-[#8f8fa3]">A customizable page with your profile and multiple links.</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreatePicker(false)
+                    setCreateMode('direct')
+                  }}
+                  className="group rounded-2xl border border-[#30303f] bg-white/[0.025] p-5 text-left transition hover:border-violet-400 hover:bg-violet-500/10"
+                >
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/5 text-white/65 transition group-hover:bg-violet-500 group-hover:text-white">
+                    <Link2 className="h-5 w-5" />
+                  </span>
+                  <span className="mt-5 block text-lg font-black">Direct link</span>
+                  <span className="mt-1 block text-sm leading-5 text-[#8f8fa3]">A short URL that redirects visitors to one destination.</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowCreatePicker(false)}
+                className="mt-5 w-full rounded-xl border border-[#2b2b39] px-4 py-3 text-sm font-bold text-[#a0a0b2] transition hover:bg-white/5 hover:text-white"
+              >
+                Cancel
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {(createMode || editingLink) && (
         <CreateLinkModal
