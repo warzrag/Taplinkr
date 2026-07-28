@@ -19,8 +19,7 @@ export async function POST(request: NextRequest) {
       where: { 
         token,
         type: 'email'
-      },
-      include: { user: true }
+      }
     })
 
     if (!verificationToken) {
@@ -44,7 +43,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier si l'email est déjà vérifié
-    if (verificationToken.user.emailVerified) {
+    const user = await prisma.user.findUnique({
+      where: { id: verificationToken.userId }
+    })
+
+    if (!user) {
+      await prisma.verificationToken.delete({
+        where: { id: verificationToken.id }
+      })
+
+      return NextResponse.json(
+        { message: 'The account associated with this verification link no longer exists' },
+        { status: 404 }
+      )
+    }
+
+    if (user.emailVerified) {
       // Supprimer le token
       await prisma.verificationToken.delete({
         where: { id: verificationToken.id }
@@ -73,8 +87,8 @@ export async function POST(request: NextRequest) {
     })
 
     await EmailService.sendWelcomeEmail(
-      verificationToken.user.email,
-      verificationToken.user.name || verificationToken.user.username || 'there',
+      user.email,
+      user.name || user.username || 'there',
     )
 
     return NextResponse.json(
