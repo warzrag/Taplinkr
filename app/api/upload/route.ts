@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nanoid } from 'nanoid'
-import sharp from 'sharp'
 import { authOptions } from '@/lib/auth'
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024
@@ -17,51 +16,6 @@ function extensionFor(contentType: string, originalName: string) {
   if (contentType === 'image/webp') return '.webp'
   const ext = originalName.match(/\.[a-z0-9]+$/i)?.[0]
   return ext?.toLowerCase() || '.bin'
-}
-
-async function optimizeImage(buffer: Buffer, type: string, mimeType: string): Promise<{ buffer: Buffer; contentType: string }> {
-  if (mimeType === 'image/gif') {
-    return { buffer, contentType: mimeType }
-  }
-
-  const image = sharp(buffer)
-  const metadata = await image.metadata()
-
-  switch (type) {
-    case 'avatar':
-      return {
-        buffer: await image.resize(400, 400, { fit: 'cover', position: 'center' }).jpeg({ quality: 85 }).toBuffer(),
-        contentType: 'image/jpeg',
-      }
-    case 'banner':
-      return {
-        buffer: await image.resize(1200, 300, { fit: 'cover', position: 'center' }).jpeg({ quality: 85 }).toBuffer(),
-        contentType: 'image/jpeg',
-      }
-    case 'cover':
-      return {
-        buffer: await image.resize(800, 600, { fit: 'cover', position: 'center' }).jpeg({ quality: 85 }).toBuffer(),
-        contentType: 'image/jpeg',
-      }
-    case 'icon':
-      return {
-        buffer: await image.resize(64, 64, { fit: 'cover', position: 'center' }).jpeg({ quality: 90 }).toBuffer(),
-        contentType: 'image/jpeg',
-      }
-    case 'profile':
-      return {
-        buffer: await image.resize(1200, 1200, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer(),
-        contentType: 'image/jpeg',
-      }
-    default:
-      if (metadata.width && metadata.width > 1920) {
-        return {
-          buffer: await image.resize(1920, null, { withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer(),
-          contentType: 'image/jpeg',
-        }
-      }
-      return { buffer, contentType: mimeType }
-  }
 }
 
 export async function POST(request: NextRequest) {
@@ -91,13 +45,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File too large (max 4 MB)' }, { status: 400 })
     }
 
-    const rawBuffer = Buffer.from(await file.arrayBuffer())
-    let uploaded: { buffer: Buffer; contentType: string } = { buffer: rawBuffer, contentType: file.type }
-
-    try {
-      uploaded = await optimizeImage(rawBuffer, type, file.type)
-    } catch {
-      return NextResponse.json({ error: 'Invalid image content' }, { status: 400 })
+    // Keep uploads as their original bytes. The previous server-side Sharp
+    // conversion could not resolve its native binary in the production
+    // function and rejected otherwise valid landing-page images.
+    const uploaded = {
+      buffer: Buffer.from(await file.arrayBuffer()),
+      contentType: file.type,
     }
 
     const fileId = nanoid()
