@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import {
+  AlertCircle,
   ArrowLeft,
   ChevronRight,
   Eye,
@@ -56,10 +57,12 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(0)
   const [suggestedUsername, setSuggestedUsername] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [accountState, setAccountState] = useState<'verified' | 'unverified' | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const { register, handleSubmit, formState: { errors }, trigger } = useForm<FormData>()
+  const { register, handleSubmit, formState: { errors }, getValues, trigger } = useForm<FormData>()
 
   useEffect(() => {
     const username = searchParams.get('username')
@@ -69,6 +72,8 @@ export default function SignUp() {
   }, [searchParams])
 
   const nextStep = async () => {
+    setSubmitError('')
+    setAccountState(null)
     const isValid = await trigger(['name', 'email'])
     if (isValid) {
       setStep(1)
@@ -76,17 +81,32 @@ export default function SignUp() {
   }
 
   const onSubmit = async (data: FormData) => {
+    setSubmitError('')
+    setAccountState(null)
     setLoading(true)
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 20_000)
+
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, username: suggestedUsername || undefined }),
+        signal: controller.signal,
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        toast.error(error.message || 'Unable to create your account.')
+        const error = await response.json().catch(() => ({}))
+        const message = error.message || 'Unable to create your account. Please try again.'
+        setSubmitError(message)
+        setAccountState(
+          error.code === 'EMAIL_NOT_VERIFIED'
+            ? 'unverified'
+            : error.code === 'ACCOUNT_EXISTS'
+              ? 'verified'
+              : null,
+        )
+        toast.error(message)
         return
       }
 
@@ -101,9 +121,14 @@ export default function SignUp() {
         + encodeURIComponent(data.email)
         + (result.emailSent === false ? '&delivery=delayed' : ''),
       )
-    } catch {
-      toast.error('Unable to create your account.')
+    } catch (error) {
+      const message = error instanceof DOMException && error.name === 'AbortError'
+        ? 'The request is taking too long. Your account may already exist. Try signing in or resend the verification email.'
+        : 'Unable to reach TapLinkr. Check your connection and try again.'
+      setSubmitError(message)
+      toast.error(message)
     } finally {
+      window.clearTimeout(timeout)
       setLoading(false)
     }
   }
@@ -321,9 +346,48 @@ export default function SignUp() {
                       <UserPlus className="h-4 w-4" />
                     </Button>
 
+                    <div aria-live="polite">
+                      {loading && (
+                        <p className="text-center text-sm text-foreground/60">
+                          Creating your account… Please keep this page open.
+                        </p>
+                      )}
+
+                      {submitError && (
+                        <div
+                          role="alert"
+                          className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-4 text-sm text-rose-700 dark:text-rose-300"
+                        >
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                            <p>{submitError}</p>
+                          </div>
+                          {accountState && (
+                            <div className="mt-3 flex flex-wrap gap-3 pl-6 text-sm font-semibold">
+                              {accountState === 'unverified' && (
+                                <Link
+                                  href={`/auth/resend-verification?email=${encodeURIComponent(getValues('email') || '')}`}
+                                  className="text-brand-600 hover:underline"
+                                >
+                                  Resend verification email
+                                </Link>
+                              )}
+                              <Link href="/auth/signin" className="text-brand-600 hover:underline">
+                                Go to login
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() => setStep(0)}
+                      onClick={() => {
+                        setSubmitError('')
+                        setAccountState(null)
+                        setStep(0)
+                      }}
                       className="w-full text-sm text-foreground/50 transition-colors hover:text-foreground/70"
                     >
                       Back to the previous step
@@ -334,7 +398,7 @@ export default function SignUp() {
             </form>
 
             <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
-              <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Conseil</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Tip</p>
               <p className="mt-2 text-sm text-foreground/70">
                 Once signed up, add your deep links, enable the 18+ gate if needed, and track clicks from your first campaign.
               </p>

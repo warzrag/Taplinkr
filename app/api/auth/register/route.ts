@@ -38,8 +38,13 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: 'An account with this email already exists' },
-        { status: 400 }
+        {
+          message: existingUser.emailVerified
+            ? 'An account with this email already exists. Log in instead.'
+            : 'This account already exists but its email is not verified.',
+          code: existingUser.emailVerified ? 'ACCOUNT_EXISTS' : 'EMAIL_NOT_VERIFIED',
+        },
+        { status: 409 }
       )
     }
 
