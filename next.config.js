@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  // Keep the Blob SDK as a native server dependency. Bundling it inside the
+  // upload function breaks its runtime path resolution on Vercel.
+  serverExternalPackages: ['@vercel/blob'],
   // Optimisations extrêmes pour WSL
   webpack: (config, { dev, isServer }) => {
     if (dev) {
