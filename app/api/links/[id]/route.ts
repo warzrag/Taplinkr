@@ -128,8 +128,14 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       if (!/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])?$/.test(normalizedSlug) || RESERVED_USERNAMES.has(normalizedSlug)) {
         return NextResponse.json({ error: 'The slug must be 3–50 characters and contain only letters, numbers, or hyphens.' }, { status: 400 })
       }
-      const slugOwner = await prisma.link.findFirst({ where: { slug: normalizedSlug, id: { not: params.id } } })
-      if (slugOwner) return NextResponse.json({ error: 'This custom URL is already in use.' }, { status: 409 })
+      // Slugs are unique. Looking up the slug directly and comparing the id in
+      // application code avoids a Firestore query that needs a composite index.
+      if (normalizedSlug !== existingLink.slug) {
+        const slugOwner = await prisma.link.findUnique({ where: { slug: normalizedSlug } })
+        if (slugOwner && slugOwner.id !== params.id) {
+          return NextResponse.json({ error: 'This custom URL is already in use.' }, { status: 409 })
+        }
+      }
     }
 
     // Pas de validation d'URL car c'est un multi-link

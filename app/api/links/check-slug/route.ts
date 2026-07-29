@@ -25,15 +25,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ available: false, error: 'Invalid or reserved URL' })
     }
 
-    const existingLink = await prisma.link.findFirst({
-      where: {
-        slug: normalizedSlug,
-        id: linkId ? { not: linkId } : undefined
-      }
+    // Slugs are unique. Compare the current link id after the lookup so
+    // Firestore does not need a composite index for `slug + id`.
+    const existingLink = await prisma.link.findUnique({
+      where: { slug: normalizedSlug }
     })
 
     return NextResponse.json({
-      available: !existingLink,
+      available: !existingLink || existingLink.id === linkId,
       slug: normalizedSlug
     })
 
