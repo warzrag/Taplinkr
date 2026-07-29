@@ -51,6 +51,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     }
 
     // ⚡ INSTANT: Charger depuis cache d'abord (sauf si skipCache)
+    let restoredFromCache = false
+
     if (!skipCache) {
       const cached = localStorage.getItem('links-cache')
       if (cached) {
@@ -64,8 +66,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
             setHasTeam(data.hasTeam || false)
             setLoading(false)
             setHasLoaded(true)
+            restoredFromCache = true
             console.log('⚡ Liens chargés depuis cache:', data.links?.length || 0)
-            return
           }
         } catch (e) {
           console.error('Cache invalide:', e)
@@ -74,7 +76,7 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
       // The folders workspace keeps a second snapshot. It can restore visible
       // links if a temporary database outage occurred after the main cache was cleared.
-      const folderSnapshot = localStorage.getItem('folders-page-cache')
+      const folderSnapshot = restoredFromCache ? null : localStorage.getItem('folders-page-cache')
       if (folderSnapshot) {
         try {
           const parsed = JSON.parse(folderSnapshot)
@@ -97,7 +99,7 @@ export function LinksProvider({ children }: { children: ReactNode }) {
             setTeamLinks([])
             setLoading(false)
             setHasLoaded(true)
-            return
+            restoredFromCache = true
           }
         } catch (error) {
           console.error('Unable to restore the folders snapshot:', error)
@@ -107,7 +109,8 @@ export function LinksProvider({ children }: { children: ReactNode }) {
       console.log('🚫 Cache ignoré - Chargement forcé depuis la DB')
     }
 
-    setLoading(true)
+    // Keep cached links visible while the authoritative server list refreshes.
+    setLoading(!restoredFromCache)
     console.log('🔄 Chargement des liens...')
 
     try {
@@ -124,17 +127,20 @@ export function LinksProvider({ children }: { children: ReactNode }) {
 
         let allLinks = []
 
-        if (data.links) {
-          allLinks = data.links || []
-          setPersonalLinks(allLinks)
-          setTeamLinks([])
-          setHasTeam(false)
-          setLinks(allLinks)
-        } else if (data.personalLinks !== undefined) {
+        if (data.personalLinks !== undefined) {
           setPersonalLinks(data.personalLinks || [])
           setTeamLinks(data.teamLinks || [])
           setHasTeam(data.hasTeam || false)
           allLinks = [...(data.personalLinks || []), ...(data.teamLinks || [])]
+          allLinks = allLinks.filter((link: LinkType, index: number, items: LinkType[]) =>
+            items.findIndex(candidate => candidate.id === link.id) === index
+          )
+          setLinks(allLinks)
+        } else if (data.links) {
+          allLinks = data.links || []
+          setPersonalLinks(allLinks)
+          setTeamLinks([])
+          setHasTeam(false)
           setLinks(allLinks)
         } else {
           allLinks = Array.isArray(data) ? data : []
