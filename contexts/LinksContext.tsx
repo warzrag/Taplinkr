@@ -183,7 +183,9 @@ export function LinksProvider({ children }: { children: ReactNode }) {
   const refreshLinks = async () => {
     // ⚡ Invalider le cache avant de recharger
     localStorage.removeItem('links-cache')
-    await fetchLinks()
+    // A user-triggered refresh must not restore the stale folders snapshot.
+    // Fetch the newly saved values directly from the API instead.
+    await fetchLinks(true)
   }
 
   const refreshFolders = async () => {

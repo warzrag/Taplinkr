@@ -42,7 +42,7 @@ function dashboardLinkName(item: LinkType) {
 }
 
 export default function LinksDashboard() {
-  const { personalLinks, loading, refreshLinks } = useLinks()
+  const { personalLinks, loading, refreshLinks, updateLinkOptimistic } = useLinks()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [showCreatePicker, setShowCreatePicker] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
@@ -450,7 +450,10 @@ export default function LinksDashboard() {
             setCreateMode(null)
             setEditingLink(null)
           }}
-          onSuccess={async () => {
+          onSuccess={async (savedLink) => {
+            if (editingLink?.id && savedLink) {
+              updateLinkOptimistic(editingLink.id, savedLink)
+            }
             setCreateMode(null)
             setEditingLink(null)
             await refreshLinks()
