@@ -265,7 +265,8 @@ export const authOptions: NextAuthOptions = {
       const isConfiguredAdmin = Boolean(
         session.user.email && configuredAdminEmails.includes(session.user.email.toLowerCase())
       )
-      session.user.role = isConfiguredAdmin ? 'admin' : token.role as string
+      const normalizedRole = typeof token.role === 'string' ? token.role.toLowerCase() : 'user'
+      session.user.role = isConfiguredAdmin ? 'admin' : normalizedRole
       session.user.plan = token.plan as string
       session.user.planExpiresAt = token.planExpiresAt as Date | null
       session.user.teamId = token.teamId as string | null
