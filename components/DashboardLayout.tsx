@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { signOut, useSession } from 'next-auth/react'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -48,6 +48,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false)
+  const [canAccessAdmin, setCanAccessAdmin] = useState(session?.user?.role === 'admin')
+
+  useEffect(() => {
+    if (!session?.user) {
+      setCanAccessAdmin(false)
+      return
+    }
+    if (session.user.role === 'admin') {
+      setCanAccessAdmin(true)
+      return
+    }
+
+    let cancelled = false
+    fetch('/api/admin/access', { cache: 'no-store' })
+      .then(response => response.ok ? response.json() : { canAccess: false })
+      .then(data => {
+        if (!cancelled) setCanAccessAdmin(Boolean(data.canAccess))
+      })
+      .catch(() => {
+        if (!cancelled) setCanAccessAdmin(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [session?.user])
 
   const displayName = session?.user?.name || session?.user?.email?.split('@')[0] || 'My workspace'
   const initials = displayName.slice(0, 2).toUpperCase()
@@ -59,6 +86,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = (href: string) => {
     router.push(href)
     setSidebarOpen(false)
+    setWorkspaceMenuOpen(false)
   }
 
   return (
@@ -86,14 +114,38 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         <div className="border-b border-[#22222d] p-4">
-          <button className="flex w-full items-center gap-3 rounded-xl border border-[#2a2a38] bg-[#11111b] px-4 py-3 text-left transition hover:border-violet-500/50">
+          <button
+            type="button"
+            onClick={() => setWorkspaceMenuOpen(open => !open)}
+            aria-expanded={workspaceMenuOpen}
+            aria-haspopup="menu"
+            className="flex w-full items-center gap-3 rounded-xl border border-[#2a2a38] bg-[#11111b] px-4 py-3 text-left transition hover:border-violet-500/50"
+          >
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-violet-500/10 text-violet-400">
               <LayoutGrid className="h-4 w-4" />
             </span>
             <span className="min-w-0 flex-1 truncate text-sm font-semibold">{displayName}</span>
-            <ChevronDown className="h-4 w-4 text-[#77778a]" />
+            <ChevronDown className={`h-4 w-4 text-[#77778a] transition-transform ${workspaceMenuOpen ? 'rotate-180' : ''}`} />
           </button>
-          {session?.user?.role === 'admin' && (
+          {workspaceMenuOpen && (
+            <div role="menu" className="mt-2 space-y-1 rounded-xl border border-[#2a2a38] bg-[#11111b] p-2 shadow-2xl">
+              <button type="button" role="menuitem" onClick={() => navigate('/dashboard/profile')} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#b6b6c6] transition hover:bg-white/5 hover:text-white">
+                <User className="h-4 w-4" />
+                <span>Profile</span>
+              </button>
+              <button type="button" role="menuitem" onClick={() => navigate('/dashboard/team')} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#b6b6c6] transition hover:bg-white/5 hover:text-white">
+                <Users className="h-4 w-4" />
+                <span>Team</span>
+              </button>
+              {canAccessAdmin && (
+                <button type="button" role="menuitem" onClick={() => navigate('/admin')} className="flex w-full items-center gap-3 rounded-lg bg-violet-500/10 px-3 py-2.5 text-left text-sm font-semibold text-violet-200 transition hover:bg-violet-500/15">
+                  <Settings2 className="h-4 w-4 text-violet-400" />
+                  <span>Administration</span>
+                </button>
+              )}
+            </div>
+          )}
+          {canAccessAdmin && (
             <button
               onClick={() => navigate('/admin')}
               className="mt-3 flex w-full items-center gap-3 rounded-xl border border-violet-500/25 bg-violet-500/[0.09] px-4 py-3 text-left text-sm font-semibold text-violet-100 transition hover:border-violet-400/40 hover:bg-violet-500/15"
