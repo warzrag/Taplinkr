@@ -93,6 +93,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <span className="min-w-0 flex-1 truncate text-sm font-semibold">{displayName}</span>
             <ChevronDown className="h-4 w-4 text-[#77778a]" />
           </button>
+          {session?.user?.role === 'admin' && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="mt-3 flex w-full items-center gap-3 rounded-xl border border-violet-500/25 bg-violet-500/[0.09] px-4 py-3 text-left text-sm font-semibold text-violet-100 transition hover:border-violet-400/40 hover:bg-violet-500/15"
+            >
+              <Settings2 className="h-[19px] w-[19px] text-violet-400" />
+              <span>Administration</span>
+            </button>
+          )}
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
