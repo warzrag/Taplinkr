@@ -1,826 +1,160 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'react-hot-toast'
-import PromoCodesManager from '@/components/admin/PromoCodesManager'
-import { 
-  Users,
-  Search,
-  MoreVertical,
-  Ban,
-  Trash2,
-  Mail,
-  Calendar,
-  Check,
-  X,
-  Crown,
-  Shield,
-  AlertCircle,
-  Loader2,
-  RefreshCw,
-  UserCheck,
-  UserX,
-  Filter,
-  Gift,
-  Clock,
-  Zap,
-  Tag,
-  Percent
-} from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { CheckCircle2, Loader2, RefreshCw, Search, Shield, Tag, UserCheck, UserX, Users } from 'lucide-react'
+import toast from 'react-hot-toast'
 
-interface User {
+import PromoCodesManager from '@/components/admin/PromoCodesManager'
+
+type UserRow = {
   id: string
   email: string
-  name: string | null
+  name?: string
   username: string
   role: string
   plan: string
-  planExpiresAt: string | null
+  planExpiresAt?: string
   emailVerified: boolean
   isActive: boolean
   createdAt: string
-  _count: {
-    links: number
-  }
+  _count?: { links: number }
 }
 
 export default function AdminUsersPage() {
-  const { data: session } = useSession()
-  const router = useRouter()
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filter, setFilter] = useState('all')
-  const [showActions, setShowActions] = useState<string | null>(null)
-  const [processingUser, setProcessingUser] = useState<string | null>(null)
-  const [showRoleModal, setShowRoleModal] = useState<string | null>(null)
-  const [showPlanModal, setShowPlanModal] = useState<string | null>(null)
-  const [showPromoModal, setShowPromoModal] = useState(false)
+  const [users, setUsers] = useState<UserRow[]>([])
   const [promoCodes, setPromoCodes] = useState<any[]>([])
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState('all')
+  const [loading, setLoading] = useState(true)
+  const [processing, setProcessing] = useState<string | null>(null)
+  const [showPromos, setShowPromos] = useState(false)
 
-  useEffect(() => {
-    if (session?.user?.role !== 'admin' && session?.user?.role !== 'manager') {
-      router.push('/dashboard')
-      return
-    }
-    fetchUsers()
-    if (session?.user?.role === 'admin') {
-      fetchPromoCodes()
-    }
-  }, [session, router])
-
-  const fetchUsers = async () => {
+  const loadUsers = useCallback(async () => {
+    setLoading(true)
     try {
-      const response = await fetch('/api/admin/users')
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data)
-      } else {
-        toast.error('Unable to load users.')
-      }
-    } catch (error) {
-      toast.error('Connection error.')
+      const response = await fetch('/api/admin/users', { cache: 'no-store' })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || 'Unable to load users')
+      setUsers(payload)
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : 'Unable to load users')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const fetchPromoCodes = async () => {
+  const loadPromos = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/promo-codes')
-      if (response.ok) {
-        const data = await response.json()
-        setPromoCodes(data)
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des codes promo:', error)
+      const response = await fetch('/api/admin/promo-codes', { cache: 'no-store' })
+      if (response.ok) setPromoCodes(await response.json())
+    } catch {
+      toast.error('Unable to load promo codes')
     }
-  }
+  }, [])
 
-  const handleToggleActive = async (userId: string, currentStatus: boolean) => {
-    setProcessingUser(userId)
-    try {
-      const response = await fetch(`/api/admin/users/${userId}/toggle-active`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !currentStatus })
-      })
+  useEffect(() => { void loadUsers(); void loadPromos() }, [loadUsers, loadPromos])
 
-      if (response.ok) {
-        toast.success(currentStatus ? 'User deactivated' : 'User activated')
-        fetchUsers()
-      } else {
-        toast.error('Unable to update the user.')
-      }
-    } catch (error) {
-      toast.error('Connection error.')
-    } finally {
-      setProcessingUser(null)
-      setShowActions(null)
-    }
-  }
-
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This cannot be undone.')) {
-      return
-    }
-
-    setProcessingUser(userId)
-    try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        toast.success('User deleted.')
-        fetchUsers()
-      } else {
-        toast.error('Unable to delete the user.')
-      }
-    } catch (error) {
-      toast.error('Connection error.')
-    } finally {
-      setProcessingUser(null)
-      setShowActions(null)
-    }
-  }
-
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    setProcessingUser(userId)
-    try {
-      const response = await fetch(`/api/admin/users/${userId}/role`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: newRole })
-      })
-
-      if (response.ok) {
-        toast.success('Role updated successfully.')
-        fetchUsers()
-      } else {
-        toast.error('Unable to update the role.')
-      }
-    } catch (error) {
-      toast.error('Connection error.')
-    } finally {
-      setProcessingUser(null)
-      setShowRoleModal(null)
-    }
-  }
-
-  const handlePlanChange = async (userId: string, newPlan: string, duration?: number) => {
-    setProcessingUser(userId)
-    try {
-      const response = await fetch(`/api/admin/users/${userId}/plan`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: newPlan, duration })
-      })
-
-      if (response.ok) {
-        toast.success('Subscription updated successfully.')
-        fetchUsers()
-      } else {
-        toast.error('Unable to update the subscription.')
-      }
-    } catch (error) {
-      toast.error('Connection error.')
-    } finally {
-      setProcessingUser(null)
-      setShowPlanModal(null)
-    }
-  }
-
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesFilter = 
-      filter === 'all' ||
-      (filter === 'active' && user.isActive) ||
-      (filter === 'inactive' && !user.isActive) ||
-      (filter === 'verified' && user.emailVerified) ||
-      (filter === 'unverified' && !user.emailVerified) ||
-      (filter === 'premium' && user.plan === 'premium') ||
-      (filter === 'admin' && user.role === 'admin')
-    
+  const visibleUsers = useMemo(() => users.filter(user => {
+    const needle = query.trim().toLowerCase()
+    const matchesSearch = !needle || [user.email, user.name, user.username].some(value => value?.toLowerCase().includes(needle))
+    const matchesFilter = filter === 'all' || (filter === 'verified' ? user.emailVerified : filter === 'inactive' ? !user.isActive : user.role === filter || user.plan === filter)
     return matchesSearch && matchesFilter
-  })
+  }), [users, query, filter])
 
   const stats = {
     total: users.length,
-    active: users.filter(u => u.isActive).length,
-    verified: users.filter(u => u.emailVerified).length,
-    premium: users.filter(u => u.plan === 'premium').length
+    active: users.filter(user => user.isActive).length,
+    verified: users.filter(user => user.emailVerified).length,
+    paid: users.filter(user => user.plan === 'standard' || user.plan === 'premium').length,
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-3 border-blue-600 border-t-transparent rounded-full"
-        />
-      </div>
-    )
+  const toggleAccount = async (user: UserRow) => {
+    setProcessing(user.id)
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}/toggle-active`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !user.isActive }),
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || 'Unable to update account')
+      toast.success(user.isActive ? 'Account suspended' : 'Account activated')
+      await loadUsers()
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : 'Unable to update account')
+    } finally {
+      setProcessing(null)
+    }
+  }
+
+  const changeRole = async (user: UserRow, role: string) => {
+    setProcessing(user.id)
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role }),
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || 'Unable to update role')
+      toast.success(`Role changed to ${role}`)
+      await loadUsers()
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : 'Unable to update role')
+    } finally {
+      setProcessing(null)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/20">
-      <div className="p-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
-                User management
-              </h1>
-              <p className="text-gray-600 mt-1">Manage user accounts and permissions</p>
-            </div>
-            
-            <div className="flex gap-2">
-              {session?.user?.role === 'admin' && (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowPromoModal(true)}
-                  className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center gap-2"
-                >
-                  <Tag className="w-5 h-5" />
-                  <span>Codes Promo</span>
-                </motion.button>
-              )}
-              
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={fetchUsers}
-                className="p-3 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-              >
-                <RefreshCw className="w-5 h-5 text-gray-600" />
-              </motion.button>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Total</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                </div>
-                <Users className="w-8 h-8 text-gray-400" />
-              </div>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Active</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.active}</p>
-                </div>
-                <UserCheck className="w-8 h-8 text-green-400" />
-              </div>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Verified</p>
-                  <p className="text-2xl font-bold text-blue-600">{stats.verified}</p>
-                </div>
-                <Mail className="w-8 h-8 text-blue-400" />
-              </div>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Premium</p>
-                  <p className="text-2xl font-bold text-purple-600">{stats.premium}</p>
-                </div>
-                <Crown className="w-8 h-8 text-purple-400" />
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Search and filters */}
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by email, name, or username..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All users</option>
-              <option value="active">Active only</option>
-              <option value="inactive">Inactive only</option>
-              <option value="verified">Email verified</option>
-              <option value="unverified">Email not verified</option>
-              <option value="premium">Premium seulement</option>
-              <option value="admin">Admins seulement</option>
-            </select>
-          </div>
-        </motion.div>
-
-        {/* Users table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Plan
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Links
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Inscrit le
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredUsers.map((user) => (
-                  <motion.tr
-                    key={user.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                            <span className="text-sm font-medium text-blue-600">
-                              {user.name?.[0] || user.email[0].toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="flex items-center gap-2">
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.name || 'Sans nom'}
-                            </div>
-                            {user.role === 'admin' && (
-                              <Shield className="w-4 h-4 text-red-500" />
-                            )}
-                            {user.role === 'manager' && (
-                              <Shield className="w-4 h-4 text-purple-500" />
-                            )}
-                          </div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
-                          <div className="text-xs text-gray-400">@{user.username}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {user.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                        {user.emailVerified ? (
-                          <span className="inline-flex items-center gap-1 text-xs text-green-600">
-                            <Check className="w-3 h-3" />
-                            Email verified
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs text-amber-600">
-                            <X className="w-3 h-3" />
-                            Not verified
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.plan === 'premium'
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {user.plan === 'premium' ? (
-                            <>
-                              <Crown className="w-3 h-3 mr-1" />
-                              Premium
-                            </>
-                          ) : (
-                            'Free'
-                          )}
-                        </span>
-                        {user.plan === 'premium' && user.planExpiresAt && (
-                          <span className="text-xs text-gray-500">
-                            Expire le {new Date(user.planExpiresAt).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {user._count.links}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="relative">
-                        <button
-                          onClick={() => setShowActions(showActions === user.id ? null : user.id)}
-                          disabled={processingUser === user.id}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                          {processingUser === user.id ? (
-                            <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
-                          ) : (
-                            <MoreVertical className="w-5 h-5 text-gray-400" />
-                          )}
-                        </button>
-
-                        <AnimatePresence>
-                          {showActions === user.id && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.95 }}
-                              className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-10"
-                            >
-                              <button
-                                onClick={() => handleToggleActive(user.id, user.isActive)}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                              >
-                                {user.isActive ? (
-                                  <>
-                                    <UserX className="w-4 h-4 text-amber-600" />
-                                    <span className="text-amber-600">Deactivate</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserCheck className="w-4 h-4 text-green-600" />
-                                    <span className="text-green-600">Activer</span>
-                                  </>
-                                )}
-                              </button>
-                              
-                              <button
-                                onClick={() => {
-                                  setShowRoleModal(user.id)
-                                  setShowActions(null)
-                                }}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                              >
-                                <Shield className="w-4 h-4 text-purple-600" />
-                                <span>Change role</span>
-                              </button>
-                              
-                              {session?.user?.role === 'admin' && (
-                                <button
-                                  onClick={() => {
-                                    setShowPlanModal(user.id)
-                                    setShowActions(null)
-                                  }}
-                                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                  <Crown className="w-4 h-4 text-yellow-600" />
-                                  <span>Manage subscription</span>
-                                </button>
-                              )}
-                              
-                              {user.role !== 'admin' && user.role !== 'manager' && (
-                                <button
-                                  onClick={() => handleDeleteUser(user.id)}
-                                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Delete
-                                </button>
-                              )}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredUsers.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No users found</p>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Modal de changement de rôle */}
-        <AnimatePresence>
-          {showRoleModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-              onClick={() => setShowRoleModal(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Change user role
-                </h3>
-                
-                <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-2">
-                    User: <span className="font-medium text-gray-900">
-                      {users.find(u => u.id === showRoleModal)?.email}
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Current role: <span className="font-medium text-gray-900">
-                      {users.find(u => u.id === showRoleModal)?.role === 'admin' 
-                        ? 'Admin'
-                        : users.find(u => u.id === showRoleModal)?.role === 'manager' 
-                        ? 'Manager' 
-                        : 'User'}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <button
-                    onClick={() => handleRoleChange(showRoleModal, 'user')}
-                    disabled={users.find(u => u.id === showRoleModal)?.role === 'user'}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                      users.find(u => u.id === showRoleModal)?.role === 'user'
-                        ? 'border-blue-500 bg-blue-50 cursor-not-allowed opacity-50'
-                        : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Users className="w-5 h-5 text-blue-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">User</p>
-                        <p className="text-sm text-gray-500">Standard app access</p>
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => handleRoleChange(showRoleModal, 'manager')}
-                    disabled={users.find(u => u.id === showRoleModal)?.role === 'manager' || session?.user?.role !== 'admin'}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                      users.find(u => u.id === showRoleModal)?.role === 'manager'
-                        ? 'border-purple-500 bg-purple-50 cursor-not-allowed opacity-50'
-                        : session?.user?.role !== 'admin'
-                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
-                        : 'border-gray-200 hover:border-purple-500 hover:bg-purple-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Shield className="w-5 h-5 text-purple-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">Manager</p>
-                        <p className="text-sm text-gray-500">Can manage users except admins and managers</p>
-                        {session?.user?.role !== 'admin' && (
-                          <p className="text-xs text-red-500 mt-1">Only an admin can assign this role</p>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => handleRoleChange(showRoleModal, 'admin')}
-                    disabled={true}
-                    className="w-full p-4 rounded-xl border-2 text-left transition-all border-gray-200 bg-gray-50 cursor-not-allowed opacity-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Shield className="w-5 h-5 text-red-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">Admin</p>
-                        <p className="text-sm text-gray-500">Full access — only one admin allowed</p>
-                        <p className="text-xs text-red-500 mt-1">Il ne peut y avoir qu'un seul administrateur</p>
-                      </div>
-                    </div>
-                  </button>
-                </div>
-
-                <div className="mt-6 flex gap-3">
-                  <button
-                    onClick={() => setShowRoleModal(null)}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Modal de gestion des abonnements */}
-        <AnimatePresence>
-          {showPlanModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-              onClick={() => setShowPlanModal(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Manage subscription
-                </h3>
-                
-                <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-2">
-                    User: <span className="font-medium text-gray-900">
-                      {users.find(u => u.id === showPlanModal)?.email}
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Current plan: <span className="font-medium text-gray-900">
-                      {users.find(u => u.id === showPlanModal)?.plan === 'premium' ? 'Premium' : 'Free'}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <button
-                    onClick={() => handlePlanChange(showPlanModal, 'free')}
-                    disabled={users.find(u => u.id === showPlanModal)?.plan === 'free'}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                      users.find(u => u.id === showPlanModal)?.plan === 'free'
-                        ? 'border-gray-500 bg-gray-50 cursor-not-allowed opacity-50'
-                        : 'border-gray-200 hover:border-gray-500 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Users className="w-5 h-5 text-gray-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">Free plan</p>
-                        <p className="text-sm text-gray-500">Access to core features</p>
-                      </div>
-                    </div>
-                  </button>
-
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Offrir Premium :</p>
-                    
-                    <button
-                      onClick={() => handlePlanChange(showPlanModal, 'premium', 30)}
-                      className="w-full p-4 rounded-xl border-2 text-left transition-all border-gray-200 hover:border-yellow-500 hover:bg-yellow-50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Gift className="w-5 h-5 text-yellow-600" />
-                        <div>
-                          <p className="font-medium text-gray-900">Offrir 1 mois Premium</p>
-                          <p className="text-sm text-gray-500">30 days of free Premium access</p>
-                        </div>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => handlePlanChange(showPlanModal, 'premium', 90)}
-                      className="w-full p-4 rounded-xl border-2 text-left transition-all border-gray-200 hover:border-yellow-500 hover:bg-yellow-50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Clock className="w-5 h-5 text-yellow-600" />
-                        <div>
-                          <p className="font-medium text-gray-900">Offrir 3 mois Premium</p>
-                          <p className="text-sm text-gray-500">90 days of free Premium access</p>
-                        </div>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => handlePlanChange(showPlanModal, 'premium', 365)}
-                      className="w-full p-4 rounded-xl border-2 text-left transition-all border-gray-200 hover:border-yellow-500 hover:bg-yellow-50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Zap className="w-5 h-5 text-yellow-600" />
-                        <div>
-                          <p className="font-medium text-gray-900">Offrir 1 an Premium</p>
-                          <p className="text-sm text-gray-500">365 days of free Premium access</p>
-                        </div>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => handlePlanChange(showPlanModal, 'premium')}
-                      className="w-full p-4 rounded-xl border-2 text-left transition-all border-gray-200 hover:border-purple-500 hover:bg-purple-50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Crown className="w-5 h-5 text-purple-600" />
-                        <div>
-                          <p className="font-medium text-gray-900">Lifetime Premium</p>
-                          <p className="text-sm text-gray-500">Unlimited access forever</p>
-                        </div>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex gap-3">
-                  <button
-                    onClick={() => setShowPlanModal(null)}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Modal de gestion des codes promo */}
-        <AnimatePresence>
-          {showPromoModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-              onClick={() => setShowPromoModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-2xl shadow-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <PromoCodesManager
-                  promoCodes={promoCodes}
-                  onRefresh={fetchPromoCodes}
-                  onClose={() => setShowPromoModal(false)}
-                />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+    <div className="mx-auto max-w-[1500px] px-5 py-8 sm:px-8 lg:px-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-400">Accounts & access</p><h1 className="mt-2 text-3xl font-semibold tracking-tight">Users</h1><p className="mt-2 text-sm text-white/45">Review accounts, verification, access status and administrative roles.</p></div>
+        <div className="flex gap-2">
+          <button onClick={() => setShowPromos(true)} className="flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-2.5 text-sm font-semibold hover:bg-violet-400"><Tag className="h-4 w-4" /> Promo codes</button>
+          <button onClick={loadUsers} disabled={loading} className="rounded-xl border border-white/10 p-2.5 text-white/65 hover:bg-white/5" aria-label="Refresh users"><RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
+        </div>
       </div>
+
+      <div className="mt-8 grid grid-cols-2 gap-4 xl:grid-cols-4">
+        {[['Total users', stats.total], ['Active', stats.active], ['Verified', stats.verified], ['Paid access', stats.paid]].map(([label, value]) => (
+          <div key={String(label)} className="rounded-2xl border border-white/10 bg-[#111119] p-5"><p className="text-sm text-white/45">{label}</p><p className="mt-2 text-3xl font-semibold">{value}</p></div>
+        ))}
+      </div>
+
+      <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-[#111119]">
+        <div className="flex flex-col gap-3 border-b border-white/10 p-4 sm:flex-row">
+          <div className="relative flex-1"><Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search by name, email or username..." className="w-full rounded-xl border border-white/10 bg-black/20 py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-white/25 focus:border-violet-500/50" /></div>
+          <select value={filter} onChange={event => setFilter(event.target.value)} className="rounded-xl border border-white/10 bg-[#0d0d14] px-4 py-2.5 text-sm text-white/70 outline-none"><option value="all">All users</option><option value="verified">Verified email</option><option value="inactive">Suspended</option><option value="standard">Standard</option><option value="premium">Premium</option><option value="admin">Admins</option><option value="manager">Managers</option></select>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[950px] text-left">
+            <thead className="border-b border-white/10 text-[11px] uppercase tracking-wider text-white/35"><tr><th className="px-5 py-3.5">User</th><th className="px-5 py-3.5">Status</th><th className="px-5 py-3.5">Plan</th><th className="px-5 py-3.5">Role</th><th className="px-5 py-3.5">Links</th><th className="px-5 py-3.5">Joined</th><th className="px-5 py-3.5">Access</th></tr></thead>
+            <tbody className="divide-y divide-white/[0.07]">
+              {loading && !users.length ? <tr><td colSpan={7} className="py-16 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-violet-400" /></td></tr> : visibleUsers.length === 0 ? <tr><td colSpan={7} className="py-16 text-center"><Users className="mx-auto h-9 w-9 text-white/20" /><p className="mt-3 text-sm text-white/40">No matching users.</p></td></tr> : visibleUsers.map(user => (
+                <tr key={user.id} className="text-sm hover:bg-white/[0.02]">
+                  <td className="px-5 py-4"><div className="flex items-center gap-3"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-indigo-700 font-bold">{(user.name || user.email).slice(0,1).toUpperCase()}</div><div className="min-w-0"><p className="truncate font-semibold">{user.name || user.username}</p><p className="truncate text-xs text-white/40">{user.email}</p></div></div></td>
+                  <td className="px-5 py-4"><div className="space-y-1.5"><span className={`block text-xs font-semibold ${user.isActive ? 'text-emerald-300' : 'text-red-300'}`}>{user.isActive ? 'Active' : 'Suspended'}</span><span className={`inline-flex items-center gap-1 text-[11px] ${user.emailVerified ? 'text-sky-300' : 'text-white/30'}`}><CheckCircle2 className="h-3.5 w-3.5" />{user.emailVerified ? 'Email verified' : 'Not verified'}</span></div></td>
+                  <td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${user.plan === 'free' ? 'bg-white/5 text-white/40' : 'bg-violet-500/15 text-violet-300'}`}>{user.plan}</span></td>
+                  <td className="px-5 py-4"><div className="flex items-center gap-2"><Shield className="h-4 w-4 text-white/25" /><select value={user.role} disabled={processing === user.id} onChange={event => void changeRole(user, event.target.value)} className="rounded-lg border border-white/10 bg-[#0d0d14] px-2.5 py-2 text-xs capitalize outline-none disabled:opacity-40"><option value="user">User</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div></td>
+                  <td className="px-5 py-4 text-white/55">{user._count?.links || 0}</td>
+                  <td className="px-5 py-4 text-xs text-white/40">{new Date(user.createdAt).toLocaleDateString('en-US')}</td>
+                  <td className="px-5 py-4"><button onClick={() => void toggleAccount(user)} disabled={processing === user.id} className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-40 ${user.isActive ? 'border-red-500/20 text-red-300 hover:bg-red-500/10' : 'border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/10'}`}>{processing === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : user.isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}{user.isActive ? 'Suspend' : 'Activate'}</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {showPromos && (
+        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" onClick={() => setShowPromos(false)}>
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-6 text-gray-900 shadow-2xl" onClick={event => event.stopPropagation()}>
+            <PromoCodesManager promoCodes={promoCodes} onRefresh={loadPromos} onClose={() => setShowPromos(false)} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
