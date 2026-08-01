@@ -258,7 +258,14 @@ export const authOptions: NextAuthOptions = {
 
       session.user.id = token.id as string
       session.user.username = token.username as string
-      session.user.role = token.role as string
+      const configuredAdminEmails = (process.env.ADMIN_EMAILS || '')
+        .split(',')
+        .map(email => email.trim().toLowerCase())
+        .filter(Boolean)
+      const isConfiguredAdmin = Boolean(
+        session.user.email && configuredAdminEmails.includes(session.user.email.toLowerCase())
+      )
+      session.user.role = isConfiguredAdmin ? 'admin' : token.role as string
       session.user.plan = token.plan as string
       session.user.planExpiresAt = token.planExpiresAt as Date | null
       session.user.teamId = token.teamId as string | null
