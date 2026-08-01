@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   MousePointerClick,
+  Settings2,
   Shield,
   User,
   Users,
@@ -113,6 +114,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </button>
             )
           })}
+          {session?.user?.role === 'admin' && (
+            <>
+              <div className="mx-4 my-4 border-t border-[#22222d]" />
+              <button
+                onClick={() => navigate('/admin')}
+                className="group relative flex w-full items-center gap-3 rounded-xl border border-violet-500/20 bg-violet-500/[0.06] px-4 py-3 text-left text-sm font-medium text-violet-200 transition hover:bg-violet-500/10"
+              >
+                <Settings2 className="h-[19px] w-[19px] text-violet-400" />
+                <span>Administration</span>
+              </button>
+            </>
+          )}
         </nav>
 
         <div className="border-t border-[#22222d] p-4">

@@ -19,7 +19,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     const { plan, duration } = await request.json()
 
     // Vérifier que le plan est valide
-    if (!['free', 'premium', 'business'].includes(plan)) {
+    if (!['free', 'standard', 'premium'].includes(plan)) {
       return NextResponse.json(
         { error: 'Plan invalide' },
         { status: 400 }
@@ -28,7 +28,8 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
 
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
+      select: { id: true, stripeSubscriptionId: true }
     })
 
     if (!user) {
@@ -38,9 +39,16 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
       )
     }
 
+    if (user.stripeSubscriptionId) {
+      return NextResponse.json(
+        { error: 'This subscription is managed by Stripe. Change or cancel it in Stripe.' },
+        { status: 409 }
+      )
+    }
+
     // Calculer la date d'expiration si une durée est fournie
     let planExpiresAt = null
-    if (plan === 'premium' && duration) {
+    if ((plan === 'standard' || plan === 'premium') && duration) {
       planExpiresAt = new Date()
       planExpiresAt.setDate(planExpiresAt.getDate() + duration)
     }
