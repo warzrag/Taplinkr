@@ -3,6 +3,15 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
+  const hostname = forwardedHost.split(',')[0].trim().toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '')
+  const isPlatformHostname =
+    !hostname ||
+    hostname === 'taplinkr.com' ||
+    hostname === 'www.taplinkr.com' ||
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname.endsWith('.vercel.app')
 
   const hiddenPublicRoutes = [
     '/admin-login',
@@ -48,6 +57,19 @@ export function middleware(request: NextRequest) {
     [...hiddenPublicRoutes, ...hiddenApiRoutes].some((route) => pathname === route || pathname.startsWith(`${route}/`))
   ) {
     return new NextResponse('Not found', { status: 404 })
+  }
+
+  // A verified customer domain serves its selected Taplinkr destination at
+  // the domain root. Resolution stays server-side so domain ownership cannot
+  // be spoofed through a query parameter or client-side redirect.
+  if (!isPlatformHostname && pathname === '/') {
+    const rewriteUrl = request.nextUrl.clone()
+    rewriteUrl.pathname = `/custom-domain/${encodeURIComponent(hostname)}`
+    const rewrite = NextResponse.rewrite(rewriteUrl)
+    rewrite.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate')
+    rewrite.headers.set('X-Frame-Options', 'SAMEORIGIN')
+    rewrite.headers.set('X-Content-Type-Options', 'nosniff')
+    return rewrite
   }
 
   const response = NextResponse.next()

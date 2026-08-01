@@ -10,6 +10,7 @@ import {
   CreditCard,
   ExternalLink,
   FolderKanban,
+  Globe2,
   LayoutGrid,
   LogOut,
   Menu,
@@ -39,6 +40,7 @@ const navItems = [
   { icon: Users, label: 'Team', href: '/dashboard/team' },
   { icon: Shield, label: 'Protection', href: '/dashboard/protection' },
   { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
+  { icon: Globe2, label: 'Custom domains', href: '/dashboard/domains' },
   { icon: User, label: 'Profile', href: '/dashboard/profile' },
   { icon: BookOpen, label: 'Help', href: '/dashboard/support' },
 ]

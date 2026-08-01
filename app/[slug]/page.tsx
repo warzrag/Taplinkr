@@ -130,7 +130,13 @@ export default async function LinkPage(props: PageProps) {
     const host = forwardedHost?.split(',')[0]?.trim() || 'www.taplinkr.com'
     const forwardedProto = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim()
     const protocol = forwardedProto === 'http' ? 'http' : 'https'
-    const publicUrl = `${protocol}://${host}/${encodeURIComponent(params.slug)}`
+    const normalizedHost = host.toLowerCase().replace(/:\d+$/, '')
+    const isPlatformHost = normalizedHost === 'taplinkr.com' ||
+      normalizedHost === 'www.taplinkr.com' ||
+      normalizedHost === 'localhost' ||
+      normalizedHost === '127.0.0.1' ||
+      normalizedHost.endsWith('.vercel.app')
+    const publicUrl = `${protocol}://${host}${isPlatformHost ? `/${encodeURIComponent(params.slug)}` : '/'}`
     const externalBrowserUrl = getExternalBrowserTarget({
       currentUrl: publicUrl,
       userAgent,
