@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Updating TapLinkr…</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+      body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: #09090f; color: #f7f7fb; }
+      main { width: min(88vw, 430px); padding: 36px; border: 1px solid #292938; border-radius: 24px; background: #11111b; text-align: center; box-shadow: 0 24px 80px rgba(0,0,0,.4); }
+      .mark { width: 52px; height: 52px; margin: 0 auto 20px; display: grid; place-items: center; border-radius: 16px; background: linear-gradient(135deg,#8b5cf6,#4f46e5); font-size: 24px; }
+      h1 { margin: 0 0 10px; font-size: 24px; }
+      p { margin: 0; color: #a6a6b8; line-height: 1.55; }
+      .spinner { width: 24px; height: 24px; margin: 24px auto 0; border: 3px solid #343445; border-top-color: #a78bfa; border-radius: 50%; animation: spin .8s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark">↻</div>
+      <h1>Updating TapLinkr</h1>
+      <p id="status">Removing the old dashboard cache…</p>
+      <div class="spinner" aria-hidden="true"></div>
+    </main>
+    <script>
+      (async () => {
+        const status = document.getElementById('status')
+        try {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations()
+            await Promise.all(registrations.map(registration => registration.unregister()))
+          }
+          if ('caches' in window) {
+            const names = await caches.keys()
+            await Promise.all(names.map(name => caches.delete(name)))
+          }
+          status.textContent = 'Update complete. Opening your dashboard…'
+        } catch (error) {
+          status.textContent = 'Opening the latest dashboard…'
+        }
+        window.setTimeout(() => {
+          window.location.replace('/dashboard?client_refresh=20260801')
+        }, 700)
+      })()
+    </script>
+  </body>
+</html>
