@@ -1,167 +1,217 @@
 import { prisma } from './prisma'
+import { InvalidCustomDomainError, normalizeCustomDomain } from './domain-utils'
 
-export interface DomainConfig {
-  domain: string
-  subdomain?: string
+export type DnsInstruction = {
+  type: 'A' | 'CNAME' | 'TXT'
+  name: string
+  value: string
+  reason?: string
 }
 
-export class DomainManager {
-  async addDomain(userId: string, config: DomainConfig) {
-    // Validate domain format
-    if (!this.isValidDomain(config.domain)) {
-      throw new Error('Format de domaine invalide')
+type VercelVerification = {
+  type?: string
+  domain?: string
+  value?: string
+  reason?: string
+}
+
+type VercelProjectDomain = {
+  name?: string
+  verified?: boolean
+  verification?: VercelVerification[]
+}
+
+type VercelDomainConfig = {
+  misconfigured?: boolean
+}
+
+export class DomainIntegrationError extends Error {
+  status: number
+
+  constructor(message: string, status = 500) {
+    super(message)
+    this.name = 'DomainIntegrationError'
+    this.status = status
+  }
+}
+
+function cleanHostname(input: string) {
+  try {
+    return normalizeCustomDomain(input)
+  } catch (error) {
+    if (error instanceof InvalidCustomDomainError) {
+      throw new DomainIntegrationError(error.message, 400)
     }
+    throw error
+  }
+}
 
-    // Check if domain already exists
-    const existing = await prisma.customDomain.findUnique({
-      where: { domain: config.domain }
-    })
+function vercelConfig() {
+  const token = process.env.VERCEL_TOKEN
+  const projectId = process.env.VERCEL_PROJECT_ID
+  const teamId = process.env.VERCEL_TEAM_ID
 
-    if (existing) {
-      throw new Error('This domain is already in use')
-    }
+  if (!token || !projectId) {
+    throw new DomainIntegrationError('Custom-domain automation is not configured yet.', 503)
+  }
 
-    // Generate DNS records
-    const dnsRecords = this.generateDNSRecords(config.domain)
+  return { token, projectId, teamId }
+}
 
-    return await prisma.customDomain.create({
-      data: {
-        userId,
-        domain: config.domain,
-        subdomain: config.subdomain,
-        dnsRecords: JSON.stringify(dnsRecords),
-        verified: false
-      }
+async function vercelRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const { token, teamId } = vercelConfig()
+  const url = new URL(`https://api.vercel.com${path}`)
+  if (teamId) url.searchParams.set('teamId', teamId)
+
+  const response = await fetch(url, {
+    ...init,
+    cache: 'no-store',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...init?.headers,
+    },
+  })
+
+  const payload = await response.json().catch(() => ({})) as any
+  if (!response.ok) {
+    const message = payload?.error?.message || payload?.message || 'Vercel could not update this domain.'
+    throw new DomainIntegrationError(message, response.status)
+  }
+
+  return payload as T
+}
+
+function baseDnsInstruction(domain: string): DnsInstruction {
+  const labels = domain.split('.')
+  const isApex = labels.length === 2 || (labels.length === 3 && labels[labels.length - 2].length <= 3)
+
+  if (isApex) {
+    return { type: 'A', name: '@', value: '76.76.21.21' }
+  }
+
+  return {
+    type: 'CNAME',
+    name: labels.slice(0, -2).join('.'),
+    value: 'cname.vercel-dns.com',
+  }
+}
+
+function dnsInstructions(domain: string, verification: VercelVerification[] = []): DnsInstruction[] {
+  const instructions: DnsInstruction[] = [baseDnsInstruction(domain)]
+
+  for (const item of verification) {
+    if (!item.value || item.type?.toUpperCase() !== 'TXT') continue
+    const recordDomain = (item.domain || `_vercel.${domain}`).replace(/\.$/, '')
+    const suffix = `.${domain}`
+    const name = recordDomain === domain
+      ? '@'
+      : recordDomain.endsWith(suffix)
+        ? recordDomain.slice(0, -suffix.length)
+        : recordDomain
+
+    instructions.push({
+      type: 'TXT',
+      name,
+      value: item.value,
+      reason: item.reason,
     })
   }
 
-  async verifyDomain(domainId: string): Promise<boolean> {
-    const domain = await prisma.customDomain.findUnique({
-      where: { id: domainId }
-    })
+  return instructions
+}
 
-    if (!domain) {
-      throw new Error('Domain not found')
-    }
+export function isCustomDomainAutomationConfigured() {
+  return Boolean(process.env.VERCEL_TOKEN && process.env.VERCEL_PROJECT_ID)
+}
 
-    // Check DNS configuration (simplified for demo)
-    const isConfigured = await this.checkDNSConfiguration(domain.domain)
-    
-    if (isConfigured) {
-      await prisma.customDomain.update({
-        where: { id: domainId },
-        data: { verified: true }
+export const domainManager = {
+  normalizeDomain: cleanHostname,
+
+  async addDomain(userId: string, input: { domain: string; redirectTo: string }) {
+    const domain = cleanHostname(input.domain)
+    const existing = await prisma.customDomain.findUnique({ where: { domain } })
+    if (existing) throw new DomainIntegrationError('This domain is already connected to Taplinkr.', 409)
+
+    const { projectId } = vercelConfig()
+    const projectDomain = await vercelRequest<VercelProjectDomain>(
+      `/v10/projects/${encodeURIComponent(projectId)}/domains`,
+      { method: 'POST', body: JSON.stringify({ name: domain }) },
+    )
+    const records = dnsInstructions(domain, projectDomain.verification)
+
+    try {
+      return await prisma.customDomain.create({
+        data: {
+          userId,
+          domain,
+          subdomain: domain.split('.').length > 2 ? domain.split('.')[0] : null,
+          dnsRecords: JSON.stringify(records),
+          redirectTo: input.redirectTo,
+          verified: false,
+          sslEnabled: false,
+        },
       })
-      return true
+    } catch (error) {
+      await this.detachDomain(domain).catch(() => undefined)
+      throw error
+    }
+  },
+
+  async refreshDomain(domainId: string, userId: string) {
+    const domain = await prisma.customDomain.findFirst({ where: { id: domainId, userId } })
+    if (!domain) throw new DomainIntegrationError('Domain not found.', 404)
+
+    const { projectId } = vercelConfig()
+    let projectDomain = await vercelRequest<VercelProjectDomain>(
+      `/v9/projects/${encodeURIComponent(projectId)}/domains/${encodeURIComponent(domain.domain)}`,
+    )
+
+    if (!projectDomain.verified) {
+      projectDomain = await vercelRequest<VercelProjectDomain>(
+        `/v9/projects/${encodeURIComponent(projectId)}/domains/${encodeURIComponent(domain.domain)}/verify`,
+        { method: 'POST' },
+      ).catch(error => {
+        if (error instanceof DomainIntegrationError && error.status >= 400 && error.status < 500) {
+          return projectDomain
+        }
+        throw error
+      })
     }
 
-    return false
-  }
+    const config = await vercelRequest<VercelDomainConfig>(
+      `/v6/domains/${encodeURIComponent(domain.domain)}/config?projectId=${encodeURIComponent(projectId)}`,
+    )
+    const ready = Boolean(projectDomain.verified && !config.misconfigured)
+    const records = dnsInstructions(domain.domain, projectDomain.verification)
 
-  async setupSSL(domainId: string) {
-    const domain = await prisma.customDomain.findUnique({
-      where: { id: domainId }
-    })
-
-    if (!domain || !domain.verified) {
-      throw new Error('The domain must be verified before SSL can be configured')
-    }
-
-    // In a real implementation, this would use Let's Encrypt or similar
-    // For demo purposes, we'll just mark it as enabled
-    const sslExpiry = new Date()
-    sslExpiry.setDate(sslExpiry.getDate() + 90) // 90 days
-
-    await prisma.customDomain.update({
-      where: { id: domainId },
+    return prisma.customDomain.update({
+      where: { id: domain.id },
       data: {
-        sslEnabled: true,
-        sslExpiry
-      }
-    })
-
-    return true
-  }
-
-  private async checkDNSConfiguration(domain: string): Promise<boolean> {
-    // In a real implementation, this would use DNS lookup libraries
-    // For demo purposes, we'll simulate verification
-    console.log(`Checking DNS for ${domain}...`)
-    
-    // Simulate DNS check - in production, you'd use libraries like:
-    // - dns.promises.resolve()
-    // - dig commands
-    // - Third-party DNS APIs
-    
-    return Math.random() > 0.3 // 70% chance of success for demo
-  }
-
-  private generateDNSRecords(domain: string) {
-    const subdomain = domain.includes('.') ? domain.split('.')[0] : '@'
-    
-    return [
-      {
-        type: 'CNAME',
-        name: subdomain,
-        value: 'cname.linktracker.app',
-        ttl: 300
+        verified: ready,
+        sslEnabled: ready,
+        sslExpiry: null,
+        dnsRecords: JSON.stringify(records),
       },
-      {
-        type: 'TXT',
-        name: `_linktracker.${domain}`,
-        value: `linktracker-verification=${this.generateVerificationToken()}`,
-        ttl: 300
-      }
-    ]
-  }
-
-  private generateVerificationToken(): string {
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15)
-  }
-
-  private isValidDomain(domain: string): boolean {
-    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.([a-zA-Z]{2,}|[a-zA-Z]{2,}\.[a-zA-Z]{2,})$/
-    return domainRegex.test(domain)
-  }
-
-  async getUserDomains(userId: string) {
-    return await prisma.customDomain.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' }
     })
-  }
+  },
+
+  async detachDomain(domain: string) {
+    const { projectId } = vercelConfig()
+    try {
+      await vercelRequest(
+        `/v9/projects/${encodeURIComponent(projectId)}/domains/${encodeURIComponent(domain)}`,
+        { method: 'DELETE' },
+      )
+    } catch (error) {
+      if (!(error instanceof DomainIntegrationError) || error.status !== 404) throw error
+    }
+  },
 
   async deleteDomain(domainId: string, userId: string) {
-    const domain = await prisma.customDomain.findUnique({
-      where: { id: domainId }
-    })
-
-    if (!domain || domain.userId !== userId) {
-      throw new Error('Domain not found or unauthorized')
-    }
-
-    await prisma.customDomain.delete({
-      where: { id: domainId }
-    })
-
-    return true
-  }
-
-  async getDomainByName(domain: string) {
-    return await prisma.customDomain.findUnique({
-      where: { domain },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            name: true
-          }
-        }
-      }
-    })
-  }
+    const domain = await prisma.customDomain.findFirst({ where: { id: domainId, userId } })
+    if (!domain) throw new DomainIntegrationError('Domain not found.', 404)
+    await this.detachDomain(domain.domain)
+    await prisma.customDomain.delete({ where: { id: domain.id } })
+  },
 }
-
-export const domainManager = new DomainManager()
