@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { toast } from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import {
@@ -160,6 +161,15 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setActivePanel('identity')
     }
   }, [isOpen, editingLink, initialMode])
+
+  useEffect(() => {
+    if (!isOpen || pageMode !== 'landing') return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isOpen, pageMode])
 
   useEffect(() => {
     if (!editingLink && !customSlugTouched && pageMode === 'landing') {
@@ -450,8 +460,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       !loading && !imageUploading && !checkingSlug
     )
 
-    return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-[#070a12] text-white">
+    return createPortal(
+      <div className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-[#070a12] text-white">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen">
           <header className="sticky top-0 z-30 border-b border-white/10 bg-[#070a12]/90 backdrop-blur-xl">
             <div className="mx-auto flex max-w-[1480px] items-center justify-between gap-4 px-4 py-4 sm:px-7">
@@ -727,7 +737,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               </div>
             </div>
 
-            <aside className="border-l border-white/10 bg-white/[0.025] p-5 lg:sticky lg:top-[81px] lg:h-[calc(100vh-81px)] lg:overflow-y-auto">
+            <aside className="border-l border-white/10 bg-white/[0.025] p-5 lg:sticky lg:top-[97px] lg:self-start">
               <div className="mx-auto max-w-[380px]">
                 <div className="mb-3 flex items-center justify-between">
                   <div>
@@ -770,7 +780,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
             </aside>
           </form>
         </motion.div>
-      </div>
+      </div>,
+      document.body
     )
   }
 
