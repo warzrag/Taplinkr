@@ -190,8 +190,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </button>
             </>
           )}
-          <SidebarUsageCard />
         </nav>
+
+        <div className="shrink-0 border-t border-[#22222d] bg-[#0c0c14] px-3 pb-3">
+          <SidebarUsageCard />
+        </div>
 
         <div className="shrink-0 border-t border-[#22222d] bg-[#0c0c14] p-4">
           <div className="mb-4 flex items-center gap-3">

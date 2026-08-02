@@ -61,7 +61,7 @@ export default function SidebarUsageCard() {
   const planName = usage.plan.charAt(0).toUpperCase() + usage.plan.slice(1)
 
   return (
-    <section className="mx-1 mt-5 rounded-xl border border-violet-500/15 bg-gradient-to-b from-violet-500/[0.08] to-transparent p-3" aria-label="Plan usage">
+    <section className="mx-1 mt-3 rounded-xl border border-violet-500/15 bg-gradient-to-b from-violet-500/[0.08] to-transparent p-3" aria-label="Plan usage">
       <div className="mb-3 flex items-center justify-between gap-2">
         <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#77778a]">Plan usage</span>
         <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-300">{planName}</span>
