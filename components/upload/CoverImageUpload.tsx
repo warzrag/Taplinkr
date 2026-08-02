@@ -13,6 +13,44 @@ interface CoverImageUploadProps {
   onUploadingChange?: (isUploading: boolean) => void
 }
 
+const MAX_SOURCE_SIZE = 25 * 1024 * 1024
+const UPLOAD_TARGET_SIZE = 3.6 * 1024 * 1024
+
+async function optimizeCoverImage(file: File): Promise<File> {
+  if (file.size <= UPLOAD_TARGET_SIZE) return file
+  if (file.type === 'image/gif') {
+    throw new Error('Animated GIFs must be 4 MB or smaller. Use a JPG, PNG, or WebP image for automatic optimization.')
+  }
+
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const element = new window.Image()
+      element.onload = () => resolve(element)
+      element.onerror = () => reject(new Error('This image could not be read. Try a JPG, PNG, or WebP file.'))
+      element.src = objectUrl
+    })
+    const scale = Math.min(1, 2200 / Math.max(image.naturalWidth, image.naturalHeight))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
+    const context = canvas.getContext('2d')
+    if (!context) throw new Error('Unable to optimize this image in your browser.')
+    context.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+    let blob: Blob | null = null
+    for (const quality of [0.86, 0.76, 0.66, 0.56]) {
+      blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', quality))
+      if (blob && blob.size <= UPLOAD_TARGET_SIZE) break
+    }
+    if (!blob || blob.size > 4 * 1024 * 1024) throw new Error('This image is too large to optimize. Try a smaller image.')
+    const baseName = file.name.replace(/\.[^.]+$/, '') || 'cover'
+    return new File([blob], `${baseName}.webp`, { type: 'image/webp', lastModified: Date.now() })
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
 export default function CoverImageUpload({ 
   value, 
   onChange,
@@ -66,8 +104,8 @@ export default function CoverImageUpload({
       return
     }
 
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error('The image must be 4 MB or smaller.')
+    if (file.size > MAX_SOURCE_SIZE) {
+      toast.error('The original image must be 25 MB or smaller.')
       return
     }
 
@@ -83,8 +121,11 @@ export default function CoverImageUpload({
     // Upload
     setIsUploading(true)
     try {
+      const uploadFile = await optimizeCoverImage(file)
+      if (uploadFile.size < file.size) toast.success('Image optimized automatically.')
+
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', uploadFile)
       formData.append('type', 'cover')
 
       const uploadResponse = await fetch('/api/upload', {
@@ -211,7 +252,7 @@ export default function CoverImageUpload({
 
             {/* Info text */}
             <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-              Recommended: 16:9 landscape or 9:16 portrait • Max 4 MB
+              Recommended: 16:9 landscape or 9:16 portrait • Images up to 25 MB are optimized automatically
             </p>
           </motion.div>
         ) : (
