@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { ArrowUpRight, Link2 } from 'lucide-react'
+import { ArrowUpRight, Github, Link2 } from 'lucide-react'
 
 interface LandingPageVisualProps {
   title: string
@@ -28,13 +28,15 @@ interface LandingActionCardProps {
   disabled?: boolean
 }
 
-function isOnlyFansUrl(value?: string | null) {
-  if (!value) return false
+function knownPlatform(value?: string | null) {
+  if (!value) return null
   try {
     const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`)
-    return /(^|\.)onlyfans\.com$/i.test(url.hostname)
+    if (/(^|\.)onlyfans\.com$/i.test(url.hostname)) return 'onlyfans'
+    if (/(^|\.)github\.com$/i.test(url.hostname)) return 'github'
+    return null
   } catch {
-    return false
+    return null
   }
 }
 
@@ -78,6 +80,7 @@ export function LandingActionCard({
 }: LandingActionCardProps) {
   const resolvedAccent = accentColor || '#8b5cf6'
   const foreground = readableText(resolvedAccent)
+  const platform = knownPlatform(destinationUrl)
 
   return (
     <button
@@ -93,8 +96,10 @@ export function LandingActionCard({
           icon.startsWith('http') || icon.startsWith('/') || icon.startsWith('data:')
             ? <img src={icon} alt="" className="h-full w-full object-cover" />
             : <span className="text-lg">{icon}</span>
-        ) : isOnlyFansUrl(destinationUrl) ? (
+        ) : platform === 'onlyfans' ? (
           <OnlyFansIcon />
+        ) : platform === 'github' ? (
+          <Github className="h-8 w-8" aria-label="GitHub" />
         ) : (
           <Link2 className="h-5 w-5 opacity-80" />
         )}
