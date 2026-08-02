@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import { Link as LinkType } from '@/types'
 import { createShortPublicSlug } from '@/lib/public-slug'
-import { normalizeHttpURL } from '@/lib/url-validator'
+import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
 import IconUpload from './upload/IconUpload'
@@ -87,6 +87,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [pageMode, setPageMode] = useState<'landing' | 'direct'>('landing')
   const [directUrl, setDirectUrl] = useState('')
 
+  const [internalName, setInternalName] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [slug, setSlug] = useState('')
@@ -110,6 +111,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setPageMode(editingLink.isDirect ? 'direct' : 'landing')
       setDirectUrl(editingLink.directUrl || '')
       setActivePanel('identity')
+      setInternalName(editingLink.internalName || '')
       setTitle(editingLink.isDirect ? (editingLink.internalName || editingLink.title || '') : (editingLink.title || ''))
       setDescription(editingLink.description || editingLink.bio || '')
       setSlug(editingLink.slug || '')
@@ -138,6 +140,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     } else {
       setPageMode(initialMode)
       setDirectUrl('')
+      setInternalName('')
       setTitle('')
       setDescription('')
       setSlug(initialMode === 'direct' ? createShortPublicSlug() : '')
@@ -364,12 +367,23 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       return
     }
 
+    if (pageMode === 'landing') {
+      const invalidLink = validLinks.find(link => {
+        const normalizedUrl = normalizeHttpURL(link.url)
+        return !normalizedUrl || !validateURL(normalizedUrl)
+      })
+      if (invalidLink) {
+        toast.error(`Check the URL for “${invalidLink.title}”`)
+        return
+      }
+    }
+
     setLoading(true)
 
     try {
       const requestBody = {
         title: pageMode === 'direct' ? 'Direct link' : title.trim(),
-        internalName: pageMode === 'direct' ? title.trim() : null,
+        internalName: pageMode === 'direct' ? title.trim() : (internalName.trim() || null),
         slug: slug.trim(),
         description: description.trim() || null,
         bio: description.trim() || null,
@@ -431,31 +445,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   if (!isOpen) return null
 
   if (pageMode === 'landing') {
-    const landingSteps = [
-      { id: 'identity' as const, label: 'Page info', helper: 'Name, photo, and address' },
-      { id: 'links' as const, label: 'Links', helper: 'Add what visitors can open' },
-      { id: 'style' as const, label: 'Design', helper: 'Choose the final look' },
-    ]
-    const currentStep = Math.max(0, landingSteps.findIndex(step => step.id === activePanel))
-
-    const goToStep = (step: 'identity' | 'links' | 'style') => {
-      if ((step === 'links' || step === 'style') && (!title.trim() || !slug.trim())) {
-        toast.error('Add your page name and public address first')
-        setActivePanel('identity')
-        return
-      }
-      if ((step === 'links' || step === 'style') && slugAvailable === false) {
-        toast.error('Choose an available public address')
-        setActivePanel('identity')
-        return
-      }
-      if (step === 'style' && validLinks.length === 0) {
-        toast.error('Add at least one complete link first')
-        setActivePanel('links')
-        return
-      }
-      setActivePanel(step)
-    }
+    const canPublish = Boolean(
+      title.trim() && slug.trim() && slugAvailable !== false && validLinks.length > 0 &&
+      !loading && !imageUploading && !checkingSlug
+    )
 
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto bg-[#070a12] text-white">
@@ -470,67 +463,38 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                   {title.trim() || 'Your new page'}
                 </h2>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={loading}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white"
-              >
-                <X className="h-4 w-4" />
-                <span className="hidden sm:inline">Close</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={onClose} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white">
+                  <X className="h-4 w-4" /><span className="hidden sm:inline">Close</span>
+                </button>
+                <button type="submit" form="landing-page-form" disabled={!canPublish} className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-black text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-45">
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  <span className="hidden sm:inline">{editingLink ? 'Save changes' : 'Publish page'}</span><span className="sm:hidden">Save</span>
+                </button>
+              </div>
             </div>
           </header>
 
-          <form onSubmit={handleSubmit} className="mx-auto grid w-full max-w-[1480px] lg:grid-cols-[minmax(0,1fr)_430px]">
+          <form id="landing-page-form" onSubmit={handleSubmit} className="mx-auto grid w-full max-w-[1480px] lg:grid-cols-[minmax(0,1fr)_430px]">
             <div className="min-w-0 px-4 py-6 sm:px-7 lg:py-9">
               <div className="mx-auto max-w-3xl">
-                <div className="mb-8">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-bold text-white">Step {currentStep + 1} of 3</span>
-                    <span className="text-white/45">{landingSteps[currentStep]?.label}</span>
-                  </div>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 transition-all duration-300"
-                      style={{ width: `${((currentStep + 1) / 3) * 100}%` }}
-                    />
-                  </div>
-                  <div className="mt-5 grid grid-cols-3 gap-2">
-                    {landingSteps.map((step, index) => (
-                      <button
-                        key={step.id}
-                        type="button"
-                        onClick={() => goToStep(step.id)}
-                        className={`rounded-2xl border px-3 py-3 text-left transition ${
-                          activePanel === step.id
-                            ? 'border-violet-500/60 bg-violet-500/15'
-                            : index < currentStep
-                              ? 'border-emerald-400/20 bg-emerald-400/5 hover:bg-emerald-400/10'
-                              : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2 text-sm font-bold">
-                          <span className={`grid h-6 w-6 place-items-center rounded-full text-xs ${
-                            index < currentStep ? 'bg-emerald-400 text-emerald-950' : 'bg-white/10'
-                          }`}>
-                            {index < currentStep ? <Check className="h-3.5 w-3.5" /> : index + 1}
-                          </span>
-                          <span className="hidden sm:inline">{step.label}</span>
-                        </span>
-                        <span className="mt-1 hidden text-xs text-white/40 md:block">{step.helper}</span>
-                      </button>
-                    ))}
-                  </div>
+                <div className="mb-8 rounded-3xl border border-violet-400/20 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/5 p-5 sm:p-7">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-300">Everything in one place</p>
+                  <h3 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Build your page from top to bottom.</h3>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">Add your identity, buttons, and style below. The preview updates instantly, and you can publish whenever the required fields are ready.</p>
                 </div>
 
-                {activePanel === 'identity' && (
                   <section>
                     <p className="text-sm font-bold text-violet-400">PAGE INFO</p>
                     <h3 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Introduce yourself.</h3>
                     <p className="mt-2 text-white/55">This is the first thing people will see. You can change it anytime.</p>
 
                     <div className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-7">
+                      <label className="block">
+                        <span className="text-sm font-bold">Internal label <span className="font-normal text-white/35">(private)</span></span>
+                        <input value={internalName} onChange={event => setInternalName(event.target.value)} placeholder="e.g. Madison — Instagram campaign" className="mt-2 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3.5 text-white outline-none transition placeholder:text-white/25 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10" />
+                        <p className="mt-2 text-xs text-white/35">Only you and your team can see this name.</p>
+                      </label>
                       <div className="grid gap-5 sm:grid-cols-[160px_minmax(0,1fr)] sm:items-center">
                         <ImageUpload
                           value={profileImage}
@@ -598,10 +562,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       </label>
                     </div>
                   </section>
-                )}
 
-                {activePanel === 'links' && (
-                  <section>
+                  <section className="mt-12 border-t border-white/10 pt-12">
                     <p className="text-sm font-bold text-violet-400">YOUR LINKS</p>
                     <h3 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">What should people open?</h3>
                     <p className="mt-2 text-white/55">Add one or more destinations. Only complete links will be published.</p>
@@ -646,6 +608,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                                 placeholder="e.g. Follow me on Instagram"
                                 className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500"
                               />
+                              {link.url.trim() && !validateURL(normalizeHttpURL(link.url)) && <span className="mt-1.5 block text-xs font-semibold text-rose-400">Enter a valid web address.</span>}
                             </label>
                             <label>
                               <span className="text-xs font-bold text-white/55">Destination URL</span>
@@ -680,10 +643,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       Add another link
                     </button>
                   </section>
-                )}
 
-                {activePanel === 'style' && (
-                  <section>
+                  <section className="mt-12 border-t border-white/10 pt-12">
                     <p className="text-sm font-bold text-violet-400">DESIGN</p>
                     <h3 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Make it feel like you.</h3>
                     <p className="mt-2 text-white/55">Pick a polished style. Your preview updates instantly.</p>
@@ -739,7 +700,8 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       </div>
 
                       <div>
-                        <h4 className="mb-3 text-sm font-bold">Background image <span className="font-normal text-white/35">(optional)</span></h4>
+                        <h4 className="mb-1 text-sm font-bold">Page background <span className="font-normal text-white/35">(optional)</span></h4>
+                        <p className="mb-3 text-xs leading-5 text-white/40">This image fills the page behind your profile and buttons.</p>
                         <CoverImageUpload
                           value={coverImage}
                           onChange={setCoverImage}
@@ -748,36 +710,19 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                       </div>
                     </div>
                   </section>
-                )}
 
                 <div className="mt-8 flex items-center justify-between gap-3 border-t border-white/10 pt-6">
                   <button
                     type="button"
-                    onClick={() => activePanel === 'identity' ? onClose() : goToStep(activePanel === 'style' ? 'links' : 'identity')}
+                    onClick={onClose}
                     className="rounded-xl px-4 py-3 text-sm font-bold text-white/55 transition hover:bg-white/5 hover:text-white"
                   >
-                    {activePanel === 'identity' ? 'Cancel' : 'Back'}
+                    Cancel
                   </button>
-                  {activePanel === 'style' ? (
-                    <button
-                      type="submit"
-                      disabled={loading || imageUploading || checkingSlug}
-                      className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                      {editingLink ? 'Save changes' : 'Publish my page'}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => goToStep(activePanel === 'identity' ? 'links' : 'style')}
-                      disabled={checkingSlug}
-                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-[#070a12] transition hover:bg-violet-100 disabled:opacity-50"
-                    >
-                      Continue
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  )}
+                  <button type="submit" disabled={!canPublish} className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-45">
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    {editingLink ? 'Save changes' : 'Publish my page'}
+                  </button>
                 </div>
               </div>
             </div>

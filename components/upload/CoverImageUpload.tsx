@@ -179,6 +179,7 @@ export default function CoverImageUpload({
                 <p className="text-xs text-gray-500 dark:text-gray-400">L'image est centree comme dans le telephone.</p>
                 <div className="flex items-center gap-2">
                   <motion.button
+                    type="button"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => fileInputRef.current?.click()}
@@ -188,6 +189,7 @@ export default function CoverImageUpload({
                     <Upload className="w-4 h-4" />
                   </motion.button>
                   <motion.button
+                    type="button"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleRemove}
