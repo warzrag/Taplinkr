@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="40" x2="448" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#181329"/>
+      <stop offset="1" stop-color="#09090F"/>
+    </linearGradient>
+    <linearGradient id="soft" x1="78" y1="93" x2="438" y2="270" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#DDD6FE"/>
+    </linearGradient>
+    <linearGradient id="stem" x1="196" y1="173" x2="415" y2="451" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA"/>
+      <stop offset="0.55" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="132" fill="url(#bg)"/>
+  <rect x="10" y="10" width="492" height="492" rx="122" stroke="#8B5CF6" stroke-opacity="0.22" stroke-width="20"/>
+  <g transform="translate(52 52) scale(6.375)">
+    <path d="M28 25V42.5C28 50.5 32.8 55 39.5 55C46.2 55 51 50.4 51 42.5V30" stroke="url(#stem)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="7.5" y="9.5" width="49" height="23" rx="11.5" stroke="#5B4BC4" stroke-opacity="0.7" stroke-width="10"/>
+    <rect x="7.5" y="9.5" width="49" height="23" rx="11.5" stroke="url(#soft)" stroke-width="7"/>
+    <path d="M28 24.5V32.5" stroke="url(#stem)" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>

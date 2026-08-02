@@ -1,0 +1,25 @@
+<svg width="480" height="160" viewBox="0 0 480 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="soft" x1="14" y1="20" x2="110" y2="68" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#312E81"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="stem" x1="50" y1="44" x2="106" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA"/>
+      <stop offset="0.55" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="word" x1="176" y1="50" x2="438" y2="116" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(10 10) scale(2.18)">
+    <path d="M28 25V42.5C28 50.5 32.8 55 39.5 55C46.2 55 51 50.4 51 42.5V30" stroke="url(#stem)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="7.5" y="9.5" width="49" height="23" rx="11.5" stroke="#C4B5FD" stroke-width="10"/>
+    <rect x="7.5" y="9.5" width="49" height="23" rx="11.5" stroke="url(#soft)" stroke-width="7"/>
+    <path d="M28 24.5V32.5" stroke="url(#stem)" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <text x="158" y="106" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="700" letter-spacing="-3">Tap</text>
+  <text x="268" y="106" fill="url(#word)" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="700" letter-spacing="-3">Linkr</text>
+</svg>
