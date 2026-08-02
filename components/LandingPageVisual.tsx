@@ -1,7 +1,8 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { ArrowUpRight, Github, Link2 } from 'lucide-react'
+import { ArrowUpRight, Link2 } from 'lucide-react'
+import { getKnownPlatformForUrl } from '@/lib/platform-icons'
 
 interface LandingPageVisualProps {
   title: string
@@ -26,29 +27,6 @@ interface LandingActionCardProps {
   trailing?: ReactNode
   onClick?: () => void
   disabled?: boolean
-}
-
-function knownPlatform(value?: string | null) {
-  if (!value) return null
-  try {
-    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`)
-    if (/(^|\.)onlyfans\.com$/i.test(url.hostname)) return 'onlyfans'
-    if (/(^|\.)github\.com$/i.test(url.hostname)) return 'github'
-    return null
-  } catch {
-    return null
-  }
-}
-
-function OnlyFansIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-label="OnlyFans" className="h-8 w-8" role="img">
-      <path
-        fill="#00AFF0"
-        d="M24 4.003h-4.015c-3.45 0-5.3.197-6.748 1.957a7.996 7.996 0 1 0 2.103 9.211c3.182-.231 5.39-2.134 6.085-5.173 0 0-2.399.585-4.43 0 4.018-.777 6.333-3.037 7.005-5.995zM5.61 11.999A2.391 2.391 0 0 1 9.28 9.97a2.966 2.966 0 0 1 2.998-2.528h.008c-.92 1.778-1.407 3.352-1.998 5.263A2.392 2.392 0 0 1 5.61 12Zm2.386-7.996a7.996 7.996 0 1 0 7.996 7.996 7.996 7.996 0 0 0-7.996-7.996Zm0 10.394A2.399 2.399 0 1 1 10.395 12a2.396 2.396 0 0 1-2.399 2.398Z"
-      />
-    </svg>
-  )
 }
 
 function initials(value: string) {
@@ -80,7 +58,7 @@ export function LandingActionCard({
 }: LandingActionCardProps) {
   const resolvedAccent = accentColor || '#8b5cf6'
   const foreground = readableText(resolvedAccent)
-  const platform = knownPlatform(destinationUrl)
+  const platformIcon = getKnownPlatformForUrl(destinationUrl)?.icon || null
 
   return (
     <button
@@ -92,14 +70,10 @@ export function LandingActionCard({
     >
       <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10" />
       <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/15 shadow-inner backdrop-blur-sm">
-        {icon ? (
-          icon.startsWith('http') || icon.startsWith('/') || icon.startsWith('data:')
-            ? <img src={icon} alt="" className="h-full w-full object-cover" />
+        {icon || platformIcon ? (
+          (icon || platformIcon)!.startsWith('http') || (icon || platformIcon)!.startsWith('/') || (icon || platformIcon)!.startsWith('data:')
+            ? <img src={(icon || platformIcon)!} alt="" className="h-8 w-8 object-contain" />
             : <span className="text-lg">{icon}</span>
-        ) : platform === 'onlyfans' ? (
-          <OnlyFansIcon />
-        ) : platform === 'github' ? (
-          <Github className="h-8 w-8" aria-label="GitHub" />
         ) : (
           <Link2 className="h-5 w-5 opacity-80" />
         )}

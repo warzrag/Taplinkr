@@ -1,5 +1,6 @@
 import { isIP } from 'node:net'
 import { lookup } from 'node:dns/promises'
+import { detectKnownPlatformHost } from './platform-icons'
 
 export type LinkIconSource = 'platform' | 'favicon' | 'open-graph' | 'fallback'
 
@@ -13,35 +14,8 @@ const MAX_HTML_BYTES = 512 * 1024
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 const REQUEST_TIMEOUT_MS = 5_000
 
-// Some platforms deliberately block favicon requests made by servers. Keep a
-// tiny trusted SVG inline so their icon remains available in both the editor
-// and the published page without another network request.
-const ONLYFANS_ICON =
-  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath fill="%2300AFF0" d="M24 4.003h-4.015c-3.45 0-5.3.197-6.748 1.957a7.996 7.996 0 1 0 2.103 9.211c3.182-.231 5.39-2.134 6.085-5.173 0 0-2.399.585-4.43 0 4.018-.777 6.333-3.037 7.005-5.995zM5.61 11.999A2.391 2.391 0 0 1 9.28 9.97a2.966 2.966 0 0 1 2.998-2.528h.008c-.92 1.778-1.407 3.352-1.998 5.263A2.392 2.392 0 0 1 5.61 12Zm2.386-7.996a7.996 7.996 0 1 0 7.996 7.996 7.996 7.996 0 0 0-7.996-7.996Zm0 10.394A2.399 2.399 0 1 1 10.395 12a2.396 2.396 0 0 1-2.399 2.398Z"/%3E%3C/svg%3E'
-
-const GITHUB_ICON =
-  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath fill="%23ffffff" d="M12 .297a12 12 0 0 0-3.793 23.387c.6.111.82-.261.82-.58 0-.287-.011-1.232-.017-2.235-3.338.726-4.042-1.416-4.042-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.085 1.839 1.237 1.839 1.237 1.071 1.835 2.809 1.305 3.495.998.108-.776.419-1.305.762-1.605-2.665-.303-5.466-1.332-5.466-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23A11.5 11.5 0 0 1 12 6.096a11.5 11.5 0 0 1 3.003.404c2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.61-2.806 5.624-5.479 5.921.43.372.814 1.103.814 2.222 0 1.606-.014 2.898-.014 3.294 0 .321.216.696.825.578A12 12 0 0 0 12 .297Z"/%3E%3C/svg%3E'
-
-const PLATFORM_HOSTS: Array<{ pattern: RegExp; name: string; home: string; icon?: string }> = [
-  { pattern: /(^|\.)instagram\.com$/i, name: 'Instagram', home: 'https://www.instagram.com/' },
-  { pattern: /(^|\.)tiktok\.com$/i, name: 'TikTok', home: 'https://www.tiktok.com/' },
-  { pattern: /(^|\.)youtube\.com$|(^|\.)youtu\.be$/i, name: 'YouTube', home: 'https://www.youtube.com/' },
-  { pattern: /(^|\.)twitter\.com$|(^|\.)x\.com$/i, name: 'X', home: 'https://x.com/' },
-  { pattern: /(^|\.)telegram\.me$|(^|\.)t\.me$/i, name: 'Telegram', home: 'https://telegram.org/' },
-  { pattern: /(^|\.)spotify\.com$/i, name: 'Spotify', home: 'https://www.spotify.com/' },
-  { pattern: /(^|\.)onlyfans\.com$/i, name: 'OnlyFans', home: 'https://onlyfans.com/', icon: ONLYFANS_ICON },
-  { pattern: /(^|\.)github\.com$/i, name: 'GitHub', home: 'https://github.com/', icon: GITHUB_ICON },
-  { pattern: /(^|\.)twitch\.tv$/i, name: 'Twitch', home: 'https://www.twitch.tv/' },
-  { pattern: /(^|\.)discord\.(com|gg)$/i, name: 'Discord', home: 'https://discord.com/' },
-  { pattern: /(^|\.)snapchat\.com$/i, name: 'Snapchat', home: 'https://www.snapchat.com/' },
-  { pattern: /(^|\.)reddit\.com$/i, name: 'Reddit', home: 'https://www.reddit.com/' },
-  { pattern: /(^|\.)facebook\.com$/i, name: 'Facebook', home: 'https://www.facebook.com/' },
-  { pattern: /(^|\.)patreon\.com$/i, name: 'Patreon', home: 'https://www.patreon.com/' },
-]
-
 export function detectKnownPlatform(hostname: string) {
-  const normalized = hostname.toLowerCase().replace(/\.$/, '')
-  return PLATFORM_HOSTS.find(platform => platform.pattern.test(normalized)) || null
+  return detectKnownPlatformHost(hostname)
 }
 
 export function normalizeMetadataUrl(value: string) {

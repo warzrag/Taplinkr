@@ -12,6 +12,9 @@ describe('link icon metadata', () => {
     expect(detectKnownPlatform('onlyfans.com')?.icon).toMatch(/^data:image\/svg\+xml,/)
     expect(detectKnownPlatform('github.com')?.icon).toMatch(/^data:image\/svg\+xml,/)
     expect(detectKnownPlatform('youtu.be')?.name).toBe('YouTube')
+    expect(detectKnownPlatform('www.youtube.com')?.icon).toMatch(/^data:image\/svg\+xml,/)
+    expect(detectKnownPlatform('tiktok.com')?.icon).toMatch(/^data:image\/svg\+xml,/)
+    expect(detectKnownPlatform('x.com')?.icon).toMatch(/^data:image\/svg\+xml,/)
     expect(detectKnownPlatform('instagram.com.evil.test')).toBeNull()
   })
 
