@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="dark min-h-screen bg-[#09090f] text-[#f7f7fb]">
+    <div className="dark min-h-screen bg-[#09090f] text-[#f7f7fb] lg:grid lg:h-screen lg:grid-cols-[286px_minmax(0,1fr)] lg:overflow-hidden">
       {sidebarOpen && (
         <button
           aria-label="Close menu"
@@ -101,7 +101,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      <aside className={`fixed left-0 top-0 z-50 flex h-[100dvh] max-h-[100dvh] w-[286px] flex-col overflow-hidden border-r border-[#22222d] bg-[#0c0c14] transition-transform duration-300 lg:translate-x-0 ${
+      <aside className={`fixed inset-y-0 left-0 z-50 flex h-screen w-[286px] flex-col overflow-hidden border-r border-[#22222d] bg-[#0c0c14] transition-transform duration-300 lg:static lg:inset-auto lg:h-full lg:min-h-0 lg:w-full lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex h-[88px] shrink-0 items-center justify-between border-b border-[#22222d] px-6">
@@ -211,7 +211,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </aside>
 
-      <div className="min-h-screen lg:pl-[286px]">
+      <div className="min-h-screen min-w-0 lg:h-full lg:min-h-0 lg:overflow-y-auto">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#22222d] bg-[#09090f]/90 px-4 backdrop-blur-xl lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -224,7 +224,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-400 to-indigo-600" />
         </header>
 
-        <main className="min-h-screen">
+        <main className="min-h-screen lg:min-h-full">
           <ProfileProvider>
             <LinksProvider>
               <LinkUpdateProvider updateLinkInPreview={() => undefined}>
