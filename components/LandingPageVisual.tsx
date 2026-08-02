@@ -61,10 +61,11 @@ export function LandingActionCard({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`group flex min-h-[68px] w-full items-center gap-3 border border-white/10 px-4 py-3 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:cursor-default disabled:opacity-90 ${borderRadius || 'rounded-2xl'}`}
+      className={`group relative flex min-h-[76px] w-full items-center gap-3 overflow-hidden border border-white/20 px-4 py-3.5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.18)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.22)] hover:brightness-105 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:cursor-default disabled:opacity-90 ${borderRadius || 'rounded-2xl'}`}
       style={{ backgroundColor: resolvedAccent, color: foreground }}
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-black/10">
+      <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10" />
+      <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/15 shadow-inner backdrop-blur-sm">
         {icon ? (
           icon.startsWith('http') || icon.startsWith('/') || icon.startsWith('data:')
             ? <img src={icon} alt="" className="h-full w-full object-cover" />
@@ -73,15 +74,17 @@ export function LandingActionCard({
           <Link2 className="h-5 w-5 opacity-80" />
         )}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block break-words text-sm font-bold leading-5">{title}</span>
+      <span className="relative min-w-0 flex-1">
+        <span className="block break-words text-[15px] font-extrabold leading-5 tracking-[-0.01em]">{title}</span>
         {description && (
           <span className="mt-0.5 block break-words text-xs leading-4 opacity-70">
             {description}
           </span>
         )}
       </span>
-      {trailing || <ArrowUpRight className="h-5 w-5 shrink-0 opacity-65 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />}
+      <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/10">
+        {trailing || <ArrowUpRight className="h-5 w-5 opacity-70 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />}
+      </span>
     </button>
   )
 }

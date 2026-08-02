@@ -609,34 +609,35 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            <label>
-                              <span className="text-xs font-bold text-white/55">Button title</span>
+                          <div className="space-y-3">
+                            <label className="block">
+                              <span className="text-xs font-bold text-white/70">Text shown on the button</span>
                               <input
                                 value={link.title}
                                 onChange={event => updateLink(index, 'title', event.target.value)}
-                                placeholder="e.g. Follow me on Instagram"
+                                placeholder="e.g. See my exclusive content"
+                                className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500"
+                              />
+                              <span className="mt-1.5 block text-xs text-white/35">This text is visible to every visitor and updates instantly in the phone.</span>
+                            </label>
+                            <label className="block">
+                              <span className="text-xs font-bold text-white/70">Where the button opens</span>
+                              <input
+                                value={link.url}
+                                onChange={event => updateLink(index, 'url', event.target.value)}
+                                placeholder="https://your-destination.com"
+                                inputMode="url"
                                 className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500"
                               />
                               {link.url.trim() && !validateURL(normalizeHttpURL(link.url)) && <span className="mt-1.5 block text-xs font-semibold text-rose-400">Enter a valid web address.</span>}
                             </label>
-                            <label>
-                              <span className="text-xs font-bold text-white/55">Destination URL</span>
-                              <input
-                                value={link.url}
-                                onChange={event => updateLink(index, 'url', event.target.value)}
-                                placeholder="https://..."
-                                inputMode="url"
-                                className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500"
-                              />
-                            </label>
                           </div>
                           <label className="mt-3 block">
-                            <span className="text-xs font-bold text-white/55">Description <span className="font-normal">(optional)</span></span>
+                            <span className="text-xs font-bold text-white/70">Small text below <span className="font-normal text-white/35">(optional)</span></span>
                             <input
                               value={link.description || ''}
                               onChange={event => updateLink(index, 'description', event.target.value)}
-                              placeholder="A short reason to click"
+                              placeholder="e.g. New content available now"
                               className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500"
                             />
                           </label>
@@ -764,10 +765,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     textColor={textColor}
                     accentColor={accentColor}
                   >
-                    {(validLinks.length ? validLinks : [{ title: 'Your first link', url: '#', description: '' }]).slice(0, 5).map((link, index) => (
+                    {links.slice(0, 5).map((link, index) => (
                       <LandingActionCard
                         key={`${link.title}-${index}`}
-                        title={link.title || 'Untitled link'}
+                        title={link.title || 'Type your button text'}
                         description={link.description}
                         accentColor={accentColor}
                         borderRadius={borderRadius}
