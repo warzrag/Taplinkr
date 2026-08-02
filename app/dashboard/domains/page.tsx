@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
+  AlertCircle,
   Check,
   Copy,
   ExternalLink,
@@ -44,6 +45,7 @@ export default function CustomDomainsPage() {
   const [domain, setDomain] = useState('')
   const [linkId, setLinkId] = useState('')
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [working, setWorking] = useState<string | null>(null)
 
   const load = useCallback(async () => {
@@ -53,9 +55,12 @@ export default function CustomDomainsPage() {
       const payload = await response.json()
       if (!response.ok) throw new Error(payload.error || 'Unable to load custom domains.')
       setData(payload)
+      setLoadError(null)
       setLinkId(current => current || payload.links?.[0]?.id || '')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Unable to load custom domains.')
+      const message = error instanceof Error ? error.message : 'Unable to load custom domains.'
+      setLoadError(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -126,6 +131,23 @@ export default function CustomDomainsPage() {
 
   if (loading && !data) {
     return <div className="grid min-h-[70vh] place-items-center"><Loader2 className="h-8 w-8 animate-spin text-violet-400" /></div>
+  }
+
+  if (!data && loadError) {
+    return (
+      <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-400">Your brand</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Custom domains</h1>
+        <div className="mt-8 rounded-3xl border border-red-500/20 bg-red-500/[0.06] p-7">
+          <AlertCircle className="h-9 w-9 text-red-300" />
+          <h2 className="mt-5 text-xl font-semibold">We couldn't load your custom domains</h2>
+          <p className="mt-2 text-sm leading-6 text-white/50">{loadError}</p>
+          <button onClick={() => void load()} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-white/90">
+            <RefreshCw className="h-4 w-4" /> Try again
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

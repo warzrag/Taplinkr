@@ -42,21 +42,50 @@ export async function GET() {
     const user = await currentUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const [domains, links, allowed] = await Promise.all([
-      prisma.customDomain.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' } }),
+    const [domainRows, linkRows, allowed] = await Promise.all([
+      // Keep these Firestore reads on single-field indexes. Sorting and the
+      // small ownership/status checks are intentionally completed in memory
+      // so this screen does not depend on a newly-created composite index.
+      prisma.customDomain.findMany({ where: { userId: user.id } }),
       prisma.link.findMany({
         where: {
-          isActive: true,
           OR: [
             { userId: user.id },
-            ...(user.teamId ? [{ teamId: user.teamId, teamShared: true }] : []),
+            ...(user.teamId ? [{ teamId: user.teamId }] : []),
           ],
         },
-        select: { id: true, slug: true, title: true, internalName: true, isDirect: true },
-        orderBy: { order: 'asc' },
+        select: {
+          id: true,
+          userId: true,
+          teamId: true,
+          teamShared: true,
+          isActive: true,
+          order: true,
+          slug: true,
+          title: true,
+          internalName: true,
+          isDirect: true,
+        },
       }),
       checkTeamPermission(user.id, 'hasCustomDomain'),
     ])
+
+    const domains = domainRows.sort((a: any, b: any) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    const links = linkRows
+      .filter((link: any) => link.isActive && (
+        link.userId === user.id ||
+        Boolean(user.teamId && link.teamId === user.teamId && link.teamShared)
+      ))
+      .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+      .map(({ id, slug, title, internalName, isDirect }: any) => ({
+        id,
+        slug,
+        title,
+        internalName,
+        isDirect,
+      }))
 
     return NextResponse.json({
       domains: domains.map(serializeDomain),
