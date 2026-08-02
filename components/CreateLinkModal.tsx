@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { Link as LinkType } from '@/types'
 import { createShortPublicSlug } from '@/lib/public-slug'
+import { getKnownPlatformForUrl } from '@/lib/platform-icons'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
@@ -76,6 +77,8 @@ function slugify(value: string) {
 
 function inferTitleFromUrl(url: string) {
   try {
+    const platform = getKnownPlatformForUrl(url)
+    if (platform) return platform.name
     const host = new URL(url.startsWith('http') ? url : `https://${url}`).hostname.replace(/^www\./, '')
     const name = host.split('.')[0]
     return name ? name.charAt(0).toUpperCase() + name.slice(1) : ''
@@ -355,9 +358,12 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const updateLink = (index: number, field: keyof PageLink, value: string) => {
     setLinks(current => {
       const next = [...current]
-      const updated = { ...next[index], [field]: value }
-      if (field === 'url' && !updated.title.trim()) {
-        updated.title = inferTitleFromUrl(value)
+      const previous = next[index]
+      const updated = { ...previous, [field]: value }
+      if (field === 'url') {
+        const oldAutomaticTitle = previous.iconSiteName || inferTitleFromUrl(previous.url)
+        const titleWasAutomatic = !previous.title.trim() || previous.title.trim().toLowerCase() === oldAutomaticTitle.trim().toLowerCase()
+        if (titleWasAutomatic) updated.title = inferTitleFromUrl(value)
       }
       if (field === 'url' && (updated.iconMode || 'auto') === 'auto') {
         updated.icon = ''
