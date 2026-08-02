@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 
 import Logo from '@/components/Logo'
+import SidebarUsageCard from '@/components/SidebarUsageCard'
 import { LinkUpdateProvider } from '@/contexts/LinkUpdateContext'
 import { LinksProvider } from '@/contexts/LinksContext'
 import { ProfileProvider } from '@/contexts/ProfileContext'
@@ -189,6 +190,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </button>
             </>
           )}
+          <SidebarUsageCard />
         </nav>
 
         <div className="shrink-0 border-t border-[#22222d] bg-[#0c0c14] p-4">
