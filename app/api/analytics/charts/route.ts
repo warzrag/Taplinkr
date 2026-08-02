@@ -75,9 +75,9 @@ export async function GET(request: NextRequest) {
     const linkIds = links.map(link => link.id)
     const directLinkIds = links.filter(link => link.isDirect).map(link => link.id)
 
-    const [events, directClicks, filteredClicks, previousEvents, previousDirectClicks] = await Promise.all([
+    const [events, directClicks, allFilteredClicks, previousEvents, previousDirectClicks] = await Promise.all([
       prisma.analyticsEvent.findMany({
-        where: { userId: user.id, linkId: { in: linkIds }, createdAt: { gte: startDate, lte: endDate } },
+        where: { userId: user.id, ...(linkId ? { linkId } : {}), createdAt: { gte: startDate, lte: endDate } },
         orderBy: { createdAt: 'asc' },
       }),
       directLinkIds.length ? prisma.click.findMany({
@@ -85,17 +85,24 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'asc' },
       }) : [],
       prisma.filteredClick.findMany({
-        where: { userId: user.id, linkId: { in: linkIds }, createdAt: { gte: startDate, lte: endDate } },
-        select: { reason: true },
+        // Firestore would require a new three-field composite index for
+        // userId + linkId + createdAt. Keep this query on the existing
+        // userId index and narrow the small result set in memory instead.
+        where: { userId: user.id },
+        select: { linkId: true, reason: true, createdAt: true },
       }),
       prisma.analyticsEvent.findMany({
-        where: { userId: user.id, linkId: { in: linkIds }, createdAt: { gte: previousStartDate, lt: startDate } },
+        where: { userId: user.id, ...(linkId ? { linkId } : {}), createdAt: { gte: previousStartDate, lt: startDate } },
         select: { eventType: true },
       }),
       directLinkIds.length ? prisma.click.count({
         where: { userId: user.id, linkId: { in: directLinkIds }, createdAt: { gte: previousStartDate, lt: startDate } },
       }) : 0,
     ])
+    const selectedLinkIds = new Set(linkIds)
+    const filteredClicks = allFilteredClicks.filter(click =>
+      selectedLinkIds.has(click.linkId) && click.createdAt >= startDate && click.createdAt <= endDate
+    )
 
     const dateMap = new Map<string, { clicks: number; views: number; visitors: Set<string> }>()
     const cursor = new Date(startDate)
