@@ -131,7 +131,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     if (!itemId || itemUrl === '#') return
 
     const ageRestricted = isAgeRestricted(item, link)
-    if (ageRestricted && !confirmedLinks.includes(itemId)) {
+    if (ageRestricted && !settings.ageGateEnabled && !confirmedLinks.includes(itemId)) {
       setConfirmingLink(itemId)
       return
     }
@@ -209,6 +209,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
               const itemIcon = item?.iconImage || item?.icon || null
               const ageRestricted = isAgeRestricted(item, link)
               const isConfirmed = confirmedLinks.includes(itemId)
+              const needsLinkAgeConfirmation = ageRestricted && !settings.ageGateEnabled && !isConfirmed
               const isClicked = clickedLinks.includes(itemId)
 
               if (confirmingLink === itemId) {
@@ -257,7 +258,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   onClick={() => trackAndOpen(item)}
                   trailing={
                     <span className="flex shrink-0 items-center gap-2 text-xs font-semibold opacity-70">
-                      {ageRestricted && !isConfirmed && <span>18+</span>}
+                      {needsLinkAgeConfirmation && <span>18+</span>}
                       {isClicked && <Check className="h-4 w-4" />}
                     </span>
                   }
