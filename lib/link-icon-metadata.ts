@@ -13,14 +13,14 @@ const MAX_HTML_BYTES = 512 * 1024
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 const REQUEST_TIMEOUT_MS = 5_000
 
-const PLATFORM_HOSTS: Array<{ pattern: RegExp; name: string; home: string }> = [
+const PLATFORM_HOSTS: Array<{ pattern: RegExp; name: string; home: string; icon?: string }> = [
   { pattern: /(^|\.)instagram\.com$/i, name: 'Instagram', home: 'https://www.instagram.com/' },
   { pattern: /(^|\.)tiktok\.com$/i, name: 'TikTok', home: 'https://www.tiktok.com/' },
   { pattern: /(^|\.)youtube\.com$|(^|\.)youtu\.be$/i, name: 'YouTube', home: 'https://www.youtube.com/' },
   { pattern: /(^|\.)twitter\.com$|(^|\.)x\.com$/i, name: 'X', home: 'https://x.com/' },
   { pattern: /(^|\.)telegram\.me$|(^|\.)t\.me$/i, name: 'Telegram', home: 'https://telegram.org/' },
   { pattern: /(^|\.)spotify\.com$/i, name: 'Spotify', home: 'https://www.spotify.com/' },
-  { pattern: /(^|\.)onlyfans\.com$/i, name: 'OnlyFans', home: 'https://onlyfans.com/' },
+  { pattern: /(^|\.)onlyfans\.com$/i, name: 'OnlyFans', home: 'https://onlyfans.com/', icon: '/platform-icons/onlyfans.svg' },
   { pattern: /(^|\.)twitch\.tv$/i, name: 'Twitch', home: 'https://www.twitch.tv/' },
   { pattern: /(^|\.)discord\.(com|gg)$/i, name: 'Discord', home: 'https://discord.com/' },
   { pattern: /(^|\.)snapchat\.com$/i, name: 'Snapchat', home: 'https://www.snapchat.com/' },
@@ -218,6 +218,14 @@ export async function resolveLinkIcon(value: string): Promise<LinkIconMetadata> 
   if (!requestedUrl) throw new Error('Enter a valid web address')
 
   const platform = detectKnownPlatform(requestedUrl.hostname)
+  if (platform?.icon) {
+    return {
+      icon: platform.icon,
+      source: 'platform',
+      siteName: platform.name,
+    }
+  }
+
   const metadataUrl = platform ? new URL(platform.home) : requestedUrl
   const response = await fetchPublic(metadataUrl, 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.2')
   if (!response.ok) throw new Error('Unable to read this website')

@@ -9,6 +9,7 @@ import {
 describe('link icon metadata', () => {
   it('recognizes common creator platforms without matching lookalike domains', () => {
     expect(detectKnownPlatform('www.instagram.com')?.name).toBe('Instagram')
+    expect(detectKnownPlatform('onlyfans.com')?.icon).toBe('/platform-icons/onlyfans.svg')
     expect(detectKnownPlatform('youtu.be')?.name).toBe('YouTube')
     expect(detectKnownPlatform('instagram.com.evil.test')).toBeNull()
   })
