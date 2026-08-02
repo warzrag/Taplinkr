@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { createCheckoutSession, createPortalSession, stripe } from '@/lib/stripe'
+import { assertStripeConfigured, createCheckoutSession, createPortalSession, stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { syncStripeSubscription } from '@/lib/sync-stripe-subscription'
 
@@ -13,10 +13,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { plan } = body
+    assertStripeConfigured()
 
-    if (!plan || !['standard', 'premium'].includes(plan)) {
+    const body = await request.json()
+    const { plan } = body as { plan?: string }
+
+    if (plan !== 'standard' && plan !== 'premium') {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
     }
 
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (!appUrl) return NextResponse.json({ error: 'Missing APP_URL configuration' }, { status: 500 })
     const origin = new URL(appUrl).origin
     const successUrl = `${origin}/dashboard/billing?success=true&session_id={CHECKOUT_SESSION_ID}`
-    const cancelUrl = `${origin}/pricing`
+    const cancelUrl = `${origin}/dashboard/pricing?checkout=canceled`
 
     let customerId = user.stripeCustomerId
     let existingSubscription = null
@@ -75,7 +77,8 @@ export async function POST(request: NextRequest) {
       await syncStripeSubscription(existingSubscription, session.user.id)
       const portalSession = await createPortalSession(
         customerId,
-        `${origin}/dashboard/billing`
+        `${origin}/dashboard/billing`,
+        { subscription: existingSubscription, plan }
       )
       return NextResponse.json({ url: portalSession.url, mode: 'portal' })
     }
@@ -94,9 +97,12 @@ export async function POST(request: NextRequest) {
       sessionId: checkoutSession.id 
     })
   } catch (error) {
-    console.error('Erreur lors de la création de la session Stripe:', error)
+    console.error('Unable to create Stripe Checkout session:', error)
+    const message = error instanceof Error && error.message.startsWith('Stripe configuration is incomplete')
+      ? 'Payments are temporarily unavailable. Please contact support.'
+      : 'Unable to start checkout'
     return NextResponse.json(
-      { error: 'Unable to start checkout' },
+      { error: message },
       { status: 500 }
     )
   }

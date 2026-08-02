@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { cancelSubscription } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { syncStripeSubscription } from '@/lib/sync-stripe-subscription'
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Annuler la souscription à la fin de la période
     const subscription = await cancelSubscription(user.stripeSubscriptionId)
+    await syncStripeSubscription(subscription, session.user.id)
 
     return NextResponse.json({ 
       success: true,
