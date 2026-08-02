@@ -93,7 +93,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="dark min-h-screen bg-[#09090f] text-[#f7f7fb] lg:grid lg:h-screen lg:grid-cols-[286px_minmax(0,1fr)] lg:overflow-hidden">
+    <div className="dark min-h-screen bg-[#09090f] text-[#f7f7fb] lg:grid lg:h-screen lg:grid-cols-[236px_minmax(0,1fr)] lg:overflow-hidden xl:grid-cols-[248px_minmax(0,1fr)] 2xl:grid-cols-[264px_minmax(0,1fr)]">
       {sidebarOpen && (
         <button
           aria-label="Close menu"
@@ -102,11 +102,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 flex h-screen w-[286px] flex-col overflow-hidden border-r border-[#22222d] bg-[#0c0c14] transition-transform duration-300 lg:static lg:inset-auto lg:h-full lg:min-h-0 lg:w-full lg:translate-x-0 ${
+      <aside className={`dashboard-sidebar fixed inset-y-0 left-0 z-50 flex h-screen w-[min(264px,calc(100vw-24px))] flex-col overflow-hidden border-r border-[#22222d] bg-[#0c0c14] transition-transform duration-300 lg:static lg:inset-auto lg:h-full lg:min-h-0 lg:w-full lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex h-[88px] shrink-0 items-center justify-between border-b border-[#22222d] px-6">
-          <Logo size="md" showText />
+        <div className="dashboard-sidebar-header flex h-16 shrink-0 items-center justify-between border-b border-[#22222d] px-5">
+          <Logo size="sm" showText />
           <button
             onClick={() => setSidebarOpen(false)}
             className="rounded-lg p-2 text-[#9696a8] hover:bg-white/5 hover:text-white lg:hidden"
@@ -116,42 +116,36 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </button>
         </div>
 
-        <div className="shrink-0 border-b border-[#22222d] p-4">
+        <div className="dashboard-sidebar-workspace relative shrink-0 border-b border-[#22222d] p-3">
           <button
             type="button"
             onClick={() => setWorkspaceMenuOpen(open => !open)}
             aria-expanded={workspaceMenuOpen}
             aria-haspopup="menu"
-            className="flex w-full items-center gap-3 rounded-xl border border-[#2a2a38] bg-[#11111b] px-4 py-3 text-left transition hover:border-violet-500/50"
+            className="flex h-11 w-full items-center gap-2.5 rounded-xl border border-[#2a2a38] bg-[#11111b] px-3 text-left transition hover:border-violet-500/50"
           >
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-violet-500/10 text-violet-400">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-violet-500/10 text-violet-400">
               <LayoutGrid className="h-4 w-4" />
             </span>
             <span className="min-w-0 flex-1 truncate text-sm font-semibold">{displayName}</span>
             <ChevronDown className={`h-4 w-4 text-[#77778a] transition-transform ${workspaceMenuOpen ? 'rotate-180' : ''}`} />
           </button>
           {workspaceMenuOpen && (
-            <div role="menu" className="mt-2 space-y-1 rounded-xl border border-[#2a2a38] bg-[#11111b] p-2 shadow-2xl">
-              <button type="button" role="menuitem" onClick={() => navigate('/dashboard/profile')} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#b6b6c6] transition hover:bg-white/5 hover:text-white">
+            <div role="menu" className="absolute left-3 right-3 top-[58px] z-30 space-y-1 rounded-xl border border-[#353547] bg-[#12121d] p-2 shadow-[0_20px_55px_rgba(0,0,0,0.55)]">
+              <button type="button" role="menuitem" onClick={() => navigate('/dashboard/profile')} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-[#b6b6c6] transition hover:bg-white/5 hover:text-white">
                 <User className="h-4 w-4" />
                 <span>Profile</span>
               </button>
-              <button type="button" role="menuitem" onClick={() => navigate('/dashboard/team')} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#b6b6c6] transition hover:bg-white/5 hover:text-white">
+              <button type="button" role="menuitem" onClick={() => navigate('/dashboard/team')} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-[#b6b6c6] transition hover:bg-white/5 hover:text-white">
                 <Users className="h-4 w-4" />
                 <span>Team</span>
               </button>
-              {canAccessAdmin && (
-                <button type="button" role="menuitem" onClick={() => navigate('/admin')} className="flex w-full items-center gap-3 rounded-lg bg-violet-500/10 px-3 py-2.5 text-left text-sm font-semibold text-violet-200 transition hover:bg-violet-500/15">
-                  <Settings2 className="h-4 w-4 text-violet-400" />
-                  <span>Administration</span>
-                </button>
-              )}
             </div>
           )}
           {canAccessAdmin && (
             <button
               onClick={() => navigate('/admin')}
-              className="mt-3 flex w-full items-center gap-3 rounded-xl border border-violet-500/25 bg-violet-500/[0.09] px-4 py-3 text-left text-sm font-semibold text-violet-100 transition hover:border-violet-400/40 hover:bg-violet-500/15"
+              className="dashboard-admin-shortcut mt-2 flex h-10 w-full items-center gap-2.5 rounded-xl border border-violet-500/25 bg-violet-500/[0.09] px-3 text-left text-sm font-semibold text-violet-100 transition hover:border-violet-400/40 hover:bg-violet-500/15"
             >
               <Settings2 className="h-[19px] w-[19px] text-violet-400" />
               <span>Administration</span>
@@ -159,14 +153,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           )}
         </div>
 
-        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-4 py-6">
+        <nav className="dashboard-sidebar-nav min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-3 py-3">
           {navItems.map(item => {
             const active = isActive(item.href)
             return (
               <button
                 key={item.href}
                 onClick={() => navigate(item.href)}
-                className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
+                className={`dashboard-sidebar-nav-item group relative flex h-9 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium transition ${
                   active
                     ? 'border border-violet-500/30 bg-violet-500/[0.08] text-white shadow-[0_0_24px_rgba(139,92,246,0.08)]'
                     : 'border border-transparent text-[#9292a4] hover:bg-white/[0.035] hover:text-white'
@@ -178,41 +172,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </button>
             )
           })}
-          {session?.user?.role === 'admin' && (
-            <>
-              <div className="mx-4 my-4 border-t border-[#22222d]" />
-              <button
-                onClick={() => navigate('/admin')}
-                className="group relative flex w-full items-center gap-3 rounded-xl border border-violet-500/20 bg-violet-500/[0.06] px-4 py-3 text-left text-sm font-medium text-violet-200 transition hover:bg-violet-500/10"
-              >
-                <Settings2 className="h-[19px] w-[19px] text-violet-400" />
-                <span>Administration</span>
-              </button>
-            </>
-          )}
         </nav>
 
-        <div className="shrink-0 border-t border-[#22222d] bg-[#0c0c14] px-3 pb-3">
+        <div className="dashboard-sidebar-usage shrink-0 border-t border-[#22222d] bg-[#0c0c14] px-2.5 pb-2.5">
           <SidebarUsageCard />
         </div>
 
-        <div className="shrink-0 border-t border-[#22222d] bg-[#0c0c14] p-4">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-indigo-600 text-sm font-bold text-white">
+        <div className="dashboard-sidebar-account shrink-0 border-t border-[#22222d] bg-[#0c0c14] p-3">
+          <div className="flex items-center gap-2.5">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-indigo-600 text-xs font-bold text-white">
               {initials}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-white">{displayName}</p>
-              <p className="truncate text-xs text-[#858598]">{session?.user?.email}</p>
+              <p className="dashboard-sidebar-email truncate text-xs text-[#858598]">{session?.user?.email}</p>
             </div>
+            <button
+              onClick={() => signOut({ callbackUrl: '/auth/signin', redirect: true })}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#2a2a38] text-[#9a9aac] transition hover:border-violet-500/40 hover:bg-violet-500/5 hover:text-white"
+              aria-label="Log out"
+              title="Log out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            onClick={() => signOut({ callbackUrl: '/auth/signin', redirect: true })}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#2a2a38] px-4 py-2.5 text-sm font-semibold text-[#d8d8e2] transition hover:border-violet-500/40 hover:bg-violet-500/5 hover:text-white"
-          >
-            <LogOut className="h-4 w-4" />
-            Log out
-          </button>
         </div>
       </aside>
 
