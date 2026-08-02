@@ -1,0 +1,64 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="background" x1="104" y1="25" x2="1085" y2="626" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#070711"/>
+      <stop offset="0.55" stop-color="#101023"/>
+      <stop offset="1" stop-color="#17102C"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="280" y1="96" x2="935" y2="574" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#2563EB" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="stem" x1="197" y1="239" x2="313" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA"/>
+      <stop offset="0.55" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+    <linearGradient id="word" x1="593" y1="224" x2="908" y2="370" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+    <filter id="blur" x="-100" y="-100" width="1400" height="830" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="70"/>
+    </filter>
+    <filter id="shadow" x="120" y="155" width="284" height="295" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" rx="44" fill="url(#background)"/>
+  <ellipse cx="522" cy="310" rx="440" ry="230" fill="url(#glow)" filter="url(#blur)"/>
+  <circle cx="1098" cy="78" r="170" stroke="#8B5CF6" stroke-opacity="0.13" stroke-width="2"/>
+  <circle cx="1098" cy="78" r="112" stroke="#60A5FA" stroke-opacity="0.10" stroke-width="2"/>
+  <path d="M0 518C211 477 338 551 526 526C735 499 920 421 1200 488V630H0V518Z" fill="#FFFFFF" fill-opacity="0.025"/>
+
+  <g filter="url(#shadow)">
+    <rect x="143" y="166" width="240" height="240" rx="68" fill="#121225" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+    <path d="M224 253V322C224 354 243 372 270 372C297 372 316 354 316 322V273" stroke="url(#stem)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="174" y="215" width="171" height="80" rx="40" stroke="#5B4BC4" stroke-opacity="0.72" stroke-width="35"/>
+    <rect x="174" y="215" width="171" height="80" rx="40" stroke="#F7F5FF" stroke-width="25"/>
+    <path d="M224 252V284" stroke="url(#stem)" stroke-width="30" stroke-linecap="round"/>
+  </g>
+
+  <text x="446" y="282" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="88" font-weight="760" letter-spacing="-5">Tap</text>
+  <text x="593" y="282" fill="url(#word)" font-family="Inter, Arial, sans-serif" font-size="88" font-weight="760" letter-spacing="-5">Linkr</text>
+  <text x="451" y="346" fill="#B7B7C8" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="500">One link that converts.</text>
+
+  <g transform="translate(450 394)">
+    <rect width="184" height="54" rx="27" fill="#FFFFFF" fill-opacity="0.055" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <circle cx="28" cy="27" r="7" fill="#34D399"/>
+    <text x="49" y="35" fill="#D8D8E5" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="600">Smart links</text>
+  </g>
+  <g transform="translate(649 394)">
+    <rect width="166" height="54" rx="27" fill="#FFFFFF" fill-opacity="0.055" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <path d="M24 32L31 25L37 29L45 20" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="59" y="35" fill="#D8D8E5" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="600">Analytics</text>
+  </g>
+  <g transform="translate(830 394)">
+    <rect width="171" height="54" rx="27" fill="#FFFFFF" fill-opacity="0.055" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <path d="M29 19L40 23V30C40 37 35 41 29 44C23 41 18 37 18 30V23L29 19Z" stroke="#60A5FA" stroke-width="2.5" stroke-linejoin="round"/>
+    <text x="55" y="35" fill="#D8D8E5" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="600">Protection</text>
+  </g>
+
+  <text x="72" y="570" fill="#8B8B9D" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="500">taplinkr.com</text>
+</svg>

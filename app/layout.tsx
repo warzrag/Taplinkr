@@ -21,8 +21,22 @@ export const metadata: Metadata = {
     siteName: 'TapLinkr',
     locale: 'en_US',
     type: 'website',
+    images: [
+      {
+        url: '/taplinkr-social-card.png',
+        width: 1200,
+        height: 630,
+        alt: 'TapLinkr — One link that converts',
+        type: 'image/png',
+      },
+    ],
   },
-  twitter: { card: 'summary', title: 'TapLinkr — One link that converts', description: 'Create a polished page for all your links.' },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TapLinkr — One link that converts',
+    description: 'Create a polished page for all your links.',
+    images: ['/taplinkr-social-card.png'],
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
