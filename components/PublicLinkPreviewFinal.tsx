@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, ShieldAlert } from 'lucide-react'
 import LandingPageVisual, { LandingActionCard } from './LandingPageVisual'
+import LandingTrackingConsent from './LandingTrackingConsent'
+import { parseLandingSettings } from '@/lib/landing-settings'
 
 interface PublicLinkPreviewProps {
   link: any
@@ -53,11 +55,13 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const [clickedLinks, setClickedLinks] = useState<string[]>([])
   const [confirmedLinks, setConfirmedLinks] = useState<string[]>([])
   const [confirmingLink, setConfirmingLink] = useState<string | null>(null)
+  const [ageConfirmed, setAgeConfirmed] = useState(false)
 
   const profileImage = link?.profileImage || null
   const coverImage = link?.coverImage || null
   const title = link?.title || link?.user?.name || link?.user?.username || 'My links'
   const bio = link?.description || link?.user?.bio || null
+  const settings = useMemo(() => parseLandingSettings(link?.shieldConfig), [link?.shieldConfig])
   const multiLinks = useMemo(() => {
     return Array.isArray(link?.multiLinks)
       ? [...link.multiLinks].sort((a: any, b: any) => (a.order ?? 999) - (b.order ?? 999))
@@ -67,6 +71,11 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   useEffect(() => {
     setSessionId(getSessionId())
   }, [])
+
+  useEffect(() => {
+    if (!settings.ageGateEnabled) return
+    setAgeConfirmed(localStorage.getItem(`taplinkr_age_${link?.id}`) === 'confirmed')
+  }, [link?.id, settings.ageGateEnabled])
 
   useEffect(() => {
     if (!link?.id) return
@@ -123,6 +132,10 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
       })
     } catch {}
 
+    const win = window as any
+    win.gtag?.('event', 'select_content', { content_type: 'landing_link', item_id: itemId })
+    win.fbq?.('trackCustom', 'TaplinkrLinkClick', { link_id: itemId })
+
     if (openedWindow) {
       openedWindow.location.href = itemUrl
     } else {
@@ -132,6 +145,23 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
 
   if (!link) {
     return <main className="min-h-screen bg-neutral-950" />
+  }
+
+  if (settings.ageGateEnabled && !ageConfirmed) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#070a12] px-5 text-white">
+        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.05] p-7 text-center shadow-2xl">
+          <ShieldAlert className="mx-auto h-10 w-10 text-violet-300" />
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-violet-300">Age-restricted content</p>
+          <h1 className="mt-3 text-2xl font-black">Are you 18 or older?</h1>
+          <p className="mt-3 text-sm leading-6 text-white/55">You must meet the age requirement to view this page.</p>
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => { window.location.href = 'https://www.google.com/' }} className="rounded-xl border border-white/15 px-4 py-3 text-sm font-bold transition hover:bg-white/10">Leave</button>
+            <button type="button" onClick={() => { localStorage.setItem(`taplinkr_age_${link.id}`, 'confirmed'); setAgeConfirmed(true) }} className="rounded-xl bg-violet-500 px-4 py-3 text-sm font-bold transition hover:bg-violet-400">I am 18+</button>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -144,6 +174,9 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         backgroundColor={link?.backgroundColor || '#070a12'}
         textColor={link?.textColor || '#f8fafc'}
         accentColor={link?.color || '#8b5cf6'}
+        onlineBadge={Boolean(link?.isOnline)}
+        locationLabel={settings.visitorLocationBadge ? [link?._visitorCity, link?._visitorCountry].filter(Boolean).join(', ') || 'Location unavailable' : null}
+        countdown={settings.countdown}
       >
         {multiLinks.length > 0 ? (
           multiLinks.map((item: any) => {
@@ -213,6 +246,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
           </div>
         )}
       </LandingPageVisual>
+      <LandingTrackingConsent tracking={settings.tracking} />
     </main>
   )
 }

@@ -15,6 +15,7 @@ import {
 } from '@/lib/public-link-cache'
 import { passwordCookieName, verifySignedToken } from '@/lib/signed-token'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
+import { parseLandingSettings } from '@/lib/landing-settings'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -171,7 +172,44 @@ export default async function LinkPage(props: PageProps) {
     )
   }
 
-  return <PublicLinkPreviewFinal link={toPlainObject(link)} />
+  const landingSettings = parseLandingSettings(link.shieldConfig)
+  const requestHeaders = await headers()
+  const country = (requestHeaders.get('x-vercel-ip-country') || '').toUpperCase()
+  let city = requestHeaders.get('x-vercel-ip-city') || ''
+  try { city = decodeURIComponent(city) } catch {}
+
+  const redirectRule = landingSettings.geoRedirects.find(rule => !rule.countries.length || rule.countries.includes(country))
+  if (redirectRule?.url && validateURL(redirectRule.url)) redirect(redirectRule.url)
+
+  if (landingSettings.geoFilter.enabled && landingSettings.geoFilter.countries.length) {
+    const listed = landingSettings.geoFilter.countries.includes(country)
+    const blocked = landingSettings.geoFilter.mode === 'allow' ? !listed : listed
+    if (blocked) {
+      return (
+        <main className="grid min-h-screen place-items-center bg-[#070a12] px-5 text-center text-white">
+          <div className="max-w-md rounded-3xl border border-white/10 bg-white/[0.05] p-8 shadow-2xl">
+            <h1 className="text-2xl font-black">This page is not available in your country</h1>
+            <p className="mt-3 text-sm leading-6 text-white/55">The page owner has limited access by geographic region.</p>
+          </div>
+        </main>
+      )
+    }
+  }
+
+  if (landingSettings.inAppBrowserWarning) {
+    const userAgent = (requestHeaders.get('user-agent') || '').slice(0, 1000)
+    const referer = requestHeaders.get('referer') || ''
+    const forwardedHost = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host') || 'www.taplinkr.com'
+    const forwardedProto = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim()
+    const protocol = forwardedProto === 'http' ? 'http' : 'https'
+    const publicUrl = `${protocol}://${forwardedHost}/${encodeURIComponent(params.slug)}`
+    const externalBrowserUrl = getExternalBrowserTarget({ currentUrl: publicUrl, userAgent, referer })
+    if (externalBrowserUrl) {
+      return <PublicDirectRedirect linkId={link.id} destination={publicUrl} externalBrowserUrl={externalBrowserUrl} trackClick={false} />
+    }
+  }
+
+  return <PublicLinkPreviewFinal link={toPlainObject({ ...link, _visitorCountry: country, _visitorCity: city })} />
 }
 
 export async function generateMetadata(props: PageProps) {

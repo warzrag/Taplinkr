@@ -10,6 +10,7 @@ import { getUpgradeMessage } from '@/lib/permissions'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import { RESERVED_USERNAMES } from '@/lib/username'
 import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
+import { serializeLandingSettings } from '@/lib/landing-settings'
 
 export async function POST(request: NextRequest) {
   try {
@@ -88,6 +89,13 @@ export async function POST(request: NextRequest) {
         isActive: true,
         shieldEnabled: !!body.shieldEnabled,
         isUltraLink: !!body.isUltraLink,
+        shieldConfig: body.isDirect
+          ? ((body.shieldEnabled || body.isUltraLink) ? JSON.stringify({
+              level: body.isUltraLink ? 3 : 2,
+              timer: body.isUltraLink ? 5000 : 3000,
+              features: body.isUltraLink ? ['adaptive-content', 'domain-rotation', 'js-obfuscation', 'ai-detection'] : ['timer', 'basic-detection'],
+            }) : null)
+          : serializeLandingSettings(body.landingSettings),
         clicks: 0,
         views: 0,
         order: (maxOrder?.order || 0) + 1,

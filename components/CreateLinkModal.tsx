@@ -7,6 +7,8 @@ import { motion } from 'framer-motion'
 import {
   AlertCircle,
   ArrowRight,
+  BadgeCheck,
+  BarChart3,
   Check,
   ChevronDown,
   Copy,
@@ -17,9 +19,12 @@ import {
   Image as ImageIcon,
   Link2,
   Loader2,
+  MapPin,
   Plus,
   RefreshCw,
   Sparkles,
+  ShieldCheck,
+  Timer,
   Trash2,
   Zap,
   X,
@@ -27,6 +32,7 @@ import {
 import { Link as LinkType } from '@/types'
 import { createShortPublicSlug } from '@/lib/public-slug'
 import { getKnownPlatformForUrl } from '@/lib/platform-icons'
+import { DEFAULT_LANDING_SETTINGS, LandingSettings, parseLandingSettings } from '@/lib/landing-settings'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import ImageUpload from './upload/ImageUpload'
 import CoverImageUpload from './upload/CoverImageUpload'
@@ -87,6 +93,28 @@ function inferTitleFromUrl(url: string) {
   }
 }
 
+function toLocalDateTimeInput(value: string) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value.slice(0, 16)
+  const offset = date.getTimezoneOffset() * 60_000
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16)
+}
+
+function SettingToggle({ checked, onChange, label, description }: { checked: boolean; onChange: (checked: boolean) => void; label: string; description: string }) {
+  return (
+    <button type="button" onClick={() => onChange(!checked)} className="flex w-full items-center justify-between gap-4 text-left">
+      <span>
+        <span className="block text-sm font-bold text-white/85">{label}</span>
+        <span className="mt-1 block text-xs leading-5 text-white/40">{description}</span>
+      </span>
+      <span className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? 'bg-violet-500' : 'bg-white/10'}`} aria-hidden="true">
+        <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition ${checked ? 'left-6' : 'left-1'}`} />
+      </span>
+    </button>
+  )
+}
+
 export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLink, initialMode = 'landing' }: CreateLinkModalProps) {
   const [loading, setLoading] = useState(false)
   const [imageUploading, setImageUploading] = useState(false)
@@ -112,6 +140,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
   const [textColor, setTextColor] = useState('#f8fafc')
   const [accentColor, setAccentColor] = useState('#8b5cf6')
   const [borderRadius, setBorderRadius] = useState('rounded-2xl')
+  const [shieldEnabled, setShieldEnabled] = useState(false)
+  const [isOnline, setIsOnline] = useState(false)
+  const [landingSettings, setLandingSettings] = useState<LandingSettings>(() => structuredClone(DEFAULT_LANDING_SETTINGS))
   const [customSlugTouched, setCustomSlugTouched] = useState(false)
 
   useEffect(() => {
@@ -149,6 +180,10 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setTextColor(editingLink.textColor || '#f8fafc')
       setAccentColor(editingLink.color || '#8b5cf6')
       setBorderRadius(editingLink.borderRadius || 'rounded-2xl')
+      setShieldEnabled(Boolean(editingLink.shieldEnabled))
+      setIsOnline(Boolean(editingLink.isOnline))
+      const savedSettings = parseLandingSettings(editingLink.shieldConfig)
+      setLandingSettings({ ...savedSettings, countdown: { ...savedSettings.countdown, endAt: toLocalDateTimeInput(savedSettings.countdown.endAt) } })
       setCustomSlugTouched(true)
     } else {
       setPageMode(initialMode)
@@ -168,6 +203,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       setTextColor('#f8fafc')
       setAccentColor('#8b5cf6')
       setBorderRadius('rounded-2xl')
+      setShieldEnabled(false)
+      setIsOnline(false)
+      setLandingSettings(structuredClone(DEFAULT_LANDING_SETTINGS))
       setCustomSlugTouched(false)
       setShowAdvanced(false)
       setActivePanel('identity')
@@ -345,15 +383,15 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     })),
     userId: '',
     directUrl,
-    shieldEnabled: false,
+    shieldEnabled,
     isUltraLink: false,
-    isOnline: false,
+    isOnline,
     order: 0,
     clicks: 0,
     views: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  }), [accentColor, backgroundColor, borderRadius, coverImage, description, directUrl, editingLink?.id, instagramUrl, links, pageMode, profileImage, slug, textColor, tiktokUrl, title, twitterUrl, youtubeUrl])
+  }), [accentColor, backgroundColor, borderRadius, coverImage, description, directUrl, editingLink?.id, instagramUrl, isOnline, links, pageMode, profileImage, shieldEnabled, slug, textColor, tiktokUrl, title, twitterUrl, youtubeUrl])
 
   const updateLink = (index: number, field: keyof PageLink, value: string) => {
     setLinks(current => {
@@ -519,7 +557,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         bio: description.trim() || null,
         isDirect: pageMode === 'direct',
         directUrl: pageMode === 'direct' ? normalizedDirectUrl : null,
-        shieldEnabled: pageMode === 'direct' ? Boolean(editingLink?.shieldEnabled) : false,
+        shieldEnabled: pageMode === 'direct' ? Boolean(editingLink?.shieldEnabled) : shieldEnabled,
         isUltraLink: pageMode === 'direct' ? Boolean(editingLink?.isUltraLink) : false,
         multiLinks: pageMode === 'landing'
           ? validLinks.map((link, index) => ({
@@ -544,6 +582,14 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
         twitterUrl: twitterUrl || null,
         youtubeUrl: youtubeUrl || null,
         animation: 'none',
+        isOnline: pageMode === 'landing' ? isOnline : false,
+        landingSettings: pageMode === 'landing' ? {
+          ...landingSettings,
+          countdown: {
+            ...landingSettings.countdown,
+            endAt: landingSettings.countdown.endAt ? new Date(landingSettings.countdown.endAt).toISOString() : '',
+          },
+        } : undefined,
       }
 
       const response = await fetch(editingLink ? `/api/links/${editingLink.id}` : '/api/links-create-final', {
@@ -913,6 +959,88 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     </div>
                   </section>
 
+                  <section className="mt-12 border-t border-white/10 pt-12">
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced(value => !value)}
+                      className="flex w-full items-center justify-between gap-4 rounded-3xl border border-violet-400/20 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/5 p-5 text-left transition hover:border-violet-400/35 sm:p-7"
+                    >
+                      <span>
+                        <span className="text-sm font-bold text-violet-300">ADVANCED SETTINGS</span>
+                        <span className="mt-2 block text-2xl font-black tracking-tight">Growth, targeting, and protection.</span>
+                        <span className="mt-2 block text-sm leading-6 text-white/45">Optional tools. Your page works perfectly without configuring them.</span>
+                      </span>
+                      <ChevronDown className={`h-5 w-5 shrink-0 text-violet-300 transition ${showAdvanced ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showAdvanced && (
+                      <div className="mt-5 space-y-5">
+                        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-7">
+                          <div className="mb-5 flex items-center gap-3"><BadgeCheck className="h-5 w-5 text-violet-300" /><div><h4 className="font-black">Badges</h4><p className="text-xs text-white/40">Optional context shown near your profile.</p></div></div>
+                          <div className="space-y-5 divide-y divide-white/10">
+                            <SettingToggle checked={isOnline} onChange={setIsOnline} label="Online badge" description="Show a pulsing green dot next to your title. Use it only when the status is accurate." />
+                            <div className="pt-5"><SettingToggle checked={landingSettings.visitorLocationBadge} onChange={checked => setLandingSettings(current => ({ ...current, visitorLocationBadge: checked }))} label="Visitor location badge" description="Show the visitor's approximate city and country, never their precise address." /></div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-7">
+                          <div className="mb-5 flex items-center gap-3"><Timer className="h-5 w-5 text-violet-300" /><div><h4 className="font-black">Countdown</h4><p className="text-xs text-white/40">Display a genuine deadline above your buttons.</p></div></div>
+                          <SettingToggle checked={landingSettings.countdown.enabled} onChange={checked => setLandingSettings(current => ({ ...current, countdown: { ...current.countdown, enabled: checked } }))} label="Enable countdown" description="The countdown is shown between your profile and your first link." />
+                          {landingSettings.countdown.enabled && (
+                            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                              <label className="block"><span className="text-xs font-bold text-white/65">Label</span><input value={landingSettings.countdown.label} onChange={event => setLandingSettings(current => ({ ...current, countdown: { ...current.countdown, label: event.target.value } }))} placeholder="Offer ends in" className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none focus:border-violet-500" /></label>
+                              <label className="block"><span className="text-xs font-bold text-white/65">End date and time</span><input type="datetime-local" value={landingSettings.countdown.endAt} onChange={event => setLandingSettings(current => ({ ...current, countdown: { ...current.countdown, endAt: event.target.value } }))} className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none focus:border-violet-500" /></label>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-7">
+                          <div className="mb-5 flex items-center gap-3"><MapPin className="h-5 w-5 text-violet-300" /><div><h4 className="font-black">Geographic targeting</h4><p className="text-xs text-white/40">Filter countries or send visitors to a local destination.</p></div></div>
+                          <SettingToggle checked={landingSettings.geoFilter.enabled} onChange={checked => setLandingSettings(current => ({ ...current, geoFilter: { ...current.geoFilter, enabled: checked } }))} label="Enable geographic filter" description="Allow or block access based on the visitor's country." />
+                          {landingSettings.geoFilter.enabled && (
+                            <div className="mt-5 grid gap-3 sm:grid-cols-[150px_1fr]">
+                              <select value={landingSettings.geoFilter.mode} onChange={event => setLandingSettings(current => ({ ...current, geoFilter: { ...current.geoFilter, mode: event.target.value as 'allow' | 'block' } }))} className="rounded-xl border border-white/10 bg-[#0b0d16] px-3.5 py-3 text-sm outline-none focus:border-violet-500"><option value="block">Block listed</option><option value="allow">Allow only listed</option></select>
+                              <input value={landingSettings.geoFilter.countries.join(', ')} onChange={event => setLandingSettings(current => ({ ...current, geoFilter: { ...current.geoFilter, countries: event.target.value.split(',').map(value => value.trim().toUpperCase()) } }))} placeholder="US, CA, GB" className="rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none focus:border-violet-500" />
+                            </div>
+                          )}
+
+                          <div className="mt-6 border-t border-white/10 pt-6">
+                            <h5 className="text-sm font-black">Geographic redirects</h5>
+                            <p className="mt-1 text-xs leading-5 text-white/40">Rules run from top to bottom. Use two-letter country codes.</p>
+                            <div className="mt-4 space-y-3">
+                              {landingSettings.geoRedirects.map((rule, index) => (
+                                <div key={index} className="grid gap-2 rounded-2xl border border-white/10 bg-black/15 p-3 sm:grid-cols-[150px_1fr_auto]">
+                                  <input value={rule.countries.join(', ')} onChange={event => setLandingSettings(current => ({ ...current, geoRedirects: current.geoRedirects.map((item, itemIndex) => itemIndex === index ? { ...item, countries: event.target.value.split(',').map(value => value.trim().toUpperCase()) } : item) }))} placeholder="US, CA" className="rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm outline-none focus:border-violet-500" />
+                                  <input value={rule.url} onChange={event => setLandingSettings(current => ({ ...current, geoRedirects: current.geoRedirects.map((item, itemIndex) => itemIndex === index ? { ...item, url: event.target.value } : item) }))} placeholder="https://destination.com" className="rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm outline-none focus:border-violet-500" />
+                                  <button type="button" onClick={() => setLandingSettings(current => ({ ...current, geoRedirects: current.geoRedirects.filter((_, itemIndex) => itemIndex !== index) }))} className="rounded-xl p-2.5 text-white/35 transition hover:bg-rose-500/10 hover:text-rose-300" aria-label="Remove redirect rule"><Trash2 className="h-4 w-4" /></button>
+                                </div>
+                              ))}
+                            </div>
+                            <button type="button" onClick={() => setLandingSettings(current => ({ ...current, geoRedirects: [...current.geoRedirects, { countries: [], url: '' }] }))} className="mt-3 inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-bold text-white/65 transition hover:bg-white/5"><Plus className="h-3.5 w-3.5" />Add redirect rule</button>
+                          </div>
+                        </div>
+
+                        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-7">
+                          <div className="mb-5 flex items-center gap-3"><ShieldCheck className="h-5 w-5 text-emerald-300" /><div><h4 className="font-black">Protection</h4><p className="text-xs text-white/40">Keep suspicious traffic away and improve mobile opening.</p></div></div>
+                          <div className="space-y-5 divide-y divide-white/10">
+                            <SettingToggle checked={shieldEnabled} onChange={setShieldEnabled} label="Shield (bot and VPN filtering)" description="Filter suspicious traffic from your real-click analytics. Premium feature." />
+                            <div className="pt-5"><SettingToggle checked={landingSettings.inAppBrowserWarning} onChange={checked => setLandingSettings(current => ({ ...current, inAppBrowserWarning: checked }))} label="In-app browser handoff" description="Help visitors continue in Safari or Chrome when a social app allows it." /></div>
+                            <div className="pt-5"><SettingToggle checked={landingSettings.ageGateEnabled} onChange={checked => setLandingSettings(current => ({ ...current, ageGateEnabled: checked }))} label="Age gate (18+)" description="Recommended for age-restricted content. This does not replace platform policy compliance." /></div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-7">
+                          <div className="mb-5 flex items-center gap-3"><BarChart3 className="h-5 w-5 text-violet-300" /><div><h4 className="font-black">Tracking pixels</h4><p className="text-xs text-white/40">Optional marketing measurement, loaded only after visitor consent.</p></div></div>
+                          <div className="space-y-4">
+                            <label className="block"><span className="text-xs font-bold text-white/65">Meta Pixel ID</span><input value={landingSettings.tracking.metaPixelId} onChange={event => setLandingSettings(current => ({ ...current, tracking: { ...current.tracking, metaPixelId: event.target.value } }))} placeholder="123456789012345" inputMode="numeric" className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none focus:border-violet-500" /></label>
+                            <label className="block"><span className="text-xs font-bold text-white/65">Google Analytics (GA4) ID</span><input value={landingSettings.tracking.googleAnalyticsId} onChange={event => setLandingSettings(current => ({ ...current, tracking: { ...current.tracking, googleAnalyticsId: event.target.value } }))} placeholder="G-XXXXXXXXXX" className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm uppercase outline-none focus:border-violet-500" /></label>
+                            <label className="block"><span className="text-xs font-bold text-white/65">Google Ads ID</span><input value={landingSettings.tracking.googleAdsId} onChange={event => setLandingSettings(current => ({ ...current, tracking: { ...current.tracking, googleAdsId: event.target.value } }))} placeholder="AW-XXXXXXXXXX" className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm uppercase outline-none focus:border-violet-500" /></label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
                 <div className="mt-8 flex items-center justify-between gap-3 border-t border-white/10 pt-6">
                   <button
                     type="button"
@@ -955,6 +1083,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     backgroundColor={backgroundColor}
                     textColor={textColor}
                     accentColor={accentColor}
+                    onlineBadge={isOnline}
+                    locationLabel={landingSettings.visitorLocationBadge ? 'Visitor city and country' : null}
+                    countdown={landingSettings.countdown}
                   >
                     {links.slice(0, 5).map((link, index) => (
                       <LandingActionCard

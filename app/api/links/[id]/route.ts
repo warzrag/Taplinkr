@@ -9,6 +9,7 @@ import { checkTeamPermission } from '@/lib/team-permissions'
 import { canDeleteLink } from '@/lib/team-links'
 import { RESERVED_USERNAMES } from '@/lib/username'
 import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
+import { serializeLandingSettings } from '@/lib/landing-settings'
 
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -85,7 +86,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       instagramUrl,
       tiktokUrl,
       twitterUrl,
-      youtubeUrl
+      youtubeUrl,
+      landingSettings,
     } = body
 
     const existingLink = await prisma.link.findFirst({
@@ -183,7 +185,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(isActive !== undefined && { isActive }),
         ...(isDirect !== undefined && { isDirect }),
         ...(directUrl !== undefined && { directUrl: effectiveDirectUrl }),
-        ...(shieldEnabled !== undefined && { shieldEnabled: isDirect ? shieldEnabled : false }),
+        ...(shieldEnabled !== undefined && { shieldEnabled }),
         ...(isUltraLink !== undefined && { isUltraLink: isDirect ? isUltraLink : false }),
         ...(isOnline !== undefined && { isOnline }),
         ...(city !== undefined && { city: city || null }),
@@ -192,13 +194,16 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(tiktokUrl !== undefined && { tiktokUrl: tiktokUrl || null }),
         ...(twitterUrl !== undefined && { twitterUrl: twitterUrl || null }),
         ...(youtubeUrl !== undefined && { youtubeUrl: youtubeUrl || null }),
-        ...((shieldEnabled !== undefined || isUltraLink !== undefined) && {
-          shieldConfig: (isDirect && (shieldEnabled || isUltraLink)) ? JSON.stringify({
+        ...(effectiveIsDirect && (shieldEnabled !== undefined || isUltraLink !== undefined) && {
+          shieldConfig: (shieldEnabled || isUltraLink) ? JSON.stringify({
             level: isUltraLink ? 3 : 2,
             timer: isUltraLink ? 5000 : 3000,
             features: isUltraLink ? ['adaptive-content', 'domain-rotation', 'js-obfuscation', 'ai-detection'] : ['timer', 'basic-detection']
           }) : null
-        })
+        }),
+        ...(!effectiveIsDirect && landingSettings !== undefined && {
+          shieldConfig: serializeLandingSettings(landingSettings),
+        }),
       },
       include: {
         multiLinks: {

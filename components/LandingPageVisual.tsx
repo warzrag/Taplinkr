@@ -1,7 +1,7 @@
 'use client'
 
-import type { ReactNode } from 'react'
-import { ArrowUpRight, Link2 } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { ArrowUpRight, Clock3, Link2, MapPin } from 'lucide-react'
 import { getKnownPlatformForUrl } from '@/lib/platform-icons'
 
 interface LandingPageVisualProps {
@@ -15,6 +15,9 @@ interface LandingPageVisualProps {
   children: ReactNode
   compact?: boolean
   showBranding?: boolean
+  onlineBadge?: boolean
+  locationLabel?: string | null
+  countdown?: { enabled?: boolean; label?: string; endAt?: string } | null
 }
 
 interface LandingActionCardProps {
@@ -43,6 +46,31 @@ function readableText(background: string) {
   const blue = Number.parseInt(value.slice(4, 6), 16)
   const luminance = (0.299 * red + 0.587 * green + 0.114 * blue) / 255
   return luminance > 0.64 ? '#111827' : '#ffffff'
+}
+
+function LandingCountdown({ label, endAt }: { label?: string; endAt?: string }) {
+  const [remaining, setRemaining] = useState(0)
+
+  useEffect(() => {
+    const update = () => setRemaining(Math.max(0, new Date(endAt || '').getTime() - Date.now()))
+    update()
+    const timer = window.setInterval(update, 1000)
+    return () => window.clearInterval(timer)
+  }, [endAt])
+
+  if (!endAt || remaining <= 0) return null
+  const totalSeconds = Math.floor(remaining / 1000)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  return (
+    <div className="mb-4 rounded-2xl border border-white/15 bg-black/15 px-4 py-3 text-center backdrop-blur">
+      <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] opacity-65"><Clock3 className="h-3.5 w-3.5" />{label || 'Offer ends in'}</p>
+      <p className="mt-1 text-xl font-black tabular-nums">{days > 0 ? `${days}d ` : ''}{String(hours).padStart(2, '0')}:{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</p>
+    </div>
+  )
 }
 
 export function LandingActionCard({
@@ -104,6 +132,9 @@ export default function LandingPageVisual({
   children,
   compact = false,
   showBranding = true,
+  onlineBadge = false,
+  locationLabel,
+  countdown,
 }: LandingPageVisualProps) {
   const resolvedBackground = backgroundColor || '#070a12'
   const resolvedText = textColor || '#f8fafc'
@@ -147,16 +178,18 @@ export default function LandingPageVisual({
           )}
 
           <h1 className="mt-5 break-words text-3xl font-black tracking-[-0.035em]" style={{ color: resolvedText }}>
-            {title}
+            <span className="inline-flex items-center justify-center gap-2">{title}{onlineBadge && <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.8)]" aria-label="Online" />}</span>
           </h1>
           {bio && (
             <p className="mx-auto mt-3 max-w-sm text-sm leading-6 opacity-70">
               {bio}
             </p>
           )}
+          {locationLabel && <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold opacity-55"><MapPin className="h-3.5 w-3.5" />{locationLabel}</p>}
         </header>
 
         <div className="mt-8 flex-1 space-y-3">
+          {countdown?.enabled && <LandingCountdown label={countdown.label} endAt={countdown.endAt} />}
           {children}
         </div>
 
