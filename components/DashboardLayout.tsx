@@ -101,10 +101,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[286px] flex-col border-r border-[#22222d] bg-[#0c0c14] transition-transform duration-300 lg:translate-x-0 ${
+      <aside className={`fixed left-0 top-0 z-50 flex h-[100dvh] max-h-[100dvh] w-[286px] flex-col overflow-hidden border-r border-[#22222d] bg-[#0c0c14] transition-transform duration-300 lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex h-[88px] items-center justify-between border-b border-[#22222d] px-6">
+        <div className="flex h-[88px] shrink-0 items-center justify-between border-b border-[#22222d] px-6">
           <Logo size="md" showText />
           <button
             onClick={() => setSidebarOpen(false)}
@@ -115,7 +115,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </button>
         </div>
 
-        <div className="border-b border-[#22222d] p-4">
+        <div className="shrink-0 border-b border-[#22222d] p-4">
           <button
             type="button"
             onClick={() => setWorkspaceMenuOpen(open => !open)}
@@ -158,7 +158,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           )}
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-4 py-6">
           {navItems.map(item => {
             const active = isActive(item.href)
             return (
@@ -191,7 +191,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           )}
         </nav>
 
-        <div className="border-t border-[#22222d] p-4">
+        <div className="shrink-0 border-t border-[#22222d] bg-[#0c0c14] p-4">
           <div className="mb-4 flex items-center gap-3">
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-indigo-600 text-sm font-bold text-white">
               {initials}
