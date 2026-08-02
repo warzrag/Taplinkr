@@ -11,6 +11,8 @@ import {
   ChevronDown,
   Copy,
   ExternalLink,
+  EyeOff,
+  Globe2,
   GripVertical,
   Image as ImageIcon,
   Link2,
@@ -45,10 +47,14 @@ interface PageLink {
   description?: string
   icon?: string
   iconImage?: string
+  iconMode?: 'auto' | 'custom' | 'none'
+  iconStatus?: 'idle' | 'loading' | 'ready' | 'error'
+  iconResolvedFor?: string
+  iconSiteName?: string
 }
 
 const defaultLinks: PageLink[] = [
-  { title: '', url: '', description: '', icon: '', iconImage: '' },
+  { title: '', url: '', description: '', icon: '', iconImage: '', iconMode: 'auto', iconStatus: 'idle' },
 ]
 
 const themes = [
@@ -126,8 +132,11 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
               description: link.description || '',
               icon: link.icon || '',
               iconImage: link.iconImage || '',
+              iconMode: link.iconImage?.startsWith('data:image/') ? 'auto' : (link.iconImage || link.icon ? 'custom' : 'auto'),
+              iconStatus: link.iconImage || link.icon ? 'ready' : 'idle',
+              iconResolvedFor: link.iconImage?.startsWith('data:image/') ? normalizeHttpURL(link.url || '') : '',
             }))
-          : [{ title: '', url: '', description: '', icon: '', iconImage: '' }]
+          : [{ title: '', url: '', description: '', icon: '', iconImage: '', iconMode: 'auto', iconStatus: 'idle' }]
       )
       setInstagramUrl(editingLink.instagramUrl || '')
       setTiktokUrl(editingLink.tiktokUrl || '')
@@ -205,6 +214,86 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
     [links]
   )
 
+  const autoIconSignature = links
+    .map((link, index) => `${index}:${link.iconMode || 'auto'}:${normalizeHttpURL(link.url)}`)
+    .join('|')
+
+  useEffect(() => {
+    if (!isOpen || pageMode !== 'landing') return
+
+    const controller = new AbortController()
+    const timer = window.setTimeout(() => {
+      setLinks(current => {
+        const targets = current
+          .map((link, index) => ({ link, index, normalizedUrl: normalizeHttpURL(link.url) }))
+          .filter(({ link, normalizedUrl }) =>
+            (link.iconMode || 'auto') === 'auto' &&
+            Boolean(normalizedUrl) &&
+            validateURL(normalizedUrl) &&
+            link.iconResolvedFor !== normalizedUrl
+          )
+
+        if (!targets.length) return current
+
+        const loadingLinks = [...current]
+        targets.forEach(({ index }) => {
+          loadingLinks[index] = { ...loadingLinks[index], iconStatus: 'loading' }
+        })
+
+        void Promise.all(targets.map(async ({ index, normalizedUrl }) => {
+          try {
+            const response = await fetch('/api/link-metadata', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: normalizedUrl }),
+              signal: controller.signal,
+            })
+            const data = await response.json()
+            if (!response.ok) throw new Error(data.error || 'Icon not found')
+
+            setLinks(latest => {
+              const currentLink = latest[index]
+              if (!currentLink || (currentLink.iconMode || 'auto') !== 'auto' || normalizeHttpURL(currentLink.url) !== normalizedUrl) return latest
+              const next = [...latest]
+              next[index] = {
+                ...currentLink,
+                icon: '',
+                iconImage: data.icon || '',
+                iconStatus: data.icon ? 'ready' : 'error',
+                iconResolvedFor: normalizedUrl,
+                iconSiteName: data.siteName || '',
+              }
+              return next
+            })
+          } catch (error) {
+            if (controller.signal.aborted) return
+            setLinks(latest => {
+              const currentLink = latest[index]
+              if (!currentLink || (currentLink.iconMode || 'auto') !== 'auto' || normalizeHttpURL(currentLink.url) !== normalizedUrl) return latest
+              const next = [...latest]
+              next[index] = {
+                ...currentLink,
+                icon: '',
+                iconImage: '',
+                iconStatus: 'error',
+                iconResolvedFor: normalizedUrl,
+                iconSiteName: '',
+              }
+              return next
+            })
+          }
+        }))
+
+        return loadingLinks
+      })
+    }, 550)
+
+    return () => {
+      window.clearTimeout(timer)
+      controller.abort()
+    }
+  }, [autoIconSignature, isOpen, pageMode])
+
   const panelSteps = pageMode === 'direct'
     ? [
         ['start', 'Type', 'Page or redirect'],
@@ -270,13 +359,38 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
       if (field === 'url' && !updated.title.trim()) {
         updated.title = inferTitleFromUrl(value)
       }
+      if (field === 'url' && (updated.iconMode || 'auto') === 'auto') {
+        updated.icon = ''
+        updated.iconImage = ''
+        updated.iconStatus = 'idle'
+        updated.iconResolvedFor = ''
+        updated.iconSiteName = ''
+      }
       next[index] = updated
       return next
     })
   }
 
   const addLink = () => {
-    setLinks(current => [...current, { title: '', url: '', description: '', icon: '', iconImage: '' }])
+    setLinks(current => [...current, { title: '', url: '', description: '', icon: '', iconImage: '', iconMode: 'auto', iconStatus: 'idle' }])
+  }
+
+  const setLinkIconMode = (index: number, mode: 'auto' | 'custom' | 'none') => {
+    setLinks(current => {
+      const next = [...current]
+      const link = next[index]
+      if (!link) return current
+      next[index] = {
+        ...link,
+        iconMode: mode,
+        icon: mode === 'custom' ? link.icon : '',
+        iconImage: mode === 'custom' ? link.iconImage : '',
+        iconStatus: mode === 'auto' ? 'idle' : 'ready',
+        iconResolvedFor: '',
+        iconSiteName: '',
+      }
+      return next
+    })
   }
 
   const addPresetLink = (preset: PageLink) => {
@@ -632,6 +746,77 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                               {link.url.trim() && !validateURL(normalizeHttpURL(link.url)) && <span className="mt-1.5 block text-xs font-semibold text-rose-400">Enter a valid web address.</span>}
                             </label>
                           </div>
+
+                          <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-3.5">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/10 bg-white/10">
+                                  {link.iconStatus === 'loading' ? (
+                                    <Loader2 className="h-5 w-5 animate-spin text-violet-300" />
+                                  ) : link.iconImage || link.icon ? (
+                                    <img src={link.iconImage || link.icon} alt="" className="h-full w-full object-cover" />
+                                  ) : (
+                                    <Link2 className="h-5 w-5 text-white/35" />
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-extrabold text-white/80">Button icon</p>
+                                  <p className="mt-0.5 truncate text-xs text-white/35">
+                                    {(link.iconMode || 'auto') === 'auto'
+                                      ? link.iconStatus === 'loading'
+                                        ? 'Detecting the website...'
+                                        : link.iconStatus === 'ready'
+                                          ? `${link.iconSiteName || 'Website'} detected automatically`
+                                          : link.iconStatus === 'error'
+                                            ? 'No icon found — the clean fallback will be used'
+                                            : 'Paste a URL and Taplinkr will find its logo'
+                                      : link.iconMode === 'custom'
+                                        ? 'Your custom image'
+                                        : 'No icon will be displayed'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex rounded-xl border border-white/10 bg-black/20 p-1">
+                                {([
+                                  ['auto', Globe2, 'Auto'],
+                                  ['custom', ImageIcon, 'Custom'],
+                                  ['none', EyeOff, 'None'],
+                                ] as const).map(([mode, ModeIcon, label]) => (
+                                  <button
+                                    key={mode}
+                                    type="button"
+                                    onClick={() => setLinkIconMode(index, mode)}
+                                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[11px] font-bold transition ${
+                                      (link.iconMode || 'auto') === mode
+                                        ? 'bg-violet-500/20 text-violet-200'
+                                        : 'text-white/40 hover:bg-white/5 hover:text-white/70'
+                                    }`}
+                                  >
+                                    <ModeIcon className="h-3.5 w-3.5" />
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {link.iconMode === 'custom' && (
+                              <div className="mt-3 flex items-center gap-3 border-t border-white/10 pt-3">
+                                <IconUpload
+                                  value={link.iconImage || link.icon}
+                                  onChange={value => {
+                                    setLinks(current => {
+                                      const next = [...current]
+                                      next[index] = { ...next[index], iconMode: 'custom', icon: '', iconImage: value, iconStatus: value ? 'ready' : 'idle' }
+                                      return next
+                                    })
+                                  }}
+                                />
+                                <p className="text-xs leading-5 text-white/35">Upload a square PNG, JPG, or WebP. You can change it anytime.</p>
+                              </div>
+                            )}
+                          </div>
+
                           <label className="mt-3 block">
                             <span className="text-xs font-bold text-white/70">Small text below <span className="font-normal text-white/35">(optional)</span></span>
                             <input
@@ -770,6 +955,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         key={`${link.title}-${index}`}
                         title={link.title || 'Type your button text'}
                         description={link.description}
+                        icon={(link.iconMode || 'auto') === 'none' ? null : (link.iconImage || link.icon)}
                         accentColor={accentColor}
                         borderRadius={borderRadius}
                         disabled
