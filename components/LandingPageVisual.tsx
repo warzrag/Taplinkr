@@ -178,14 +178,29 @@ export default function LandingPageVisual({
           )}
 
           <h1 className="mt-5 break-words text-3xl font-black tracking-[-0.035em]" style={{ color: resolvedText }}>
-            <span className="inline-flex items-center justify-center gap-2">{title}{onlineBadge && <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.8)]" aria-label="Online" />}</span>
+            {title}
           </h1>
           {bio && (
             <p className="mx-auto mt-3 max-w-sm text-sm leading-6 opacity-70">
               {bio}
             </p>
           )}
-          {locationLabel && <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold opacity-55"><MapPin className="h-3.5 w-3.5" />{locationLabel}</p>}
+          {(onlineBadge || locationLabel) && (
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              {onlineBadge && (
+                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-600 shadow-sm backdrop-blur-sm">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.65)]" />
+                  Online
+                </span>
+              )}
+              {locationLabel && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/25 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-600 shadow-sm backdrop-blur-sm">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {locationLabel}
+                </span>
+              )}
+            </div>
+          )}
         </header>
 
         <div className="mt-8 flex-1 space-y-3">

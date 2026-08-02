@@ -8,6 +8,7 @@ export interface GeoRedirectRule {
 export interface LandingSettings {
   version: 1
   visitorLocationBadge: boolean
+  locationBadgeTemplate: string
   countdown: {
     enabled: boolean
     label: string
@@ -31,6 +32,7 @@ export interface LandingSettings {
 export const DEFAULT_LANDING_SETTINGS: LandingSettings = {
   version: 1,
   visitorLocationBadge: false,
+  locationBadgeTemplate: "I'm in {city}, {country}",
   countdown: { enabled: false, label: 'Offer ends in', endAt: '' },
   geoFilter: { enabled: false, mode: 'block', countries: [] },
   geoRedirects: [],
@@ -66,6 +68,7 @@ export function sanitizeLandingSettings(input: any): LandingSettings {
   return {
     version: 1,
     visitorLocationBadge: Boolean(input?.visitorLocationBadge),
+    locationBadgeTemplate: String(input?.locationBadgeTemplate || "I'm in {city}, {country}").trim().slice(0, 80),
     countdown: {
       enabled: Boolean(input?.countdown?.enabled),
       label: String(input?.countdown?.label || 'Offer ends in').trim().slice(0, 60),

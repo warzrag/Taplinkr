@@ -979,7 +979,21 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           <div className="mb-5 flex items-center gap-3"><BadgeCheck className="h-5 w-5 text-violet-300" /><div><h4 className="font-black">Badges</h4><p className="text-xs text-white/40">Optional context shown near your profile.</p></div></div>
                           <div className="space-y-5 divide-y divide-white/10">
                             <SettingToggle checked={isOnline} onChange={setIsOnline} label="Online badge" description="Show a pulsing green dot next to your title. Use it only when the status is accurate." />
-                            <div className="pt-5"><SettingToggle checked={landingSettings.visitorLocationBadge} onChange={checked => setLandingSettings(current => ({ ...current, visitorLocationBadge: checked }))} label="Visitor location badge" description="Show the visitor's approximate city and country, never their precise address." /></div>
+                            <div className="pt-5">
+                              <SettingToggle checked={landingSettings.visitorLocationBadge} onChange={checked => setLandingSettings(current => ({ ...current, visitorLocationBadge: checked }))} label="Visitor location badge" description="Show the visitor's approximate city and country, never their precise address." />
+                              {landingSettings.visitorLocationBadge && (
+                                <label className="mt-5 block">
+                                  <span className="text-xs font-bold text-white/65">Badge text template</span>
+                                  <input
+                                    value={landingSettings.locationBadgeTemplate}
+                                    onChange={event => setLandingSettings(current => ({ ...current, locationBadgeTemplate: event.target.value }))}
+                                    placeholder="I'm in {city}, {country}"
+                                    className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3.5 py-3 text-sm outline-none focus:border-violet-500"
+                                  />
+                                  <span className="mt-2 block text-xs text-white/35">Use {'{city}'} and {'{country}'} to insert the visitor's approximate location automatically.</span>
+                                </label>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -1084,7 +1098,9 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                     textColor={textColor}
                     accentColor={accentColor}
                     onlineBadge={isOnline}
-                    locationLabel={landingSettings.visitorLocationBadge ? 'Visitor city and country' : null}
+                    locationLabel={landingSettings.visitorLocationBadge
+                      ? landingSettings.locationBadgeTemplate.replaceAll('{city}', 'Paris').replaceAll('{country}', 'France')
+                      : null}
                     countdown={landingSettings.countdown}
                   >
                     {links.slice(0, 5).map((link, index) => (

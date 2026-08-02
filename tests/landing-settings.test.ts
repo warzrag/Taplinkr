@@ -15,6 +15,7 @@ describe('landing settings', () => {
     })
     const settings = parseLandingSettings(serialized)
 
+    expect(settings.locationBadgeTemplate).toBe("I'm in {city}, {country}")
     expect(settings.geoFilter.countries).toEqual(['US', 'FR'])
     expect(settings.tracking).toEqual({
       metaPixelId: '1234567890',

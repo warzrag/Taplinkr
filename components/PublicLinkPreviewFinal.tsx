@@ -16,6 +16,27 @@ function normalizeUrl(url: string) {
   return `https://${url}`
 }
 
+function countryName(countryCode: string) {
+  if (!countryCode) return ''
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'region' }).of(countryCode.toUpperCase()) || countryCode
+  } catch {
+    return countryCode
+  }
+}
+
+function visitorLocationLabel(template: string, city: string, countryCode: string) {
+  const needsCity = template.includes('{city}')
+  const needsCountry = template.includes('{country}')
+  const country = countryName(countryCode)
+  if ((needsCity && !city) || (needsCountry && !country)) return null
+
+  return template
+    .replaceAll('{city}', city)
+    .replaceAll('{country}', country)
+    .trim() || null
+}
+
 function getSessionId() {
   const key = 'taplinkr_visit_session'
   const timeout = 30 * 60 * 1000
@@ -62,6 +83,9 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
   const title = link?.title || link?.user?.name || link?.user?.username || 'My links'
   const bio = link?.description || link?.user?.bio || null
   const settings = useMemo(() => parseLandingSettings(link?.shieldConfig), [link?.shieldConfig])
+  const locationLabel = settings.visitorLocationBadge
+    ? visitorLocationLabel(settings.locationBadgeTemplate, link?._visitorCity || '', link?._visitorCountry || '')
+    : null
   const multiLinks = useMemo(() => {
     return Array.isArray(link?.multiLinks)
       ? [...link.multiLinks].sort((a: any, b: any) => (a.order ?? 999) - (b.order ?? 999))
@@ -175,7 +199,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         textColor={link?.textColor || '#f8fafc'}
         accentColor={link?.color || '#8b5cf6'}
         onlineBadge={Boolean(link?.isOnline)}
-        locationLabel={settings.visitorLocationBadge ? [link?._visitorCity, link?._visitorCountry].filter(Boolean).join(', ') || 'Location unavailable' : null}
+        locationLabel={locationLabel}
         countdown={settings.countdown}
       >
         {multiLinks.length > 0 ? (
