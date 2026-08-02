@@ -1,5 +1,6 @@
 'use client'
 
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useCallback, useEffect, useState } from 'react'
 import {
   Activity,
@@ -10,6 +11,7 @@ import {
   MousePointer2,
   RefreshCw,
   ShieldCheck,
+  Sparkles,
   Users,
 } from 'lucide-react'
 import {
@@ -22,6 +24,8 @@ import {
   YAxis,
 } from 'recharts'
 import { toast } from 'react-hot-toast'
+
+import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
 
 interface ChartPoint {
   date: string
@@ -61,6 +65,7 @@ const emptyData: AnalyticsData = {
 }
 
 export default function AnalyticsPage() {
+  const reduceMotion = useReducedMotion()
   const [days, setDays] = useState(7)
   const [data, setData] = useState<AnalyticsData>(emptyData)
   const [loading, setLoading] = useState(true)
@@ -109,75 +114,82 @@ export default function AnalyticsPage() {
     : 0
 
   const cards = [
-    { label: 'Total clicks', value: data.totals.clicks, icon: MousePointer2, color: 'text-violet-400' },
-    { label: 'Unique visitors', value: data.totals.uniqueVisitors, icon: Users, color: 'text-sky-400' },
-    { label: 'Views', value: data.totals.views, icon: Eye, color: 'text-emerald-400' },
-    { label: 'Filtered clicks', value: data.totals.filteredClicks, icon: ShieldCheck, color: 'text-emerald-300' },
-    { label: 'Bots / previews', value: data.totals.botsFiltered, icon: Bot, color: 'text-rose-400' },
-    { label: 'Duplicates / spam', value: data.totals.duplicatesFiltered, icon: Activity, color: 'text-amber-400' },
-    { label: 'Clicks / visitor', value: clicksPerVisitor, icon: Activity, color: 'text-amber-400' },
+    { label: 'Total clicks', note: 'Verified actions', value: data.totals.clicks, icon: MousePointer2, color: 'text-violet-300', glow: 'from-violet-500/20 via-violet-500/5' },
+    { label: 'Unique visitors', note: 'People reached', value: data.totals.uniqueVisitors, icon: Users, color: 'text-cyan-300', glow: 'from-cyan-500/20 via-cyan-500/5' },
+    { label: 'Views', note: 'Page impressions', value: data.totals.views, icon: Eye, color: 'text-sky-300', glow: 'from-sky-500/20 via-sky-500/5' },
+    { label: 'Filtered clicks', note: 'Protected traffic', value: data.totals.filteredClicks, icon: ShieldCheck, color: 'text-emerald-300', glow: 'from-emerald-500/20 via-emerald-500/5' },
+    { label: 'Bots / previews', note: 'Automatic traffic', value: data.totals.botsFiltered, icon: Bot, color: 'text-rose-300', glow: 'from-rose-500/20 via-rose-500/5' },
+    { label: 'Duplicates / spam', note: 'Repeated actions', value: data.totals.duplicatesFiltered, icon: Activity, color: 'text-amber-300', glow: 'from-amber-500/20 via-amber-500/5' },
+    { label: 'Clicks / visitor', note: 'Visitor intensity', value: clicksPerVisitor, icon: Activity, color: 'text-fuchsia-300', glow: 'from-fuchsia-500/20 via-fuchsia-500/5' },
   ]
 
   return (
-    <div className="min-h-screen bg-[#09090f] px-5 py-8 text-white sm:px-8 lg:px-12 lg:py-12">
-      <div className="mx-auto max-w-[1500px]">
-        <header className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+    <div className="relative min-h-screen overflow-hidden bg-[#08080d] px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
+      <DashboardAtmosphere />
+      <div className="relative mx-auto max-w-[1500px]">
+        <motion.header initial={reduceMotion ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-violet-400">
-              <BarChart3 className="h-4 w-4" />
+            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-violet-300">
+              <Sparkles className="h-3.5 w-3.5" />
               Analytics
             </p>
-            <h1 className="mt-3 text-4xl font-bold tracking-[-0.05em] sm:text-5xl">
+            <h1 className="mt-2 text-3xl font-black tracking-[-0.05em] sm:text-4xl">
               Your traffic, <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">at a glance.</span>
             </h1>
             <p className="mt-3 text-base text-[#9696a8]">Real clicks only: bots, automatic previews, duplicates, and bursts are filtered out.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex rounded-xl border border-[#292936] bg-[#101018] p-1">
+            <div className="flex rounded-2xl border border-white/[0.08] bg-[#11111a]/80 p-1.5 shadow-xl backdrop-blur-xl">
               {[1, 7, 30, 90].map(value => (
                 <button
                   key={value}
                   onClick={() => setDays(value)}
-                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${days === value ? 'bg-violet-500 text-white' : 'text-[#858598] hover:text-white'}`}
+                  className={`relative rounded-xl px-4 py-2 text-sm font-semibold transition ${days === value ? 'text-white' : 'text-[#858598] hover:text-white'}`}
                 >
-                  {value === 1 ? '24h' : `${value}d`}
+                  {days === value && <motion.span layoutId="analytics-period" className="absolute inset-0 rounded-xl border border-white/10 bg-gradient-to-b from-violet-500 to-violet-600 shadow-lg shadow-violet-950/40" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
+                  <span className="relative z-10">{value === 1 ? '24h' : `${value}d`}</span>
                 </button>
               ))}
             </div>
-            <button
+            <motion.button whileHover={reduceMotion ? undefined : { rotate: 8, scale: 1.05 }} whileTap={reduceMotion ? undefined : { scale: 0.94 }}
               onClick={loadAnalytics}
               className="rounded-xl border border-[#292936] p-3 text-[#aaaabc] transition hover:border-violet-500/50 hover:text-white"
               aria-label="Refresh"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-            <button
+            </motion.button>
+            <motion.button whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.97 }}
               onClick={exportCsv}
               className="inline-flex items-center gap-2 rounded-xl border border-[#292936] px-4 py-3 text-sm font-semibold transition hover:border-violet-500/50"
             >
               <Download className="h-4 w-4" />
               Export CSV
-            </button>
+            </motion.button>
           </div>
-        </header>
+        </motion.header>
 
-        <section className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
-          {cards.map(card => (
-            <article key={card.label} className="rounded-2xl border border-[#252532] bg-[#11111a] p-6">
+        <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {cards.map((card, index) => (
+            <motion.article key={card.label} initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.055, duration: 0.42 }} whileHover={reduceMotion ? undefined : { y: -4, scale: 1.01 }} className="group relative overflow-hidden rounded-[22px] border border-white/[0.075] bg-[#11111a]/90 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.2)] backdrop-blur-xl transition-colors hover:border-white/[0.13]">
+              <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.glow} to-transparent opacity-55 transition-opacity group-hover:opacity-90`} />
+              <div className="relative">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8e8ea1]">{card.label}</p>
-                <card.icon className={`h-5 w-5 ${card.color}`} />
+                <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a9aac]">{card.label}</p><p className="mt-1 text-[11px] text-white/35">{card.note}</p></div>
+                <span className="grid h-10 w-10 place-items-center rounded-2xl border border-white/[0.07] bg-black/20"><card.icon className={`h-5 w-5 ${card.color}`} /></span>
               </div>
-              <p className="mt-7 text-4xl font-bold tracking-tight">
+              <AnimatePresence mode="wait"><motion.p key={`${card.label}-${card.value}-${loading}`} initial={reduceMotion ? false : { opacity: 0, y: 8, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -5 }} className="mt-6 text-3xl font-black tracking-[-0.04em] tabular-nums">
                 {loading ? '—' : typeof card.value === 'number' ? card.value.toLocaleString('en-US') : card.value}
-              </p>
-            </article>
+              </motion.p></AnimatePresence>
+              </div>
+            </motion.article>
           ))}
         </section>
 
-        <section className="mt-6 rounded-2xl border border-[#252532] bg-[#11111a] p-5 sm:p-7">
+        <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.5 }} className="relative mt-6 overflow-hidden rounded-[22px] border border-white/[0.075] bg-[#11111a]/90 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl sm:p-7">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-violet-500/[0.07] blur-3xl" />
+          <div className="relative">
           <div>
-            <h2 className="text-xl font-semibold">Traffic over time</h2>
+            <h2 className="flex items-center gap-2 text-xl font-semibold"><BarChart3 className="h-5 w-5 text-violet-300" />Traffic over time</h2>
             <p className="mt-1 text-sm text-[#8e8ea1]">Clicks and views over the {days === 1 ? 'last 24 hours' : `last ${days} days`}.</p>
           </div>
           <div className="mt-8 h-[360px] w-full">
@@ -200,26 +212,26 @@ export default function AnalyticsPage() {
                   contentStyle={{ background: '#15151f', border: '1px solid #30303e', borderRadius: 12, color: '#fff' }}
                   labelStyle={{ color: '#aaaabc' }}
                 />
-                <Area type="monotone" dataKey="clicks" name="Clicks" stroke="#8b5cf6" strokeWidth={3} fill="url(#clicksGradient)" />
-                <Area type="monotone" dataKey="views" name="Views" stroke="#38bdf8" strokeWidth={2.5} fill="url(#viewsGradient)" />
+                <Area isAnimationActive={!reduceMotion} animationDuration={900} type="monotone" dataKey="clicks" name="Clicks" stroke="#a78bfa" strokeWidth={3.5} fill="url(#clicksGradient)" />
+                <Area isAnimationActive={!reduceMotion} animationDuration={1050} type="monotone" dataKey="views" name="Views" stroke="#67e8f9" strokeWidth={2.5} fill="url(#viewsGradient)" />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-        </section>
+          </div></div>
+        </motion.section>
 
         <section className="mt-6 grid gap-6 lg:grid-cols-2">
-          <Ranking title="Top countries" items={data.stats.topCountries} />
-          <Ranking title="Top sources" items={data.stats.topSources} />
+          <Ranking title="Top countries" items={data.stats.topCountries} reduceMotion={Boolean(reduceMotion)} />
+          <Ranking title="Top sources" items={data.stats.topSources} reduceMotion={Boolean(reduceMotion)} />
         </section>
       </div>
     </div>
   )
 }
 
-function Ranking({ title, items }: { title: string; items: Array<[string, number]> }) {
+function Ranking({ title, items, reduceMotion }: { title: string; items: Array<[string, number]>; reduceMotion: boolean }) {
   const max = Math.max(...items.map(([, count]) => count), 1)
   return (
-    <article className="rounded-2xl border border-[#252532] bg-[#11111a] p-6">
+    <motion.article initial={reduceMotion ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-[22px] border border-white/[0.075] bg-[#11111a]/90 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-xl">
       <h2 className="text-lg font-semibold">{title}</h2>
       <div className="mt-5 space-y-4">
         {items.length ? items.map(([label, count]) => (
@@ -229,11 +241,11 @@ function Ranking({ title, items }: { title: string; items: Array<[string, number
               <span className="font-semibold">{count}</span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-[#242431]">
-              <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-sky-400" style={{ width: `${(count / max) * 100}%` }} />
+              <motion.div initial={reduceMotion ? false : { width: 0 }} animate={{ width: `${(count / max) * 100}%` }} transition={{ duration: 0.75, ease: 'easeOut' }} className="h-full rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-400 to-cyan-400" />
             </div>
           </div>
         )) : <p className="py-8 text-center text-sm text-[#77778a]">Not enough data yet.</p>}
       </div>
-    </article>
+    </motion.article>
   )
 }

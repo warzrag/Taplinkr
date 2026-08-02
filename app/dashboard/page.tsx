@@ -26,6 +26,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { useLinks } from '@/contexts/LinksContext'
 import { useProfile } from '@/contexts/ProfileContext'
+import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
 
 const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
   ssr: false,
@@ -242,11 +243,7 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#08080d] px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <motion.div className="absolute -left-40 -top-48 h-[520px] w-[520px] rounded-full bg-violet-600/[0.09] blur-[120px]" animate={reduceMotion ? undefined : { x: [0, 70, 0], y: [0, 35, 0] }} transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }} />
-        <motion.div className="absolute -right-40 top-40 h-[480px] w-[480px] rounded-full bg-cyan-500/[0.055] blur-[130px]" animate={reduceMotion ? undefined : { x: [0, -55, 0], y: [0, 65, 0] }} transition={{ duration: 19, repeat: Infinity, ease: 'easeInOut' }} />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent_65%)]" />
-      </div>
+      <DashboardAtmosphere />
       <div className="relative mx-auto max-w-[1500px]">
         <motion.header initial={reduceMotion ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>

@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import {
@@ -14,11 +14,13 @@ import {
   Link2,
   Loader2,
   Plus,
+  Sparkles,
   Trash2,
   Zap,
 } from 'lucide-react'
 
 import { useLinks } from '@/contexts/LinksContext'
+import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
 import { reconcileLiveClickCounts } from '@/lib/live-click-counts'
 import { Link as LinkType } from '@/types'
 
@@ -42,6 +44,7 @@ function dashboardLinkName(item: LinkType) {
 }
 
 export default function LinksDashboard() {
+  const reduceMotion = useReducedMotion()
   const { personalLinks, loading, refreshLinks, updateLinkOptimistic } = useLinks()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [showCreatePicker, setShowCreatePicker] = useState(false)
@@ -258,39 +261,49 @@ export default function LinksDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090f] px-5 py-8 text-white sm:px-8 lg:px-12 lg:py-12">
-      <div className="mx-auto max-w-[1500px]">
-        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+    <div className="relative min-h-screen overflow-hidden bg-[#08080d] px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
+      <DashboardAtmosphere />
+      <div className="relative mx-auto max-w-[1500px]">
+        <motion.header initial={reduceMotion ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Links</h1>
+            <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-violet-300"><Sparkles className="h-3.5 w-3.5" />Link hub</p>
+            <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Your links</h1>
             <p className="mt-2 text-base text-[#9494a7]">Create link pages or direct redirects.</p>
           </div>
-          <button
+          <motion.button
+            whileHover={reduceMotion ? undefined : { y: -2, scale: 1.02 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.97 }}
             onClick={() => setShowCreatePicker(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-500 px-5 py-3 text-sm font-bold transition hover:bg-violet-400"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-gradient-to-r from-violet-600 to-violet-500 px-5 py-3 text-sm font-bold shadow-lg shadow-violet-950/35 transition hover:brightness-110"
           >
             <Plus className="h-4 w-4" />
             Create link
-          </button>
-        </header>
+          </motion.button>
+        </motion.header>
 
-        <section className="mt-10 overflow-hidden rounded-2xl border border-[#252532] bg-[#0e0e16] p-3">
+        <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.48 }} className="mt-8 overflow-hidden rounded-[24px] border border-white/[0.075] bg-[#101018]/90 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl">
           {loading ? (
             <div className="space-y-2">
               {[1, 2, 3].map(item => <div key={item} className="h-[88px] animate-pulse rounded-xl bg-white/[0.035]" />)}
             </div>
           ) : personalLinks.length ? (
             <div className="space-y-2">
-              {personalLinks.map(item => {
+              {personalLinks.map((item, index) => {
                 const displayedClicks = clickCountsReady
                   ? (liveClicks[item.id] ?? item.clicks ?? 0)
                   : null
 
                 return (
-                <article
+                <motion.article
                   key={item.id}
-                  className="group grid min-h-[88px] items-center gap-4 rounded-xl border border-[#282835] bg-[#0b0b12] px-4 py-3 transition hover:border-[#3a3a4a] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_190px_132px]"
+                  layout
+                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(index * 0.045, 0.32), duration: 0.36 }}
+                  whileHover={reduceMotion ? undefined : { x: 4, scale: 1.002 }}
+                  className="group relative grid min-h-[88px] items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.075] bg-[#0a0a11]/90 px-4 py-3 transition-colors hover:border-violet-400/25 hover:bg-[#0d0d16] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_190px_132px]"
                 >
+                  <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/0 to-transparent transition-all duration-300 group-hover:via-violet-400/80" />
                   <div className="flex min-w-0 items-center gap-3">
                     <GripVertical className="hidden h-5 w-5 shrink-0 text-[#5e5e70] sm:block" />
                     <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.35)]' : 'bg-[#505060]'}`} />
@@ -307,8 +320,8 @@ export default function LinksDashboard() {
                   </div>
 
                   <div>
-                    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold ${
-                      item.isDirect ? 'bg-violet-500/10 text-violet-300' : 'bg-sky-500/10 text-sky-300'
+                    <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
+                      item.isDirect ? 'border-violet-400/10 bg-violet-500/10 text-violet-300' : 'border-sky-400/10 bg-sky-500/10 text-sky-300'
                     }`}>
                       {item.isDirect ? <Link2 className="h-3.5 w-3.5" /> : <LayoutGrid className="h-3.5 w-3.5" />}
                       {item.isDirect ? 'Direct' : 'Page'}
@@ -365,7 +378,7 @@ export default function LinksDashboard() {
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => toggleLink(item)}
-                      className={`relative h-7 w-12 rounded-full transition ${item.isActive ? 'bg-violet-500' : 'bg-[#343443]'}`}
+                      className={`relative h-7 w-12 rounded-full transition-all duration-300 ${item.isActive ? 'bg-violet-500 shadow-[0_0_18px_rgba(139,92,246,.28)]' : 'bg-[#343443]'}`}
                       aria-label={item.isActive ? 'Disable link' : 'Enable link'}
                     >
                       <span className={`absolute top-1 h-5 w-5 rounded-full bg-[#0b0b12] transition-transform ${item.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -391,7 +404,7 @@ export default function LinksDashboard() {
                       </button>
                     )}
                   </div>
-                </article>
+                </motion.article>
                 )
               })}
             </div>
@@ -415,12 +428,12 @@ export default function LinksDashboard() {
               </div>
             </div>
           )}
-        </section>
+        </motion.section>
 
-        <p className="mt-4 flex items-center gap-2 text-xs text-[#6f6f81]">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mt-4 flex items-center gap-2 text-xs text-[#6f6f81]">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
           Click counts update automatically. Status changes are applied immediately.
-        </p>
+        </motion.p>
       </div>
 
       <AnimatePresence>
