@@ -231,6 +231,7 @@ export default function ImageUpload({
             {/* Overlay au survol */}
             <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
               <button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
                 className="p-2 bg-black/20 backdrop-blur-sm rounded-lg hover:bg-black/30 transition-colors"
@@ -238,6 +239,7 @@ export default function ImageUpload({
                 <Camera className="w-5 h-5 text-white" />
               </button>
               <button
+                type="button"
                 onClick={handleRemove}
                 disabled={isUploading}
                 className="p-2 bg-black/20 backdrop-blur-sm rounded-lg hover:bg-black/30 transition-colors"
