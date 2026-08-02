@@ -57,12 +57,17 @@ export function calculateDashboardMetrics(input: {
 }) {
   const pageViews = input.clicks.filter(click => !click.multiLinkId).length
   const visitsWithClick = new Set<string>()
+  const uniqueVisitors = new Set<string>()
+  let realClicks = 0
 
   for (const click of input.clicks) {
+    const visitorKey = click.sessionId || click.ip || click.id
+    uniqueVisitors.add(visitorKey)
+
     const isCompletedClick = Boolean(click.multiLinkId) || input.directLinkIds.has(click.linkId)
     if (!isCompletedClick) continue
 
-    const visitorKey = click.sessionId || click.ip || click.id
+    realClicks += 1
     visitsWithClick.add(`${click.linkId}:${visitorKey}`)
   }
 
@@ -75,11 +80,47 @@ export function calculateDashboardMetrics(input: {
   ).length
 
   return {
+    realClicks,
+    uniqueVisitors: uniqueVisitors.size,
     pageViews,
     visitsWithClick: clickedVisits,
     clickThroughRate,
     botsFiltered,
   }
+}
+
+export function calculateHourlyClicks(input: {
+  now: Date
+  timeZone: string
+  clicks: ClickMetricEvent[]
+  directLinkIds: Set<string>
+}) {
+  const today = dateKeyInTimeZone(input.now, input.timeZone)
+  let formatter: Intl.DateTimeFormat
+  try {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: input.timeZone,
+      hour: '2-digit',
+      hourCycle: 'h23',
+    })
+  } catch {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'UTC',
+      hour: '2-digit',
+      hourCycle: 'h23',
+    })
+  }
+
+  const hours = Array.from({ length: 24 }, (_, hour) => ({ hour, clicks: 0 }))
+  for (const click of input.clicks) {
+    if (!click.createdAt || dateKeyInTimeZone(click.createdAt, input.timeZone) !== today) continue
+    const isCompletedClick = Boolean(click.multiLinkId) || input.directLinkIds.has(click.linkId)
+    if (!isCompletedClick) continue
+    const hour = Number(formatter.format(click.createdAt))
+    if (Number.isInteger(hour) && hours[hour]) hours[hour].clicks += 1
+  }
+
+  return hours
 }
 
 export function dashboardDateKeys(period: DashboardPeriod, now: Date, timeZone: string) {

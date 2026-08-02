@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import {
   calculateDailyLinkClicks,
   calculateDashboardMetrics,
+  calculateHourlyClicks,
   dashboardPeriodStart,
   type DashboardPeriod,
 } from '@/lib/dashboard-metrics'
@@ -64,15 +65,20 @@ export async function GET(request: NextRequest) {
     const linkIds = new Set(links.map(link => link.id))
 
     if (linkIds.size === 0) {
+      const emptyMetrics = calculateDashboardMetrics({
+        clicks: [],
+        filteredClicks: [],
+        directLinkIds: new Set(),
+      })
       return NextResponse.json({
         period,
-        ...calculateDashboardMetrics({
-          clicks: [],
-          filteredClicks: [],
-          directLinkIds: new Set(),
-        }),
+        ...emptyMetrics,
+        changes: { realClicks: 0, uniqueVisitors: 0, clickThroughRate: 0, botsFiltered: 0 },
         links: [],
         dailyClicks: [],
+        hourlyClicks: Array.from({ length: 24 }, (_, hour) => ({ hour, clicks: 0 })),
+        topLinks: [],
+        recentActivity: [],
       })
     }
 
@@ -88,6 +94,8 @@ export async function GET(request: NextRequest) {
           ip: true,
           sessionId: true,
           multiLinkId: true,
+          country: true,
+          device: true,
         },
       }))),
       Promise.all([...linkIds].map(linkId => prisma.filteredClick.findMany({
@@ -99,17 +107,33 @@ export async function GET(request: NextRequest) {
         },
       }))),
     ])
-    const recentClicks = clickGroups
-      .flat()
+    const allClicks = clickGroups.flat()
+    const allFilteredClicks = filteredClickGroups.flat()
+    const recentClicks = allClicks
       .filter(click => click.createdAt >= start && click.createdAt <= now)
-    const recentFilteredClicks = filteredClickGroups
-      .flat()
+    const recentFilteredClicks = allFilteredClicks
       .filter(click => click.createdAt >= start && click.createdAt <= now)
+
+    const periodDays = period === 'today' ? 1 : period === '7d' ? 7 : 30
+    const previousStart = new Date(start)
+    previousStart.setUTCDate(previousStart.getUTCDate() - periodDays)
+    const previousClicks = allClicks.filter(click => click.createdAt >= previousStart && click.createdAt < start)
+    const previousFilteredClicks = allFilteredClicks.filter(click => click.createdAt >= previousStart && click.createdAt < start)
+    const directLinkIds = new Set<string>(
+      links
+        .filter((link: any) => link.isDirect)
+        .map((link: any) => String(link.id)),
+    )
 
     const metrics = calculateDashboardMetrics({
       clicks: recentClicks,
       filteredClicks: recentFilteredClicks,
-      directLinkIds: new Set(links.filter(link => link.isDirect).map(link => link.id)),
+      directLinkIds,
+    })
+    const previousMetrics = calculateDashboardMetrics({
+      clicks: previousClicks,
+      filteredClicks: previousFilteredClicks,
+      directLinkIds,
     })
     const dailyBreakdown = calculateDailyLinkClicks({
       period,
@@ -123,6 +147,44 @@ export async function GET(request: NextRequest) {
         isDirect: link.isDirect,
       })),
     })
+    const hourlyClicks = calculateHourlyClicks({ now, timeZone, clicks: recentClicks, directLinkIds })
+    const completedClickCountByLink = (items: typeof recentClicks) => {
+      const counts = new Map<string, number>()
+      for (const click of items) {
+        if (!click.multiLinkId && !directLinkIds.has(click.linkId)) continue
+        counts.set(click.linkId, (counts.get(click.linkId) || 0) + 1)
+      }
+      return counts
+    }
+    const currentByLink = completedClickCountByLink(recentClicks)
+    const previousByLink = completedClickCountByLink(previousClicks)
+    const topLinks = links
+      .map(link => ({
+        id: link.id,
+        name: link.internalName?.trim() || link.title,
+        slug: link.slug,
+        clicks: currentByLink.get(link.id) || 0,
+        previousClicks: previousByLink.get(link.id) || 0,
+      }))
+      .sort((a, b) => b.clicks - a.clicks)
+      .slice(0, 5)
+    const linkNames = new Map(links.map(link => [link.id, link.internalName?.trim() || link.title]))
+    const recentActivity = recentClicks
+      .filter(click => Boolean(click.multiLinkId) || directLinkIds.has(click.linkId))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 6)
+      .map(click => ({
+        id: click.id,
+        linkId: click.linkId,
+        linkName: linkNames.get(click.linkId) || 'Link',
+        createdAt: click.createdAt.toISOString(),
+        country: click.country || null,
+        device: click.device || null,
+      }))
+    const percentageChange = (current: number, previous: number) => {
+      if (previous === 0) return current === 0 ? 0 : 100
+      return Number((((current - previous) / previous) * 100).toFixed(1))
+    }
 
     return NextResponse.json({
       period,
@@ -130,6 +192,15 @@ export async function GET(request: NextRequest) {
       end: now.toISOString(),
       ...metrics,
       ...dailyBreakdown,
+      hourlyClicks,
+      topLinks,
+      recentActivity,
+      changes: {
+        realClicks: percentageChange(metrics.realClicks, previousMetrics.realClicks),
+        uniqueVisitors: percentageChange(metrics.uniqueVisitors, previousMetrics.uniqueVisitors),
+        clickThroughRate: percentageChange(metrics.clickThroughRate, previousMetrics.clickThroughRate),
+        botsFiltered: percentageChange(metrics.botsFiltered, previousMetrics.botsFiltered),
+      },
     }, {
       headers: {
         'Cache-Control': 'private, no-store, max-age=0, must-revalidate',

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   calculateDailyLinkClicks,
   calculateDashboardMetrics,
+  calculateHourlyClicks,
   dashboardDateKeys,
   dashboardPeriodStart,
 } from '../lib/dashboard-metrics'
@@ -28,11 +29,30 @@ describe('dashboard metrics', () => {
     })
 
     expect(metrics).toEqual({
+      realClicks: 3,
+      uniqueVisitors: 4,
       pageViews: 3,
       visitsWithClick: 2,
       clickThroughRate: 66.7,
       botsFiltered: 3,
     })
+  })
+
+  it('groups completed clicks by local hour', () => {
+    const hours = calculateHourlyClicks({
+      now: new Date('2026-07-27T12:00:00.000Z'),
+      timeZone: 'Europe/Paris',
+      directLinkIds: new Set(['direct']),
+      clicks: [
+        { id: 'view', linkId: 'page', createdAt: new Date('2026-07-27T08:00:00.000Z') },
+        { id: 'page-click', linkId: 'page', multiLinkId: 'button', createdAt: new Date('2026-07-27T08:10:00.000Z') },
+        { id: 'direct-click', linkId: 'direct', createdAt: new Date('2026-07-27T09:15:00.000Z') },
+      ],
+    })
+
+    expect(hours[10].clicks).toBe(1)
+    expect(hours[11].clicks).toBe(1)
+    expect(hours.reduce((sum, hour) => sum + hour.clicks, 0)).toBe(2)
   })
 
   it('calculates inclusive UTC periods', () => {
