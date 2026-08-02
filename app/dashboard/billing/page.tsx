@@ -9,27 +9,47 @@ import { toast } from 'react-hot-toast'
 import { usePermissions } from '@/hooks/usePermissions'
 import PromoCodeInput from '@/components/PromoCodeInput'
 
+interface BillingSubscription {
+  id: string
+  status: string
+  plan: 'free' | 'standard' | 'premium'
+  cancel_at_period_end: boolean
+  current_period_end: number | null
+  current_period_start: number | null
+  created: number
+}
+
 export default function BillingPage() {
-  const { data: session, update } = useSession()
+  const { data: session, status: sessionStatus, update } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { userPlan } = usePermissions()
   const [loading, setLoading] = useState(false)
-  const [subscription, setSubscription] = useState<any>(null)
+  const [subscription, setSubscription] = useState<BillingSubscription | null>(null)
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true)
+  const [subscriptionError, setSubscriptionError] = useState<string | null>(null)
   const [selectedPromo, setSelectedPromo] = useState<any>(null)
   
 
   const fetchSubscription = useCallback(async () => {
     try {
       const response = await fetch('/api/stripe/subscription')
-      if (response.ok) {
-        const data = await response.json()
-        setSubscription(data)
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to load subscription details.')
+      }
+      setSubscription(data.subscription ?? null)
+      setSubscriptionError(null)
+      if (data.subscription?.plan && data.subscription.plan !== userPlan) {
+        await update()
       }
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'abonnement:', error)
+      console.error('Unable to load subscription:', error)
+      setSubscriptionError(error instanceof Error ? error.message : 'Unable to load subscription details.')
+    } finally {
+      setSubscriptionLoading(false)
     }
-  }, [])
+  }, [update, userPlan])
 
   useEffect(() => {
     let cancelled = false
@@ -118,8 +138,8 @@ export default function BillingPage() {
       }
 
       toast.success('Subscription canceled. You will keep access through the end of the billing period.')
-      fetchSubscription()
-      update()
+      await fetchSubscription()
+      await update()
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Something went wrong')
@@ -128,22 +148,17 @@ export default function BillingPage() {
     }
   }
 
-  if (!session || userPlan === 'free') {
+  if (sessionStatus === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            No active subscription
-          </h1>
-          <button
-            onClick={() => router.push('/dashboard/pricing')}
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all"
-          >
-            View plans
-          </button>
-        </div>
+        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
       </div>
     )
+  }
+
+  if (!session) {
+    router.replace('/auth/signin?callbackUrl=/dashboard/billing')
+    return null
   }
 
   return (
@@ -246,13 +261,17 @@ export default function BillingPage() {
             <div className={`px-4 py-2 rounded-full flex items-center gap-2 ${
               subscription?.cancel_at_period_end
                 ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
-                : 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                : userPlan === 'free'
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  : 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
             }`}>
               {subscription?.cancel_at_period_end ? (
                 <>
                   <XCircle className="w-5 h-5" />
                   <span className="font-medium">Canceled</span>
                 </>
+              ) : userPlan === 'free' ? (
+                <span className="font-medium">Free</span>
               ) : (
                 <>
                   <CheckCircle className="w-5 h-5" />
@@ -261,6 +280,19 @@ export default function BillingPage() {
               )}
             </div>
           </div>
+
+          {subscriptionLoading && (
+            <div className="mb-6 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Syncing subscription with Stripe...
+            </div>
+          )}
+
+          {subscriptionError && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+              {subscriptionError}
+            </div>
+          )}
 
           {subscription?.current_period_end && (
             <div className="space-y-3 mb-6">
@@ -303,6 +335,7 @@ export default function BillingPage() {
             </div>
           )}
 
+          {subscription ? (
           <div className="flex flex-col sm:flex-row gap-3">
             <motion.button
               onClick={handleManageSubscription}
@@ -336,6 +369,19 @@ export default function BillingPage() {
               </motion.button>
             )}
           </div>
+          ) : userPlan === 'free' ? (
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard/pricing')}
+              className="w-full rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-600 px-6 py-3 font-semibold text-white transition hover:from-violet-600 hover:to-fuchsia-700"
+            >
+              View paid plans
+            </button>
+          ) : (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">
+              Your complimentary {userPlan} access is active. No payment method is being charged.
+            </div>
+          )}
         </motion.div>
 
         {/* Plan actuel Premium */}
@@ -377,7 +423,7 @@ export default function BillingPage() {
           <ul className="list-disc space-y-2 pl-5 text-sm text-blue-800 dark:text-blue-400">
             <li>Your data is retained even if you cancel your subscription</li>
             <li>You can reactivate your subscription at any time</li>
-            <li>Plan changes take effect immediately</li>
+            <li>Changes made in Stripe are synchronized automatically</li>
             <li>Billing is monthly</li>
           </ul>
         </motion.div>

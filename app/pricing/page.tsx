@@ -53,6 +53,7 @@ const plans = [
     highlighted: false,
     features: [
       'Unlimited links',
+      'Custom domain with automatic HTTPS',
       'Custom themes and icons',
       'Premium deep links',
       'Real-time analytics',

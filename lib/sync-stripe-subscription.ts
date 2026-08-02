@@ -11,9 +11,11 @@ export async function syncStripeSubscription(
   expectedUserId?: string
 ) {
   const customerId = stripeId(subscription.customer)
+  const metadataUserId = subscription.metadata?.userId || undefined
+  const userId = expectedUserId || metadataUserId
 
-  const user = expectedUserId
-    ? await prisma.user.findUnique({ where: { id: expectedUserId } })
+  const user = userId
+    ? await prisma.user.findUnique({ where: { id: userId } })
     : await prisma.user.findFirst({
         where: {
           OR: [

@@ -18,7 +18,8 @@ interface PricingFeature {
 
 const features: PricingFeature[] = [
   { name: 'Pages', free: '1', standard: 'Unlimited', premium: 'Unlimited', icon: Sparkles },
-  { name: 'Links per page', free: '5', standard: '50', premium: 'Unlimited', icon: Zap },
+  { name: 'Links per page', free: '5', standard: 'Unlimited', premium: 'Unlimited', icon: Zap },
+  { name: 'Custom domain', free: false, standard: false, premium: true },
   { name: 'Animations', free: true, standard: true, premium: true },
   { name: 'Profile and cover images', free: true, standard: true, premium: true },
   { name: 'Online status', free: false, standard: true, premium: true },

@@ -5,6 +5,17 @@ import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { syncStripeSubscription } from '@/lib/sync-stripe-subscription'
 
+async function syncInvoiceSubscription(invoice: Stripe.Invoice) {
+  const subscriptionReference = invoice.parent?.subscription_details?.subscription
+  const subscriptionId = typeof subscriptionReference === 'string'
+    ? subscriptionReference
+    : subscriptionReference?.id
+
+  if (!subscriptionId) return
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  await syncStripeSubscription(subscription)
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const signature = (await headers()).get('stripe-signature')
@@ -54,6 +65,7 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
+        await syncInvoiceSubscription(invoice)
         const customerId =
           typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id
 
@@ -64,6 +76,11 @@ export async function POST(request: NextRequest) {
           })
           if (user) console.warn(`Stripe payment failed for user ${user.id}`)
         }
+        break
+      }
+
+      case 'invoice.paid': {
+        await syncInvoiceSubscription(event.data.object as Stripe.Invoice)
         break
       }
     }
