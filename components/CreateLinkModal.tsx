@@ -956,6 +956,7 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                         title={link.title || 'Type your button text'}
                         description={link.description}
                         icon={(link.iconMode || 'auto') === 'none' ? null : (link.iconImage || link.icon)}
+                        destinationUrl={(link.iconMode || 'auto') === 'auto' ? link.url : null}
                         accentColor={accentColor}
                         borderRadius={borderRadius}
                         disabled

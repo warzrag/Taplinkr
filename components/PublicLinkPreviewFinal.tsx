@@ -194,6 +194,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                   title={itemTitle}
                   description={item?.description || null}
                   icon={itemIcon}
+                  destinationUrl={item?.url || null}
                   accentColor={link?.color || '#8b5cf6'}
                   borderRadius={link?.borderRadius || 'rounded-2xl'}
                   onClick={() => trackAndOpen(item)}
