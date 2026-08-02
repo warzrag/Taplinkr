@@ -48,10 +48,13 @@ export default function LinksDashboard() {
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
   const [deletingLinkId, setDeletingLinkId] = useState<string | null>(null)
   const [liveClicks, setLiveClicks] = useState<Record<string, number>>({})
+  const [todayClicks, setTodayClicks] = useState<Record<string, number>>({})
   const [clickDeltas, setClickDeltas] = useState<Record<string, number>>({})
   const [clickCountsReady, setClickCountsReady] = useState(false)
+  const [todayClicksReady, setTodayClicksReady] = useState(false)
   const liveClicksRef = useRef<Record<string, number>>({})
   const clickCountsInitializedRef = useRef(false)
+  const todayClicksInitializedRef = useRef(false)
 
   useEffect(() => {
     setLiveClicks(current => {
@@ -63,6 +66,35 @@ export default function LinksDashboard() {
       return next
     })
   }, [personalLinks])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const loadTodayClicks = async () => {
+      try {
+        const start = new Date()
+        start.setHours(0, 0, 0, 0)
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+        const response = await fetch(
+          `/api/dashboard/metrics?period=today&start=${encodeURIComponent(start.toISOString())}&timeZone=${encodeURIComponent(timeZone)}`,
+          { cache: 'no-store', signal: controller.signal },
+        )
+        if (!response.ok) return
+
+        const data = await response.json()
+        const clicks = data.dailyClicks?.[0]?.clicks || {}
+        setTodayClicks(clicks)
+        todayClicksInitializedRef.current = true
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return
+      } finally {
+        if (!controller.signal.aborted) setTodayClicksReady(true)
+      }
+    }
+
+    void loadTodayClicks()
+    return () => controller.abort()
+  }, [])
 
   useEffect(() => {
     let stopped = false
@@ -111,6 +143,15 @@ export default function LinksDashboard() {
           setClickCountsReady(true)
 
           if (increases.length) {
+            if (todayClicksInitializedRef.current) {
+              setTodayClicks(current => ({
+                ...current,
+                ...Object.fromEntries(increases.map(item => [
+                  item.id,
+                  (current[item.id] || 0) + item.delta,
+                ])),
+              }))
+            }
             setClickDeltas(current => ({
               ...current,
               ...Object.fromEntries(increases.map(item => [item.id, item.delta])),
@@ -248,7 +289,7 @@ export default function LinksDashboard() {
                 return (
                 <article
                   key={item.id}
-                  className="group grid min-h-[88px] items-center gap-4 rounded-xl border border-[#282835] bg-[#0b0b12] px-4 py-3 transition hover:border-[#3a3a4a] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_170px_132px]"
+                  className="group grid min-h-[88px] items-center gap-4 rounded-xl border border-[#282835] bg-[#0b0b12] px-4 py-3 transition hover:border-[#3a3a4a] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_190px_132px]"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <GripVertical className="hidden h-5 w-5 shrink-0 text-[#5e5e70] sm:block" />
@@ -287,16 +328,24 @@ export default function LinksDashboard() {
                     }`}
                   >
                     <BarChart3 className="h-5 w-5 shrink-0 text-violet-400" />
-                    <motion.span
-                      key={`${item.id}-${displayedClicks ?? 'loading'}`}
-                      initial={clickDeltas[item.id] ? { opacity: 0.35, scale: 0.6, y: 8 } : false}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{ type: 'spring', stiffness: 480, damping: 22 }}
-                      className="text-xl font-bold leading-none"
-                    >
-                      {displayedClicks === null ? '—' : displayedClicks.toLocaleString('en-US')}
-                    </motion.span>
-                    <span className="text-xs font-semibold uppercase tracking-wide text-[#89899c]">clicks</span>
+                    <div className="min-w-0">
+                      <div className="flex items-baseline gap-2">
+                        <motion.span
+                          key={`${item.id}-${displayedClicks ?? 'loading'}`}
+                          initial={clickDeltas[item.id] ? { opacity: 0.35, scale: 0.6, y: 8 } : false}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          transition={{ type: 'spring', stiffness: 480, damping: 22 }}
+                          className="text-xl font-bold leading-none"
+                        >
+                          {displayedClicks === null ? '—' : displayedClicks.toLocaleString('en-US')}
+                        </motion.span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-[#77778a]">total</span>
+                      </div>
+                      <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-emerald-400/10 px-2 py-1 text-[11px] font-bold text-emerald-300">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        Today {todayClicksReady ? (todayClicks[item.id] || 0).toLocaleString('en-US') : '—'}
+                      </span>
+                    </div>
                     <AnimatePresence>
                       {clickDeltas[item.id] ? (
                         <motion.span
@@ -370,7 +419,7 @@ export default function LinksDashboard() {
 
         <p className="mt-4 flex items-center gap-2 text-xs text-[#6f6f81]">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-          Click counts update automatically every 5 seconds. Status changes are applied immediately.
+          Click counts update automatically. Status changes are applied immediately.
         </p>
       </div>
 
