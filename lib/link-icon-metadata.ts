@@ -13,6 +13,12 @@ const MAX_HTML_BYTES = 512 * 1024
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 const REQUEST_TIMEOUT_MS = 5_000
 
+// Some platforms deliberately block favicon requests made by servers. Keep a
+// tiny trusted SVG inline so their icon remains available in both the editor
+// and the published page without another network request.
+const ONLYFANS_ICON =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath fill="%2300AFF0" d="M24 4.003h-4.015c-3.45 0-5.3.197-6.748 1.957a7.996 7.996 0 1 0 2.103 9.211c3.182-.231 5.39-2.134 6.085-5.173 0 0-2.399.585-4.43 0 4.018-.777 6.333-3.037 7.005-5.995zM5.61 11.999A2.391 2.391 0 0 1 9.28 9.97a2.966 2.966 0 0 1 2.998-2.528h.008c-.92 1.778-1.407 3.352-1.998 5.263A2.392 2.392 0 0 1 5.61 12Zm2.386-7.996a7.996 7.996 0 1 0 7.996 7.996 7.996 7.996 0 0 0-7.996-7.996Zm0 10.394A2.399 2.399 0 1 1 10.395 12a2.396 2.396 0 0 1-2.399 2.398Z"/%3E%3C/svg%3E'
+
 const PLATFORM_HOSTS: Array<{ pattern: RegExp; name: string; home: string; icon?: string }> = [
   { pattern: /(^|\.)instagram\.com$/i, name: 'Instagram', home: 'https://www.instagram.com/' },
   { pattern: /(^|\.)tiktok\.com$/i, name: 'TikTok', home: 'https://www.tiktok.com/' },
@@ -20,7 +26,7 @@ const PLATFORM_HOSTS: Array<{ pattern: RegExp; name: string; home: string; icon?
   { pattern: /(^|\.)twitter\.com$|(^|\.)x\.com$/i, name: 'X', home: 'https://x.com/' },
   { pattern: /(^|\.)telegram\.me$|(^|\.)t\.me$/i, name: 'Telegram', home: 'https://telegram.org/' },
   { pattern: /(^|\.)spotify\.com$/i, name: 'Spotify', home: 'https://www.spotify.com/' },
-  { pattern: /(^|\.)onlyfans\.com$/i, name: 'OnlyFans', home: 'https://onlyfans.com/', icon: '/platform-icons/onlyfans.svg' },
+  { pattern: /(^|\.)onlyfans\.com$/i, name: 'OnlyFans', home: 'https://onlyfans.com/', icon: ONLYFANS_ICON },
   { pattern: /(^|\.)twitch\.tv$/i, name: 'Twitch', home: 'https://www.twitch.tv/' },
   { pattern: /(^|\.)discord\.(com|gg)$/i, name: 'Discord', home: 'https://discord.com/' },
   { pattern: /(^|\.)snapchat\.com$/i, name: 'Snapchat', home: 'https://www.snapchat.com/' },
