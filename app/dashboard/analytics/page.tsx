@@ -227,6 +227,7 @@ function IconButton({ label, onClick, reduceMotion, children }: { label: string;
 }
 
 function Overview({ data, insights, loading, reduceMotion, days }: { data: AnalyticsData; insights: Array<{ title: string; text: string; tone: string }>; loading: boolean; reduceMotion: boolean; days: number }) {
+  const dateRange = formatDateRange(data.summary)
   const cards = [
     { label: 'Verified clicks', value: data.totals.clicks, suffix: '', growth: data.totals.clicksGrowth, icon: MousePointer2, glow: 'from-violet-500/22' },
     { label: 'Unique visitors', value: data.totals.uniqueVisitors, suffix: '', icon: Users, glow: 'from-cyan-500/20' },
@@ -248,8 +249,8 @@ function Overview({ data, insights, loading, reduceMotion, days }: { data: Analy
 
     <section className={`${cardClass} relative mt-6 overflow-hidden p-5 sm:p-7`}>
       <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-violet-500/[0.08] blur-3xl" />
-      <div className="relative flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><h2 className="flex items-center gap-2 text-xl font-bold"><BarChart3 className="h-5 w-5 text-violet-300" />Traffic trend</h2><p className="mt-1 text-sm text-[#8e8ea1]">Clicks, visitors and landing-page views during the {days === 1 ? 'current day' : `last ${days} days`}.</p></div><div className="flex gap-4 text-xs text-white/55"><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-violet-400" />Clicks</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-cyan-300" />Visitors</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-sky-500" />Views</span></div></div>
-      <div className="relative mt-7 h-[360px] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data.summary}><defs><linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.38} /><stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} /></linearGradient><linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity={0.2} /><stop offset="100%" stopColor="#38bdf8" stopOpacity={0} /></linearGradient></defs><CartesianGrid stroke="#242431" strokeDasharray="4 8" vertical={false} /><XAxis dataKey="date" stroke="#6f6f81" tickLine={false} axisLine={false} tickFormatter={value => value.slice(5)} /><YAxis stroke="#6f6f81" tickLine={false} axisLine={false} allowDecimals={false} /><Tooltip content={<TrafficTooltip />} cursor={{ stroke: 'rgba(167, 139, 250, 0.42)', strokeWidth: 1.5, strokeDasharray: '4 5' }} wrapperStyle={{ outline: 'none', zIndex: 20 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="clicks" name="Verified clicks" stroke="#a78bfa" strokeWidth={3.5} fill="url(#clicksGradient)" activeDot={{ r: 6, fill: '#a78bfa', stroke: '#ffffff', strokeWidth: 2 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="visitors" name="Unique visitors" stroke="#67e8f9" strokeWidth={2.5} fill="transparent" activeDot={{ r: 5, fill: '#67e8f9', stroke: '#ffffff', strokeWidth: 2 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="views" name="Landing views" stroke="#38bdf8" strokeWidth={2} fill="url(#viewsGradient)" activeDot={{ r: 5, fill: '#38bdf8', stroke: '#ffffff', strokeWidth: 2 }} /></AreaChart></ResponsiveContainer></div>
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><h2 className="flex items-center gap-2 text-xl font-bold"><BarChart3 className="h-5 w-5 text-violet-300" />Traffic trend</h2><p className="mt-1 text-sm text-[#8e8ea1]">Clicks, visitors and landing-page views during the {days === 1 ? 'current day' : `last ${days} days`}.</p></div><div className="flex flex-col gap-3 sm:items-end"><span className="w-fit rounded-lg border border-white/[0.07] bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-white/65">{dateRange || 'Waiting for traffic data'}</span><div className="flex gap-4 text-xs text-white/55"><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-violet-400" />Clicks</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-cyan-300" />Visitors</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-sky-500" />Views</span></div></div></div>
+      <div className="relative mt-7 h-[360px] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data.summary} margin={{ top: 4, right: 8, bottom: 8, left: 0 }}><defs><linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.38} /><stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} /></linearGradient><linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity={0.2} /><stop offset="100%" stopColor="#38bdf8" stopOpacity={0} /></linearGradient></defs><CartesianGrid stroke="#242431" strokeDasharray="4 8" vertical={false} /><XAxis dataKey="date" stroke="#858598" tickLine={false} axisLine={false} tickFormatter={formatAxisDate} interval={days <= 7 ? 0 : 'preserveStartEnd'} minTickGap={days <= 30 ? 26 : 42} tickMargin={12} height={38} tick={{ fontSize: 12, fontWeight: 600 }} /><YAxis stroke="#6f6f81" tickLine={false} axisLine={false} allowDecimals={false} /><Tooltip content={<TrafficTooltip />} cursor={{ stroke: 'rgba(167, 139, 250, 0.42)', strokeWidth: 1.5, strokeDasharray: '4 5' }} wrapperStyle={{ outline: 'none', zIndex: 20 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="clicks" name="Verified clicks" stroke="#a78bfa" strokeWidth={3.5} fill="url(#clicksGradient)" activeDot={{ r: 6, fill: '#a78bfa', stroke: '#ffffff', strokeWidth: 2 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="visitors" name="Unique visitors" stroke="#67e8f9" strokeWidth={2.5} fill="transparent" activeDot={{ r: 5, fill: '#67e8f9', stroke: '#ffffff', strokeWidth: 2 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="views" name="Landing views" stroke="#38bdf8" strokeWidth={2} fill="url(#viewsGradient)" activeDot={{ r: 5, fill: '#38bdf8', stroke: '#ffffff', strokeWidth: 2 }} /></AreaChart></ResponsiveContainer></div>
     </section>
   </>
 }
@@ -295,7 +296,7 @@ function EmptyState({ title, text }: { title: string; text: string }) {
 function TrafficTooltip({ active, payload, label }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null
   const formattedDate = typeof label === 'string'
-    ? new Date(`${label}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    ? new Date(`${label}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
     : String(label || '')
   const colors: Record<string, string> = { clicks: '#a78bfa', visitors: '#67e8f9', views: '#38bdf8' }
 
@@ -311,6 +312,28 @@ function TrafficTooltip({ active, payload, label }: TooltipProps<number, string>
       })}
     </div>
   </motion.div>
+}
+
+function parseChartDate(value: string) {
+  const date = new Date(`${value}T12:00:00`)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function formatAxisDate(value: string) {
+  const date = parseChartDate(value)
+  return date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : value
+}
+
+function formatDateRange(summary: ChartPoint[]) {
+  if (!summary.length) return ''
+  const first = parseChartDate(summary[0].date)
+  const last = parseChartDate(summary[summary.length - 1].date)
+  if (!first || !last) return ''
+  if (first.getTime() === last.getTime()) {
+    return first.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  }
+  const sameYear = first.getFullYear() === last.getFullYear()
+  return `${first.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: sameYear ? undefined : 'numeric' })} – ${last.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
 }
 
 function HourlyTooltip({ active, payload, label }: TooltipProps<number, string>) {
