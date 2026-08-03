@@ -77,13 +77,6 @@ const periodLabels: Record<Period, string> = {
   '30d': 'Last 30 days',
 }
 
-function periodStart(period: Period) {
-  const start = new Date()
-  if (period !== 'today') start.setDate(start.getDate() - (period === '7d' ? 6 : 29))
-  start.setHours(0, 0, 0, 0)
-  return start.toISOString()
-}
-
 function Trend({ value, negativeIsGood = false }: { value: number; negativeIsGood?: boolean }) {
   if (value === 0) return <span className="text-xs font-bold text-[#77778a]">0%</span>
 
@@ -199,7 +192,7 @@ export default function Dashboard() {
       try {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
         const response = await fetch(
-          `/api/dashboard/metrics?period=${period}&start=${encodeURIComponent(periodStart(period))}&timeZone=${encodeURIComponent(timeZone)}`,
+          `/api/dashboard/metrics?period=${period}&timeZone=${encodeURIComponent(timeZone)}`,
           { cache: 'no-store' },
         )
         const data = await response.json()

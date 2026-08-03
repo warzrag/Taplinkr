@@ -75,11 +75,9 @@ export default function LinksDashboard() {
 
     const loadTodayClicks = async () => {
       try {
-        const start = new Date()
-        start.setHours(0, 0, 0, 0)
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
         const response = await fetch(
-          `/api/dashboard/metrics?period=today&start=${encodeURIComponent(start.toISOString())}&timeZone=${encodeURIComponent(timeZone)}`,
+          `/api/dashboard/metrics?period=today&timeZone=${encodeURIComponent(timeZone)}`,
           { cache: 'no-store', signal: controller.signal },
         )
         if (!response.ok) return

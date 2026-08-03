@@ -6,10 +6,16 @@ import {
   calculateDailyLinkClicks,
   calculateDashboardMetrics,
   calculateHourlyClicks,
-  dashboardPeriodStart,
+  dashboardDateKeys,
+  dateKeyInTimeZone,
   type DashboardPeriod,
 } from '@/lib/dashboard-metrics'
 import { prisma } from '@/lib/prisma'
+import {
+  isValidTimeZone,
+  readReportingTimeZone,
+  writeReportingTimeZone,
+} from '@/lib/reporting-timezone'
 
 const periods = new Set<DashboardPeriod>(['today', '7d', '30d'])
 
@@ -22,21 +28,42 @@ export async function GET(request: NextRequest) {
 
     const requestedPeriod = request.nextUrl.searchParams.get('period') as DashboardPeriod | null
     const period = requestedPeriod && periods.has(requestedPeriod) ? requestedPeriod : '30d'
-    const timeZone = request.nextUrl.searchParams.get('timeZone') || 'UTC'
     const now = new Date()
-    const requestedStart = request.nextUrl.searchParams.get('start')
-    const parsedStart = requestedStart ? new Date(requestedStart) : null
-    const earliestAllowed = new Date(now)
-    earliestAllowed.setUTCDate(earliestAllowed.getUTCDate() - 31)
-    const start = parsedStart && !Number.isNaN(parsedStart.getTime())
-      && parsedStart <= now && parsedStart >= earliestAllowed
-      ? parsedStart
-      : dashboardPeriodStart(period, now)
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { teamId: true },
+      select: {
+        teamId: true,
+        team: { select: { ownerId: true } },
+      },
     })
+    const reportingUserId = user?.team?.ownerId || session.user.id
+    const reportingProfile = await prisma.userProfile.findUnique({
+      where: { userId: reportingUserId },
+      select: { analytics: true },
+    })
+    const storedTimeZone = readReportingTimeZone(reportingProfile?.analytics)
+    const geoTimeZone = request.headers.get('x-vercel-ip-timezone')
+    const browserTimeZone = request.nextUrl.searchParams.get('timeZone')
+    const inferredTimeZone = isValidTimeZone(geoTimeZone)
+      ? geoTimeZone
+      : isValidTimeZone(browserTimeZone)
+        ? browserTimeZone
+        : 'UTC'
+    const timeZone = storedTimeZone || inferredTimeZone
+
+    if (!storedTimeZone) {
+      await prisma.userProfile.upsert({
+        where: { userId: reportingUserId },
+        create: {
+          userId: reportingUserId,
+          analytics: writeReportingTimeZone(null, timeZone),
+        },
+        update: {
+          analytics: writeReportingTimeZone(reportingProfile?.analytics, timeZone),
+        },
+      })
+    }
     const teamMembers = user?.teamId
       ? await prisma.user.findMany({
           where: { teamId: user.teamId },
@@ -109,16 +136,15 @@ export async function GET(request: NextRequest) {
     ])
     const allClicks = clickGroups.flat()
     const allFilteredClicks = filteredClickGroups.flat()
-    const recentClicks = allClicks
-      .filter(click => click.createdAt >= start && click.createdAt <= now)
-    const recentFilteredClicks = allFilteredClicks
-      .filter(click => click.createdAt >= start && click.createdAt <= now)
-
     const periodDays = period === 'today' ? 1 : period === '7d' ? 7 : 30
-    const previousStart = new Date(start)
-    previousStart.setUTCDate(previousStart.getUTCDate() - periodDays)
-    const previousClicks = allClicks.filter(click => click.createdAt >= previousStart && click.createdAt < start)
-    const previousFilteredClicks = allFilteredClicks.filter(click => click.createdAt >= previousStart && click.createdAt < start)
+    const currentDateKeys = dashboardDateKeys(period, now, timeZone)
+    const currentDates = new Set(currentDateKeys)
+    const previousDates = new Set(dashboardDateKeys(period, now, timeZone, periodDays))
+    const isInDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
+    const recentClicks = allClicks.filter(click => isInDates(click.createdAt, currentDates))
+    const recentFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, currentDates))
+    const previousClicks = allClicks.filter(click => isInDates(click.createdAt, previousDates))
+    const previousFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, previousDates))
     const directLinkIds = new Set<string>(
       links
         .filter((link: any) => link.isDirect)
@@ -188,8 +214,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       period,
-      start: start.toISOString(),
+      start: currentDateKeys[0],
       end: now.toISOString(),
+      timeZone,
       ...metrics,
       ...dailyBreakdown,
       hourlyClicks,

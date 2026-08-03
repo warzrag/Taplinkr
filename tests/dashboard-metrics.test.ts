@@ -74,6 +74,7 @@ describe('dashboard metrics', () => {
       '2026-07-26',
       '2026-07-27',
     ])
+    expect(dashboardDateKeys('today', now, 'Europe/Paris', 1)).toEqual(['2026-07-26'])
   })
 
   it('counts completed clicks per day and per link without counting page views', () => {

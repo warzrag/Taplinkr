@@ -123,9 +123,10 @@ export function calculateHourlyClicks(input: {
   return hours
 }
 
-export function dashboardDateKeys(period: DashboardPeriod, now: Date, timeZone: string) {
+export function dashboardDateKeys(period: DashboardPeriod, now: Date, timeZone: string, dayOffset = 0) {
   const [year, month, day] = dateKeyInTimeZone(now, timeZone).split('-').map(Number)
   const currentDay = new Date(Date.UTC(year, month - 1, day))
+  currentDay.setUTCDate(currentDay.getUTCDate() - dayOffset)
   const numberOfDays = period === 'today' ? 1 : period === '7d' ? 7 : 30
 
   return Array.from({ length: numberOfDays }, (_, index) => {
