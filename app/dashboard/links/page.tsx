@@ -281,7 +281,7 @@ export default function LinksDashboard() {
           </motion.button>
         </motion.header>
 
-        <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.48 }} className="mt-8 overflow-hidden rounded-[24px] border border-white/[0.075] bg-[#101018]/90 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.48 }} className="mt-8 overflow-visible rounded-[24px] border border-white/[0.075] bg-[#101018]/90 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl">
           {loading ? (
             <div className="space-y-2">
               {[1, 2, 3].map(item => <div key={item} className="h-[88px] animate-pulse rounded-xl bg-white/[0.035]" />)}
@@ -301,7 +301,7 @@ export default function LinksDashboard() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(index * 0.045, 0.32), duration: 0.36 }}
                   whileHover={reduceMotion ? undefined : { x: 4, scale: 1.002 }}
-                  className="group relative grid min-h-[88px] items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.075] bg-[#0a0a11]/90 px-4 py-3 transition-colors hover:border-violet-400/25 hover:bg-[#0d0d16] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_190px_132px]"
+                  className={`group relative grid min-h-[88px] items-center gap-4 overflow-visible rounded-2xl border border-white/[0.075] bg-[#0a0a11]/90 px-4 py-3 transition-colors hover:z-10 hover:border-violet-400/25 hover:bg-[#0d0d16] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_190px_132px] ${clickDeltas[item.id] ? 'z-20' : 'z-0'}`}
                 >
                   <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/0 to-transparent transition-all duration-300 group-hover:via-violet-400/80" />
                   <div className="flex min-w-0 items-center gap-3">
@@ -334,7 +334,7 @@ export default function LinksDashboard() {
 
                   <Link
                     href={`/dashboard/analytics/${item.id}`}
-                    className={`relative inline-flex items-center gap-2.5 rounded-xl border px-3 py-2 text-[#d6d6e0] transition duration-500 hover:text-violet-200 ${
+                    className={`relative z-10 inline-flex items-center gap-2.5 overflow-visible rounded-xl border px-3 py-2 text-[#d6d6e0] transition duration-500 hover:text-violet-200 ${
                       clickDeltas[item.id]
                         ? 'scale-[1.04] border-emerald-400/50 bg-emerald-400/10 shadow-[0_0_28px_rgba(52,211,153,0.22)]'
                         : 'border-violet-500/15 bg-violet-500/[0.07] hover:border-violet-500/35 hover:bg-violet-500/10'
@@ -367,7 +367,7 @@ export default function LinksDashboard() {
                           animate={{ opacity: 1, y: -18, scale: 1 }}
                           exit={{ opacity: 0, y: -30, scale: 0.85 }}
                           transition={{ duration: 0.55, ease: 'easeOut' }}
-                          className="pointer-events-none absolute -right-1 -top-1 rounded-full bg-emerald-400 px-2 py-0.5 text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/30"
+                          className="pointer-events-none absolute -right-1 -top-1 z-30 rounded-full bg-emerald-400 px-2 py-0.5 text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/30"
                         >
                           +{clickDeltas[item.id]}
                         </motion.span>
