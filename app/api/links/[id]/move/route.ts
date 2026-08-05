@@ -29,11 +29,23 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     const existingLink = await prisma.link.findUnique({
       where: { id: params.id },
     })
+    const linkOwner = existingLink && existingLink.userId !== currentUser.id
+      ? await prisma.user.findUnique({
+          where: { id: existingLink.userId },
+          select: { teamId: true },
+        })
+      : null
+    const isCurrentTeamLink = Boolean(
+      currentUser.teamId
+      && (
+        existingLink?.teamId === currentUser.teamId
+        || linkOwner?.teamId === currentUser.teamId
+      )
+    )
     const canMoveLink = existingLink && (
       existingLink.userId === currentUser.id
       || (
-        currentUser.teamId
-        && existingLink.teamId === currentUser.teamId
+        isCurrentTeamLink
         && hasTeamActionPermission(currentUser.teamRole, TeamAction.EDIT_LINK)
       )
     )
