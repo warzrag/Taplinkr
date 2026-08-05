@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Folder, Move, X } from 'lucide-react'
+import { Inbox, Move, X } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 interface Folder {
@@ -35,7 +35,7 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
         setFolders(data)
       }
     } catch (error) {
-      toast.error('Unable to load folders')
+      toast.error('Unable to load groups')
     } finally {
       setLoading(false)
     }
@@ -52,24 +52,24 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
         onClick={onClose}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+          className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-3xl border border-[#2a2a38] bg-[#0e0e17] p-6 text-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center space-x-2">
               <Move className="w-5 h-5" />
-              <span>Move to a folder</span>
+              <span>Move to a group</span>
             </h2>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              className="rounded-lg p-2 text-[#8d8d9f] transition-colors hover:bg-white/5 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
@@ -77,22 +77,22 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-400 border-t-transparent"></div>
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Option "Sans dossier" */}
+              {/* Ungrouped option */}
               {currentFolderId && (
                 <button
                   onClick={() => handleMove(null)}
-                  className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left border border-gray-200"
+                  className="flex w-full items-center space-x-3 rounded-xl border border-[#2b2b39] p-3 text-left transition-colors hover:border-violet-400/35 hover:bg-violet-500/10"
                 >
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <X className="w-4 h-4 text-gray-600" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-[#a0a0b2]">
+                    <Inbox className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="font-medium">Sans dossier</p>
-                    <p className="text-sm text-gray-500">Retirer du dossier actuel</p>
+                    <p className="font-medium">Ungrouped</p>
+                    <p className="text-sm text-[#7f7f91]">Remove from the current group</p>
                   </div>
                 </button>
               )}
@@ -103,10 +103,10 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
                   key={folder.id}
                   onClick={() => handleMove(folder.id)}
                   disabled={folder.id === currentFolderId}
-                  className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left border ${
+                  className={`flex w-full items-center space-x-3 rounded-xl border p-3 text-left transition-colors ${
                     folder.id === currentFolderId
-                      ? 'border-gray-300 bg-gray-100 opacity-50 cursor-not-allowed'
-                      : 'border-gray-200 hover:bg-gray-50'
+                      ? 'cursor-not-allowed border-violet-400/20 bg-violet-500/10 opacity-50'
+                      : 'border-[#2b2b39] hover:border-violet-400/35 hover:bg-violet-500/10'
                   }`}
                 >
                   <div
@@ -118,15 +118,15 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
                   <div>
                     <p className="font-medium">{folder.name}</p>
                     {folder.id === currentFolderId && (
-                      <p className="text-sm text-gray-500">Current folder</p>
+                      <p className="text-sm text-[#7f7f91]">Current group</p>
                     )}
                   </div>
                 </button>
               ))}
 
               {folders.length === 0 && (
-                <p className="text-center text-gray-500 py-8">
-                  No folders yet. Create one from the "Folders" tab.
+                <p className="py-8 text-center text-[#7f7f91]">
+                  No groups yet. Create one from the Links page.
                 </p>
               )}
             </div>

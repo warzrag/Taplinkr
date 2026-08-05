@@ -111,7 +111,7 @@ export default function ShareFoldersPage() {
               </div>
 
               <button
-                onClick={() => window.location.href = '/dashboard/folders'}
+                onClick={() => window.location.href = '/dashboard/links'}
                 className="w-full px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all"
               >
                 Back to folders

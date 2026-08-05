@@ -224,7 +224,7 @@ export function getUpgradeMessage(feature: keyof PlanLimits): string {
     maxPages: 'Upgrade to Standard to create unlimited pages',
     maxLinksPerPage: 'You reached the free plan limit of 5 links. Upgrade to create unlimited links',
     maxMultiLinks: 'You reached the free plan limit of 5 links per page. Upgrade to create unlimited links',
-    maxFolders: 'Upgrade to Standard to create more folders',
+    maxFolders: 'Upgrade to Standard to create more groups',
     hasAnalytics: 'This feature requires a paid plan',
     hasAdvancedAnalytics: 'Advanced analytics require the Standard plan',
     hasCustomThemes: 'Custom themes require the Standard plan',

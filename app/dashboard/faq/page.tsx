@@ -24,8 +24,8 @@ const faqs: FAQItem[] = [
   },
   {
     category: 'Features',
-    question: 'Can I organize links into folders?',
-    answer: 'Yes. You can create folders to organize links and reorder them with drag and drop.'
+    question: 'Can I organize links into groups?',
+    answer: 'Yes. Create groups directly on the Links page, then drag links between them or use the move button.'
   },
   {
     category: 'Features',

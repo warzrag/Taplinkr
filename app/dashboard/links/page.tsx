@@ -3,14 +3,19 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { DragEvent as ReactDragEvent } from 'react'
 import { toast } from 'react-hot-toast'
 import {
   BarChart3,
   Copy,
+  ChevronDown,
   Edit3,
+  FolderPlus,
   GripVertical,
+  Inbox,
   LayoutGrid,
+  Layers3,
   Link2,
   Loader2,
   Plus,
@@ -21,6 +26,7 @@ import {
 
 import { useLinks } from '@/contexts/LinksContext'
 import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
+import MoveToFolderMenu from '@/components/MoveToFolderMenu'
 import { reconcileLiveClickCounts } from '@/lib/live-click-counts'
 import { Link as LinkType } from '@/types'
 
@@ -43,9 +49,22 @@ function dashboardLinkName(item: LinkType) {
   return item.internalName?.trim() || item.title
 }
 
+interface LinkGroup {
+  id: string
+  name: string
+  description?: string
+  color: string
+  icon: string
+  children?: LinkGroup[]
+}
+
+function flattenGroups(groups: LinkGroup[]): LinkGroup[] {
+  return groups.flatMap(group => [group, ...flattenGroups(group.children || [])])
+}
+
 export default function LinksDashboard() {
   const reduceMotion = useReducedMotion()
-  const { personalLinks, loading, refreshLinks, updateLinkOptimistic } = useLinks()
+  const { personalLinks, folders, loading, refreshLinks, refreshFolders, updateLinkOptimistic } = useLinks()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [showCreatePicker, setShowCreatePicker] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
@@ -55,9 +74,42 @@ export default function LinksDashboard() {
   const [clickDeltas, setClickDeltas] = useState<Record<string, number>>({})
   const [clickCountsReady, setClickCountsReady] = useState(false)
   const [todayClicksReady, setTodayClicksReady] = useState(false)
+  const [showCreateGroup, setShowCreateGroup] = useState(false)
+  const [editingGroup, setEditingGroup] = useState<LinkGroup | null>(null)
+  const [newGroupName, setNewGroupName] = useState('')
+  const [creatingGroup, setCreatingGroup] = useState(false)
+  const [movingLink, setMovingLink] = useState<LinkType | null>(null)
+  const [movingLinkId, setMovingLinkId] = useState<string | null>(null)
+  const [dropTargetId, setDropTargetId] = useState<string | null | undefined>(undefined)
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
   const liveClicksRef = useRef<Record<string, number>>({})
   const clickCountsInitializedRef = useRef(false)
   const todayClicksInitializedRef = useRef(false)
+
+  const groups = useMemo(() => flattenGroups(folders as LinkGroup[]), [folders])
+  const knownGroupIds = useMemo(() => new Set(groups.map(group => group.id)), [groups])
+  const linkSections = useMemo(() => [
+    ...groups.map(group => ({
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      color: group.color,
+      icon: group.icon,
+      links: personalLinks.filter(item => item.folderId === group.id),
+    })),
+    {
+      id: null,
+      name: 'Ungrouped',
+      description: 'Links waiting to be organized',
+      color: '#8b5cf6',
+      icon: '',
+      links: personalLinks.filter(item => !item.folderId || !knownGroupIds.has(item.folderId)),
+    },
+  ], [groups, knownGroupIds, personalLinks])
+
+  useEffect(() => {
+    void refreshFolders()
+  }, [])
 
   useEffect(() => {
     setLiveClicks(current => {
@@ -212,6 +264,93 @@ export default function LinksDashboard() {
     toast.success('URL copied')
   }
 
+  const moveLinkToGroup = async (linkId: string, groupId: string | null) => {
+    if (movingLinkId === linkId) return
+    setMovingLinkId(linkId)
+    try {
+      const response = await fetch(`/api/links/${linkId}/move`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folderId: groupId }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        toast.error(data.error || 'Unable to move this link')
+        return
+      }
+
+      updateLinkOptimistic(linkId, { folderId: groupId || undefined })
+      localStorage.removeItem('links-cache')
+      localStorage.removeItem('folders-page-cache')
+      toast.success(groupId ? 'Link moved to group' : 'Link moved to Ungrouped')
+      await Promise.all([refreshLinks(), refreshFolders()])
+    } catch {
+      toast.error('Unable to move this link')
+    } finally {
+      setMovingLinkId(null)
+      setDropTargetId(undefined)
+    }
+  }
+
+  const saveGroup = async () => {
+    const name = newGroupName.trim()
+    if (!name || creatingGroup) return
+    setCreatingGroup(true)
+    try {
+      const response = await fetch(editingGroup ? `/api/folders/${editingGroup.id}` : '/api/folders', {
+        method: editingGroup ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          color: editingGroup?.color || '#8b5cf6',
+          icon: editingGroup?.icon || '✦',
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        toast.error(data.error || 'Unable to create the group')
+        return
+      }
+      setNewGroupName('')
+      setShowCreateGroup(false)
+      setEditingGroup(null)
+      toast.success(editingGroup ? 'Group updated' : 'Group created')
+      await refreshFolders()
+    } catch {
+      toast.error('Unable to create the group')
+    } finally {
+      setCreatingGroup(false)
+    }
+  }
+
+  const deleteGroup = async (group: LinkGroup) => {
+    const confirmed = window.confirm(`Delete “${group.name}”? Its links will move to Ungrouped and no click data will be deleted.`)
+    if (!confirmed) return
+    try {
+      const response = await fetch(`/api/folders/${group.id}`, { method: 'DELETE' })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        toast.error(data.error || 'Unable to delete this group')
+        return
+      }
+      localStorage.removeItem('links-cache')
+      localStorage.removeItem('folders-page-cache')
+      toast.success('Group deleted. Its links are now ungrouped.')
+      await Promise.all([refreshLinks(), refreshFolders()])
+    } catch {
+      toast.error('Unable to delete this group')
+    }
+  }
+
+  const toggleGroup = (groupKey: string) => {
+    setCollapsedGroups(current => {
+      const next = new Set(current)
+      if (next.has(groupKey)) next.delete(groupKey)
+      else next.add(groupKey)
+      return next
+    })
+  }
+
   const toggleLink = async (item: LinkType) => {
     const response = await fetch('/api/links/toggle', {
       method: 'PATCH',
@@ -268,15 +407,30 @@ export default function LinksDashboard() {
             <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Your links</h1>
             <p className="mt-2 text-base text-[#9494a7]">Create link pages or direct redirects.</p>
           </div>
-          <motion.button
-            whileHover={reduceMotion ? undefined : { y: -2, scale: 1.02 }}
-            whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-            onClick={() => setShowCreatePicker(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-gradient-to-r from-violet-600 to-violet-500 px-5 py-3 text-sm font-bold shadow-lg shadow-violet-950/35 transition hover:brightness-110"
-          >
-            <Plus className="h-4 w-4" />
-            Create link
-          </motion.button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <motion.button
+              whileHover={reduceMotion ? undefined : { y: -2 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+              onClick={() => {
+                setEditingGroup(null)
+                setNewGroupName('')
+                setShowCreateGroup(true)
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.035] px-5 py-3 text-sm font-bold transition hover:border-violet-400/30 hover:bg-violet-500/10"
+            >
+              <FolderPlus className="h-4 w-4" />
+              New group
+            </motion.button>
+            <motion.button
+              whileHover={reduceMotion ? undefined : { y: -2, scale: 1.02 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+              onClick={() => setShowCreatePicker(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-gradient-to-r from-violet-600 to-violet-500 px-5 py-3 text-sm font-bold shadow-lg shadow-violet-950/35 transition hover:brightness-110"
+            >
+              <Plus className="h-4 w-4" />
+              Create link
+            </motion.button>
+          </div>
         </motion.header>
 
         <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.48 }} className="mt-8 overflow-visible rounded-[24px] border border-white/[0.075] bg-[#101018]/90 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl">
@@ -285,8 +439,116 @@ export default function LinksDashboard() {
               {[1, 2, 3].map(item => <div key={item} className="h-[88px] animate-pulse rounded-xl bg-white/[0.035]" />)}
             </div>
           ) : personalLinks.length ? (
-            <div className="space-y-2">
-              {personalLinks.map((item, index) => {
+            <div className="space-y-4">
+              {linkSections.map(section => {
+                const groupKey = section.id || 'ungrouped'
+                const collapsed = collapsedGroups.has(groupKey)
+                const totalClicksInGroup = section.links.reduce(
+                  (sum, item) => sum + (liveClicks[item.id] ?? item.clicks ?? 0),
+                  0,
+                )
+                const todayClicksInGroup = section.links.reduce(
+                  (sum, item) => sum + (todayClicks[item.id] || 0),
+                  0,
+                )
+
+                return (
+                  <motion.section
+                    layout
+                    key={groupKey}
+                    onDragOver={event => {
+                      event.preventDefault()
+                      setDropTargetId(section.id)
+                    }}
+                    onDragLeave={event => {
+                      if (!event.currentTarget.contains(event.relatedTarget as Node)) setDropTargetId(undefined)
+                    }}
+                    onDrop={event => {
+                      event.preventDefault()
+                      const linkId = event.dataTransfer.getData('text/taplinkr-link')
+                      if (linkId) void moveLinkToGroup(linkId, section.id)
+                    }}
+                    className={`rounded-2xl border p-2 transition-all ${
+                      dropTargetId === section.id
+                        ? 'border-violet-400/60 bg-violet-500/10 shadow-[0_0_32px_rgba(139,92,246,0.14)]'
+                        : 'border-white/[0.065] bg-white/[0.018]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(groupKey)}
+                        className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-white/[0.035]"
+                      >
+                      <span
+                        className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/[0.08] text-lg"
+                        style={{ backgroundColor: `${section.color}18`, color: section.color }}
+                      >
+                        {section.id ? (section.icon || <Layers3 className="h-4 w-4" />) : <Inbox className="h-4 w-4" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-2">
+                          <span className="truncate font-bold text-white">{section.name}</span>
+                          <span className="rounded-full bg-white/[0.055] px-2 py-0.5 text-[11px] font-bold text-[#9b9bad]">{section.links.length}</span>
+                        </span>
+                        <span className="mt-0.5 block truncate text-xs text-[#79798c]">{section.description}</span>
+                      </span>
+                      <span className="hidden items-center gap-5 text-right sm:flex">
+                        <span>
+                          <span className="block text-sm font-black text-white">{totalClicksInGroup.toLocaleString('en-US')}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f6f81]">total</span>
+                        </span>
+                        <span>
+                          <span className="block text-sm font-black text-emerald-300">{todayClicksReady ? todayClicksInGroup.toLocaleString('en-US') : '—'}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f6f81]">today</span>
+                        </span>
+                      </span>
+                        <ChevronDown className={`h-4 w-4 shrink-0 text-[#77778a] transition-transform ${collapsed ? '-rotate-90' : ''}`} />
+                      </button>
+                      {section.id && (
+                        <div className="flex shrink-0 items-center pr-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const group = groups.find(item => item.id === section.id)
+                              if (!group) return
+                              setEditingGroup(group)
+                              setNewGroupName(group.name)
+                              setShowCreateGroup(true)
+                            }}
+                            className="rounded-lg p-2 text-[#77778a] transition hover:bg-white/5 hover:text-white"
+                            aria-label={`Edit ${section.name}`}
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const group = groups.find(item => item.id === section.id)
+                              if (group) void deleteGroup(group)
+                            }}
+                            className="rounded-lg p-2 text-[#77778a] transition hover:bg-red-500/10 hover:text-red-400"
+                            aria-label={`Delete ${section.name}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <AnimatePresence initial={false}>
+                      {!collapsed && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="space-y-2 overflow-visible"
+                        >
+                          {section.links.length === 0 ? (
+                            <div className="mx-1 mb-1 rounded-xl border border-dashed border-white/10 px-5 py-7 text-center text-sm text-[#77778a]">
+                              Drag a link here to add it to this group.
+                            </div>
+                          ) : section.links.map((item, index) => {
                 const displayedClicks = clickCountsReady
                   ? (liveClicks[item.id] ?? item.clicks ?? 0)
                   : null
@@ -294,6 +556,12 @@ export default function LinksDashboard() {
                 return (
                 <motion.article
                   key={item.id}
+                  draggable
+                  onDragStartCapture={(event: ReactDragEvent<HTMLElement>) => {
+                    event.dataTransfer.effectAllowed = 'move'
+                    event.dataTransfer.setData('text/taplinkr-link', item.id)
+                  }}
+                  onDragEndCapture={() => setDropTargetId(undefined)}
                   layout
                   initial={reduceMotion ? false : { opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -382,6 +650,15 @@ export default function LinksDashboard() {
                       <span className={`absolute top-1 h-5 w-5 rounded-full bg-[#0b0b12] transition-transform ${item.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
                     <button
+                      onClick={() => setMovingLink(item)}
+                      disabled={movingLinkId === item.id}
+                      className="rounded-lg p-2 text-[#8d8d9f] transition hover:bg-violet-500/10 hover:text-violet-300 disabled:opacity-40"
+                      aria-label="Move to group"
+                      title="Move to group"
+                    >
+                      {movingLinkId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Layers3 className="h-4 w-4" />}
+                    </button>
+                    <button
                       onClick={() => setEditingLink(item)}
                       className="rounded-lg p-2 text-[#8d8d9f] transition hover:bg-white/5 hover:text-white"
                       aria-label="Edit"
@@ -403,6 +680,12 @@ export default function LinksDashboard() {
                     )}
                   </div>
                 </motion.article>
+                )
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.section>
                 )
               })}
             </div>
@@ -500,6 +783,69 @@ export default function LinksDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {showCreateGroup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm"
+            onMouseDown={event => {
+              if (event.currentTarget === event.target) {
+                setShowCreateGroup(false)
+                setEditingGroup(null)
+              }
+            }}
+          >
+            <motion.form
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              onSubmit={event => {
+                event.preventDefault()
+                void saveGroup()
+              }}
+              className="w-full max-w-md rounded-3xl border border-[#2a2a38] bg-[#0e0e17] p-6 shadow-2xl"
+            >
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-500/15 text-violet-300">
+                <Layers3 className="h-5 w-5" />
+              </span>
+              <h2 className="mt-5 text-2xl font-black tracking-tight">{editingGroup ? 'Edit group' : 'Create a group'}</h2>
+              <p className="mt-2 text-sm leading-6 text-[#9292a5]">Group links by channel, campaign, creator or any workflow that makes sense to you.</p>
+              <label className="mt-6 block text-sm font-bold text-[#d8d8e2]" htmlFor="new-group-name">Group name</label>
+              <input
+                id="new-group-name"
+                autoFocus
+                value={newGroupName}
+                onChange={event => setNewGroupName(event.target.value)}
+                placeholder="e.g. Instagram, Reddit, Campaign A"
+                maxLength={60}
+                className="mt-2 w-full rounded-xl border border-[#30303f] bg-[#090910] px-4 py-3 text-white outline-none transition placeholder:text-[#5f5f70] focus:border-violet-400"
+              />
+              <div className="mt-6 flex justify-end gap-3">
+                <button type="button" onClick={() => { setShowCreateGroup(false); setEditingGroup(null) }} className="rounded-xl border border-[#30303f] px-4 py-3 text-sm font-bold text-[#a0a0b2] transition hover:bg-white/5 hover:text-white">Cancel</button>
+                <button type="submit" disabled={!newGroupName.trim() || creatingGroup} className="inline-flex items-center gap-2 rounded-xl bg-violet-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-45">
+                  {creatingGroup ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                  {editingGroup ? 'Save changes' : 'Create group'}
+                </button>
+              </div>
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {movingLink && (
+        <MoveToFolderMenu
+          linkId={movingLink.id}
+          currentFolderId={movingLink.folderId}
+          onClose={() => setMovingLink(null)}
+          onMove={(linkId, groupId) => {
+            setMovingLink(null)
+            void moveLinkToGroup(linkId, groupId)
+          }}
+        />
+      )}
 
       {(createMode || editingLink) && (
         <CreateLinkModal
