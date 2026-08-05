@@ -114,7 +114,7 @@ export function LinksProvider({ children }: { children: ReactNode }) {
     console.log('🔄 Chargement des liens...')
 
     try {
-      const response = await fetch('/api/links/fast', {
+      const response = await fetch(skipCache ? '/api/links/fast?fresh=1' : '/api/links/fast', {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',

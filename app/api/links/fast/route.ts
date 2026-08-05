@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -6,7 +6,7 @@ import { cache } from '@/lib/redis-cache'
 import { canDeleteLink, uniqueTeamMemberIds } from '@/lib/team-links'
 
 // Version optimisée pour le dashboard - charge uniquement l'essentiel
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -15,10 +15,11 @@ export async function GET() {
     }
 
     const cacheKey = `links:user:${session.user.id}`
+    const fresh = request.nextUrl.searchParams.get('fresh') === '1'
 
     // Essayer le cache Redis-like d'abord
     const cached = await cache.get(cacheKey)
-    if (cached) {
+    if (!fresh && cached) {
       console.log(`✅ Cache hit pour user ${session.user.id}`)
       return NextResponse.json(cached)
     }
@@ -70,6 +71,7 @@ export async function GET() {
         isActive: true,
         isDirect: true,
         directUrl: true,
+        folderId: true,
         order: true,
         createdAt: true,
         updatedAt: true,
@@ -117,7 +119,7 @@ export async function GET() {
     }
 
     // Mettre en cache pour 3 secondes seulement (pour mise à jour quasi-instantanée)
-    await cache.set(cacheKey, response, 3)
+    if (!fresh) await cache.set(cacheKey, response, 3)
 
     return NextResponse.json(response, {
       headers: {

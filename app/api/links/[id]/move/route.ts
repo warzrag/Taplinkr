@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
+import { cache } from '@/lib/redis-cache'
 import { hasTeamActionPermission, TeamAction } from '@/lib/team-roles'
 
 // PUT - Déplacer un lien vers un dossier
@@ -71,6 +72,10 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         folder: true
       }
     })
+
+    // The Links dashboard reads from the fast endpoint. Invalidate its short
+    // cache immediately so the saved group is not replaced by a stale result.
+    await cache.del(`links:user:${currentUser.id}`)
 
     return NextResponse.json(link)
   } catch (error) {
