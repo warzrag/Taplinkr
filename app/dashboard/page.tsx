@@ -27,13 +27,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLinks } from '@/contexts/LinksContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
+import { dashColors } from '@/lib/dashboard-colors'
 
 const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
   ssr: false,
   loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-black/70"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" /></div>,
 })
 
-const cardClass = 'rounded-[22px] border border-white/[0.075] bg-[#11111a]/90 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl'
+const cardClass = 'rounded-[22px] border border-white/[0.075] bg-dash-raised/90 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl'
 type Period = 'today' | '7d' | '30d'
 
 interface DashboardMetrics {
@@ -78,7 +79,7 @@ const periodLabels: Record<Period, string> = {
 }
 
 function Trend({ value, negativeIsGood = false }: { value: number; negativeIsGood?: boolean }) {
-  if (value === 0) return <span className="text-xs font-bold text-[#77778a]">0%</span>
+  if (value === 0) return <span className="text-xs font-bold text-dash-text6">0%</span>
 
   const rising = value >= 0
   const positive = negativeIsGood ? !rising : rising
@@ -150,7 +151,7 @@ function TrafficChart({ values, period }: { values: number[]; period: Period }) 
           {points.map((point, index) => point.value > 0 && (
             <g key={index} className="group">
               <circle cx={point.x} cy={point.y} r="12" fill="transparent" />
-              <circle cx={point.x} cy={point.y} r="4.5" fill="#c4b5fd" stroke="#16121f" strokeWidth="3" />
+              <circle cx={point.x} cy={point.y} r="4.5" fill="#c4b5fd" stroke={dashColors.overlay} strokeWidth="3" />
               <title>{point.value} click{point.value === 1 ? '' : 's'}</title>
             </g>
           ))}
@@ -159,7 +160,7 @@ function TrafficChart({ values, period }: { values: number[]; period: Period }) 
           <span>Peak {max.toLocaleString('en-US')}</span><span>Verified traffic</span>
         </div>
       </div>
-      <div className="mt-3 flex justify-between text-[11px] font-medium text-[#68687a]">
+      <div className="mt-3 flex justify-between text-[11px] font-medium text-dash-text6">
         <span>{period === 'today' ? '12 AM' : 'Start'}</span>
         <span>{period === 'today' ? 'Now' : periodLabels[period]}</span>
       </div>
@@ -235,22 +236,22 @@ export default function Dashboard() {
   ]
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#08080d] px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
+    <div className="relative min-h-screen overflow-hidden bg-dash-bg px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
       <DashboardAtmosphere />
       <div className="relative mx-auto max-w-[1500px]">
         <motion.header initial={reduceMotion ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-violet-300"><Sparkles className="h-3.5 w-3.5" />Overview</p>
             <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Good to see you, {name}</h1>
-            <p className="mt-2 text-sm text-[#858598]">Your real traffic and link performance at a glance.</p>
+            <p className="mt-2 text-sm text-dash-text5">Your real traffic and link performance at a glance.</p>
           </div>
-          <div className="inline-flex self-start rounded-2xl border border-white/[0.08] bg-[#11111a]/80 p-1.5 shadow-xl backdrop-blur-xl sm:self-auto">
+          <div className="inline-flex self-start rounded-2xl border border-white/[0.08] bg-dash-raised/80 p-1.5 shadow-xl backdrop-blur-xl sm:self-auto">
             {([['today', 'Today'], ['7d', '7 days'], ['30d', '30 days']] as Array<[Period, string]>).map(([value, label]) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setPeriod(value)}
-                className={`relative rounded-xl px-3.5 py-2 text-sm font-bold transition ${period === value ? 'text-white' : 'text-[#858598] hover:text-white'}`}
+                className={`relative rounded-xl px-3.5 py-2 text-sm font-bold transition ${period === value ? 'text-white' : 'text-dash-text5 hover:text-white'}`}
               >
                 {period === value && <motion.span layoutId="active-period" className="absolute inset-0 rounded-xl border border-white/10 bg-gradient-to-b from-violet-500 to-violet-600 shadow-lg shadow-violet-950/40" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
                 <span className="relative z-10">{label}</span>
@@ -269,7 +270,7 @@ export default function Dashboard() {
               <div className="relative">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-[#9a9aac]">{stat.label}</p>
+                  <p className="text-sm font-semibold text-dash-text4">{stat.label}</p>
                   <p className="mt-1 text-[11px] font-medium text-white/35">{stat.note}</p>
                   <AnimatePresence mode="wait"><motion.p key={`${stat.key}-${stat.value}-${metricsLoading}`} initial={reduceMotion ? false : { opacity: 0, y: 8, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -6 }} className="mt-4 text-3xl font-black tracking-[-0.04em] tabular-nums">
                     {metricsLoading ? '—' : `${stat.value.toLocaleString('en-US', { maximumFractionDigits: 1 })}${stat.suffix}`}
@@ -279,7 +280,7 @@ export default function Dashboard() {
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <Trend value={metrics.changes[stat.key]} negativeIsGood={stat.negativeIsGood} />
-                <span className="text-xs text-[#69697b]">vs previous period</span>
+                <span className="text-xs text-dash-text6">vs previous period</span>
               </div></div>
             </motion.article>
           ))}
@@ -292,11 +293,11 @@ export default function Dashboard() {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h2 className="flex items-center gap-2 text-lg font-bold"><Activity className="h-5 w-5 text-violet-300" />Traffic pulse</h2>
-                <p className="mt-1 text-sm text-[#7f7f92]">Real clicks · {periodLabels[period].toLowerCase()}</p>
+                <p className="mt-1 text-sm text-dash-text6">Real clicks · {periodLabels[period].toLowerCase()}</p>
               </div>
               <div className="text-right">
                 <p className="text-2xl font-black">{metrics.realClicks.toLocaleString('en-US')}</p>
-                <p className="text-xs text-[#6d6d80]">{metrics.pageViews.toLocaleString('en-US')} page views</p>
+                <p className="text-xs text-dash-text6">{metrics.pageViews.toLocaleString('en-US')} page views</p>
               </div>
             </div>
             {metricsLoading ? <div className="mt-8 h-52 animate-pulse rounded-xl bg-white/[0.025]" /> : <TrafficChart values={chartValues} period={period} />}
@@ -304,15 +305,15 @@ export default function Dashboard() {
           </motion.article>
 
           <motion.aside initial={reduceMotion ? false : { opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className={`${cardClass} overflow-hidden p-5`}>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#77778a]">Quick actions</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-dash-text6">Quick actions</p>
             <div className="mt-5 space-y-3">
               <motion.button whileHover={reduceMotion ? undefined : { scale: 1.02 }} whileTap={reduceMotion ? undefined : { scale: 0.98 }} onClick={() => setCreateMode('direct')} className="flex w-full items-center gap-3 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-3 text-left text-sm font-bold shadow-lg shadow-violet-950/30 transition hover:brightness-110">
                 <Zap className="h-4 w-4" /><span className="flex-1">Create direct link</span><ArrowRight className="h-4 w-4" />
               </motion.button>
-              <button onClick={() => setCreateMode('landing')} className="flex w-full items-center gap-3 rounded-xl border border-[#30303e] px-4 py-3 text-left text-sm font-bold transition hover:border-violet-500/50 hover:bg-violet-500/5">
+              <button onClick={() => setCreateMode('landing')} className="flex w-full items-center gap-3 rounded-xl border border-dash-line2 px-4 py-3 text-left text-sm font-bold transition hover:border-violet-500/50 hover:bg-violet-500/5">
                 <Plus className="h-4 w-4" /><span className="flex-1">Create landing page</span><ArrowRight className="h-4 w-4" />
               </button>
-              <Link href="/dashboard/visitors" className="flex w-full items-center gap-3 rounded-xl border border-[#30303e] px-4 py-3 text-left text-sm font-bold transition hover:border-violet-500/50 hover:bg-violet-500/5">
+              <Link href="/dashboard/visitors" className="flex w-full items-center gap-3 rounded-xl border border-dash-line2 px-4 py-3 text-left text-sm font-bold transition hover:border-violet-500/50 hover:bg-violet-500/5">
                 <BarChart3 className="h-4 w-4" /><span className="flex-1">Open click log</span><ExternalLink className="h-4 w-4" />
               </Link>
             </div>
@@ -324,50 +325,50 @@ export default function Dashboard() {
 
         <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
           <article className={`${cardClass} overflow-hidden`}>
-            <div className="flex items-center justify-between border-b border-[#252532] px-5 py-4">
-              <div><h2 className="font-bold">Top performing links</h2><p className="mt-1 text-xs text-[#77778a]">Ranked by real clicks</p></div>
+            <div className="flex items-center justify-between border-b border-dash-line px-5 py-4">
+              <div><h2 className="font-bold">Top performing links</h2><p className="mt-1 text-xs text-dash-text6">Ranked by real clicks</p></div>
               <Link href="/dashboard/links" className="text-xs font-bold text-violet-400 hover:text-violet-300">View links</Link>
             </div>
             {metrics.topLinks.length ? (
-              <div className="divide-y divide-[#20202b]">
+              <div className="divide-y divide-dash-line">
                 {metrics.topLinks.map((item, index) => {
                   const change = item.previousClicks === 0 ? (item.clicks ? 100 : 0) : ((item.clicks - item.previousClicks) / item.previousClicks) * 100
                   return (
                     <motion.div key={item.id} whileHover={reduceMotion ? undefined : { x: 4 }}><Link href={`/dashboard/analytics/${item.id}`} className="flex items-center gap-4 px-5 py-3.5 transition hover:bg-white/[0.025]">
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/[0.035] text-xs font-black text-[#8d8d9f]">{index + 1}</span>
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/[0.035] text-xs font-black text-dash-text5">{index + 1}</span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-3"><p className="truncate text-sm font-bold">{item.name}</p><Trend value={change} /></div>
                         <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]"><motion.div initial={{ width: 0 }} animate={{ width: `${(item.clicks / maxTopClicks) * 100}%` }} transition={{ duration: 0.7, delay: index * 0.08 }} className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400" /></div>
-                        <p className="mt-1.5 truncate text-[11px] text-[#656578]">/{item.slug}</p>
+                        <p className="mt-1.5 truncate text-[11px] text-dash-text6">/{item.slug}</p>
                       </div>
                       <p className="text-sm font-black tabular-nums">{item.clicks.toLocaleString('en-US')}</p>
                     </Link></motion.div>
                   )
                 })}
               </div>
-            ) : <div className="px-5 py-12 text-center text-sm text-[#747487]">No real clicks during this period.</div>}
+            ) : <div className="px-5 py-12 text-center text-sm text-dash-text6">No real clicks during this period.</div>}
           </article>
 
           <article className={`${cardClass} overflow-hidden`}>
-            <div className="flex items-center justify-between border-b border-[#252532] px-5 py-4">
-              <div><h2 className="font-bold">Recent activity</h2><p className="mt-1 text-xs text-[#77778a]">Latest verified clicks</p></div>
+            <div className="flex items-center justify-between border-b border-dash-line px-5 py-4">
+              <div><h2 className="font-bold">Recent activity</h2><p className="mt-1 text-xs text-dash-text6">Latest verified clicks</p></div>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />Live</span>
             </div>
             {metrics.recentActivity.length ? (
-              <div className="divide-y divide-[#20202b]">
+              <div className="divide-y divide-dash-line">
                 {metrics.recentActivity.map(activity => (
                   <motion.div key={activity.id} initial={reduceMotion ? false : { opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-white/[0.02]">
                     <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-violet-500/10 text-violet-400"><Link2 className="h-4 w-4" /></span>
-                    <div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{activity.linkName}</p><p className="mt-1 truncate text-[11px] text-[#707082]">{[activity.device, activity.country].filter(Boolean).join(' · ') || 'Verified visitor'}</p></div>
-                    <span className="inline-flex items-center gap-1 text-[10px] text-[#69697b]"><Clock3 className="h-3 w-3" />{new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date(activity.createdAt))}</span>
+                    <div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{activity.linkName}</p><p className="mt-1 truncate text-[11px] text-dash-text6">{[activity.device, activity.country].filter(Boolean).join(' · ') || 'Verified visitor'}</p></div>
+                    <span className="inline-flex items-center gap-1 text-[10px] text-dash-text6"><Clock3 className="h-3 w-3" />{new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date(activity.createdAt))}</span>
                   </motion.div>
                 ))}
               </div>
-            ) : <div className="px-5 py-12 text-center text-sm text-[#747487]">No recent activity for this period.</div>}
+            ) : <div className="px-5 py-12 text-center text-sm text-dash-text6">No recent activity for this period.</div>}
           </article>
         </section>
 
-        <p className="mt-5 text-center text-[11px] text-[#5f5f71]">Numbers refresh automatically every 5 minutes and when you return to this tab.</p>
+        <p className="mt-5 text-center text-[11px] text-dash-text6">Numbers refresh automatically every 5 minutes and when you return to this tab.</p>
       </div>
 
       {createMode && (

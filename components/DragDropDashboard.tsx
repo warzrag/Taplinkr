@@ -39,6 +39,7 @@ import {
 import { toast } from 'react-hot-toast'
 import { useLinks } from '@/contexts/LinksContext'
 import { Link as LinkType } from '@/types'
+import { dashColors } from '@/lib/dashboard-colors'
 
 interface Folder {
   id: string
@@ -138,7 +139,7 @@ function SortableFolder({
       }}
       className={`group relative overflow-hidden rounded-2xl border transition-all duration-150 ${
         isDragging ? 'opacity-50 shadow-2xl' : ''
-      } ${isOver ? 'border-violet-400 bg-violet-500/10 ring-2 ring-violet-400/30' : 'border-[#2a2a38] bg-[#11111a] hover:border-[#3a3a4a]'}`}
+      } ${isOver ? 'border-violet-400 bg-violet-500/10 ring-2 ring-violet-400/30' : 'border-dash-line2 bg-dash-raised hover:border-dash-line3'}`}
     >
       {/* En-tête du dossier */}
       <div
@@ -157,7 +158,7 @@ function SortableFolder({
             transition={{ duration: 0.2 }}
             className="flex-shrink-0"
           >
-            <ChevronRight className="h-5 w-5 text-[#77778a]" />
+            <ChevronRight className="h-5 w-5 text-dash-text6" />
           </motion.div>
           
           <div className="flex items-center space-x-3">
@@ -172,10 +173,10 @@ function SortableFolder({
             <div className="select-none min-w-0 flex-1">
               <h3 className="truncate font-semibold text-white">{folder.name}</h3>
               {folder.description && (
-                <p className="truncate text-sm text-[#858598]">{folder.description}</p>
+                <p className="truncate text-sm text-dash-text5">{folder.description}</p>
               )}
               <div className="flex items-center space-x-3 mt-1">
-                <span className="flex items-center text-xs text-[#858598]">
+                <span className="flex items-center text-xs text-dash-text5">
                   <Link2 className="w-3 h-3 mr-1" />
                   {(() => {
                     // 🔥 FIX: Compter TOUS les liens (directs + dans sous-dossiers)
@@ -209,7 +210,7 @@ function SortableFolder({
                   })()} {periodLabel ? `· ${periodLabel}` : ''}
                 </span>
                 {folder.children && folder.children.length > 0 && (
-                  <span className="flex items-center text-xs text-[#858598]">
+                  <span className="flex items-center text-xs text-dash-text5">
                     <FolderIcon className="w-3 h-3 mr-1" />
                     {folder.children.length} subfolder{folder.children.length !== 1 ? 's' : ''}
                   </span>
@@ -222,7 +223,7 @@ function SortableFolder({
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
           {/* Drag Handle for Folders */}
           <div
-            className="cursor-grab rounded-lg p-2 text-[#77778a] transition-colors hover:bg-white/5 hover:text-white active:cursor-grabbing"
+            className="cursor-grab rounded-lg p-2 text-dash-text6 transition-colors hover:bg-white/5 hover:text-white active:cursor-grabbing"
             title="Drag folder"
             {...attributes}
             {...listeners}
@@ -244,7 +245,7 @@ function SortableFolder({
           )}
           <motion.button
             onClick={onCreateSubfolder}
-            className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-2 text-xs font-semibold text-[#c7c7d2] transition hover:bg-white/10 hover:text-white"
+            className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-2 text-xs font-semibold text-dash-text2 transition hover:bg-white/10 hover:text-white"
             title="Add a subfolder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -268,7 +269,7 @@ function SortableFolder({
             onShare && (
               <motion.button
                 onClick={onShare}
-                className="rounded-lg p-2 text-[#77778a] transition hover:bg-white/5 hover:text-white"
+                className="rounded-lg p-2 text-dash-text6 transition hover:bg-white/5 hover:text-white"
                 title="Share with the team"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -279,7 +280,7 @@ function SortableFolder({
           )}
           <motion.button
             onClick={onEdit}
-            className="rounded-lg p-2 text-[#77778a] transition hover:bg-white/5 hover:text-white"
+            className="rounded-lg p-2 text-dash-text6 transition hover:bg-white/5 hover:text-white"
             title="Edit folder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -288,7 +289,7 @@ function SortableFolder({
           </motion.button>
           <motion.button
             onClick={onDelete}
-            className="rounded-lg p-2 text-[#77778a] transition hover:bg-red-500/10 hover:text-red-300"
+            className="rounded-lg p-2 text-dash-text6 transition hover:bg-red-500/10 hover:text-red-300"
             title="Delete folder"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -306,7 +307,7 @@ function SortableFolder({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="border-t border-[#252532] bg-[#0b0b12]"
+            className="border-t border-dash-line bg-dash-bg"
           >
             <div className="p-4">
               {children}
@@ -358,14 +359,14 @@ function SortableLink({
     <div
       ref={setNodeRef}
       style={style}
-      className={`mb-2 rounded-xl border border-[#292936] bg-[#151520] p-3 transition hover:border-[#3a3a4a] ${
+      className={`mb-2 rounded-xl border border-dash-line bg-dash-overlay p-3 transition hover:border-dash-line3 ${
         isDragging ? 'cursor-grabbing opacity-40' : ''
       }`}
     >
       <div className="flex min-w-0 items-center gap-2.5">
         <button
           type="button"
-          className="cursor-grab rounded-lg p-2 text-[#666679] hover:bg-white/5 hover:text-white active:cursor-grabbing"
+          className="cursor-grab rounded-lg p-2 text-dash-text6 hover:bg-white/5 hover:text-white active:cursor-grabbing"
           title="Drag this link"
           {...listeners}
           {...attributes}
@@ -376,23 +377,23 @@ function SortableLink({
           {link.icon || <Link2 className="h-4 w-4 text-violet-300" />}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#666679]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-dash-text6">
             {link.internalName ? 'Internal name' : 'Link name'}
           </p>
           <p className="mt-0.5 truncate text-sm font-semibold text-white">{link.internalName || link.title}</p>
-          <p className="mt-0.5 truncate text-xs text-[#77778a]">/{link.slug}</p>
+          <p className="mt-0.5 truncate text-xs text-dash-text6">/{link.slug}</p>
         </div>
         <button
           type="button"
           onClick={() => onEdit(link)}
-          className="shrink-0 rounded-lg p-2 text-[#858598] hover:bg-white/5 hover:text-white"
+          className="shrink-0 rounded-lg p-2 text-dash-text5 hover:bg-white/5 hover:text-white"
           title="Edit link"
         >
           <Edit2 className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#292936] pt-3">
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-dash-line pt-3">
         <span className="rounded-lg bg-violet-500/10 px-2.5 py-1.5 text-xs font-semibold text-violet-300">
           {(link.clicks || 0).toLocaleString()} clicks
         </span>
@@ -402,7 +403,7 @@ function SortableLink({
           className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
             link.isActive
               ? 'bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20'
-              : 'bg-white/5 text-[#858598] hover:bg-white/10'
+              : 'bg-white/5 text-dash-text5 hover:bg-white/10'
           }`}
           title={link.isActive ? 'Click to pause this link' : 'Click to activate this link'}
         >
@@ -413,7 +414,7 @@ function SortableLink({
           <button
             type="button"
             onClick={() => onRemoveFromFolder(link.id)}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#858598] hover:bg-cyan-500/10 hover:text-cyan-300"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-dash-text5 hover:bg-cyan-500/10 hover:text-cyan-300"
             title="Move back to Inbox"
           >
             <Link2 className="h-3.5 w-3.5" />
@@ -427,7 +428,7 @@ function SortableLink({
               onDelete(link.id)
             }
           }}
-          className="rounded-lg p-2 text-[#858598] hover:bg-red-500/10 hover:text-red-300"
+          className="rounded-lg p-2 text-dash-text5 hover:bg-red-500/10 hover:text-red-300"
           title="Delete link"
         >
           <Trash2 className="h-4 w-4" />
@@ -983,10 +984,10 @@ export default function DragDropDashboard({
                 className="flex flex-col items-center justify-center py-8 text-center"
               >
                 <div className="mb-3 rounded-xl bg-white/5 p-3">
-                  <FolderIcon className="h-7 w-7 text-[#77778a]" />
+                  <FolderIcon className="h-7 w-7 text-dash-text6" />
                 </div>
-                <p className="text-sm font-medium text-[#b0b0bf]">This folder is empty</p>
-                <p className="mt-1 text-xs text-[#6f6f81]">Drop a link here, or add a subfolder.</p>
+                <p className="text-sm font-medium text-dash-text3">This folder is empty</p>
+                <p className="mt-1 text-xs text-dash-text6">Drop a link here, or add a subfolder.</p>
               </motion.div>
             )}
           </div>
@@ -1005,7 +1006,7 @@ export default function DragDropDashboard({
       onDragCancel={handleDragCancel}
     >
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
-        <section className="space-y-5 rounded-3xl border border-[#252532] bg-[#0b0b12] p-4 sm:p-5">
+        <section className="space-y-5 rounded-3xl border border-dash-line bg-dash-bg p-4 sm:p-5">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center space-x-3">
               <div className="rounded-xl bg-violet-500/15 p-2.5">
@@ -1013,7 +1014,7 @@ export default function DragDropDashboard({
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">Your folders</h2>
-                <p className="text-sm text-[#858598]">Open a folder to see its links and subfolders.</p>
+                <p className="text-sm text-dash-text5">Open a folder to see its links and subfolders.</p>
               </div>
             </div>
             <motion.button
@@ -1035,7 +1036,7 @@ export default function DragDropDashboard({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="rounded-2xl border border-violet-500/30 bg-[#151520] p-5 shadow-xl"
+                className="rounded-2xl border border-violet-500/30 bg-dash-overlay p-5 shadow-xl"
               >
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
@@ -1053,7 +1054,7 @@ export default function DragDropDashboard({
                       onChange={(e) => setNewFolderName(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleCreateFolder()}
                       placeholder={createInParent ? 'Subfolder name (niche, platform, campaign...)' : 'Folder name'}
-                      className="flex-1 rounded-xl border border-[#343444] bg-[#0b0b12] px-4 py-3 text-sm text-white outline-none placeholder:text-[#686879] focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20"
+                      className="flex-1 rounded-xl border border-dash-line3 bg-dash-bg px-4 py-3 text-sm text-white outline-none placeholder:text-dash-text6 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20"
                       autoFocus
                     />
                     <div className="flex space-x-2 sm:space-x-3">
@@ -1071,7 +1072,7 @@ export default function DragDropDashboard({
                           setNewFolderName('')
                           setCreateInParent(null)
                         }}
-                        className="flex-1 rounded-xl border border-[#343444] px-6 py-3 text-sm font-semibold text-[#b0b0bf] hover:bg-white/5 hover:text-white sm:flex-none"
+                        className="flex-1 rounded-xl border border-dash-line3 px-6 py-3 text-sm font-semibold text-dash-text3 hover:bg-white/5 hover:text-white sm:flex-none"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -1080,7 +1081,7 @@ export default function DragDropDashboard({
                     </div>
                   </div>
                   {createInParent && (
-                    <p className="flex items-center text-sm text-[#858598]">
+                    <p className="flex items-center text-sm text-dash-text5">
                       <FolderIcon className="w-4 h-4 mr-1" />
                       Will be created in: <span className="font-medium ml-1">{folders.find(f => f.id === createInParent)?.name}</span>
                     </p>
@@ -1096,12 +1097,12 @@ export default function DragDropDashboard({
           >
             <div className="space-y-4">
               {folders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#343444] py-12 text-center">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-dash-line3 py-12 text-center">
                   <div className="mb-4 rounded-2xl bg-violet-500/10 p-4">
                     <FolderIcon className="h-10 w-10 text-violet-300" />
                   </div>
                   <h3 className="mb-2 text-lg font-semibold text-white">Create your first folder</h3>
-                  <p className="mb-4 max-w-xs text-sm text-[#858598]">
+                  <p className="mb-4 max-w-xs text-sm text-dash-text5">
                     Name it after a niche, platform, campaign, or anything useful to you.
                   </p>
                   <button
@@ -1122,14 +1123,14 @@ export default function DragDropDashboard({
           </SortableContext>
         </section>
 
-        <aside className="space-y-5 rounded-3xl border border-[#252532] bg-[#0b0b12] p-4 sm:p-5">
+        <aside className="space-y-5 rounded-3xl border border-dash-line bg-dash-bg p-4 sm:p-5">
           <div className="flex items-center space-x-3">
             <div className="rounded-xl bg-cyan-500/10 p-2.5">
               <Link2 className="w-6 h-6 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Inbox</h2>
-              <p className="text-sm text-[#858598]">
+              <p className="text-sm text-dash-text5">
                 {unorganizedLinks.length
                   ? `${unorganizedLinks.length} link${unorganizedLinks.length !== 1 ? 's' : ''} waiting to be filed`
                   : 'No links waiting to be filed'}
@@ -1144,10 +1145,10 @@ export default function DragDropDashboard({
             className={`min-h-[300px] rounded-2xl transition-all duration-150 ${
               isUnorganizedOver || overId === 'unorganized'
                 ? 'border-2 border-violet-400 bg-violet-500/10 shadow-lg shadow-violet-500/10'
-                : 'border-2 border-dashed border-[#343444] bg-[#11111a]'
+                : 'border-2 border-dashed border-dash-line3 bg-dash-raised'
             }`}
             animate={{
-              borderColor: isUnorganizedOver || overId === 'unorganized' ? '#a78bfa' : '#343444'
+              borderColor: isUnorganizedOver || overId === 'unorganized' ? '#a78bfa' : dashColors.line3
             }}
           >
             {unorganizedLinks.length === 0 ? (
@@ -1163,7 +1164,7 @@ export default function DragDropDashboard({
                   </div>
                 </motion.div>
                 <h3 className="mb-2 text-lg font-semibold text-white">Inbox cleared</h3>
-                <p className="max-w-xs text-sm text-[#858598]">
+                <p className="max-w-xs text-sm text-dash-text5">
                   New links without a folder will appear here automatically.
                 </p>
               </div>
@@ -1194,13 +1195,13 @@ export default function DragDropDashboard({
       {/* Overlay pendant le drag */}
       <DragOverlay dropAnimation={dropAnimationConfig}>
         {activeItem && activeId?.startsWith('link-') ? (
-          <div className="flex min-w-[320px] cursor-grabbing items-center gap-3 rounded-xl border border-violet-400 bg-[#151520] p-3 shadow-2xl shadow-violet-500/20">
+          <div className="flex min-w-[320px] cursor-grabbing items-center gap-3 rounded-xl border border-violet-400 bg-dash-overlay p-3 shadow-2xl shadow-violet-500/20">
             <GripVertical className="h-4 w-4 text-violet-300" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white">
                 {(activeItem as LinkType).internalName || (activeItem as LinkType).title}
               </p>
-              <p className="truncate text-xs text-[#858598]">/{(activeItem as LinkType).slug}</p>
+              <p className="truncate text-xs text-dash-text5">/{(activeItem as LinkType).slug}</p>
             </div>
           </div>
         ) : null}

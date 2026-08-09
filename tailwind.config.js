@@ -26,6 +26,26 @@ module.exports = {
         '3xl': '1600px',
       },
       colors: {
+        // Palette du dashboard. Remplace les 83 couleurs qui etaient ecrites en dur.
+        // 4 niveaux de profondeur (bg < surface < raised < overlay), 3 bordures,
+        // 6 niveaux de texte du plus lisible au plus discret.
+        dash: {
+          bg: '#09090f',       // fond de page
+          surface: '#0c0c14',  // barre laterale, bandeaux
+          raised: '#11111a',   // cartes
+          overlay: '#151520',  // menus, survol
+          input: '#242431',    // champs de saisie
+          line: '#22222d',     // bordure discrete
+          line2: '#2a2a38',    // bordure normale
+          line3: '#343444',    // bordure marquee
+          off: '#505060',      // point de statut / interrupteur inactif
+          text: '#f7f7fb',     // texte principal
+          text2: '#d6d6e0',
+          text3: '#b6b6c6',
+          text4: '#9292a5',
+          text5: '#858598',
+          text6: '#77778a',    // texte le plus discret
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

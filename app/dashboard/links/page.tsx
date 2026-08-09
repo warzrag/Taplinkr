@@ -398,14 +398,14 @@ export default function LinksDashboard() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#08080d] px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
+    <div className="relative min-h-screen overflow-hidden bg-dash-bg px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
       <DashboardAtmosphere />
       <div className="relative mx-auto max-w-[1500px]">
         <motion.header initial={reduceMotion ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-violet-300"><Sparkles className="h-3.5 w-3.5" />Link hub</p>
             <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Your links</h1>
-            <p className="mt-2 text-base text-[#9494a7]">Create link pages or direct redirects.</p>
+            <p className="mt-2 text-base text-dash-text4">Create link pages or direct redirects.</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <motion.button
@@ -433,7 +433,7 @@ export default function LinksDashboard() {
           </div>
         </motion.header>
 
-        <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.48 }} className="mt-8 overflow-visible rounded-[24px] border border-white/[0.075] bg-[#101018]/90 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.48 }} className="mt-8 overflow-visible rounded-[24px] border border-white/[0.075] bg-dash-raised/90 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl">
           {loading ? (
             <div className="space-y-2">
               {[1, 2, 3].map(item => <div key={item} className="h-[88px] animate-pulse rounded-xl bg-white/[0.035]" />)}
@@ -489,21 +489,21 @@ export default function LinksDashboard() {
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center gap-2">
                           <span className="truncate font-bold text-white">{section.name}</span>
-                          <span className="rounded-full bg-white/[0.055] px-2 py-0.5 text-[11px] font-bold text-[#9b9bad]">{section.links.length}</span>
+                          <span className="rounded-full bg-white/[0.055] px-2 py-0.5 text-[11px] font-bold text-dash-text4">{section.links.length}</span>
                         </span>
-                        <span className="mt-0.5 block truncate text-xs text-[#79798c]">{section.description}</span>
+                        <span className="mt-0.5 block truncate text-xs text-dash-text6">{section.description}</span>
                       </span>
                       <span className="hidden items-center gap-5 text-right sm:flex">
                         <span>
                           <span className="block text-sm font-black text-white">{totalClicksInGroup.toLocaleString('en-US')}</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f6f81]">total</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-dash-text6">total</span>
                         </span>
                         <span>
                           <span className="block text-sm font-black text-emerald-300">{todayClicksReady ? todayClicksInGroup.toLocaleString('en-US') : '—'}</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f6f81]">today</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-dash-text6">today</span>
                         </span>
                       </span>
-                        <ChevronDown className={`h-4 w-4 shrink-0 text-[#77778a] transition-transform ${collapsed ? '-rotate-90' : ''}`} />
+                        <ChevronDown className={`h-4 w-4 shrink-0 text-dash-text6 transition-transform ${collapsed ? '-rotate-90' : ''}`} />
                       </button>
                       {section.id && (
                         <div className="flex shrink-0 items-center pr-2">
@@ -516,7 +516,7 @@ export default function LinksDashboard() {
                               setNewGroupName(group.name)
                               setShowCreateGroup(true)
                             }}
-                            className="rounded-lg p-2 text-[#77778a] transition hover:bg-white/5 hover:text-white"
+                            className="rounded-lg p-2 text-dash-text6 transition hover:bg-white/5 hover:text-white"
                             aria-label={`Edit ${section.name}`}
                           >
                             <Edit3 className="h-4 w-4" />
@@ -527,7 +527,7 @@ export default function LinksDashboard() {
                               const group = groups.find(item => item.id === section.id)
                               if (group) void deleteGroup(group)
                             }}
-                            className="rounded-lg p-2 text-[#77778a] transition hover:bg-red-500/10 hover:text-red-400"
+                            className="rounded-lg p-2 text-dash-text6 transition hover:bg-red-500/10 hover:text-red-400"
                             aria-label={`Delete ${section.name}`}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -545,7 +545,7 @@ export default function LinksDashboard() {
                           className="space-y-2 overflow-visible"
                         >
                           {section.links.length === 0 ? (
-                            <div className="mx-1 mb-1 rounded-xl border border-dashed border-white/10 px-5 py-7 text-center text-sm text-[#77778a]">
+                            <div className="mx-1 mb-1 rounded-xl border border-dashed border-white/10 px-5 py-7 text-center text-sm text-dash-text6">
                               Drag a link here to add it to this group.
                             </div>
                           ) : section.links.map((item, index) => {
@@ -567,17 +567,17 @@ export default function LinksDashboard() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(index * 0.045, 0.32), duration: 0.36 }}
                   whileHover={reduceMotion ? undefined : { x: 4, scale: 1.002 }}
-                  className={`group relative grid min-h-[88px] items-center gap-4 overflow-visible rounded-2xl border border-white/[0.075] bg-[#0a0a11]/90 px-4 py-3 transition-colors hover:z-10 hover:border-violet-400/25 hover:bg-[#0d0d16] sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_190px_132px] ${clickDeltas[item.id] ? 'z-20' : 'z-0'}`}
+                  className={`group relative grid min-h-[88px] items-center gap-4 overflow-visible rounded-2xl border border-white/[0.075] bg-dash-bg/90 px-4 py-3 transition-colors hover:z-10 hover:border-violet-400/25 hover:bg-dash-surface sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_190px_132px] ${clickDeltas[item.id] ? 'z-20' : 'z-0'}`}
                 >
                   <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/0 to-transparent transition-all duration-300 group-hover:via-violet-400/80" />
                   <div className="flex min-w-0 items-center gap-3">
-                    <GripVertical className="hidden h-5 w-5 shrink-0 text-[#5e5e70] sm:block" />
-                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.35)]' : 'bg-[#505060]'}`} />
+                    <GripVertical className="hidden h-5 w-5 shrink-0 text-dash-text6 sm:block" />
+                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.35)]' : 'bg-dash-off'}`} />
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-white">{dashboardLinkName(item)}</p>
                       <button
                         onClick={() => copyUrl(item.slug)}
-                        className="mt-1 flex max-w-full items-center gap-1.5 text-left text-sm text-[#8e8ea1] transition hover:text-violet-300"
+                        className="mt-1 flex max-w-full items-center gap-1.5 text-left text-sm text-dash-text5 transition hover:text-violet-300"
                       >
                         <span className="truncate">taplinkr.com/{item.slug}</span>
                         <Copy className="h-3.5 w-3.5 shrink-0" />
@@ -594,13 +594,13 @@ export default function LinksDashboard() {
                     </span>
                   </div>
 
-                  <p className="truncate text-sm text-[#9292a5]">
+                  <p className="truncate text-sm text-dash-text4">
                     {item.isDirect ? destinationLabel(item.directUrl) : `${item.multiLinks?.length || 0} bouton${(item.multiLinks?.length || 0) > 1 ? 's' : ''}`}
                   </p>
 
                   <Link
                     href={`/dashboard/analytics/${item.id}`}
-                    className={`relative z-10 inline-flex items-center gap-2.5 overflow-visible rounded-xl border px-3 py-2 text-[#d6d6e0] transition duration-500 hover:text-violet-200 ${
+                    className={`relative z-10 inline-flex items-center gap-2.5 overflow-visible rounded-xl border px-3 py-2 text-dash-text2 transition duration-500 hover:text-violet-200 ${
                       clickDeltas[item.id]
                         ? 'scale-[1.04] border-emerald-400/50 bg-emerald-400/10 shadow-[0_0_28px_rgba(52,211,153,0.22)]'
                         : 'border-violet-500/15 bg-violet-500/[0.07] hover:border-violet-500/35 hover:bg-violet-500/10'
@@ -618,7 +618,7 @@ export default function LinksDashboard() {
                         >
                           {displayedClicks === null ? '—' : displayedClicks.toLocaleString('en-US')}
                         </motion.span>
-                        <span className="text-[10px] font-semibold uppercase tracking-wide text-[#77778a]">total</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-dash-text6">total</span>
                       </div>
                       <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-emerald-400/10 px-2 py-1 text-[11px] font-bold text-emerald-300">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -644,15 +644,15 @@ export default function LinksDashboard() {
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => toggleLink(item)}
-                      className={`relative h-7 w-12 rounded-full transition-all duration-300 ${item.isActive ? 'bg-violet-500 shadow-[0_0_18px_rgba(139,92,246,.28)]' : 'bg-[#343443]'}`}
+                      className={`relative h-7 w-12 rounded-full transition-all duration-300 ${item.isActive ? 'bg-violet-500 shadow-[0_0_18px_rgba(139,92,246,.28)]' : 'bg-dash-line3'}`}
                       aria-label={item.isActive ? 'Disable link' : 'Enable link'}
                     >
-                      <span className={`absolute top-1 h-5 w-5 rounded-full bg-[#0b0b12] transition-transform ${item.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                      <span className={`absolute top-1 h-5 w-5 rounded-full bg-dash-bg transition-transform ${item.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
                     <button
                       onClick={() => setMovingLink(item)}
                       disabled={movingLinkId === item.id}
-                      className="rounded-lg p-2 text-[#8d8d9f] transition hover:bg-violet-500/10 hover:text-violet-300 disabled:opacity-40"
+                      className="rounded-lg p-2 text-dash-text5 transition hover:bg-violet-500/10 hover:text-violet-300 disabled:opacity-40"
                       aria-label="Move to group"
                       title="Move to group"
                     >
@@ -660,7 +660,7 @@ export default function LinksDashboard() {
                     </button>
                     <button
                       onClick={() => setEditingLink(item)}
-                      className="rounded-lg p-2 text-[#8d8d9f] transition hover:bg-white/5 hover:text-white"
+                      className="rounded-lg p-2 text-dash-text5 transition hover:bg-white/5 hover:text-white"
                       aria-label="Edit"
                     >
                       <Edit3 className="h-4 w-4" />
@@ -669,7 +669,7 @@ export default function LinksDashboard() {
                       <button
                         onClick={() => deleteLink(item)}
                         disabled={deletingLinkId === item.id}
-                        className="rounded-lg p-2 text-[#8d8d9f] transition hover:bg-red-500/10 hover:text-red-400 disabled:cursor-wait disabled:opacity-50"
+                        className="rounded-lg p-2 text-dash-text5 transition hover:bg-red-500/10 hover:text-red-400 disabled:cursor-wait disabled:opacity-50"
                         aria-label={`Delete ${item.internalName || item.title}`}
                         title="Delete link"
                       >
@@ -695,11 +695,11 @@ export default function LinksDashboard() {
                 <Link2 className="h-6 w-6" />
               </span>
               <h2 className="mt-5 text-xl font-semibold">Create your first link</h2>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#8e8ea1]">
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-dash-text5">
                 A page groups several buttons. A direct link immediately redirects to a destination.
               </p>
               <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                <button onClick={() => setCreateMode('landing')} className="rounded-xl border border-[#30303e] px-4 py-3 text-sm font-semibold hover:border-violet-500/50">
+                <button onClick={() => setCreateMode('landing')} className="rounded-xl border border-dash-line2 px-4 py-3 text-sm font-semibold hover:border-violet-500/50">
                   Create a page
                 </button>
                 <button onClick={() => setCreateMode('direct')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold hover:bg-violet-400">
@@ -711,7 +711,7 @@ export default function LinksDashboard() {
           )}
         </motion.section>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mt-4 flex items-center gap-2 text-xs text-[#6f6f81]">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mt-4 flex items-center gap-2 text-xs text-dash-text6">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
           Click counts update automatically. Status changes are applied immediately.
         </motion.p>
@@ -732,12 +732,12 @@ export default function LinksDashboard() {
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
-              className="w-full max-w-xl rounded-3xl border border-[#2a2a38] bg-[#0e0e17] p-5 shadow-2xl sm:p-7"
+              className="w-full max-w-xl rounded-3xl border border-dash-line2 bg-dash-surface p-5 shadow-2xl sm:p-7"
             >
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-400">Create a new link</p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight">What do you want to create?</h2>
-                <p className="mt-2 text-sm text-[#9292a5]">Choose one option. Each has its own simple editor.</p>
+                <p className="mt-2 text-sm text-dash-text4">Choose one option. Each has its own simple editor.</p>
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -747,13 +747,13 @@ export default function LinksDashboard() {
                     setShowCreatePicker(false)
                     setCreateMode('landing')
                   }}
-                  className="group rounded-2xl border border-[#30303f] bg-white/[0.025] p-5 text-left transition hover:border-violet-400 hover:bg-violet-500/10"
+                  className="group rounded-2xl border border-dash-line2 bg-white/[0.025] p-5 text-left transition hover:border-violet-400 hover:bg-violet-500/10"
                 >
                   <span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-500/15 text-violet-300 transition group-hover:bg-violet-500 group-hover:text-white">
                     <LayoutGrid className="h-5 w-5" />
                   </span>
                   <span className="mt-5 block text-lg font-black">Landing page</span>
-                  <span className="mt-1 block text-sm leading-5 text-[#8f8fa3]">A customizable page with your profile and multiple links.</span>
+                  <span className="mt-1 block text-sm leading-5 text-dash-text5">A customizable page with your profile and multiple links.</span>
                 </button>
 
                 <button
@@ -762,20 +762,20 @@ export default function LinksDashboard() {
                     setShowCreatePicker(false)
                     setCreateMode('direct')
                   }}
-                  className="group rounded-2xl border border-[#30303f] bg-white/[0.025] p-5 text-left transition hover:border-violet-400 hover:bg-violet-500/10"
+                  className="group rounded-2xl border border-dash-line2 bg-white/[0.025] p-5 text-left transition hover:border-violet-400 hover:bg-violet-500/10"
                 >
                   <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/5 text-white/65 transition group-hover:bg-violet-500 group-hover:text-white">
                     <Link2 className="h-5 w-5" />
                   </span>
                   <span className="mt-5 block text-lg font-black">Direct link</span>
-                  <span className="mt-1 block text-sm leading-5 text-[#8f8fa3]">A short URL that redirects visitors to one destination.</span>
+                  <span className="mt-1 block text-sm leading-5 text-dash-text5">A short URL that redirects visitors to one destination.</span>
                 </button>
               </div>
 
               <button
                 type="button"
                 onClick={() => setShowCreatePicker(false)}
-                className="mt-5 w-full rounded-xl border border-[#2b2b39] px-4 py-3 text-sm font-bold text-[#a0a0b2] transition hover:bg-white/5 hover:text-white"
+                className="mt-5 w-full rounded-xl border border-dash-line px-4 py-3 text-sm font-bold text-dash-text4 transition hover:bg-white/5 hover:text-white"
               >
                 Cancel
               </button>
@@ -806,14 +806,14 @@ export default function LinksDashboard() {
                 event.preventDefault()
                 void saveGroup()
               }}
-              className="w-full max-w-md rounded-3xl border border-[#2a2a38] bg-[#0e0e17] p-6 shadow-2xl"
+              className="w-full max-w-md rounded-3xl border border-dash-line2 bg-dash-surface p-6 shadow-2xl"
             >
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-500/15 text-violet-300">
                 <Layers3 className="h-5 w-5" />
               </span>
               <h2 className="mt-5 text-2xl font-black tracking-tight">{editingGroup ? 'Edit group' : 'Create a group'}</h2>
-              <p className="mt-2 text-sm leading-6 text-[#9292a5]">Group links by channel, campaign, creator or any workflow that makes sense to you.</p>
-              <label className="mt-6 block text-sm font-bold text-[#d8d8e2]" htmlFor="new-group-name">Group name</label>
+              <p className="mt-2 text-sm leading-6 text-dash-text4">Group links by channel, campaign, creator or any workflow that makes sense to you.</p>
+              <label className="mt-6 block text-sm font-bold text-dash-text2" htmlFor="new-group-name">Group name</label>
               <input
                 id="new-group-name"
                 autoFocus
@@ -821,10 +821,10 @@ export default function LinksDashboard() {
                 onChange={event => setNewGroupName(event.target.value)}
                 placeholder="e.g. Instagram, Reddit, Campaign A"
                 maxLength={60}
-                className="mt-2 w-full rounded-xl border border-[#30303f] bg-[#090910] px-4 py-3 text-white outline-none transition placeholder:text-[#5f5f70] focus:border-violet-400"
+                className="mt-2 w-full rounded-xl border border-dash-line2 bg-dash-bg px-4 py-3 text-white outline-none transition placeholder:text-dash-text6 focus:border-violet-400"
               />
               <div className="mt-6 flex justify-end gap-3">
-                <button type="button" onClick={() => { setShowCreateGroup(false); setEditingGroup(null) }} className="rounded-xl border border-[#30303f] px-4 py-3 text-sm font-bold text-[#a0a0b2] transition hover:bg-white/5 hover:text-white">Cancel</button>
+                <button type="button" onClick={() => { setShowCreateGroup(false); setEditingGroup(null) }} className="rounded-xl border border-dash-line2 px-4 py-3 text-sm font-bold text-dash-text4 transition hover:bg-white/5 hover:text-white">Cancel</button>
                 <button type="submit" disabled={!newGroupName.trim() || creatingGroup} className="inline-flex items-center gap-2 rounded-xl bg-violet-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-45">
                   {creatingGroup ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                   {editingGroup ? 'Save changes' : 'Create group'}

@@ -176,14 +176,14 @@ export default function CustomDomainsPage() {
           <p className="mt-2 text-sm leading-6 text-white/50">The hosting connection still needs to be completed by the Taplinkr administrator.</p>
         </div>
       ) : (
-        <section className="mt-8 rounded-3xl border border-white/10 bg-[#111119] p-5 sm:p-7">
+        <section className="mt-8 rounded-3xl border border-white/10 bg-dash-raised p-5 sm:p-7">
           <div className="flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-violet-500/15 text-violet-300"><Globe2 className="h-5 w-5" /></span>
             <div><h2 className="font-semibold">Connect a domain</h2><p className="mt-1 text-xs text-white/40">You must own the domain and be able to edit its DNS settings.</p></div>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
             <label className="block"><span className="mb-2 block text-xs font-semibold text-white/60">Domain name</span><input value={domain} onChange={event => setDomain(event.target.value)} placeholder="creator.com or links.creator.com" className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none placeholder:text-white/25 focus:border-violet-500/60" /></label>
-            <label className="block"><span className="mb-2 block text-xs font-semibold text-white/60">Open this link</span><select value={linkId} onChange={event => setLinkId(event.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0d0d14] px-4 py-3 text-sm outline-none focus:border-violet-500/60"><option value="">Choose a destination</option>{data.links.map(link => <option key={link.id} value={link.id}>{link.internalName || link.title} — {link.isDirect ? 'Direct link' : 'Landing page'}</option>)}</select></label>
+            <label className="block"><span className="mb-2 block text-xs font-semibold text-white/60">Open this link</span><select value={linkId} onChange={event => setLinkId(event.target.value)} className="w-full rounded-xl border border-white/10 bg-dash-surface px-4 py-3 text-sm outline-none focus:border-violet-500/60"><option value="">Choose a destination</option>{data.links.map(link => <option key={link.id} value={link.id}>{link.internalName || link.title} — {link.isDirect ? 'Direct link' : 'Landing page'}</option>)}</select></label>
             <button onClick={connect} disabled={working === 'create' || !domain.trim() || !linkId || data.domains.length >= data.maxDomains} className="inline-flex h-[46px] items-center justify-center gap-2 rounded-xl bg-violet-500 px-5 text-sm font-semibold hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-40">{working === 'create' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe2 className="h-4 w-4" />} Connect</button>
           </div>
           <p className="mt-3 text-xs text-white/30">{data.domains.length} of {data.maxDomains} custom domains connected</p>
@@ -192,7 +192,7 @@ export default function CustomDomainsPage() {
 
       <div className="mt-6 space-y-5">
         {data?.domains.map(item => (
-          <section key={item.id} className="overflow-hidden rounded-3xl border border-white/10 bg-[#111119]">
+          <section key={item.id} className="overflow-hidden rounded-3xl border border-white/10 bg-dash-raised">
             <div className="flex flex-col gap-4 border-b border-white/10 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div className="flex min-w-0 items-center gap-4">
                 <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.verified ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/10 text-amber-300'}`}>{item.verified ? <Check className="h-5 w-5" /> : <Globe2 className="h-5 w-5" />}</span>
