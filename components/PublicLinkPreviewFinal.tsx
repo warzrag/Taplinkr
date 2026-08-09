@@ -237,7 +237,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
                           setConfirmingLink(null)
                           setTimeout(() => trackAndOpen(item), 0)
                         }}
-                        className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
+                        className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-white/90 dark:bg-white dark:text-neutral-950"
                       >
                         Confirm
                       </button>

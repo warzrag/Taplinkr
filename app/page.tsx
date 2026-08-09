@@ -124,7 +124,7 @@ export default function Home() {
                 <div className="mt-4 text-center"><p className="text-lg font-bold">Lea Martin</p><p className="text-sm text-neutral-600">Creator · design & lifestyle</p></div>
                 <div className="mt-6 space-y-3">
                   {['My new guide', 'Explore my portfolio', 'Follow me on Instagram'].map((label, index) => (
-                    <div key={label} className={`rounded-xl px-4 py-3 text-center text-sm font-semibold shadow-sm ${index === 0 ? 'bg-neutral-950 text-white' : 'bg-white text-neutral-900'}`}>{label}</div>
+                    <div key={label} className={`rounded-xl px-4 py-3 text-center text-sm font-semibold shadow-sm ${index === 0 ? 'bg-neutral-950 text-white' : 'bg-white text-neutral-900 dark:bg-white dark:text-neutral-900'}`}>{label}</div>
                   ))}
                 </div>
                 <div className="mt-6 grid grid-cols-3 gap-2 text-center text-xs text-neutral-500"><span>1,284 views</span><span>42% clicks</span><span>+18%</span></div>

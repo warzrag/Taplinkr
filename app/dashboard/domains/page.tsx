@@ -142,7 +142,7 @@ export default function CustomDomainsPage() {
           <AlertCircle className="h-9 w-9 text-red-300" />
           <h2 className="mt-5 text-xl font-semibold">We couldn't load your custom domains</h2>
           <p className="mt-2 text-sm leading-6 text-white/50">{loadError}</p>
-          <button onClick={() => void load()} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-white/90">
+          <button onClick={() => void load()} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-white/90 dark:bg-white dark:text-black">
             <RefreshCw className="h-4 w-4" /> Try again
           </button>
         </div>
@@ -213,7 +213,7 @@ export default function CustomDomainsPage() {
                 <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
                   <table className="w-full min-w-[680px] text-left text-sm"><thead className="border-b border-white/10 text-[11px] uppercase tracking-wider text-white/35"><tr><th className="px-4 py-3">Type</th><th className="px-4 py-3">Name</th><th className="px-4 py-3">Value</th><th className="w-12 px-4 py-3" /></tr></thead><tbody className="divide-y divide-white/[0.07]">{item.dnsRecords.map((record, index) => <tr key={`${record.type}:${record.name}:${index}`}><td className="px-4 py-3 font-semibold text-violet-300">{record.type}</td><td className="px-4 py-3 font-mono text-xs">{record.name}</td><td className="max-w-md truncate px-4 py-3 font-mono text-xs text-white/60">{record.value}</td><td className="px-4 py-3"><button onClick={() => void copy(record.value)} className="text-white/40 hover:text-white" aria-label="Copy value"><Copy className="h-4 w-4" /></button></td></tr>)}</tbody></table>
                 </div>
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/35">DNS changes often appear within minutes but can occasionally take up to 48 hours.</p><button onClick={() => void verify(item)} disabled={working === `verify:${item.id}`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-50">{working === `verify:${item.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Verify DNS</button></div>
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/35">DNS changes often appear within minutes but can occasionally take up to 48 hours.</p><button onClick={() => void verify(item)} disabled={working === `verify:${item.id}`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-50 dark:bg-white dark:text-black">{working === `verify:${item.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Verify DNS</button></div>
               </div>
             )}
           </section>
