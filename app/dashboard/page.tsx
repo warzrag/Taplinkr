@@ -27,7 +27,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLinks } from '@/contexts/LinksContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
-import { dashColors } from '@/lib/dashboard-colors'
 
 const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
   ssr: false,
@@ -96,10 +95,38 @@ function TrafficChart({ values, period }: { values: number[]; period: Period }) 
   const max = Math.max(1, ...values)
   const total = values.reduce((sum, value) => sum + value, 0)
   const width = 800
-  const height = 220
-  const chartTop = 14
-  const chartBottom = 202
+  const height = 200
+  const chartTop = 10
+  const chartBottom = 190
   const usableHeight = chartBottom - chartTop
+
+  // Les lignes de repere et leurs etiquettes sont calculees a partir des memes
+  // constantes, pour qu'elles ne puissent pas se desaligner.
+  const gridRows = [0, 1, 2, 3].map(row => {
+    const y = chartTop + (usableHeight / 3) * row
+    return { y, pct: (y / height) * 100, value: Math.round((max * (3 - row)) / 3) }
+  })
+
+  // Etiquettes horizontales : pour "today", l'index est l'heure.
+  const hourName = (hour: number) => {
+    if (hour === 0) return '12 AM'
+    if (hour === 12) return '12 PM'
+    return hour < 12 ? `${hour} AM` : `${hour - 12} PM`
+  }
+  const lastIndex = Math.max(1, values.length - 1)
+  const xLabels = period === 'today'
+    ? [
+        ...[0, 6, 12, 18]
+          .filter(hour => hour < values.length)
+          .map(hour => ({ pct: (hour / lastIndex) * 100, label: hourName(hour) }))
+          // on ecarte celles qui tomberaient sur "Now"
+          .filter(item => item.pct < 86),
+        { pct: 100, label: 'Now' },
+      ]
+    : [
+        { pct: 0, label: periodLabels[period] },
+        { pct: 100, label: 'Today' },
+      ]
   const points = values.map((value, index) => ({
     x: values.length <= 1 ? width / 2 : (index / (values.length - 1)) * width,
     y: chartBottom - (value / max) * usableHeight,
@@ -113,8 +140,22 @@ function TrafficChart({ values, period }: { values: number[]; period: Period }) 
     : `M 0 ${chartBottom} L ${width} ${chartBottom} Z`
 
   return (
-    <div className="mt-6" aria-label={`${total} real clicks in ${periodLabels[period].toLowerCase()}`}>
-      <div className="relative h-[230px] overflow-hidden rounded-2xl border border-white/[0.045] bg-gradient-to-b from-white/[0.025] to-transparent px-2 pt-2">
+    <div className="mt-5 flex gap-2.5" aria-label={`${total} real clicks in ${periodLabels[period].toLowerCase()}`}>
+      {/* Echelle verticale : sans elle, les lignes en pointilles ne voulaient rien dire. */}
+      <div className="relative h-[200px] w-10 shrink-0">
+        {gridRows.map(row => (
+          <span
+            key={row.y}
+            className="absolute right-0 -translate-y-1/2 whitespace-nowrap text-[10px] font-medium tabular-nums text-dash-text6"
+            style={{ top: `${row.pct}%` }}
+          >
+            {row.value.toLocaleString('en-US')}
+          </span>
+        ))}
+      </div>
+
+      <div className="min-w-0 flex-1">
+      <div className="relative h-[200px] rounded-2xl border border-white/[0.045] bg-gradient-to-b from-white/[0.025] to-transparent">
         <svg className="h-full w-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img">
           <defs>
             <linearGradient id="trafficArea" x1="0" x2="0" y1="0" y2="1">
@@ -131,8 +172,8 @@ function TrafficChart({ values, period }: { values: number[]; period: Period }) 
               <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
           </defs>
-          {[0, 1, 2, 3].map(row => (
-            <line key={row} x1="0" x2={width} y1={chartTop + (usableHeight / 3) * row} y2={chartTop + (usableHeight / 3) * row} stroke="white" strokeOpacity="0.055" strokeDasharray="5 8" />
+          {gridRows.map(row => (
+            <line key={row.y} x1="0" x2={width} y1={row.y} y2={row.y} stroke="white" strokeOpacity="0.055" strokeDasharray="5 8" />
           ))}
           <motion.path key={`area-${period}-${values.join('-')}`} d={areaPath} fill="url(#trafficArea)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }} />
           <motion.path
@@ -148,21 +189,37 @@ function TrafficChart({ values, period }: { values: number[]; period: Period }) 
             animate={{ pathLength: 1, opacity: 1 }}
             transition={{ duration: 0.9, ease: 'easeOut' }}
           />
-          {points.map((point, index) => point.value > 0 && (
-            <g key={index} className="group">
-              <circle cx={point.x} cy={point.y} r="12" fill="transparent" />
-              <circle cx={point.x} cy={point.y} r="4.5" fill="#c4b5fd" stroke={dashColors.overlay} strokeWidth="3" />
-              <title>{point.value} click{point.value === 1 ? '' : 's'}</title>
-            </g>
-          ))}
         </svg>
+
+        {/* Les points sont poses en HTML et non en SVG : le graphique est etire
+            horizontalement (preserveAspectRatio="none"), ce qui transformait les
+            cercles SVG en ovales. Le reperage est le meme, donc ils restent alignes. */}
+        {points.map((point, index) => point.value > 0 && (
+          <span
+            key={index}
+            title={`${point.value.toLocaleString('en-US')} click${point.value === 1 ? '' : 's'}`}
+            className="absolute h-[9px] w-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-300 ring-[3px] ring-dash-overlay"
+            style={{ left: `${(point.x / width) * 100}%`, top: `${(point.y / height) * 100}%` }}
+          />
+        ))}
       </div>
-      {/* Ces reperes etaient poses par-dessus la courbe et la recouvraient des que
-          le pic montait a droite. Ils sont maintenant sur la ligne d'axe. */}
-      <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-dash-text6">
-        <span>{period === 'today' ? '12 AM' : 'Start'}</span>
-        <span className="tabular-nums">Peak {max.toLocaleString('en-US')}</span>
-        <span>{period === 'today' ? 'Now' : periodLabels[period]}</span>
+
+      {/* Echelle horizontale : il n'y avait que deux reperes pour 24 points. */}
+      <div className="relative mt-2.5 h-4 text-[11px] font-medium text-dash-text6">
+        {xLabels.map(item => (
+          <span
+            key={item.label}
+            className="absolute whitespace-nowrap"
+            style={
+              item.pct === 0 ? { left: 0 }
+              : item.pct === 100 ? { right: 0 }
+              : { left: `${item.pct}%`, transform: 'translateX(-50%)' }
+            }
+          >
+            {item.label}
+          </span>
+        ))}
+      </div>
       </div>
     </div>
   )
@@ -294,15 +351,24 @@ export default function Dashboard() {
             <div className="relative">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h2 className="flex items-center gap-2 text-lg font-bold"><Activity className="h-5 w-5 text-violet-300" />Traffic pulse</h2>
-                <p className="mt-1 text-sm text-dash-text6">Real clicks · {periodLabels[period].toLowerCase()}</p>
+                {/* "Traffic pulse" ne disait pas ce qui etait mesure. */}
+                <h2 className="flex items-center gap-2 text-lg font-bold"><Activity className="h-5 w-5 text-violet-300" />{period === 'today' ? 'Clicks per hour' : 'Clicks per day'}</h2>
+                <p className="mt-1 text-sm text-dash-text6">Verified clicks · {periodLabels[period].toLowerCase()}</p>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-black">{metrics.realClicks.toLocaleString('en-US')}</p>
-                <p className="text-xs text-dash-text6">{metrics.pageViews.toLocaleString('en-US')} page views</p>
+              {/* Le total et le nombre de vues portaient deux noms differents pour
+                  une meme valeur. Chacun est maintenant explicitement etiquete. */}
+              <div className="flex gap-6 text-right">
+                <div>
+                  <p className="text-2xl font-black tabular-nums">{metrics.realClicks.toLocaleString('en-US')}</p>
+                  <p className="text-xs text-dash-text6">clicks</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black tabular-nums text-dash-text4">{metrics.pageViews.toLocaleString('en-US')}</p>
+                  <p className="text-xs text-dash-text6">page views</p>
+                </div>
               </div>
             </div>
-            {metricsLoading ? <div className="mt-8 h-52 animate-pulse rounded-xl bg-white/[0.025]" /> : <TrafficChart values={chartValues} period={period} />}
+            {metricsLoading ? <div className="mt-5 h-[226px] animate-pulse rounded-2xl bg-white/[0.025]" /> : <TrafficChart values={chartValues} period={period} />}
             </div>
           </motion.article>
 
