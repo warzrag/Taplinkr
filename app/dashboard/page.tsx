@@ -156,12 +156,12 @@ function TrafficChart({ values, period }: { values: number[]; period: Period }) 
             </g>
           ))}
         </svg>
-        <div className="pointer-events-none absolute inset-x-5 top-5 flex justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-white/20">
-          <span>Peak {max.toLocaleString('en-US')}</span><span>Verified traffic</span>
-        </div>
       </div>
-      <div className="mt-3 flex justify-between text-[11px] font-medium text-dash-text6">
+      {/* Ces reperes etaient poses par-dessus la courbe et la recouvraient des que
+          le pic montait a droite. Ils sont maintenant sur la ligne d'axe. */}
+      <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-dash-text6">
         <span>{period === 'today' ? '12 AM' : 'Start'}</span>
+        <span className="tabular-nums">Peak {max.toLocaleString('en-US')}</span>
         <span>{period === 'today' ? 'Now' : periodLabels[period]}</span>
       </div>
     </div>
@@ -229,10 +229,12 @@ export default function Dashboard() {
   )
   const maxTopClicks = Math.max(1, ...metrics.topLinks.map(link => link.clicks))
   const stats = [
-    { key: 'realClicks' as const, label: 'Real clicks', note: 'Verified actions', value: metrics.realClicks, suffix: '', icon: MousePointerClick, color: 'text-violet-300', glow: 'from-violet-500/20 via-violet-500/5' },
-    { key: 'uniqueVisitors' as const, label: 'Unique visitors', note: 'People reached', value: metrics.uniqueVisitors, suffix: '', icon: Users, color: 'text-cyan-300', glow: 'from-cyan-500/20 via-cyan-500/5' },
-    { key: 'clickThroughRate' as const, label: 'Conversion rate', note: 'Views that clicked', value: metrics.clickThroughRate, suffix: '%', icon: Percent, color: 'text-emerald-300', glow: 'from-emerald-500/20 via-emerald-500/5' },
-    { key: 'botsFiltered' as const, label: 'Bots filtered', note: 'Noise removed', value: metrics.botsFiltered, suffix: '', icon: Bot, color: 'text-amber-300', glow: 'from-amber-500/20 via-amber-500/5', negativeIsGood: true },
+    // Ces 4 mesures sont de meme nature : elles se ressemblent volontairement.
+    // La seule couleur porteuse de sens est celle de la variation (vert / rouge).
+    { key: 'realClicks' as const, label: 'Real clicks', note: 'Verified actions', value: metrics.realClicks, suffix: '', icon: MousePointerClick },
+    { key: 'uniqueVisitors' as const, label: 'Unique visitors', note: 'People reached', value: metrics.uniqueVisitors, suffix: '', icon: Users },
+    { key: 'clickThroughRate' as const, label: 'Conversion rate', note: 'Views that clicked', value: metrics.clickThroughRate, suffix: '%', icon: Percent },
+    { key: 'botsFiltered' as const, label: 'Bots filtered', note: 'Noise removed', value: metrics.botsFiltered, suffix: '', icon: Bot, negativeIsGood: true },
   ]
 
   return (
@@ -242,8 +244,10 @@ export default function Dashboard() {
         <motion.header initial={reduceMotion ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-violet-300"><Sparkles className="h-3.5 w-3.5" />Overview</p>
-            <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Good to see you, {name}</h1>
-            <p className="mt-2 text-sm text-dash-text5">Your real traffic and link performance at a glance.</p>
+            {/* Un salut n'apporte aucune information : il ne doit pas etre l'element
+                le plus gros d'un tableau de bord. Les chiffres passent devant. */}
+            <h1 className="mt-1.5 text-2xl font-bold tracking-[-0.03em] sm:text-[1.75rem]">Good to see you, {name}</h1>
+            <p className="mt-1.5 text-sm text-dash-text5">Your real traffic and link performance at a glance.</p>
           </div>
           <div className="inline-flex self-start rounded-2xl border border-white/[0.08] bg-dash-raised/80 p-1.5 shadow-xl backdrop-blur-xl sm:self-auto">
             {([['today', 'Today'], ['7d', '7 days'], ['30d', '30 days']] as Array<[Period, string]>).map(([value, label]) => (
@@ -262,11 +266,9 @@ export default function Dashboard() {
 
         {metricsError && <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">{metricsError}</div>}
 
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat, index) => (
             <motion.article key={stat.key} initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07, duration: 0.45 }} whileHover={reduceMotion ? undefined : { y: -4, scale: 1.01 }} className={`${cardClass} group relative overflow-hidden p-5 transition-colors hover:border-white/[0.13]`}>
-              <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${stat.glow} to-transparent opacity-55 transition-opacity group-hover:opacity-90`} />
-              <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/[0.035] blur-2xl" />
               <div className="relative">
               <div className="flex items-start justify-between">
                 <div>
@@ -276,7 +278,7 @@ export default function Dashboard() {
                     {metricsLoading ? '—' : `${stat.value.toLocaleString('en-US', { maximumFractionDigits: 1 })}${stat.suffix}`}
                   </motion.p></AnimatePresence>
                 </div>
-                <span className="grid h-11 w-11 place-items-center rounded-2xl border border-white/[0.07] bg-black/20 shadow-inner"><stat.icon className={`h-5 w-5 ${stat.color}`} /></span>
+                <span className="grid h-11 w-11 place-items-center rounded-2xl border border-white/[0.07] bg-black/20 shadow-inner"><stat.icon className="h-5 w-5 text-dash-text4" /></span>
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <Trend value={metrics.changes[stat.key]} negativeIsGood={stat.negativeIsGood} />
@@ -338,7 +340,7 @@ export default function Dashboard() {
                       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/[0.035] text-xs font-black text-dash-text5">{index + 1}</span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-3"><p className="truncate text-sm font-bold">{item.name}</p><Trend value={change} /></div>
-                        <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]"><motion.div initial={{ width: 0 }} animate={{ width: `${(item.clicks / maxTopClicks) * 100}%` }} transition={{ duration: 0.7, delay: index * 0.08 }} className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400" /></div>
+                        <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]"><motion.div initial={{ width: 0 }} animate={{ width: `${(item.clicks / maxTopClicks) * 100}%` }} transition={{ duration: 0.7, delay: index * 0.08 }} className="h-full rounded-full bg-violet-400" /></div>
                         <p className="mt-1.5 truncate text-[11px] text-dash-text6">/{item.slug}</p>
                       </div>
                       <p className="text-sm font-black tabular-nums">{item.clicks.toLocaleString('en-US')}</p>
