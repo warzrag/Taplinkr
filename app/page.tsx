@@ -105,7 +105,7 @@ export default function Home() {
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/auth/signup" className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-neutral-950 transition hover:bg-cyan-50">
+                <Link href="/auth/signup" className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-neutral-950 transition hover:bg-cyan-50 dark:bg-white dark:text-neutral-950">
                   Create my page for free <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link href="/demo" className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 text-sm font-semibold text-white transition hover:bg-white/10">
@@ -170,7 +170,7 @@ export default function Home() {
           </Container>
         </section>
 
-        <section className="py-16 sm:py-24"><Container><div className="rounded-3xl bg-neutral-950 p-8 text-center text-white sm:p-12"><Lock className="mx-auto h-6 w-6 text-cyan-300" /><h2 className="mt-4 text-3xl font-semibold sm:text-4xl">Your next page can be live today.</h2><p className="mx-auto mt-4 max-w-xl text-white/65">Start for free, add your links, and improve your page with real data.</p><Link href="/auth/signup" className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-neutral-950">Create my page <ArrowRight className="h-4 w-4" /></Link></div></Container></section>
+        <section className="py-16 sm:py-24"><Container><div className="rounded-3xl bg-neutral-950 p-8 text-center text-white sm:p-12"><Lock className="mx-auto h-6 w-6 text-cyan-300" /><h2 className="mt-4 text-3xl font-semibold sm:text-4xl">Your next page can be live today.</h2><p className="mx-auto mt-4 max-w-xl text-white/65">Start for free, add your links, and improve your page with real data.</p><Link href="/auth/signup" className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-neutral-950 transition hover:bg-cyan-50 dark:bg-white dark:text-neutral-950">Create my page <ArrowRight className="h-4 w-4" /></Link></div></Container></section>
       </main>
       <SiteFooter />
     </div>
