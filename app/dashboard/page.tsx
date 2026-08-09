@@ -268,19 +268,19 @@ export default function Dashboard() {
 
         <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat, index) => (
-            <motion.article key={stat.key} initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07, duration: 0.45 }} whileHover={reduceMotion ? undefined : { y: -4, scale: 1.01 }} className={`${cardClass} group relative overflow-hidden p-5 transition-colors hover:border-white/[0.13]`}>
+            <motion.article key={stat.key} initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07, duration: 0.45 }} whileHover={reduceMotion ? undefined : { y: -4, scale: 1.01 }} className={`${cardClass} group relative overflow-hidden p-4 transition-colors hover:border-white/[0.13]`}>
               <div className="relative">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-semibold text-dash-text4">{stat.label}</p>
                   <p className="mt-1 text-[11px] font-medium text-white/35">{stat.note}</p>
-                  <AnimatePresence mode="wait"><motion.p key={`${stat.key}-${stat.value}-${metricsLoading}`} initial={reduceMotion ? false : { opacity: 0, y: 8, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -6 }} className="mt-4 text-3xl font-black tracking-[-0.04em] tabular-nums">
+                  <AnimatePresence mode="wait"><motion.p key={`${stat.key}-${stat.value}-${metricsLoading}`} initial={reduceMotion ? false : { opacity: 0, y: 8, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -6 }} className="mt-3 text-3xl font-black tracking-[-0.04em] tabular-nums">
                     {metricsLoading ? '—' : `${stat.value.toLocaleString('en-US', { maximumFractionDigits: 1 })}${stat.suffix}`}
                   </motion.p></AnimatePresence>
                 </div>
                 <span className="grid h-11 w-11 place-items-center rounded-2xl border border-white/[0.07] bg-black/20 shadow-inner"><stat.icon className="h-5 w-5 text-dash-text4" /></span>
               </div>
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-3 flex items-center gap-2">
                 <Trend value={metrics.changes[stat.key]} negativeIsGood={stat.negativeIsGood} />
                 <span className="text-xs text-dash-text6">vs previous period</span>
               </div></div>
@@ -288,8 +288,8 @@ export default function Dashboard() {
           ))}
         </section>
 
-        <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-          <motion.article layout className={`${cardClass} relative overflow-hidden p-5 sm:p-6`}>
+        <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+          <motion.article layout className={`${cardClass} relative overflow-hidden p-5`}>
             <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-violet-500/[0.07] blur-3xl" />
             <div className="relative">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -325,7 +325,7 @@ export default function Dashboard() {
           </motion.aside>
         </section>
 
-        <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+        <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
           <article className={`${cardClass} overflow-hidden`}>
             <div className="flex items-center justify-between border-b border-dash-line px-5 py-4">
               <div><h2 className="font-bold">Top performing links</h2><p className="mt-1 text-xs text-dash-text6">Ranked by real clicks</p></div>
