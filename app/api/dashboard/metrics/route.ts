@@ -109,11 +109,28 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Read only clicks belonging to visible links. A global date query makes every
-    // dashboard visit consume reads for the entire platform.
-    const [clickGroups, filteredClickGroups] = await Promise.all([
-      Promise.all([...linkIds].map(linkId => prisma.click.findMany({
-        where: { linkId },
+    const periodDays = period === 'today' ? 1 : period === '7d' ? 7 : 30
+    const currentDateKeys = dashboardDateKeys(period, now, timeZone)
+    const currentDates = new Set(currentDateKeys)
+    const previousDateKeys = dashboardDateKeys(period, now, timeZone, periodDays)
+    const previousDates = new Set(previousDateKeys)
+
+    // Borne basse des lectures. Sans elle, chaque affichage du dashboard relisait
+    // la totalite de l'historique de clics pour n'en garder que la periode
+    // demandee : le cout augmentait indefiniment avec l'anciennete du compte.
+    // previousDateKeys[0] est le jour le plus ancien reellement utilise ; on
+    // recule de deux jours parce que les cles de date sont calculees dans le
+    // fuseau du compte et non en UTC.
+    const since = new Date(`${previousDateKeys[0]}T00:00:00.000Z`)
+    since.setUTCDate(since.getUTCDate() - 2)
+
+    // Une seule requete par table, bornee par lien ET par date, ce qui
+    // correspond exactement a @@index([linkId, createdAt]). Avant : une requete
+    // par lien, sans borne de date.
+    const linkIdList = [...linkIds]
+    const [allClicks, allFilteredClicks] = await Promise.all([
+      prisma.click.findMany({
+        where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
         select: {
           id: true,
           linkId: true,
@@ -124,22 +141,16 @@ export async function GET(request: NextRequest) {
           country: true,
           device: true,
         },
-      }))),
-      Promise.all([...linkIds].map(linkId => prisma.filteredClick.findMany({
-        where: { linkId },
+      }),
+      prisma.filteredClick.findMany({
+        where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
         select: {
           linkId: true,
           reason: true,
           createdAt: true,
         },
-      }))),
+      }),
     ])
-    const allClicks = clickGroups.flat()
-    const allFilteredClicks = filteredClickGroups.flat()
-    const periodDays = period === 'today' ? 1 : period === '7d' ? 7 : 30
-    const currentDateKeys = dashboardDateKeys(period, now, timeZone)
-    const currentDates = new Set(currentDateKeys)
-    const previousDates = new Set(dashboardDateKeys(period, now, timeZone, periodDays))
     const isInDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
     const recentClicks = allClicks.filter(click => isInDates(click.createdAt, currentDates))
     const recentFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, currentDates))
