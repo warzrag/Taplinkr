@@ -181,7 +181,6 @@ model Click {
   multiLinkId     String?  // ID du lien spécifique cliqué
   sessionId       String?  // 🔥 Session ID pour déduplication (comme GetMySocial)
   folderIdAtClick String?
-  fanToken        String?  // Jeton anonyme passé par VenusBot (?vb=) : relie le clic à la conversation qui a envoyé le lien
   latitude        Float?
   longitude       Float?
   createdAt       DateTime @default(now())
@@ -192,7 +191,6 @@ model Click {
   @@index([userId, createdAt])
   @@index([linkId, country])
   @@index([ip])
-  @@index([fanToken]) // Recherche des clics par conversation VenusBot
   @@index([multiLinkId, sessionId]) // 🔥 Index pour déduplication rapide
   @@index([folderIdAtClick, createdAt])
   @@map("clicks")
