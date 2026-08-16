@@ -296,6 +296,41 @@ function TrafficChart({ data, period }: { data: ChartPoint[]; period: Period }) 
   )
 }
 
+/**
+ * Dernier resultat connu, garde dans le navigateur.
+ *
+ * Il est reaffiche immediatement a l'ouverture pendant que la vraie requete
+ * part en arriere-plan : les chiffres sont la tout de suite au lieu d'attendre
+ * la chaine session -> requete -> base. La cle contient l'identifiant du compte
+ * pour qu'un navigateur partage ne montre jamais les chiffres de quelqu'un
+ * d'autre.
+ */
+const SNAPSHOT_MAX_AGE = 24 * 60 * 60 * 1000
+
+const snapshotKey = (userId: string, period: Period) => `taplinkr:metrics:${userId}:${period}`
+
+const readSnapshot = (userId: string, period: Period): DashboardMetrics | null => {
+  try {
+    const raw = window.localStorage.getItem(snapshotKey(userId, period))
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as { savedAt?: number; data?: DashboardMetrics }
+    if (!parsed?.data || typeof parsed.savedAt !== 'number') return null
+    if (Date.now() - parsed.savedAt > SNAPSHOT_MAX_AGE) return null
+    return { ...emptyMetrics, ...parsed.data }
+  } catch {
+    // navigation privee, quota plein : on repart simplement sans instantane
+    return null
+  }
+}
+
+const writeSnapshot = (userId: string, period: Period, data: DashboardMetrics) => {
+  try {
+    window.localStorage.setItem(snapshotKey(userId, period), JSON.stringify({ savedAt: Date.now(), data }))
+  } catch {
+    // sans consequence : le cache navigateur est un confort, pas une source
+  }
+}
+
 export default function Dashboard() {
   const reduceMotion = useReducedMotion()
   const { data: session } = useSession()
@@ -308,6 +343,22 @@ export default function Dashboard() {
   const [metricsError, setMetricsError] = useState('')
 
   const name = profile?.name || session?.user?.name || session?.user?.email?.split('@')[0] || 'creator'
+  const userId = session?.user?.id
+
+  // Lu dans une ref : la requete part des le montage, sans attendre que la
+  // session soit resolue cote navigateur. La mettre en dependance relancerait
+  // un second appel inutile des qu'elle arrive.
+  const userIdRef = useRef<string | undefined>(undefined)
+  userIdRef.current = userId
+
+  // Reaffichage immediat du dernier resultat connu, des que le compte est identifie.
+  useEffect(() => {
+    if (!userId) return
+    const snapshot = readSnapshot(userId, period)
+    if (!snapshot) return
+    setMetrics(snapshot)
+    setMetricsLoading(false)
+  }, [userId, period])
 
   useEffect(() => {
     let stopped = false
@@ -326,7 +377,10 @@ export default function Dashboard() {
         )
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || 'Unable to load overview')
-        if (!stopped) setMetrics({ ...emptyMetrics, ...data })
+        const merged = { ...emptyMetrics, ...data }
+        if (!stopped) setMetrics(merged)
+        const id = userIdRef.current
+        if (id) writeSnapshot(id, period, merged)
       } catch (error) {
         if (!stopped) setMetricsError(error instanceof Error ? error.message : 'Unable to load overview')
       } finally {
@@ -335,7 +389,10 @@ export default function Dashboard() {
       }
     }
 
-    void loadMetrics(true)
+    // Pas d'indicateur de chargement s'il y a deja un instantane a l'ecran :
+    // l'effet ci-dessus l'a pose, la requete se contente de le rafraichir.
+    const hasSnapshot = Boolean(userIdRef.current && readSnapshot(userIdRef.current, period))
+    void loadMetrics(!hasSnapshot)
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') void loadMetrics(false)
     }, 300_000)

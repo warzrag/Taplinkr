@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 
 import { authOptions } from '@/lib/auth'
+import { memoryCache } from '@/lib/cache'
 import {
   calculateDailyLinkClicks,
   calculateDashboardMetrics,
@@ -19,6 +20,13 @@ import {
 
 const periods = new Set<DashboardPeriod>(['today', '7d', '30d'])
 
+// Le calcul complet enchaine cinq allers-retours vers la base puis agrege les
+// clics un par un. Le garder brievement evite de tout refaire quand on change
+// de periode et qu'on revient, ou qu'on revient sur l'onglet.
+// Attention : ce cache vit dans la memoire de l'instance. Sur une instance
+// froide il est vide, il ne remplace donc pas l'instantane cote navigateur.
+const METRICS_TTL_MS = 30_000
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -29,6 +37,15 @@ export async function GET(request: NextRequest) {
     const requestedPeriod = request.nextUrl.searchParams.get('period') as DashboardPeriod | null
     const period = requestedPeriod && periods.has(requestedPeriod) ? requestedPeriod : '30d'
     const now = new Date()
+
+    // La cle contient l'identifiant du compte : jamais de fuite entre comptes.
+    const cacheKey = `dashboard:metrics:${session.user.id}:${period}`
+    const cached = memoryCache.get(cacheKey)
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: { 'Cache-Control': 'private, no-store, max-age=0, must-revalidate' },
+      })
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -223,7 +240,7 @@ export async function GET(request: NextRequest) {
       return Number((((current - previous) / previous) * 100).toFixed(1))
     }
 
-    return NextResponse.json({
+    const payload = {
       period,
       start: currentDateKeys[0],
       end: now.toISOString(),
@@ -239,7 +256,11 @@ export async function GET(request: NextRequest) {
         clickThroughRate: percentageChange(metrics.clickThroughRate, previousMetrics.clickThroughRate),
         botsFiltered: percentageChange(metrics.botsFiltered, previousMetrics.botsFiltered),
       },
-    }, {
+    }
+
+    memoryCache.set(cacheKey, payload, METRICS_TTL_MS)
+
+    return NextResponse.json(payload, {
       headers: {
         'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
       },
