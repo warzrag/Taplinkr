@@ -28,8 +28,22 @@ const periods = new Set<DashboardPeriod>(['today', '7d', '30d'])
 const METRICS_TTL_MS = 30_000
 
 export async function GET(request: NextRequest) {
+  // Chronometrage des etapes. Sans lui, impossible de savoir si le temps part
+  // dans les allers-retours vers Firestore, dans la lecture des clics, ou dans
+  // le calcul. Renvoye en en-tete Server-Timing, lisible dans l'onglet Reseau.
+  const t0 = Date.now()
+  let mark = t0
+  const timings: Array<[string, number]> = []
+  const step = (label: string) => {
+    const at = Date.now()
+    timings.push([label, at - mark])
+    mark = at
+  }
+  const timingHeader = () => timings.map(([label, ms]) => `${label};dur=${ms}`).join(', ')
+
   try {
     const session = await getServerSession(authOptions)
+    step('session')
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -40,10 +54,15 @@ export async function GET(request: NextRequest) {
 
     // La cle contient l'identifiant du compte : jamais de fuite entre comptes.
     const cacheKey = `dashboard:metrics:${session.user.id}:${period}`
-    const cached = memoryCache.get(cacheKey)
+    const wantsTimings = request.nextUrl.searchParams.get('timings') === '1'
+    const cached = wantsTimings ? null : memoryCache.get(cacheKey)
     if (cached) {
+      step('cache')
       return NextResponse.json(cached, {
-        headers: { 'Cache-Control': 'private, no-store, max-age=0, must-revalidate' },
+        headers: {
+          'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+          'Server-Timing': timingHeader(),
+        },
       })
     }
 
@@ -55,11 +74,13 @@ export async function GET(request: NextRequest) {
       },
     })
     const reportingUserId = user?.team?.ownerId || session.user.id
+    step('user')
     const reportingProfile = await prisma.userProfile.findUnique({
       where: { userId: reportingUserId },
       select: { analytics: true },
     })
     const storedTimeZone = readReportingTimeZone(reportingProfile?.analytics)
+    step('profil')
     const geoTimeZone = request.headers.get('x-vercel-ip-timezone')
     const browserTimeZone = request.nextUrl.searchParams.get('timeZone')
     const inferredTimeZone = isValidTimeZone(geoTimeZone)
@@ -88,6 +109,7 @@ export async function GET(request: NextRequest) {
         })
       : []
     const visibleUserIds = [...new Set([session.user.id, ...teamMembers.map(member => member.id)])]
+    step('equipe')
     const links = await prisma.link.findMany({
       where: user?.teamId
         ? {
@@ -107,6 +129,7 @@ export async function GET(request: NextRequest) {
       orderBy: { order: 'asc' },
     })
     const linkIds = new Set(links.map(link => link.id))
+    step('liens')
 
     if (linkIds.size === 0) {
       const emptyMetrics = calculateDashboardMetrics({
@@ -203,6 +226,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [allClicks, allFilteredClicks] = await Promise.all([loadClicks(), loadFilteredClicks()])
+    step('lecture-clics')
     const isInDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
     const recentClicks = allClicks.filter(click => isInDates(click.createdAt, currentDates))
     const recentFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, currentDates))
@@ -294,10 +318,28 @@ export async function GET(request: NextRequest) {
     }
 
     memoryCache.set(cacheKey, payload, METRICS_TTL_MS)
+    step('calcul')
+
+    // Le nombre de documents lus dit si la borne de date fait effet. S'il est
+    // enorme alors que la periode est courte, l'index composite n'est pas actif.
+    const diagnostic = {
+      totalMs: Date.now() - t0,
+      etapes: Object.fromEntries(timings),
+      clicsLus: allClicks.length,
+      clicsEcartesLus: allFilteredClicks.length,
+      liens: linkIdList.length,
+    }
+
+    if (request.nextUrl.searchParams.get('timings') === '1') {
+      return NextResponse.json({ diagnostic, apercu: { realClicks: metrics.realClicks } }, {
+        headers: { 'Cache-Control': 'private, no-store' },
+      })
+    }
 
     return NextResponse.json(payload, {
       headers: {
         'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+        'Server-Timing': timingHeader(),
       },
     })
   } catch (error) {
