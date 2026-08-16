@@ -94,7 +94,7 @@ export async function loadDashboardAggregates(input: {
     ? Prisma.sql`(NULLIF(c."multiLinkId", '') IS NOT NULL OR c."linkId" IN (${Prisma.join(input.directLinkIds)}))`
     : Prisma.sql`(NULLIF(c."multiLinkId", '') IS NOT NULL)`
 
-  const dayExpr = Prisma.sql`to_char(c."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${input.timeZone}, 'YYYY-MM-DD')`
+  const dayExpr = Prisma.sql`to_char(c."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${input.timeZone}::text, 'YYYY-MM-DD')`
   const visitorExpr = Prisma.sql`COALESCE(NULLIF(c."sessionId", ''), NULLIF(c."ip", ''), c."id")`
 
   const [scalarRows, byDayRows, hourRows, filteredRows, recentRows] = await Promise.all([
@@ -115,7 +115,7 @@ export async function loadDashboardAggregates(input: {
           ${isCompleted} AS completed,
           (NULLIF(c."multiLinkId", '') IS NULL) AS page_view
         FROM "clicks" c
-        WHERE c."linkId" IN (${linkIdList}) AND c."createdAt" >= ${input.since}
+        WHERE c."linkId" IN (${linkIdList}) AND c."createdAt" >= ${input.since}::timestamp
       )
       SELECT
         CASE WHEN day IN (${currentDays}) THEN 'current' ELSE 'previous' END AS bucket,
@@ -142,7 +142,7 @@ export async function loadDashboardAggregates(input: {
           ${dayExpr} AS day,
           ${isCompleted} AS completed
         FROM "clicks" c
-        WHERE c."linkId" IN (${linkIdList}) AND c."createdAt" >= ${input.since}
+        WHERE c."linkId" IN (${linkIdList}) AND c."createdAt" >= ${input.since}::timestamp
       )
       SELECT
         CASE WHEN day IN (${currentDays}) THEN 'current' ELSE 'previous' END AS bucket,
@@ -157,11 +157,11 @@ export async function loadDashboardAggregates(input: {
     // Repartition horaire du jour courant, dans le fuseau du compte.
     prisma.$queryRaw<Array<{ hour: number; clicks: bigint }>>`
       SELECT
-        EXTRACT(HOUR FROM (c."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${input.timeZone}))::int AS hour,
+        EXTRACT(HOUR FROM (c."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${input.timeZone}::text))::int AS hour,
         COUNT(*) AS clicks
       FROM "clicks" c
       WHERE c."linkId" IN (${linkIdList})
-        AND c."createdAt" >= ${input.since}
+        AND c."createdAt" >= ${input.since}::timestamp
         AND ${dayExpr} = ${input.todayKey}
         AND ${isCompleted}
       GROUP BY 1
@@ -171,10 +171,10 @@ export async function loadDashboardAggregates(input: {
     prisma.$queryRaw<Array<{ bucket: WindowKey; clicks: bigint }>>`
       WITH base AS (
         SELECT
-          to_char(c."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${input.timeZone}, 'YYYY-MM-DD') AS day
+          to_char(c."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${input.timeZone}::text, 'YYYY-MM-DD') AS day
         FROM "filtered_clicks" c
         WHERE c."linkId" IN (${linkIdList})
-          AND c."createdAt" >= ${input.since}
+          AND c."createdAt" >= ${input.since}::timestamp
           AND c."reason" IN ('bot', 'preview', 'prefetch')
       )
       SELECT
@@ -196,7 +196,7 @@ export async function loadDashboardAggregates(input: {
       SELECT c."id", c."linkId" AS link_id, c."createdAt" AS created_at, c."country", c."device"
       FROM "clicks" c
       WHERE c."linkId" IN (${linkIdList})
-        AND c."createdAt" >= ${input.since}
+        AND c."createdAt" >= ${input.since}::timestamp
         AND ${isCompleted}
         AND ${dayExpr} IN (${currentDays})
       ORDER BY c."createdAt" DESC

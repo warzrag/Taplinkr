@@ -153,18 +153,108 @@ export async function GET(request: NextRequest) {
         .map((link: any) => String(link.id)),
     )
 
+    // Ancien calcul : toutes les lignes sont relues et additionnees en
+    // JavaScript. Lent, mais c'est la reference. Sert de secours si
+    // l'agregation SQL echoue, et de temoin pour ?compare=1.
+    const runLegacyPath = async () => {
+      const [allClicks, allFilteredClicks] = await Promise.all([
+        prisma.click.findMany({
+          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
+          select: {
+            id: true, linkId: true, createdAt: true, ip: true,
+            sessionId: true, multiLinkId: true, country: true, device: true,
+          },
+        }),
+        prisma.filteredClick.findMany({
+          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
+          select: { linkId: true, reason: true, createdAt: true },
+        }),
+      ])
+      const inDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
+      const currentClicks = allClicks.filter(click => inDates(click.createdAt, currentDates))
+      const previousClicks = allClicks.filter(click => inDates(click.createdAt, previousDates))
+      return {
+        rowsRead: allClicks.length + allFilteredClicks.length,
+        currentClicks,
+        previousClicks,
+        current: calculateDashboardMetrics({
+          clicks: currentClicks,
+          filteredClicks: allFilteredClicks.filter(click => inDates(click.createdAt, currentDates)),
+          directLinkIds,
+        }),
+        previous: calculateDashboardMetrics({
+          clicks: previousClicks,
+          filteredClicks: allFilteredClicks.filter(click => inDates(click.createdAt, previousDates)),
+          directLinkIds,
+        }),
+        hourly: calculateHourlyClicks({ now, timeZone, directLinkIds, clicks: currentClicks }),
+      }
+    }
+
     // Postgres fait les comptages et ne renvoie que les totaux. Avant, chaque
     // clic de la periode etait transporte puis additionne en JavaScript.
-    const aggregates = await loadDashboardAggregates({
-      linkIds: linkIdList,
-      directLinkIds: [...directLinkIds],
-      timeZone,
-      since,
-      currentDateKeys,
-      previousDateKeys,
-      todayKey: dateKeyInTimeZone(now, timeZone),
-      recentActivityLimit: RECENT_ACTIVITY_LIMIT,
-    })
+    // En cas d'echec, on retombe sur l'ancien chemin plutot que d'afficher une
+    // erreur : le dashboard doit rester lisible meme si cette requete change.
+    let aggregates: Awaited<ReturnType<typeof loadDashboardAggregates>> | null = null
+    let aggregateError: string | null = null
+    try {
+      aggregates = await loadDashboardAggregates({
+        linkIds: linkIdList,
+        directLinkIds: [...directLinkIds],
+        timeZone,
+        since,
+        currentDateKeys,
+        previousDateKeys,
+        todayKey: dateKeyInTimeZone(now, timeZone),
+        recentActivityLimit: RECENT_ACTIVITY_LIMIT,
+      })
+    } catch (error) {
+      aggregateError = error instanceof Error ? error.message : String(error)
+      console.error('Agregation SQL du dashboard indisponible, repli sur le calcul JavaScript:', error)
+    }
+
+    if (!aggregates) {
+      const legacy = await runLegacyPath()
+      const completedByLink = (clicks: typeof legacy.currentClicks) => {
+        const counts = new Map<string, number>()
+        for (const click of clicks) {
+          if (!click.multiLinkId && !directLinkIds.has(click.linkId)) continue
+          counts.set(click.linkId, (counts.get(click.linkId) || 0) + 1)
+        }
+        return counts
+      }
+      const byDay = new Map<string, Map<string, number>>()
+      for (const click of legacy.currentClicks) {
+        if (!click.multiLinkId && !directLinkIds.has(click.linkId)) continue
+        const day = dateKeyInTimeZone(click.createdAt, timeZone)
+        const perLink = byDay.get(day) || new Map<string, number>()
+        perLink.set(click.linkId, (perLink.get(click.linkId) || 0) + 1)
+        byDay.set(day, perLink)
+      }
+      aggregates = {
+        totals: {
+          current: { ...legacy.current },
+          previous: { ...legacy.previous },
+        },
+        completedByLink: {
+          current: completedByLink(legacy.currentClicks),
+          previous: completedByLink(legacy.previousClicks),
+        },
+        completedByDay: byDay,
+        hourlyCompleted: legacy.hourly.map(entry => entry.clicks),
+        recentActivity: legacy.currentClicks
+          .filter(click => Boolean(click.multiLinkId) || directLinkIds.has(click.linkId))
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+          .slice(0, RECENT_ACTIVITY_LIMIT)
+          .map(click => ({
+            id: click.id,
+            linkId: click.linkId,
+            createdAt: click.createdAt,
+            country: click.country,
+            device: click.device,
+          })),
+      }
+    }
 
     const toMetrics = (totals: WindowTotals) => ({
       realClicks: totals.realClicks,
@@ -247,51 +337,27 @@ export async function GET(request: NextRequest) {
     // avant de lui faire confiance. Volontairement lent : il relit toutes les
     // lignes, comme avant.
     if (wantsComparison) {
-      const [allClicks, allFilteredClicks] = await Promise.all([
-        prisma.click.findMany({
-          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
-          select: {
-            id: true, linkId: true, createdAt: true, ip: true,
-            sessionId: true, multiLinkId: true, country: true, device: true,
-          },
-        }),
-        prisma.filteredClick.findMany({
-          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
-          select: { linkId: true, reason: true, createdAt: true },
-        }),
-      ])
-      const inDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
-      const legacyCurrent = calculateDashboardMetrics({
-        clicks: allClicks.filter(click => inDates(click.createdAt, currentDates)),
-        filteredClicks: allFilteredClicks.filter(click => inDates(click.createdAt, currentDates)),
-        directLinkIds,
-      })
-      const legacyPrevious = calculateDashboardMetrics({
-        clicks: allClicks.filter(click => inDates(click.createdAt, previousDates)),
-        filteredClicks: allFilteredClicks.filter(click => inDates(click.createdAt, previousDates)),
-        directLinkIds,
-      })
-      const legacyHourly = calculateHourlyClicks({
-        now, timeZone, directLinkIds,
-        clicks: allClicks.filter(click => inDates(click.createdAt, currentDates)),
-      })
-
+      const legacy = await runLegacyPath()
       const differences: string[] = []
-      const compare = (label: string, sql: number, legacy: number) => {
-        if (sql !== legacy) differences.push(`${label}: SQL=${sql} JS=${legacy}`)
+      const compare = (label: string, sql: number, reference: number) => {
+        if (sql !== reference) differences.push(`${label}: SQL=${sql} JS=${reference}`)
       }
       for (const key of ['realClicks', 'uniqueVisitors', 'pageViews', 'visitsWithClick', 'clickThroughRate', 'botsFiltered'] as const) {
-        compare(`current.${key}`, (metrics as any)[key], (legacyCurrent as any)[key])
-        compare(`previous.${key}`, (previousMetrics as any)[key], (legacyPrevious as any)[key])
+        compare(`current.${key}`, (metrics as any)[key], (legacy.current as any)[key])
+        compare(`previous.${key}`, (previousMetrics as any)[key], (legacy.previous as any)[key])
       }
-      legacyHourly.forEach((entry, hour) => compare(`hour.${hour}`, hourlyClicks[hour]?.clicks ?? 0, entry.clicks))
+      legacy.hourly.forEach((entry, hour) => compare(`hour.${hour}`, hourlyClicks[hour]?.clicks ?? 0, entry.clicks))
 
       return NextResponse.json({
-        identical: differences.length === 0,
-        rowsReadByLegacyPath: allClicks.length + allFilteredClicks.length,
+        // false si l'agregation SQL a echoue : les deux colonnes viennent alors
+        // du meme calcul JavaScript, la comparaison ne prouve rien.
+        sqlAggregationUsed: aggregateError === null,
+        sqlError: aggregateError,
+        identical: aggregateError === null && differences.length === 0,
+        rowsReadByLegacyPath: legacy.rowsRead,
         differences,
         sql: { current: metrics, previous: previousMetrics },
-        legacy: { current: legacyCurrent, previous: legacyPrevious },
+        legacy: { current: legacy.current, previous: legacy.previous },
       }, { headers: { 'Cache-Control': 'private, no-store' } })
     }
 
