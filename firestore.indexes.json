@@ -47,6 +47,22 @@
       "collectionGroup": "clicks",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "linkId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "filteredClicks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "linkId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "clicks",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "device", "order": "ASCENDING" },
         { "fieldPath": "linkId", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }

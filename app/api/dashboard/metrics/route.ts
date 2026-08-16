@@ -4,13 +4,13 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { memoryCache } from '@/lib/cache'
 import {
+  calculateDailyLinkClicks,
   calculateDashboardMetrics,
   calculateHourlyClicks,
   dashboardDateKeys,
   dateKeyInTimeZone,
   type DashboardPeriod,
 } from '@/lib/dashboard-metrics'
-import { loadDashboardAggregates, type WindowTotals } from '@/lib/dashboard-metrics-sql'
 import { prisma } from '@/lib/prisma'
 import {
   isValidTimeZone,
@@ -26,7 +26,6 @@ const periods = new Set<DashboardPeriod>(['today', '7d', '30d'])
 // Attention : ce cache vit dans la memoire de l'instance. Sur une instance
 // froide il est vide, il ne remplace donc pas l'instantane cote navigateur.
 const METRICS_TTL_MS = 30_000
-const RECENT_ACTIVITY_LIMIT = 6
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,8 +40,7 @@ export async function GET(request: NextRequest) {
 
     // La cle contient l'identifiant du compte : jamais de fuite entre comptes.
     const cacheKey = `dashboard:metrics:${session.user.id}:${period}`
-    const wantsComparison = request.nextUrl.searchParams.get('compare') === '1'
-    const cached = wantsComparison ? null : memoryCache.get(cacheKey)
+    const cached = memoryCache.get(cacheKey)
     if (cached) {
       return NextResponse.json(cached, {
         headers: { 'Cache-Control': 'private, no-store, max-age=0, must-revalidate' },
@@ -111,14 +109,11 @@ export async function GET(request: NextRequest) {
     const linkIds = new Set(links.map(link => link.id))
 
     if (linkIds.size === 0) {
-      const emptyMetrics = {
-        realClicks: 0,
-        uniqueVisitors: 0,
-        pageViews: 0,
-        visitsWithClick: 0,
-        clickThroughRate: 0,
-        botsFiltered: 0,
-      }
+      const emptyMetrics = calculateDashboardMetrics({
+        clicks: [],
+        filteredClicks: [],
+        directLinkIds: new Set(),
+      })
       return NextResponse.json({
         period,
         ...emptyMetrics,
@@ -146,169 +141,135 @@ export async function GET(request: NextRequest) {
     const since = new Date(`${previousDateKeys[0]}T00:00:00.000Z`)
     since.setUTCDate(since.getUTCDate() - 2)
 
-    const linkIdList = links.map((link: any) => String(link.id))
+    // Lecture bornee a la periode affichee. Sans cette borne, tout l'historique
+    // etait relu a chaque affichage.
+    //
+    // Sur Firestore, combiner un `in` sur linkId et une borne sur createdAt
+    // exige un index composite (linkId ASC, createdAt ASC). S'il manque, la
+    // requete echoue avec FAILED_PRECONDITION (code 9). Plutot que de casser le
+    // dashboard, on refait alors la lecture sans borne de date : c'est lent,
+    // mais les chiffres restent justes. L'index est declare dans
+    // firestore.indexes.json.
+    const linkIdList = [...linkIds]
+    const MISSING_INDEX = 9
+    const isMissingIndex = (error: unknown) => (error as any)?.code === MISSING_INDEX
+    const warnMissingIndex = (label: string) => console.warn(
+      `[metrics] index composite absent pour ${label}, lecture sans borne de date (lent). ` +
+      `Deployer firestore.indexes.json pour retablir la performance.`,
+    )
+
+    const clickFields = {
+      id: true,
+      linkId: true,
+      createdAt: true,
+      ip: true,
+      sessionId: true,
+      multiLinkId: true,
+      country: true,
+      device: true,
+    } as const
+    const filteredFields = { linkId: true, reason: true, createdAt: true } as const
+
+    const loadClicks = async () => {
+      try {
+        return await prisma.click.findMany({
+          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
+          select: clickFields,
+        })
+      } catch (error) {
+        if (!isMissingIndex(error)) throw error
+        warnMissingIndex('clicks')
+        return prisma.click.findMany({
+          where: { linkId: { in: linkIdList } },
+          select: clickFields,
+        })
+      }
+    }
+
+    const loadFilteredClicks = async () => {
+      try {
+        return await prisma.filteredClick.findMany({
+          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
+          select: filteredFields,
+        })
+      } catch (error) {
+        if (!isMissingIndex(error)) throw error
+        warnMissingIndex('filteredClicks')
+        return prisma.filteredClick.findMany({
+          where: { linkId: { in: linkIdList } },
+          select: filteredFields,
+        })
+      }
+    }
+
+    const [allClicks, allFilteredClicks] = await Promise.all([loadClicks(), loadFilteredClicks()])
+    const isInDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
+    const recentClicks = allClicks.filter(click => isInDates(click.createdAt, currentDates))
+    const recentFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, currentDates))
+    const previousClicks = allClicks.filter(click => isInDates(click.createdAt, previousDates))
+    const previousFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, previousDates))
     const directLinkIds = new Set<string>(
       links
         .filter((link: any) => link.isDirect)
         .map((link: any) => String(link.id)),
     )
 
-    // Ancien calcul : toutes les lignes sont relues et additionnees en
-    // JavaScript. Lent, mais c'est la reference. Sert de secours si
-    // l'agregation SQL echoue, et de temoin pour ?compare=1.
-    const runLegacyPath = async () => {
-      const [allClicks, allFilteredClicks] = await Promise.all([
-        prisma.click.findMany({
-          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
-          select: {
-            id: true, linkId: true, createdAt: true, ip: true,
-            sessionId: true, multiLinkId: true, country: true, device: true,
-          },
-        }),
-        prisma.filteredClick.findMany({
-          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
-          select: { linkId: true, reason: true, createdAt: true },
-        }),
-      ])
-      const inDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
-      const currentClicks = allClicks.filter(click => inDates(click.createdAt, currentDates))
-      const previousClicks = allClicks.filter(click => inDates(click.createdAt, previousDates))
-      return {
-        rowsRead: allClicks.length + allFilteredClicks.length,
-        currentClicks,
-        previousClicks,
-        current: calculateDashboardMetrics({
-          clicks: currentClicks,
-          filteredClicks: allFilteredClicks.filter(click => inDates(click.createdAt, currentDates)),
-          directLinkIds,
-        }),
-        previous: calculateDashboardMetrics({
-          clicks: previousClicks,
-          filteredClicks: allFilteredClicks.filter(click => inDates(click.createdAt, previousDates)),
-          directLinkIds,
-        }),
-        hourly: calculateHourlyClicks({ now, timeZone, directLinkIds, clicks: currentClicks }),
-      }
-    }
-
-    // Postgres fait les comptages et ne renvoie que les totaux. Avant, chaque
-    // clic de la periode etait transporte puis additionne en JavaScript.
-    // En cas d'echec, on retombe sur l'ancien chemin plutot que d'afficher une
-    // erreur : le dashboard doit rester lisible meme si cette requete change.
-    let aggregates: Awaited<ReturnType<typeof loadDashboardAggregates>> | null = null
-    let aggregateError: string | null = null
-    try {
-      aggregates = await loadDashboardAggregates({
-        linkIds: linkIdList,
-        directLinkIds: [...directLinkIds],
-        timeZone,
-        since,
-        currentDateKeys,
-        previousDateKeys,
-        todayKey: dateKeyInTimeZone(now, timeZone),
-        recentActivityLimit: RECENT_ACTIVITY_LIMIT,
-      })
-    } catch (error) {
-      aggregateError = error instanceof Error ? error.message : String(error)
-      console.error('Agregation SQL du dashboard indisponible, repli sur le calcul JavaScript:', error)
-    }
-
-    if (!aggregates) {
-      const legacy = await runLegacyPath()
-      const completedByLink = (clicks: typeof legacy.currentClicks) => {
-        const counts = new Map<string, number>()
-        for (const click of clicks) {
-          if (!click.multiLinkId && !directLinkIds.has(click.linkId)) continue
-          counts.set(click.linkId, (counts.get(click.linkId) || 0) + 1)
-        }
-        return counts
-      }
-      const byDay = new Map<string, Map<string, number>>()
-      for (const click of legacy.currentClicks) {
-        if (!click.multiLinkId && !directLinkIds.has(click.linkId)) continue
-        const day = dateKeyInTimeZone(click.createdAt, timeZone)
-        const perLink = byDay.get(day) || new Map<string, number>()
-        perLink.set(click.linkId, (perLink.get(click.linkId) || 0) + 1)
-        byDay.set(day, perLink)
-      }
-      aggregates = {
-        totals: {
-          current: { ...legacy.current },
-          previous: { ...legacy.previous },
-        },
-        completedByLink: {
-          current: completedByLink(legacy.currentClicks),
-          previous: completedByLink(legacy.previousClicks),
-        },
-        completedByDay: byDay,
-        hourlyCompleted: legacy.hourly.map(entry => entry.clicks),
-        recentActivity: legacy.currentClicks
-          .filter(click => Boolean(click.multiLinkId) || directLinkIds.has(click.linkId))
-          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-          .slice(0, RECENT_ACTIVITY_LIMIT)
-          .map(click => ({
-            id: click.id,
-            linkId: click.linkId,
-            createdAt: click.createdAt,
-            country: click.country,
-            device: click.device,
-          })),
-      }
-    }
-
-    const toMetrics = (totals: WindowTotals) => ({
-      realClicks: totals.realClicks,
-      uniqueVisitors: totals.uniqueVisitors,
-      pageViews: totals.pageViews,
-      visitsWithClick: totals.visitsWithClick,
-      clickThroughRate: totals.pageViews > 0
-        ? Math.min(100, Number(((totals.visitsWithClick / totals.pageViews) * 100).toFixed(1)))
-        : 0,
-      botsFiltered: totals.botsFiltered,
+    const metrics = calculateDashboardMetrics({
+      clicks: recentClicks,
+      filteredClicks: recentFilteredClicks,
+      directLinkIds,
     })
-
-    const metrics = toMetrics(aggregates.totals.current)
-    const previousMetrics = toMetrics(aggregates.totals.previous)
-
-    const namedLinks = links.map(link => ({
-      id: link.id,
-      name: link.internalName?.trim() || link.title,
-      slug: link.slug,
-    }))
-
-    const dailyBreakdown = {
-      links: namedLinks,
-      dailyClicks: currentDateKeys.map(date => {
-        const perLink = aggregates.completedByDay.get(date)
-        const clicks = Object.fromEntries(links.map(link => [link.id, perLink?.get(link.id) || 0]))
-        return {
-          date,
-          clicks,
-          total: Object.values(clicks).reduce((sum, value) => sum + value, 0),
-        }
-      }),
+    const previousMetrics = calculateDashboardMetrics({
+      clicks: previousClicks,
+      filteredClicks: previousFilteredClicks,
+      directLinkIds,
+    })
+    const dailyBreakdown = calculateDailyLinkClicks({
+      period,
+      now,
+      timeZone,
+      clicks: recentClicks,
+      links: links.map(link => ({
+        id: link.id,
+        name: link.internalName?.trim() || link.title,
+        slug: link.slug,
+        isDirect: link.isDirect,
+      })),
+    })
+    const hourlyClicks = calculateHourlyClicks({ now, timeZone, clicks: recentClicks, directLinkIds })
+    const completedClickCountByLink = (items: typeof recentClicks) => {
+      const counts = new Map<string, number>()
+      for (const click of items) {
+        if (!click.multiLinkId && !directLinkIds.has(click.linkId)) continue
+        counts.set(click.linkId, (counts.get(click.linkId) || 0) + 1)
+      }
+      return counts
     }
-
-    const hourlyClicks = aggregates.hourlyCompleted.map((clicks, hour) => ({ hour, clicks }))
-
-    const topLinks = namedLinks
+    const currentByLink = completedClickCountByLink(recentClicks)
+    const previousByLink = completedClickCountByLink(previousClicks)
+    const topLinks = links
       .map(link => ({
-        ...link,
-        clicks: aggregates.completedByLink.current.get(link.id) || 0,
-        previousClicks: aggregates.completedByLink.previous.get(link.id) || 0,
+        id: link.id,
+        name: link.internalName?.trim() || link.title,
+        slug: link.slug,
+        clicks: currentByLink.get(link.id) || 0,
+        previousClicks: previousByLink.get(link.id) || 0,
       }))
       .sort((a, b) => b.clicks - a.clicks)
       .slice(0, 5)
-
-    const linkNames = new Map(namedLinks.map(link => [link.id, link.name]))
-    const recentActivity = aggregates.recentActivity.map(click => ({
-      id: click.id,
-      linkId: click.linkId,
-      linkName: linkNames.get(click.linkId) || 'Link',
-      createdAt: click.createdAt.toISOString(),
-      country: click.country || null,
-      device: click.device || null,
-    }))
+    const linkNames = new Map(links.map(link => [link.id, link.internalName?.trim() || link.title]))
+    const recentActivity = recentClicks
+      .filter(click => Boolean(click.multiLinkId) || directLinkIds.has(click.linkId))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 6)
+      .map(click => ({
+        id: click.id,
+        linkId: click.linkId,
+        linkName: linkNames.get(click.linkId) || 'Link',
+        createdAt: click.createdAt.toISOString(),
+        country: click.country || null,
+        device: click.device || null,
+      }))
     const percentageChange = (current: number, previous: number) => {
       if (previous === 0) return current === 0 ? 0 : 100
       return Number((((current - previous) / previous) * 100).toFixed(1))
@@ -332,35 +293,6 @@ export async function GET(request: NextRequest) {
       },
     }
 
-    // ?compare=1 rejoue l'ancien calcul en JavaScript sur les memes donnees et
-    // renvoie les ecarts. Sert a prouver que le passage en SQL n'a rien change
-    // avant de lui faire confiance. Volontairement lent : il relit toutes les
-    // lignes, comme avant.
-    if (wantsComparison) {
-      const legacy = await runLegacyPath()
-      const differences: string[] = []
-      const compare = (label: string, sql: number, reference: number) => {
-        if (sql !== reference) differences.push(`${label}: SQL=${sql} JS=${reference}`)
-      }
-      for (const key of ['realClicks', 'uniqueVisitors', 'pageViews', 'visitsWithClick', 'clickThroughRate', 'botsFiltered'] as const) {
-        compare(`current.${key}`, (metrics as any)[key], (legacy.current as any)[key])
-        compare(`previous.${key}`, (previousMetrics as any)[key], (legacy.previous as any)[key])
-      }
-      legacy.hourly.forEach((entry, hour) => compare(`hour.${hour}`, hourlyClicks[hour]?.clicks ?? 0, entry.clicks))
-
-      return NextResponse.json({
-        // false si l'agregation SQL a echoue : les deux colonnes viennent alors
-        // du meme calcul JavaScript, la comparaison ne prouve rien.
-        sqlAggregationUsed: aggregateError === null,
-        sqlError: aggregateError,
-        identical: aggregateError === null && differences.length === 0,
-        rowsReadByLegacyPath: legacy.rowsRead,
-        differences,
-        sql: { current: metrics, previous: previousMetrics },
-        legacy: { current: legacy.current, previous: legacy.previous },
-      }, { headers: { 'Cache-Control': 'private, no-store' } })
-    }
-
     memoryCache.set(cacheKey, payload, METRICS_TTL_MS)
 
     return NextResponse.json(payload, {
@@ -370,20 +302,6 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Unable to load dashboard metrics:', error)
-
-    // En mode diagnostic (?compare=1), on renvoie le message reel plutot qu'un
-    // texte generique : sans lui, impossible de savoir ce qui echoue.
-    // L'appelant est authentifie et ne voit que ses propres donnees.
-    if (request.nextUrl.searchParams.get('compare') === '1') {
-      return NextResponse.json({
-        error: 'Unable to load dashboard metrics',
-        detail: error instanceof Error ? error.message : String(error),
-        name: error instanceof Error ? error.name : null,
-        code: (error as any)?.code ?? null,
-        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 6) : null,
-      }, { status: 500 })
-    }
-
     return NextResponse.json({ error: 'Unable to load dashboard metrics' }, { status: 500 })
   }
 }
