@@ -306,6 +306,17 @@ async function runQuery(coll: string, args: any = {}, modelName = MODEL_BY_COLL[
   if (args.skip) q = q.offset(args.skip)
   if (args.take) q = q.limit(args.take)
 
+  // Ne demander a Firestore que les champs reellement utilises. Sans cela, le
+  // document entier transite avant d'etre reduit en JavaScript par applySelect :
+  // sur les collections de clics, cela represente l'essentiel du temps de
+  // lecture. La projection n'est appliquee que dans les cas surs (voir
+  // scalarProjection), sinon on garde le comportement precedent.
+  // applyWhere marque ici les filtres `contains`, appliques apres la lecture sur
+  // un champ qui n'est pas forcement dans le select : pas de projection alors.
+  const hasPostFilter = Boolean((q as any).__contains?.length)
+  const projection = scalarProjection(modelName, args, relationFilters.length > 0 || hasPostFilter)
+  if (projection) q = q.select(...projection)
+
   const snap = await q.get()
   let results = snap.docs.map(d => snapToObj(d)).filter(Boolean) as any[]
 
@@ -321,6 +332,49 @@ async function runQuery(coll: string, args: any = {}, modelName = MODEL_BY_COLL[
     }))
   }
   return applyRelationFilters(modelName, results, relationFilters)
+}
+
+/**
+ * Liste des champs a demander a Firestore, ou null s'il faut tout charger.
+ *
+ * Volontairement prudent : au moindre doute on renonce a la projection et le
+ * comportement reste celui d'avant. On refuse donc des qu'une relation, un
+ * include, un _count ou un filtre applique apres coup entre en jeu, car ces
+ * traitements ont besoin de champs absents du select.
+ */
+function scalarProjection(
+  model: string | undefined,
+  args: any,
+  hasRelationFilters: boolean,
+): string[] | null {
+  if (!model || !args?.select || args.include || hasRelationFilters) return null
+
+  const relations = RELATIONS[model] || {}
+  const fields = new Set<string>()
+
+  for (const [key, value] of Object.entries(args.select)) {
+    if (!value) continue
+    // une relation, un sous-select ou un _count : on renonce
+    if (key === '_count' || key in relations || typeof value === 'object') return null
+    fields.add(key)
+  }
+
+  if (fields.size === 0) return null
+
+  // Le tri est fait en JavaScript sur certains chemins : sans ces champs il
+  // porterait sur des valeurs absentes.
+  if (args.orderBy) {
+    for (const order of Array.isArray(args.orderBy) ? args.orderBy : [args.orderBy]) {
+      if (order && typeof order === 'object') fields.add(Object.keys(order)[0])
+    }
+  }
+
+  // Les cles etrangeres des relations restent utiles au reste de l'adaptateur.
+  for (const relation of Object.values(relations)) {
+    if (relation.localKey && args.select[relation.localKey]) fields.add(relation.localKey)
+  }
+
+  return [...fields]
 }
 
 function applySortLimit(arr: any[], args: any): any[] {
