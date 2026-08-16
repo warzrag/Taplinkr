@@ -370,6 +370,20 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Unable to load dashboard metrics:', error)
+
+    // En mode diagnostic (?compare=1), on renvoie le message reel plutot qu'un
+    // texte generique : sans lui, impossible de savoir ce qui echoue.
+    // L'appelant est authentifie et ne voit que ses propres donnees.
+    if (request.nextUrl.searchParams.get('compare') === '1') {
+      return NextResponse.json({
+        error: 'Unable to load dashboard metrics',
+        detail: error instanceof Error ? error.message : String(error),
+        name: error instanceof Error ? error.name : null,
+        code: (error as any)?.code ?? null,
+        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 6) : null,
+      }, { status: 500 })
+    }
+
     return NextResponse.json({ error: 'Unable to load dashboard metrics' }, { status: 500 })
   }
 }
