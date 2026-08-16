@@ -421,7 +421,10 @@ export default function Dashboard() {
     { key: 'realClicks' as const, label: 'Real clicks', note: 'Verified actions', value: metrics.realClicks, suffix: '', icon: MousePointerClick },
     { key: 'uniqueVisitors' as const, label: 'Unique visitors', note: 'People reached', value: metrics.uniqueVisitors, suffix: '', icon: Users },
     { key: 'clickThroughRate' as const, label: 'Conversion rate', note: 'Views that clicked', value: metrics.clickThroughRate, suffix: '%', icon: Percent },
-    { key: 'botsFiltered' as const, label: 'Bots filtered', note: 'Noise removed', value: metrics.botsFiltered, suffix: '', icon: Bot, negativeIsGood: true },
+    // Compte desormais tout le bruit ecarte, pas seulement les robots : les
+    // doublons et les rafales en representaient la totalite. Le libelle
+    // "Bots filtered" etait devenu faux.
+    { key: 'botsFiltered' as const, label: 'Noise filtered', note: 'Bots and duplicates', value: metrics.botsFiltered, suffix: '', icon: Bot, negativeIsGood: true },
   ]
 
   return (
