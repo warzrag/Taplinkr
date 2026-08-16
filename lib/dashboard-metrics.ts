@@ -13,23 +13,39 @@ type FilteredMetricEvent = {
   reason: string
 }
 
-export function dateKeyInTimeZone(date: Date, timeZone: string) {
+/**
+ * Construire un Intl.DateTimeFormat est couteux, de l'ordre de la centaine de
+ * microsecondes. dateKeyInTimeZone etant appele une fois par clic et par
+ * fenetre, cela representait environ 24 000 constructions par affichage du
+ * dashboard, soit près de deux secondes et demie de calcul pur.
+ *
+ * Les formateurs sont donc conserves par fuseau. Un fuseau invalide reste
+ * associe au formateur UTC, comme avant.
+ */
+const dateKeyFormatters = new Map<string, Intl.DateTimeFormat>()
+
+function dateKeyFormatterFor(timeZone: string): Intl.DateTimeFormat {
+  const cached = dateKeyFormatters.get(timeZone)
+  if (cached) return cached
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }
   let formatter: Intl.DateTimeFormat
   try {
-    formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    })
+    formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone })
   } catch {
-    formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'UTC',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    })
+    formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' })
   }
+
+  dateKeyFormatters.set(timeZone, formatter)
+  return formatter
+}
+
+export function dateKeyInTimeZone(date: Date, timeZone: string) {
+  const formatter = dateKeyFormatterFor(timeZone)
 
   const parts = formatter.formatToParts(date)
   const year = parts.find(part => part.type === 'year')?.value
