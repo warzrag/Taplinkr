@@ -5,12 +5,22 @@ import { assessClickRequest, recordFilteredClick } from '@/lib/click-quality'
 import { buildClickMetadata } from '@/lib/click-metadata'
 import { prisma } from '@/lib/prisma'
 
+// Jeton anonyme depuis VenusBot (?vb=). Volontairement strict : on ne stocke
+// qu'un identifiant court et opaque, jamais le pseudo ni l'identifiant du fan.
+const FAN_TOKEN_PATTERN = /^[A-Za-z0-9_-]{1,32}$/
+const sanitizeFanToken = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  return FAN_TOKEN_PATTERN.test(trimmed) ? trimmed : null
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { linkId, screenResolution, language, timezone } = await request.json()
+    const { linkId, screenResolution, language, timezone, fanToken } = await request.json()
     if (typeof linkId !== 'string' || !linkId) {
       return NextResponse.json({ error: 'Link ID required' }, { status: 400 })
     }
+    const safeFanToken = sanitizeFanToken(fanToken)
 
     const link = await prisma.link.findUnique({
       where: { id: linkId },
@@ -54,6 +64,7 @@ export async function POST(request: NextRequest) {
           linkId,
           userId: link.userId,
           folderIdAtClick: link.folderId,
+          fanToken: safeFanToken,
           ...clickMetadata,
         },
       }),

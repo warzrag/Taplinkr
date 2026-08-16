@@ -100,13 +100,16 @@ export default function PublicLinkPreview({ link }: PublicLinkPreviewProps) {
   useEffect(() => {
     const trackView = async () => {
       try {
+        // Jeton anonyme depose par VenusBot dans l'adresse (?vb=)
+        const fanToken = new URLSearchParams(window.location.search).get('vb')
         const response = await fetch('/api/track-link-view', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             linkId: link.id,
             referrer: document.referrer,
-            userAgent: navigator.userAgent
+            userAgent: navigator.userAgent,
+            ...(fanToken ? { fanToken } : {})
           })
         })
 

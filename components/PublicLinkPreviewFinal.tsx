@@ -108,6 +108,11 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
     if (sessionStorage.getItem(key)) return
     sessionStorage.setItem(key, 'true')
 
+    // Jeton anonyme depose par VenusBot dans l'adresse (?vb=). Il permet de
+    // relier ce clic a la conversation qui a envoye le lien, sans rien savoir
+    // du fan lui-meme.
+    const fanToken = new URLSearchParams(window.location.search).get('vb')
+
     fetch('/api/track-link-view', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -118,6 +123,7 @@ export default function PublicLinkPreviewFinal({ link }: PublicLinkPreviewProps)
         screenResolution: `${window.screen.width}x${window.screen.height}`,
         language: navigator.language || 'en-US',
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        ...(fanToken ? { fanToken } : {}),
       }),
       keepalive: true,
     }).catch(() => {
