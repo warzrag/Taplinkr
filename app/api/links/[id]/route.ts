@@ -6,7 +6,7 @@ import { cache } from '@/lib/redis-cache'
 import { revalidatePath } from 'next/cache'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import { checkTeamPermission } from '@/lib/team-permissions'
-import { canDeleteLink } from '@/lib/team-links'
+import { canDeleteLink, canEditLink, canViewLink } from '@/lib/team-links'
 import { RESERVED_USERNAMES } from '@/lib/username'
 import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 import { serializeLandingSettings } from '@/lib/landing-settings'
@@ -20,19 +20,39 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const link = await prisma.link.findFirst({
-      where: {
-        id: params.id,
-        userId: session.user.id
-      },
-      include: {
-        multiLinks: {
-          orderBy: { order: 'asc' }
+    const [link, currentUser] = await Promise.all([
+      prisma.link.findUnique({
+        where: { id: params.id },
+        include: {
+          multiLinks: {
+            orderBy: { order: 'asc' }
+          }
         }
-      }
-    })
+      }),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { teamId: true, teamRole: true },
+      }),
+    ])
 
     if (!link) {
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 })
+    }
+
+    // Recherche faite uniquement pour un lien qui n'est pas le mien.
+    const viewOwner = link.userId === session.user.id ? null : await prisma.user.findUnique({
+      where: { id: link.userId },
+      select: { teamId: true },
+    })
+
+    if (!canViewLink({
+      actorUserId: session.user.id,
+      actorTeamId: currentUser?.teamId,
+      actorTeamRole: currentUser?.teamRole,
+      linkUserId: link.userId,
+      linkTeamId: link.teamId,
+      linkOwnerTeamId: viewOwner?.teamId,
+    })) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
 
@@ -90,12 +110,37 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       landingSettings,
     } = body
 
-    const existingLink = await prisma.link.findFirst({
-      where: { id: params.id, userId: session.user.id },
-    })
+    const [existingLink, currentUser] = await Promise.all([
+      prisma.link.findUnique({
+        where: { id: params.id },
+      }),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { teamId: true, teamRole: true },
+      }),
+    ])
 
     if (!existingLink) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
+    }
+
+    // Recherche faite uniquement pour un lien qui n'est pas le mien.
+    const putOwner = existingLink.userId === session.user.id ? null : await prisma.user.findUnique({
+      where: { id: existingLink.userId },
+      select: { teamId: true },
+    })
+
+    if (!canEditLink({
+      actorUserId: session.user.id,
+      actorTeamId: currentUser?.teamId,
+      actorTeamRole: currentUser?.teamRole,
+      linkUserId: existingLink.userId,
+      linkTeamId: existingLink.teamId,
+      linkOwnerTeamId: putOwner?.teamId,
+    })) {
+      return NextResponse.json({
+        error: 'You do not have permission to edit this link',
+      }, { status: 403 })
     }
 
     if (shieldEnabled && !existingLink.shieldEnabled && !(await checkTeamPermission(session.user.id, 'hasShieldLink'))) {
@@ -245,13 +290,38 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
 
     const body = await request.json()
 
-    // Vérifier que le lien appartient à l'utilisateur
-    const existingLink = await prisma.link.findFirst({
-      where: { id: params.id, userId: session.user.id }
-    })
+    // Le lien doit etre le sien, ou celui d'un coequipier avec le droit d'edition
+    const [existingLink, currentUser] = await Promise.all([
+      prisma.link.findUnique({
+        where: { id: params.id },
+      }),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { teamId: true, teamRole: true },
+      }),
+    ])
 
     if (!existingLink) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
+    }
+
+    // Recherche faite uniquement pour un lien qui n'est pas le mien.
+    const patchOwner = existingLink.userId === session.user.id ? null : await prisma.user.findUnique({
+      where: { id: existingLink.userId },
+      select: { teamId: true },
+    })
+
+    if (!canEditLink({
+      actorUserId: session.user.id,
+      actorTeamId: currentUser?.teamId,
+      actorTeamRole: currentUser?.teamRole,
+      linkUserId: existingLink.userId,
+      linkTeamId: existingLink.teamId,
+      linkOwnerTeamId: patchOwner?.teamId,
+    })) {
+      return NextResponse.json({
+        error: 'You do not have permission to edit this link',
+      }, { status: 403 })
     }
 
     // Mise à jour partielle (utilisé pour le renommage rapide)
