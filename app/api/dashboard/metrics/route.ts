@@ -77,12 +77,22 @@ export async function GET(request: NextRequest) {
     })
     const reportingUserId = user?.team?.ownerId || session.user.id
     step('user')
-    const reportingProfile = await prisma.userProfile.findUnique({
-      where: { userId: reportingUserId },
-      select: { analytics: true },
-    })
+    // Le profil et la liste des coequipiers ne dependent que de `user` : rien
+    // ne justifiait de les enchainer l'un apres l'autre.
+    const [reportingProfile, teamMembers] = await Promise.all([
+      prisma.userProfile.findUnique({
+        where: { userId: reportingUserId },
+        select: { analytics: true },
+      }),
+      user?.teamId
+        ? prisma.user.findMany({
+            where: { teamId: user.teamId },
+            select: { id: true },
+          })
+        : Promise.resolve([] as Array<{ id: string }>),
+    ])
     const storedTimeZone = readReportingTimeZone(reportingProfile?.analytics)
-    step('profil')
+    step('profil+equipe')
     const geoTimeZone = request.headers.get('x-vercel-ip-timezone')
     const browserTimeZone = request.nextUrl.searchParams.get('timeZone')
     const inferredTimeZone = isValidTimeZone(geoTimeZone)
@@ -104,14 +114,7 @@ export async function GET(request: NextRequest) {
         },
       })
     }
-    const teamMembers = user?.teamId
-      ? await prisma.user.findMany({
-          where: { teamId: user.teamId },
-          select: { id: true },
-        })
-      : []
     const visibleUserIds = [...new Set([session.user.id, ...teamMembers.map(member => member.id)])]
-    step('equipe')
     const links = await prisma.link.findMany({
       where: user?.teamId
         ? {
