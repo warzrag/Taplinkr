@@ -183,6 +183,11 @@ export async function GET(request: NextRequest) {
       `Deployer firestore.indexes.json pour retablir la performance.`,
     )
 
+    // Temoins : disent si chaque lecture a pu utiliser son index, ou si elle a
+    // du retomber sur le chemin lent. Sans eux, impossible de le savoir.
+    let clicsBornes = true
+    let bruitCompteEnBase = true
+
     const clickFields = {
       id: true,
       linkId: true,
@@ -204,6 +209,7 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         if (!isMissingIndex(error)) throw error
         warnMissingIndex('clicks')
+        clicsBornes = false
         return prisma.click.findMany({
           where: { linkId: { in: linkIdList } },
           select: clickFields,
@@ -234,6 +240,7 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         if (!isMissingIndex(error)) throw error
         warnMissingIndex('filteredClicks')
+        bruitCompteEnBase = false
         // Sans l'index, on relit et on regroupe comme avant.
         const all = await prisma.filteredClick.findMany({
           where: { linkId: { in: linkIdList } },
@@ -349,6 +356,8 @@ export async function GET(request: NextRequest) {
       etapes: Object.fromEntries(timings),
       clicsLus: allClicks.length,
       bruitEcarteCompte: currentNoise,
+      clicsBornes,
+      bruitCompteEnBase,
       liens: linkIdList.length,
     }
 
