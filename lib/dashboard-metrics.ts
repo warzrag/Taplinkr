@@ -54,6 +54,62 @@ export function dateKeyInTimeZone(date: Date, timeZone: string) {
   return `${year}-${month}-${day}`
 }
 
+const offsetFormatters = new Map<string, Intl.DateTimeFormat>()
+
+function offsetFormatterFor(timeZone: string): Intl.DateTimeFormat {
+  const cached = offsetFormatters.get(timeZone)
+  if (cached) return cached
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hourCycle: 'h23',
+  }
+  let formatter: Intl.DateTimeFormat
+  try {
+    formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone })
+  } catch {
+    formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' })
+  }
+  offsetFormatters.set(timeZone, formatter)
+  return formatter
+}
+
+/** Decalage du fuseau, en millisecondes, a un instant donne. */
+function timeZoneOffsetMs(date: Date, timeZone: string): number {
+  const parts = offsetFormatterFor(timeZone).formatToParts(date)
+  const value = (type: string) => Number(parts.find(part => part.type === type)?.value)
+  const asUtc = Date.UTC(
+    value('year'), value('month') - 1, value('day'),
+    value('hour') % 24, value('minute'), value('second'),
+  )
+  return asUtc - date.getTime()
+}
+
+/**
+ * Premier instant du jour donne, dans le fuseau du compte.
+ *
+ * Permet de compter directement en base sur un intervalle, au lieu de relire
+ * chaque enregistrement pour le ranger par cle de date.
+ */
+export function zonedDayStart(dateKey: string, timeZone: string): Date {
+  const utcMidnight = new Date(`${dateKey}T00:00:00.000Z`).getTime()
+  const offset = timeZoneOffsetMs(new Date(utcMidnight), timeZone)
+  const candidate = new Date(utcMidnight - offset)
+
+  // Autour d'un changement d'heure, le decalage a l'instant corrige peut
+  // differer de celui de depart : on recalcule une fois.
+  const corrected = timeZoneOffsetMs(candidate, timeZone)
+  return corrected === offset ? candidate : new Date(utcMidnight - corrected)
+}
+
+/** Cle du lendemain, au format AAAA-MM-JJ. */
+export function nextDateKey(dateKey: string): string {
+  const date = new Date(`${dateKey}T00:00:00.000Z`)
+  date.setUTCDate(date.getUTCDate() + 1)
+  return date.toISOString().slice(0, 10)
+}
+
 export function dashboardPeriodStart(period: DashboardPeriod, now = new Date()) {
   const start = new Date(now)
   if (period === 'today') {

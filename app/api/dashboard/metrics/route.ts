@@ -9,6 +9,8 @@ import {
   calculateHourlyClicks,
   dashboardDateKeys,
   dateKeyInTimeZone,
+  nextDateKey,
+  zonedDayStart,
   type DashboardPeriod,
 } from '@/lib/dashboard-metrics'
 import { prisma } from '@/lib/prisma'
@@ -209,45 +211,65 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const loadFilteredClicks = async () => {
+    // Bruit ecarte : on ne veut qu'un nombre par periode. Le lire document par
+    // document representait 77 % de tout ce que le dashboard lisait.
+    // Firestore sait compter sans rien transferer, a condition de borner sur un
+    // intervalle plutot que de regrouper par cle de date : d'ou les bornes
+    // exactes calculees dans le fuseau du compte.
+    const currentStart = zonedDayStart(currentDateKeys[0], timeZone)
+    const currentEnd = zonedDayStart(nextDateKey(currentDateKeys[currentDateKeys.length - 1]), timeZone)
+    const previousStart = zonedDayStart(previousDateKeys[0], timeZone)
+
+    const countNoise = (from: Date, to: Date) => prisma.filteredClick.count({
+      where: { linkId: { in: linkIdList }, createdAt: { gte: from, lt: to } },
+    })
+
+    const loadNoiseCounts = async (): Promise<[number, number]> => {
       try {
-        return await prisma.filteredClick.findMany({
-          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
-          select: filteredFields,
-        })
+        const [current, previous] = await Promise.all([
+          countNoise(currentStart, currentEnd),
+          countNoise(previousStart, currentStart),
+        ])
+        return [current, previous]
       } catch (error) {
         if (!isMissingIndex(error)) throw error
         warnMissingIndex('filteredClicks')
-        return prisma.filteredClick.findMany({
+        // Sans l'index, on relit et on regroupe comme avant.
+        const all = await prisma.filteredClick.findMany({
           where: { linkId: { in: linkIdList } },
           select: filteredFields,
         })
+        const inWindow = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
+        return [
+          all.filter(item => inWindow(item.createdAt, currentDates)).length,
+          all.filter(item => inWindow(item.createdAt, previousDates)).length,
+        ]
       }
     }
 
-    const [allClicks, allFilteredClicks] = await Promise.all([loadClicks(), loadFilteredClicks()])
+    const [allClicks, [currentNoise, previousNoise]] = await Promise.all([loadClicks(), loadNoiseCounts()])
     step('lecture-clics')
     const isInDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
     const recentClicks = allClicks.filter(click => isInDates(click.createdAt, currentDates))
-    const recentFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, currentDates))
     const previousClicks = allClicks.filter(click => isInDates(click.createdAt, previousDates))
-    const previousFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, previousDates))
     const directLinkIds = new Set<string>(
       links
         .filter((link: any) => link.isDirect)
         .map((link: any) => String(link.id)),
     )
 
-    const metrics = calculateDashboardMetrics({
-      clicks: recentClicks,
-      filteredClicks: recentFilteredClicks,
-      directLinkIds,
-    })
-    const previousMetrics = calculateDashboardMetrics({
-      clicks: previousClicks,
-      filteredClicks: previousFilteredClicks,
-      directLinkIds,
-    })
+    // botsFiltered compte desormais TOUT le bruit ecarte, pas seulement les
+    // motifs bot / preview / prefetch. Les doublons et les rafales en font
+    // partie : ils representaient la totalite du bruit reel, et la carte
+    // affichait donc zero alors que des milliers de clics etaient ecartes.
+    const metrics = {
+      ...calculateDashboardMetrics({ clicks: recentClicks, filteredClicks: [], directLinkIds }),
+      botsFiltered: currentNoise,
+    }
+    const previousMetrics = {
+      ...calculateDashboardMetrics({ clicks: previousClicks, filteredClicks: [], directLinkIds }),
+      botsFiltered: previousNoise,
+    }
     const dailyBreakdown = calculateDailyLinkClicks({
       period,
       now,
@@ -326,7 +348,7 @@ export async function GET(request: NextRequest) {
       totalMs: Date.now() - t0,
       etapes: Object.fromEntries(timings),
       clicsLus: allClicks.length,
-      clicsEcartesLus: allFilteredClicks.length,
+      bruitEcarteCompte: currentNoise,
       liens: linkIdList.length,
     }
 

@@ -335,6 +335,31 @@ async function runQuery(coll: string, args: any = {}, modelName = MODEL_BY_COLL[
 }
 
 /**
+ * Comptage delegue a Firestore, ou null si ce n'est pas possible.
+ *
+ * L'agregation count() ne transfere aucun document : elle repond un nombre.
+ * Elle ne convient que si la requete se traduit en une seule requete
+ * Firestore. Des qu'un tri, un decoupage ou un filtre doit etre applique en
+ * JavaScript apres la lecture, on renonce et l'appelant relit normalement.
+ */
+async function runCount(coll: string, args: any = {}, modelName = MODEL_BY_COLL[coll]): Promise<number | null> {
+  const { where: plainWhere, relationFilters } = splitRelationWhere(modelName, args.where)
+
+  if (relationFilters.length) return null
+  if (plainWhere?.OR) return null
+  if (findLargeInFilter(plainWhere)) return null
+  if (args.skip || args.take || args.distinct) return null
+
+  let q: Query = db.collection(coll)
+  if (plainWhere) q = applyWhere(q, plainWhere)
+  // `contains` est filtre apres la lecture : un comptage serait faux.
+  if ((q as any).__contains?.length) return null
+
+  const snap = await q.count().get()
+  return snap.data().count
+}
+
+/**
  * Liste des champs a demander a Firestore, ou null s'il faut tout charger.
  *
  * Volontairement prudent : au moindre doute on renonce a la projection et le
@@ -707,6 +732,12 @@ function modelProxy(model: string) {
       return { count: r.length }
     },
     async count(args: any = {}) {
+      // Firestore sait compter sans transferer les documents. On n'y a droit
+      // que si la requete tient en une seule requete Firestore : runCount
+      // renvoie null des qu'un traitement en JavaScript est necessaire, et on
+      // retombe alors sur l'ancien comportement.
+      const fast = await runCount(collection, args, model)
+      if (fast !== null) return fast
       const r = await runQuery(collection, args, model)
       return r.length
     },
