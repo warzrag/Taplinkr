@@ -4,13 +4,13 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { memoryCache } from '@/lib/cache'
 import {
-  calculateDailyLinkClicks,
   calculateDashboardMetrics,
   calculateHourlyClicks,
   dashboardDateKeys,
   dateKeyInTimeZone,
   type DashboardPeriod,
 } from '@/lib/dashboard-metrics'
+import { loadDashboardAggregates, type WindowTotals } from '@/lib/dashboard-metrics-sql'
 import { prisma } from '@/lib/prisma'
 import {
   isValidTimeZone,
@@ -26,6 +26,7 @@ const periods = new Set<DashboardPeriod>(['today', '7d', '30d'])
 // Attention : ce cache vit dans la memoire de l'instance. Sur une instance
 // froide il est vide, il ne remplace donc pas l'instantane cote navigateur.
 const METRICS_TTL_MS = 30_000
+const RECENT_ACTIVITY_LIMIT = 6
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,7 +41,8 @@ export async function GET(request: NextRequest) {
 
     // La cle contient l'identifiant du compte : jamais de fuite entre comptes.
     const cacheKey = `dashboard:metrics:${session.user.id}:${period}`
-    const cached = memoryCache.get(cacheKey)
+    const wantsComparison = request.nextUrl.searchParams.get('compare') === '1'
+    const cached = wantsComparison ? null : memoryCache.get(cacheKey)
     if (cached) {
       return NextResponse.json(cached, {
         headers: { 'Cache-Control': 'private, no-store, max-age=0, must-revalidate' },
@@ -109,11 +111,14 @@ export async function GET(request: NextRequest) {
     const linkIds = new Set(links.map(link => link.id))
 
     if (linkIds.size === 0) {
-      const emptyMetrics = calculateDashboardMetrics({
-        clicks: [],
-        filteredClicks: [],
-        directLinkIds: new Set(),
-      })
+      const emptyMetrics = {
+        realClicks: 0,
+        uniqueVisitors: 0,
+        pageViews: 0,
+        visitsWithClick: 0,
+        clickThroughRate: 0,
+        botsFiltered: 0,
+      }
       return NextResponse.json({
         period,
         ...emptyMetrics,
@@ -141,100 +146,79 @@ export async function GET(request: NextRequest) {
     const since = new Date(`${previousDateKeys[0]}T00:00:00.000Z`)
     since.setUTCDate(since.getUTCDate() - 2)
 
-    // Une seule requete par table, bornee par lien ET par date, ce qui
-    // correspond exactement a @@index([linkId, createdAt]). Avant : une requete
-    // par lien, sans borne de date.
-    const linkIdList = [...linkIds]
-    const [allClicks, allFilteredClicks] = await Promise.all([
-      prisma.click.findMany({
-        where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
-        select: {
-          id: true,
-          linkId: true,
-          createdAt: true,
-          ip: true,
-          sessionId: true,
-          multiLinkId: true,
-          country: true,
-          device: true,
-        },
-      }),
-      prisma.filteredClick.findMany({
-        where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
-        select: {
-          linkId: true,
-          reason: true,
-          createdAt: true,
-        },
-      }),
-    ])
-    const isInDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
-    const recentClicks = allClicks.filter(click => isInDates(click.createdAt, currentDates))
-    const recentFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, currentDates))
-    const previousClicks = allClicks.filter(click => isInDates(click.createdAt, previousDates))
-    const previousFilteredClicks = allFilteredClicks.filter(click => isInDates(click.createdAt, previousDates))
+    const linkIdList = links.map((link: any) => String(link.id))
     const directLinkIds = new Set<string>(
       links
         .filter((link: any) => link.isDirect)
         .map((link: any) => String(link.id)),
     )
 
-    const metrics = calculateDashboardMetrics({
-      clicks: recentClicks,
-      filteredClicks: recentFilteredClicks,
-      directLinkIds,
-    })
-    const previousMetrics = calculateDashboardMetrics({
-      clicks: previousClicks,
-      filteredClicks: previousFilteredClicks,
-      directLinkIds,
-    })
-    const dailyBreakdown = calculateDailyLinkClicks({
-      period,
-      now,
+    // Postgres fait les comptages et ne renvoie que les totaux. Avant, chaque
+    // clic de la periode etait transporte puis additionne en JavaScript.
+    const aggregates = await loadDashboardAggregates({
+      linkIds: linkIdList,
+      directLinkIds: [...directLinkIds],
       timeZone,
-      clicks: recentClicks,
-      links: links.map(link => ({
-        id: link.id,
-        name: link.internalName?.trim() || link.title,
-        slug: link.slug,
-        isDirect: link.isDirect,
-      })),
+      since,
+      currentDateKeys,
+      previousDateKeys,
+      todayKey: dateKeyInTimeZone(now, timeZone),
+      recentActivityLimit: RECENT_ACTIVITY_LIMIT,
     })
-    const hourlyClicks = calculateHourlyClicks({ now, timeZone, clicks: recentClicks, directLinkIds })
-    const completedClickCountByLink = (items: typeof recentClicks) => {
-      const counts = new Map<string, number>()
-      for (const click of items) {
-        if (!click.multiLinkId && !directLinkIds.has(click.linkId)) continue
-        counts.set(click.linkId, (counts.get(click.linkId) || 0) + 1)
-      }
-      return counts
+
+    const toMetrics = (totals: WindowTotals) => ({
+      realClicks: totals.realClicks,
+      uniqueVisitors: totals.uniqueVisitors,
+      pageViews: totals.pageViews,
+      visitsWithClick: totals.visitsWithClick,
+      clickThroughRate: totals.pageViews > 0
+        ? Math.min(100, Number(((totals.visitsWithClick / totals.pageViews) * 100).toFixed(1)))
+        : 0,
+      botsFiltered: totals.botsFiltered,
+    })
+
+    const metrics = toMetrics(aggregates.totals.current)
+    const previousMetrics = toMetrics(aggregates.totals.previous)
+
+    const namedLinks = links.map(link => ({
+      id: link.id,
+      name: link.internalName?.trim() || link.title,
+      slug: link.slug,
+    }))
+
+    const dailyBreakdown = {
+      links: namedLinks,
+      dailyClicks: currentDateKeys.map(date => {
+        const perLink = aggregates.completedByDay.get(date)
+        const clicks = Object.fromEntries(links.map(link => [link.id, perLink?.get(link.id) || 0]))
+        return {
+          date,
+          clicks,
+          total: Object.values(clicks).reduce((sum, value) => sum + value, 0),
+        }
+      }),
     }
-    const currentByLink = completedClickCountByLink(recentClicks)
-    const previousByLink = completedClickCountByLink(previousClicks)
-    const topLinks = links
+
+    const hourlyClicks = aggregates.hourlyCompleted.map((clicks, hour) => ({ hour, clicks }))
+
+    const topLinks = namedLinks
       .map(link => ({
-        id: link.id,
-        name: link.internalName?.trim() || link.title,
-        slug: link.slug,
-        clicks: currentByLink.get(link.id) || 0,
-        previousClicks: previousByLink.get(link.id) || 0,
+        ...link,
+        clicks: aggregates.completedByLink.current.get(link.id) || 0,
+        previousClicks: aggregates.completedByLink.previous.get(link.id) || 0,
       }))
       .sort((a, b) => b.clicks - a.clicks)
       .slice(0, 5)
-    const linkNames = new Map(links.map(link => [link.id, link.internalName?.trim() || link.title]))
-    const recentActivity = recentClicks
-      .filter(click => Boolean(click.multiLinkId) || directLinkIds.has(click.linkId))
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, 6)
-      .map(click => ({
-        id: click.id,
-        linkId: click.linkId,
-        linkName: linkNames.get(click.linkId) || 'Link',
-        createdAt: click.createdAt.toISOString(),
-        country: click.country || null,
-        device: click.device || null,
-      }))
+
+    const linkNames = new Map(namedLinks.map(link => [link.id, link.name]))
+    const recentActivity = aggregates.recentActivity.map(click => ({
+      id: click.id,
+      linkId: click.linkId,
+      linkName: linkNames.get(click.linkId) || 'Link',
+      createdAt: click.createdAt.toISOString(),
+      country: click.country || null,
+      device: click.device || null,
+    }))
     const percentageChange = (current: number, previous: number) => {
       if (previous === 0) return current === 0 ? 0 : 100
       return Number((((current - previous) / previous) * 100).toFixed(1))
@@ -256,6 +240,59 @@ export async function GET(request: NextRequest) {
         clickThroughRate: percentageChange(metrics.clickThroughRate, previousMetrics.clickThroughRate),
         botsFiltered: percentageChange(metrics.botsFiltered, previousMetrics.botsFiltered),
       },
+    }
+
+    // ?compare=1 rejoue l'ancien calcul en JavaScript sur les memes donnees et
+    // renvoie les ecarts. Sert a prouver que le passage en SQL n'a rien change
+    // avant de lui faire confiance. Volontairement lent : il relit toutes les
+    // lignes, comme avant.
+    if (wantsComparison) {
+      const [allClicks, allFilteredClicks] = await Promise.all([
+        prisma.click.findMany({
+          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
+          select: {
+            id: true, linkId: true, createdAt: true, ip: true,
+            sessionId: true, multiLinkId: true, country: true, device: true,
+          },
+        }),
+        prisma.filteredClick.findMany({
+          where: { linkId: { in: linkIdList }, createdAt: { gte: since } },
+          select: { linkId: true, reason: true, createdAt: true },
+        }),
+      ])
+      const inDates = (createdAt: Date, dates: Set<string>) => dates.has(dateKeyInTimeZone(createdAt, timeZone))
+      const legacyCurrent = calculateDashboardMetrics({
+        clicks: allClicks.filter(click => inDates(click.createdAt, currentDates)),
+        filteredClicks: allFilteredClicks.filter(click => inDates(click.createdAt, currentDates)),
+        directLinkIds,
+      })
+      const legacyPrevious = calculateDashboardMetrics({
+        clicks: allClicks.filter(click => inDates(click.createdAt, previousDates)),
+        filteredClicks: allFilteredClicks.filter(click => inDates(click.createdAt, previousDates)),
+        directLinkIds,
+      })
+      const legacyHourly = calculateHourlyClicks({
+        now, timeZone, directLinkIds,
+        clicks: allClicks.filter(click => inDates(click.createdAt, currentDates)),
+      })
+
+      const differences: string[] = []
+      const compare = (label: string, sql: number, legacy: number) => {
+        if (sql !== legacy) differences.push(`${label}: SQL=${sql} JS=${legacy}`)
+      }
+      for (const key of ['realClicks', 'uniqueVisitors', 'pageViews', 'visitsWithClick', 'clickThroughRate', 'botsFiltered'] as const) {
+        compare(`current.${key}`, (metrics as any)[key], (legacyCurrent as any)[key])
+        compare(`previous.${key}`, (previousMetrics as any)[key], (legacyPrevious as any)[key])
+      }
+      legacyHourly.forEach((entry, hour) => compare(`hour.${hour}`, hourlyClicks[hour]?.clicks ?? 0, entry.clicks))
+
+      return NextResponse.json({
+        identical: differences.length === 0,
+        rowsReadByLegacyPath: allClicks.length + allFilteredClicks.length,
+        differences,
+        sql: { current: metrics, previous: previousMetrics },
+        legacy: { current: legacyCurrent, previous: legacyPrevious },
+      }, { headers: { 'Cache-Control': 'private, no-store' } })
     }
 
     memoryCache.set(cacheKey, payload, METRICS_TTL_MS)
