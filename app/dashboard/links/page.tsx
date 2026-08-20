@@ -31,6 +31,8 @@ import MoveToFolderMenu from '@/components/MoveToFolderMenu'
 import { reconcileLiveClickCounts } from '@/lib/live-click-counts'
 import { Link as LinkType } from '@/types'
 
+const LinkStatsOverlay = dynamic(() => import('@/components/dashboard/LinkStatsOverlay'), { ssr: false })
+
 const CreateLinkModal = dynamic(() => import('@/components/CreateLinkModal'), {
   ssr: false,
   loading: () => <div className="fixed inset-0 z-50 grid place-items-center bg-black/70"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" /></div>,
@@ -69,6 +71,8 @@ export default function LinksDashboard() {
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [showCreatePicker, setShowCreatePicker] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
+  // Apercu des statistiques du lien, sans quitter la liste.
+  const [statsLink, setStatsLink] = useState<LinkType | null>(null)
   const [deletingLinkId, setDeletingLinkId] = useState<string | null>(null)
   const [liveClicks, setLiveClicks] = useState<Record<string, number>>({})
   const [todayClicks, setTodayClicks] = useState<Record<string, number>>({})
@@ -599,8 +603,9 @@ export default function LinksDashboard() {
                     {item.isDirect ? destinationLabel(item.directUrl) : `${item.multiLinks?.length || 0} bouton${(item.multiLinks?.length || 0) > 1 ? 's' : ''}`}
                   </p>
 
-                  <Link
-                    href={`/dashboard/analytics/${item.id}`}
+                  <button
+                    type="button"
+                    onClick={() => setStatsLink(item)}
                     className={`relative z-10 inline-flex items-center gap-2.5 overflow-visible rounded-xl border px-3 py-2 text-dash-text2 transition duration-500 hover:text-violet-200 ${
                       clickDeltas[item.id]
                         ? 'scale-[1.04] border-emerald-400/50 bg-emerald-400/10 shadow-[0_0_28px_rgba(52,211,153,0.22)]'
@@ -640,7 +645,7 @@ export default function LinksDashboard() {
                         </motion.span>
                       ) : null}
                     </AnimatePresence>
-                  </Link>
+                  </button>
 
                   <div className="flex items-center justify-end gap-2">
                     <button
@@ -857,6 +862,8 @@ export default function LinksDashboard() {
           }}
         />
       )}
+
+      <LinkStatsOverlay link={statsLink} onClose={() => setStatsLink(null)} />
 
       {(createMode || editingLink) && (
         <CreateLinkModal
