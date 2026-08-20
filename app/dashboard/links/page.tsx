@@ -16,6 +16,7 @@ import {
   Inbox,
   LayoutGrid,
   Layers3,
+  LayoutDashboard,
   Link2,
   Loader2,
   Plus,
@@ -649,6 +650,16 @@ export default function LinksDashboard() {
                     >
                       <span className={`absolute top-1 h-5 w-5 rounded-full bg-dash-bg transition-transform ${item.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
+                    {/* Cadre le dashboard entier sur ce lien : courbe, cartes et
+                       activite recente ne montrent plus que lui. */}
+                    <Link
+                      href={`/dashboard?link=${item.id}`}
+                      className="rounded-lg p-2 text-dash-text5 transition hover:bg-violet-500/10 hover:text-violet-300"
+                      aria-label={`Dashboard for ${item.internalName || item.title}`}
+                      title="See this link on the dashboard"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                    </Link>
                     <button
                       onClick={() => setMovingLink(item)}
                       disabled={movingLinkId === item.id}

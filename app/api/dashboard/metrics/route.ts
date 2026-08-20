@@ -50,12 +50,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Filtre optionnel sur un seul lien. Toute la route calcule a partir de la
+    // liste des liens : la restreindre suffit a cadrer chaque chiffre.
+    const requestedLinkId = request.nextUrl.searchParams.get('linkId')
     const requestedPeriod = request.nextUrl.searchParams.get('period') as DashboardPeriod | null
     const period = requestedPeriod && periods.has(requestedPeriod) ? requestedPeriod : '30d'
     const now = new Date()
 
     // La cle contient l'identifiant du compte : jamais de fuite entre comptes.
-    const cacheKey = `dashboard:metrics:${session.user.id}:${period}`
+    const cacheKey = `dashboard:metrics:${session.user.id}:${period}:${requestedLinkId || 'all'}`
     const wantsTimings = request.nextUrl.searchParams.get('timings') === '1'
     const cached = wantsTimings ? null : memoryCache.get(cacheKey)
     if (cached) {
@@ -115,7 +118,7 @@ export async function GET(request: NextRequest) {
       })
     }
     const visibleUserIds = [...new Set([session.user.id, ...teamMembers.map(member => member.id)])]
-    const links = await prisma.link.findMany({
+    const allLinks = await prisma.link.findMany({
       where: user?.teamId
         ? {
             OR: [
@@ -133,6 +136,13 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { order: 'asc' },
     })
+    // Un seul point de filtrage : tout ce qui suit (courbe, cartes, activite,
+    // comptage du bruit) se calcule a partir de cette liste. Un identifiant
+    // inconnu ou n appartenant pas au compte donne une liste vide, donc un
+    // dashboard vide, jamais les chiffres de quelqu un d autre.
+    const links = requestedLinkId
+      ? allLinks.filter((link: any) => link.id === requestedLinkId)
+      : allLinks
     const linkIds = new Set(links.map(link => link.id))
     step('liens')
 

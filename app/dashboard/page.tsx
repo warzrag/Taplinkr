@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Sparkles,
   Users,
+  X,
   Zap,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -307,11 +308,12 @@ function TrafficChart({ data, period }: { data: ChartPoint[]; period: Period }) 
  */
 const SNAPSHOT_MAX_AGE = 24 * 60 * 60 * 1000
 
-const snapshotKey = (userId: string, period: Period) => `taplinkr:metrics:${userId}:${period}`
+const snapshotKey = (userId: string, period: Period, linkFilter: string) =>
+  `taplinkr:metrics:${userId}:${period}:${linkFilter || 'all'}`
 
-const readSnapshot = (userId: string, period: Period): DashboardMetrics | null => {
+const readSnapshot = (userId: string, period: Period, linkFilter: string): DashboardMetrics | null => {
   try {
-    const raw = window.localStorage.getItem(snapshotKey(userId, period))
+    const raw = window.localStorage.getItem(snapshotKey(userId, period, linkFilter))
     if (!raw) return null
     const parsed = JSON.parse(raw) as { savedAt?: number; data?: DashboardMetrics }
     if (!parsed?.data || typeof parsed.savedAt !== 'number') return null
@@ -323,9 +325,9 @@ const readSnapshot = (userId: string, period: Period): DashboardMetrics | null =
   }
 }
 
-const writeSnapshot = (userId: string, period: Period, data: DashboardMetrics) => {
+const writeSnapshot = (userId: string, period: Period, linkFilter: string, data: DashboardMetrics) => {
   try {
-    window.localStorage.setItem(snapshotKey(userId, period), JSON.stringify({ savedAt: Date.now(), data }))
+    window.localStorage.setItem(snapshotKey(userId, period, linkFilter), JSON.stringify({ savedAt: Date.now(), data }))
   } catch {
     // sans consequence : le cache navigateur est un confort, pas une source
   }
@@ -334,7 +336,7 @@ const writeSnapshot = (userId: string, period: Period, data: DashboardMetrics) =
 export default function Dashboard() {
   const reduceMotion = useReducedMotion()
   const { data: session } = useSession()
-  const { refreshLinks } = useLinks()
+  const { refreshLinks, links: availableLinks } = useLinks()
   const { profile } = useProfile()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [period, setPeriod] = useState<Period>('today')
@@ -343,6 +345,23 @@ export default function Dashboard() {
   const [metricsError, setMetricsError] = useState('')
 
   const name = profile?.name || session?.user?.name || session?.user?.email?.split('@')[0] || 'creator'
+  // Le filtre vit dans l adresse : le rafraichissement le conserve, la page se
+  // met en favori, et le bouton Retour fonctionne.
+  const [linkFilter, setLinkFilter] = useState<string>(() => {
+    if (typeof window === 'undefined') return ''
+    return new URLSearchParams(window.location.search).get('link') || ''
+  })
+
+  const filteredLink = availableLinks.find((item: any) => item.id === linkFilter)
+  const filteredLinkName = filteredLink?.internalName?.trim() || filteredLink?.title || 'This link'
+
+  const clearLinkFilter = () => {
+    setLinkFilter('')
+    const url = new URL(window.location.href)
+    url.searchParams.delete('link')
+    window.history.replaceState({}, '', url)
+  }
+
   const userId = session?.user?.id
 
   // Lu dans une ref : la requete part des le montage, sans attendre que la
@@ -354,11 +373,11 @@ export default function Dashboard() {
   // Reaffichage immediat du dernier resultat connu, des que le compte est identifie.
   useEffect(() => {
     if (!userId) return
-    const snapshot = readSnapshot(userId, period)
+    const snapshot = readSnapshot(userId, period, linkFilter)
     if (!snapshot) return
     setMetrics(snapshot)
     setMetricsLoading(false)
-  }, [userId, period])
+  }, [userId, period, linkFilter])
 
   useEffect(() => {
     let stopped = false
@@ -372,7 +391,8 @@ export default function Dashboard() {
       try {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
         const response = await fetch(
-          `/api/dashboard/metrics?period=${period}&timeZone=${encodeURIComponent(timeZone)}`,
+          `/api/dashboard/metrics?period=${period}&timeZone=${encodeURIComponent(timeZone)}` +
+            (linkFilter ? `&linkId=${encodeURIComponent(linkFilter)}` : ''),
           { cache: 'no-store' },
         )
         const data = await response.json()
@@ -380,7 +400,7 @@ export default function Dashboard() {
         const merged = { ...emptyMetrics, ...data }
         if (!stopped) setMetrics(merged)
         const id = userIdRef.current
-        if (id) writeSnapshot(id, period, merged)
+        if (id) writeSnapshot(id, period, linkFilter, merged)
       } catch (error) {
         if (!stopped) setMetricsError(error instanceof Error ? error.message : 'Unable to load overview')
       } finally {
@@ -391,7 +411,7 @@ export default function Dashboard() {
 
     // Pas d'indicateur de chargement s'il y a deja un instantane a l'ecran :
     // l'effet ci-dessus l'a pose, la requete se contente de le rafraichir.
-    const hasSnapshot = Boolean(userIdRef.current && readSnapshot(userIdRef.current, period))
+    const hasSnapshot = Boolean(userIdRef.current && readSnapshot(userIdRef.current, period, linkFilter))
     void loadMetrics(!hasSnapshot)
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') void loadMetrics(false)
@@ -404,7 +424,7 @@ export default function Dashboard() {
       window.clearInterval(timer)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [period])
+  }, [period, linkFilter])
 
   const chartPoints = useMemo<ChartPoint[]>(
     () => period === 'today'
@@ -439,6 +459,23 @@ export default function Dashboard() {
             <h1 className="mt-1.5 text-2xl font-bold tracking-[-0.03em] sm:text-[1.75rem]">Good to see you, {name}</h1>
             <p className="mt-1.5 text-sm text-dash-text5">Your real traffic and link performance at a glance.</p>
           </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            {/* Le filtre se pose depuis la liste des liens. Ici on se contente
+                de dire lequel est affiche, et d offrir le retour a tous. */}
+            {linkFilter && (
+              <div className="inline-flex h-[46px] items-center gap-2.5 rounded-2xl border border-violet-500/30 bg-violet-500/[0.12] px-3.5 shadow-xl backdrop-blur-xl">
+                <Link2 className="h-4 w-4 shrink-0 text-violet-300" />
+                <span className="max-w-[190px] truncate text-sm font-bold text-violet-50">{filteredLinkName}</span>
+                <button
+                  type="button"
+                  onClick={clearLinkFilter}
+                  aria-label="Show all links"
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-violet-200 transition hover:bg-white/10 hover:text-white"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
           <div className="inline-flex self-start rounded-2xl border border-white/[0.08] bg-dash-raised/80 p-1.5 shadow-xl backdrop-blur-xl sm:self-auto">
             {([['today', 'Today'], ['7d', '7 days'], ['30d', '30 days']] as Array<[Period, string]>).map(([value, label]) => (
               <button
@@ -451,6 +488,7 @@ export default function Dashboard() {
                 <span className="relative z-10">{label}</span>
               </button>
             ))}
+          </div>
           </div>
         </motion.header>
 
