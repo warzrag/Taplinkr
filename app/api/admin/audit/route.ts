@@ -54,12 +54,15 @@ export async function GET() {
       const [linkCount, clickCount, lastClick] = await Promise.all([
         prisma.link.count({ where: { userId: user.id } }),
         prisma.click.count({ where: { userId: user.id } }),
+        // Trier par date en filtrant sur l utilisateur reclame un index
+        // composite que les simples comptages n exigent pas. S il manque, on
+        // se passe de cette date plutot que de perdre tout l audit.
         prisma.click.findMany({
           where: { userId: user.id },
           orderBy: { createdAt: 'desc' },
           take: 1,
           select: { createdAt: true },
-        }),
+        }).catch(() => [] as Array<{ createdAt: Date }>),
       ])
 
       const domain = (user.email || '').split('@')[1]?.toLowerCase() || ''
@@ -112,6 +115,12 @@ export async function GET() {
     }, { headers: { 'Cache-Control': 'private, no-store' } })
   } catch (error) {
     console.error('[admin/audit]', error)
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 })
+    // L appelant est administrateur : lui montrer la cause reelle plutot que
+    // de le laisser deviner.
+    return NextResponse.json({
+      error: 'Erreur interne',
+      detail: error instanceof Error ? error.message : String(error),
+      code: (error as any)?.code ?? null,
+    }, { status: 500 })
   }
 }
