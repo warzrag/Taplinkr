@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { PLAN_LIMITS } from '@/lib/permissions'
+import { stripeConfiguration } from '@/lib/stripe'
 
 /**
  * Audit des comptes : sont-ils reels, et pourquoi ne paient-ils pas.
@@ -99,6 +100,9 @@ export async function GET() {
 
     return NextResponse.json({
       limiteGratuite: `${FREE_MAX_PAGES} page`,
+      // Ne liste que les NOMS de variables absentes, jamais leur valeur. Si
+      // l une manque, le paiement echoue et personne ne peut souscrire.
+      paiement: stripeConfiguration(),
       resume: {
         comptes: rows.length,
         payants: count(r => r.plan !== 'free'),
