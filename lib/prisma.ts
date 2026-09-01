@@ -20,6 +20,9 @@ const usePostgres = process.env.DATA_BACKEND === 'postgres'
 
 function createClient(): any {
   if (usePostgres) {
+    // require et non import : un import serait resolu au chargement du module et
+    // initialiserait les deux bases, ce que l on cherche precisement a eviter.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PrismaClient } = require('@prisma/client')
     // En developpement, Next recharge les modules a chaud : sans ce cache
     // global, chaque rechargement ouvrirait un nouveau pool de connexions.
@@ -27,6 +30,7 @@ function createClient(): any {
     if (!store.__prismaPg) store.__prismaPg = new PrismaClient()
     return store.__prismaPg
   }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require('@/lib/firestore-adapter').prisma
 }
 
