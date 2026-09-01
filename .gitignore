@@ -54,3 +54,7 @@ next-env.d.ts
 # uploads
 public/uploads/*
 !public/uploads/.gitkeep
+
+# Cles de service Firebase : ne doivent jamais partir sur GitHub
+firebase-key.json
+*-firebase-adminsdk-*.json
