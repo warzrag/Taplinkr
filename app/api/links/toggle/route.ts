@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
+import { canEditLink } from '@/lib/team-links'
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -25,13 +26,37 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'linkId and isActive are required' }, { status: 400 })
     }
 
-    // Vérifier que le lien appartient à l'utilisateur
-    const existingLink = await prisma.link.findFirst({
-      where: { id: linkId, userId: session.user.id }
-    })
+    // Le lien peut appartenir a un coequipier : la liste les affiche, il faut
+    // donc les accepter ici aussi. Sans ce controle, activer ou desactiver le
+    // lien d un membre de l equipe repondait "Link not found".
+    const [existingLink, currentUser] = await Promise.all([
+      prisma.link.findUnique({ where: { id: linkId } }),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { teamId: true, teamRole: true },
+      }),
+    ])
 
     if (!existingLink) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
+    }
+
+    const owner = existingLink.userId === session.user.id ? null : await prisma.user.findUnique({
+      where: { id: existingLink.userId },
+      select: { teamId: true },
+    })
+
+    if (!canEditLink({
+      actorUserId: session.user.id,
+      actorTeamId: currentUser?.teamId,
+      actorTeamRole: currentUser?.teamRole,
+      linkUserId: existingLink.userId,
+      linkTeamId: existingLink.teamId,
+      linkOwnerTeamId: owner?.teamId,
+    })) {
+      return NextResponse.json({
+        error: 'You do not have permission to edit this link',
+      }, { status: 403 })
     }
 
     const link = await prisma.link.update({

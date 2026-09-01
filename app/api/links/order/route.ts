@@ -1,3 +1,4 @@
+import { canEditLink } from '@/lib/team-links'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -19,16 +20,45 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'linkIds must be an array' }, { status: 400 })
     }
 
-    // Vérifier que tous les liens appartiennent à l'utilisateur
-    const links = await prisma.link.findMany({
-      where: {
-        id: { in: linkIds },
-        userId: session.user.id
-      }
-    })
+    // La liste affiche aussi les liens des coequipiers : reordonner doit donc
+    // les accepter. Sans cela, glisser un lien d equipe echouait.
+    const [links, currentUser] = await Promise.all([
+      prisma.link.findMany({ where: { id: { in: linkIds } } }),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { teamId: true, teamRole: true },
+      }),
+    ])
 
     if (links.length !== linkIds.length) {
-      return NextResponse.json({ error: 'Some links do not belong to this user' }, { status: 403 })
+      return NextResponse.json({ error: 'Some links do not exist' }, { status: 404 })
+    }
+
+    // Les equipes des proprietaires sont lues en une fois plutot qu une requete
+    // par lien.
+    const autresProprietaires = [...new Set(
+      links.map(link => link.userId).filter(id => id !== session.user.id)
+    )]
+    const equipeParProprietaire = new Map<string, string | null>(
+      autresProprietaires.length
+        ? (await prisma.user.findMany({
+            where: { id: { in: autresProprietaires } },
+            select: { id: true, teamId: true },
+          })).map((u: any) => [String(u.id), u.teamId ?? null])
+        : []
+    )
+
+    const interdit = links.find(link => !canEditLink({
+      actorUserId: session.user.id,
+      actorTeamId: currentUser?.teamId,
+      actorTeamRole: currentUser?.teamRole,
+      linkUserId: link.userId,
+      linkTeamId: link.teamId,
+      linkOwnerTeamId: equipeParProprietaire.get(link.userId),
+    }))
+
+    if (interdit) {
+      return NextResponse.json({ error: 'You do not have permission to reorder these links' }, { status: 403 })
     }
 
     // Mettre à jour l'ordre de chaque lien
