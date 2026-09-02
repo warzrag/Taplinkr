@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { db } from '@/lib/firebase-admin'
+import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,27 +19,19 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const queries = [
-      db.collection('links')
-        .where('userId', '==', session.user.id)
-        .select('clicks'),
-    ]
+    // Cette route interrogeait Firestore directement, en contournant le point
+    // d acces a la base. Elle continuait donc de lire l ancienne base apres le
+    // passage a PostgreSQL, et affichait des totaux figes au jour de la bascule.
+    const links = await prisma.link.findMany({
+      where: session.user.teamId
+        ? { OR: [{ userId: session.user.id }, { teamId: session.user.teamId }] }
+        : { userId: session.user.id },
+      select: { id: true, clicks: true },
+    })
 
-    if (session.user.teamId) {
-      queries.push(
-        db.collection('links')
-          .where('teamId', '==', session.user.teamId)
-          .select('clicks'),
-      )
-    }
-
-    const snapshots = await Promise.all(queries.map(query => query.get()))
     const counts = new Map<string, number>()
-
-    for (const snapshot of snapshots) {
-      for (const document of snapshot.docs) {
-        counts.set(document.id, Number(document.data().clicks) || 0)
-      }
+    for (const link of links) {
+      counts.set(String(link.id), Number(link.clicks) || 0)
     }
 
     return NextResponse.json(

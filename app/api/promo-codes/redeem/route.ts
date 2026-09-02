@@ -1,48 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { FieldValue } from 'firebase-admin/firestore'
-import { authOptions } from '@/lib/auth'
-import { db } from '@/lib/firebase-admin'
 
-function asDate(value: unknown): Date | null {
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+
+/**
+ * Utilisation d un code promotionnel.
+ *
+ * Cette route interrogeait Firestore directement, en contournant le point
+ * d acces a la base. Apres le passage a PostgreSQL elle aurait continue de lire
+ * et d ecrire dans l ancienne base : le code aurait paru accepte, sans qu aucun
+ * plan ne change reellement. Une panne silencieuse.
+ *
+ * Les trois ecritures doivent rester solidaires : accorder le Premium, marquer
+ * le code comme utilise par cette personne, incrementer le compteur. Une
+ * transaction garantit qu on ne puisse pas offrir le plan sans enregistrer
+ * l utilisation, ce qui permettrait de rejouer le code indefiniment.
+ */
+
+const asDate = (value: unknown): Date | null => {
   if (!value) return null
-  if (typeof value === 'object' && value !== null && 'toDate' in value) {
-    return (value as { toDate(): Date }).toDate()
-  }
-  const date = new Date(value as string | number | Date)
+  const date = value instanceof Date ? value : new Date(value as string)
   return Number.isNaN(date.getTime()) ? null : date
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const code = String((await request.json()).code || '').trim().toUpperCase()
     if (!/^[A-Z0-9_-]{3,40}$/.test(code)) {
       return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 })
     }
 
-    const promoQuery = await db.collection('promoCodes').where('code', '==', code).limit(1).get()
-    if (promoQuery.empty) return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 })
+    const result = await prisma.$transaction(async (tx: any) => {
+      const promo = await tx.promoCode.findFirst({ where: { code } })
+      if (!promo) throw new Error('Invalid promo code')
 
-    const promoRef = promoQuery.docs[0].ref
-    const userRef = db.collection('users').doc(session.user.id)
-    const redemptionRef = db.collection('promoRedemptions').doc(`${promoRef.id}_${session.user.id}`)
+      const user = await tx.user.findUnique({ where: { id: session.user.id } })
+      if (!user) throw new Error('User not found')
 
-    const result = await db.runTransaction(async (transaction) => {
-      const [promoSnap, userSnap, redemptionSnap] = await Promise.all([
-        transaction.get(promoRef),
-        transaction.get(userRef),
-        transaction.get(redemptionRef),
-      ])
+      const dejaUtilise = await tx.promoRedemption.findFirst({
+        where: { promoCodeId: promo.id, userId: session.user.id },
+      })
+      if (dejaUtilise) throw new Error('Promo code already used')
 
-      if (!promoSnap.exists) throw new Error('Invalid promo code')
-      if (!userSnap.exists) throw new Error('User not found')
-      if (redemptionSnap.exists) throw new Error('Promo code already used')
-
-      const promo = promoSnap.data()!
-      const user = userSnap.data()!
       const now = new Date()
       const validFrom = asDate(promo.validFrom)
       const validUntil = asDate(promo.validUntil)
@@ -62,19 +67,27 @@ export async function POST(request: NextRequest) {
       else throw new Error('Invalid promotion type')
       if (!Number.isInteger(days) || days <= 0 || days > 3650) throw new Error('Invalid promotion')
 
+      // Un Premium encore valide est prolonge, il n est pas remis a zero.
       const currentExpiry = asDate(user.planExpiresAt)
       const baseDate = user.plan === 'premium' && currentExpiry && currentExpiry > now ? currentExpiry : now
       const newExpiry = new Date(baseDate)
       newExpiry.setUTCDate(newExpiry.getUTCDate() + days)
 
-      transaction.set(userRef, { plan: 'premium', planExpiresAt: newExpiry, updatedAt: now }, { merge: true })
-      transaction.create(redemptionRef, {
-        id: redemptionRef.id,
-        promoCodeId: promoRef.id,
-        userId: session.user.id,
-        redeemedAt: now,
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: { plan: 'premium', planExpiresAt: newExpiry },
       })
-      transaction.update(promoRef, { currentUses: FieldValue.increment(1), updatedAt: now })
+      await tx.promoRedemption.create({
+        data: {
+          promoCodeId: promo.id,
+          userId: session.user.id,
+          redeemedAt: now,
+        },
+      })
+      await tx.promoCode.update({
+        where: { id: promo.id },
+        data: { currentUses: Number(promo.currentUses || 0) + 1 },
+      })
 
       return {
         success: true,
