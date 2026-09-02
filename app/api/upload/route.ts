@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nanoid } from 'nanoid'
 import { authOptions } from '@/lib/auth'
+import { enregistrerMedia } from '@/lib/media-storage'
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
@@ -25,8 +26,6 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
     }
-
-    const { put } = await import('@vercel/blob')
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -57,18 +56,15 @@ export async function POST(request: NextRequest) {
     const extension = extensionFor(uploaded.contentType, file.name)
     const pathname = `uploads/${session.user.id}/${type}/${fileId}${extension}`
 
-    const blob = await put(pathname, uploaded.buffer, {
-      access: 'public',
-      contentType: uploaded.contentType,
-      cacheControlMaxAge: 31536000,
-      allowOverwrite: false,
-    })
+    // Ecrit sur le disque du serveur, servi par Caddy sous /media. Auparavant
+    // ce fichier partait chez Vercel Blob, sur un compte impaye.
+    const media = await enregistrerMedia(pathname, uploaded.buffer)
 
     return NextResponse.json({
       id: fileId,
-      url: blob.url,
-      filename: blob.pathname,
-      path: blob.pathname,
+      url: media.url,
+      filename: media.chemin,
+      path: media.chemin,
       originalName: file.name,
       mimeType: uploaded.contentType,
       size: uploaded.buffer.length,

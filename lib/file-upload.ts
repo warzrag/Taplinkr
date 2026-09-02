@@ -1,3 +1,4 @@
+import { enregistrerMedia, supprimerMediasParPrefixe } from '@/lib/media-storage'
 import { nanoid } from 'nanoid'
 import sharp from 'sharp'
 
@@ -12,7 +13,6 @@ export interface UploadResult {
 
 export class FileUploadService {
   async uploadFile(file: File, userId: string): Promise<UploadResult> {
-    const { put } = await import('@vercel/blob')
     const fileId = nanoid()
     const extension = this.getFileExtension(file.name, file.type)
     const filename = `uploads/${userId}/files/${fileId}${extension}`
@@ -23,27 +23,22 @@ export class FileUploadService {
       throw new Error('Invalid image content')
     }
 
-    const blob = await put(filename, buffer, {
-      access: 'public',
-      contentType: file.type || 'application/octet-stream',
-      cacheControlMaxAge: 31536000,
-      allowOverwrite: false,
-    })
+    // Ecrit sur le disque du serveur plutot que chez Vercel Blob, dont le
+    // compte est impaye et les fichiers susceptibles de disparaitre.
+    const media = await enregistrerMedia(filename, buffer)
 
     return {
       id: fileId,
-      filename: blob.pathname,
+      filename: media.chemin,
       originalName: file.name,
-      url: blob.url,
+      url: media.url,
       mimeType: file.type,
       size: buffer.length,
     }
   }
 
   async deleteFile(fileId: string, userId: string): Promise<void> {
-    const { del, list } = await import('@vercel/blob')
-    const { blobs } = await list({ prefix: `uploads/${userId}/files/${fileId}` })
-    await Promise.all(blobs.map(blob => del(blob.url).catch(() => undefined)))
+    await supprimerMediasParPrefixe(`uploads/${userId}/files/${fileId}`)
   }
 
   validateFile(file: File): { valid: boolean; error?: string } {
