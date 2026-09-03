@@ -26,6 +26,11 @@ model User {
   teamId                  String?
   teamRole                String?                 @default("member")
   nickname                String?
+  // Compte desactive par un administrateur. Le code s en sert pour refuser la
+  // connexion et invalider les sessions en cours, mais la colonne n avait
+  // jamais ete declaree : Firestore l acceptait, PostgreSQL refusait la
+  // requete et deconnectait tout le monde toutes les cinq minutes.
+  isActive                Boolean                 @default(true)
   emailVerified           Boolean                 @default(false)
   emailVerificationToken  String?                 @unique
   emailVerificationExpiry DateTime?
