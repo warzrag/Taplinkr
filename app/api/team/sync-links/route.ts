@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
+import { filtreLiensAttribues } from '@/lib/team-links'
+import { chargerContexteEquipe } from '@/lib/team-context'
 import {
   requireTeamPermission,
   TeamAction,
@@ -26,10 +28,7 @@ export async function GET(request: Request) {
     }
 
     // Récupérer l'utilisateur et son équipe
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { teamId: true, teamRole: true }
-    })
+    const user = await chargerContexteEquipe(session.user.id)
 
     console.log('  user.teamId:', user?.teamId)
     console.log('  user.teamRole:', user?.teamRole)
@@ -42,11 +41,21 @@ export async function GET(request: Request) {
     const userId = session.user.id
     const teamId = user.teamId
 
+    // Accès exclusif : un membre ne voit ici que les liens qui lui sont
+    // attribués. Le propriétaire et les administrateurs gardent la vue
+    // complète, sans quoi ils ne pourraient plus attribuer les liens.
+    const filtreExclusif = filtreLiensAttribues({
+      actorUserId: userId,
+      actorTeamRole: user.teamRole,
+      restrictToAssigned: user.restrictToAssigned,
+    })
+
     // ⚡ Récupérer tous les liens de l'équipe (optimisé)
     const teamLinks = await prisma.link.findMany({
       where: {
         teamId: teamId,
-        teamShared: true
+        teamShared: true,
+        ...(filtreExclusif ?? {}),
       },
       select: {
         id: true,
@@ -257,12 +266,22 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Vérifier que le lien est bien partagé avec l'équipe
+    // Vérifier que le lien est bien partagé avec l'équipe, et qu'il s'agit bien
+    // d'un lien que cette personne a le droit de toucher : en accès exclusif,
+    // modifier le lien d'un collègue doit échouer comme s'il n'existait pas.
+    const contexte = await chargerContexteEquipe(userId!)
+    const filtreExclusif = filtreLiensAttribues({
+      actorUserId: userId!,
+      actorTeamRole: contexte.teamRole,
+      restrictToAssigned: contexte.restrictToAssigned,
+    })
+
     const link = await prisma.link.findFirst({
       where: {
         id: linkId,
         teamId: teamId,
-        teamShared: true
+        teamShared: true,
+        ...(filtreExclusif ?? {}),
       }
     })
 

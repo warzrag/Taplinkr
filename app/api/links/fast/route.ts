@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/redis-cache'
-import { canDeleteLink, uniqueTeamMemberIds } from '@/lib/team-links'
+import { canDeleteLink, filtreLiensAttribues, uniqueTeamMemberIds } from '@/lib/team-links'
+import { chargerContexteEquipe } from '@/lib/team-context'
 
 // Version optimisée pour le dashboard - charge uniquement l'essentiel
 export async function GET(request: NextRequest) {
@@ -27,10 +28,7 @@ export async function GET(request: NextRequest) {
     console.log(`❌ Cache miss pour user ${session.user.id}`)
 
     // Récupérer l'équipe de l'utilisateur
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { teamId: true, teamRole: true }
-    })
+    const user = await chargerContexteEquipe(session.user.id)
     const teamMembers = user?.teamId
       ? await prisma.user.findMany({
           where: { teamId: user.teamId },
@@ -42,10 +40,18 @@ export async function GET(request: NextRequest) {
       teamMembers.map(member => member.id),
     )
 
+    // Quand l'équipe est en accès exclusif, un membre ne voit que les liens qui
+    // lui sont attribués : il ne reste rien de la vue d'équipe à filtrer.
+    const filtreExclusif = filtreLiensAttribues({
+      actorUserId: session.user.id,
+      actorTeamRole: user?.teamRole,
+      restrictToAssigned: user?.restrictToAssigned,
+    })
+
     // Une seule requête optimisée avec les données essentielles
     // Inclure à la fois les liens personnels ET les liens d'équipe partagés
     const links = await prisma.link.findMany({
-      where: {
+      where: filtreExclusif ?? {
         OR: [
           { userId: session.user.id },  // Mes liens personnels
           ...(user?.teamId ? [{
@@ -105,6 +111,8 @@ export async function GET(request: NextRequest) {
         actorTeamRole: user?.teamRole,
         linkUserId: link.userId,
         linkTeamId: link.teamId,
+        linkAssignedToUserId: link.assignedToUserId,
+        restrictToAssigned: user?.restrictToAssigned,
       }),
       multiLinksCount: link._count?.multiLinks || 0,
       multiLinks: [] // Pas besoin des détails pour le dashboard

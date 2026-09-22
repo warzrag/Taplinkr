@@ -56,6 +56,7 @@ interface Team {
   members: TeamMember[]
   invitations?: TeamInvitation[]
   maxMembers: number
+  restrictToAssignedLinks?: boolean
 }
 
 export default function TeamPage() {
@@ -695,6 +696,7 @@ export default function TeamPage() {
               userRole={userTeamRole}
               userId={session?.user?.id}
               teamId={team.id}
+              restrictToAssignedLinks={team.restrictToAssignedLinks ?? false}
             />
           </motion.div>
         )}

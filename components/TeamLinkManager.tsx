@@ -59,9 +59,10 @@ interface TeamLinkManagerProps {
   userRole?: string
   userId?: string
   teamId?: string
+  restrictToAssignedLinks?: boolean
 }
 
-export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkManagerProps) {
+export default function TeamLinkManager({ userRole, userId, teamId, restrictToAssignedLinks = false }: TeamLinkManagerProps) {
   const [teamLinks, setTeamLinks] = useState<TeamLink[]>([])
   const [userLinks, setUserLinks] = useState<TeamLink[]>([])
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -69,6 +70,41 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
   const [selectedLink, setSelectedLink] = useState<TeamLink | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [filter, setFilter] = useState<'all' | 'mine' | 'team'>('all')
+  // Acces exclusif : etat local pour que l'interrupteur reponde tout de suite,
+  // reaccorde sur la valeur du serveur si l'appel echoue.
+  const [exclusif, setExclusif] = useState(restrictToAssignedLinks)
+  const [exclusifEnCours, setExclusifEnCours] = useState(false)
+
+  useEffect(() => {
+    setExclusif(restrictToAssignedLinks)
+  }, [restrictToAssignedLinks])
+
+  const changerAccesExclusif = async (valeur: boolean) => {
+    setExclusif(valeur)
+    setExclusifEnCours(true)
+    try {
+      const response = await fetch('/api/teams/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restrictToAssignedLinks: valeur }),
+      })
+      if (!response.ok) {
+        const erreur = await response.json().catch(() => ({}))
+        setExclusif(!valeur)
+        toast.error(erreur.error || 'Unable to update this setting.')
+        return
+      }
+      toast.success(valeur
+        ? 'Each member now only sees the links assigned to them.'
+        : 'Every member sees all the team links again.')
+      fetchLinks()
+    } catch {
+      setExclusif(!valeur)
+      toast.error('Unable to update this setting.')
+    } finally {
+      setExclusifEnCours(false)
+    }
+  }
 
   // Charger les liens et membres
   useEffect(() => {
@@ -321,6 +357,40 @@ export default function TeamLinkManager({ userRole, userId, teamId }: TeamLinkMa
             </span>
           )}
         </div>
+
+        {/* Acces exclusif : reserve au proprietaire et aux administrateurs. */}
+        {(userRole === 'owner' || userRole === 'admin') && (
+          <div className="mt-3 flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-2">
+              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
+              <div>
+                <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 sm:text-sm">
+                  Exclusive access
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Each member only sees the links assigned to them. Assign every link first, or their dashboard will look empty.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={exclusif}
+              aria-label="Exclusive access"
+              disabled={exclusifEnCours}
+              onClick={() => changerAccesExclusif(!exclusif)}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 sm:ml-auto ${
+                exclusif ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-gray-50 shadow transition-transform dark:bg-gray-100 ${
+                  exclusif ? 'translate-x-[22px]' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Liste des liens */}

@@ -1,4 +1,5 @@
 import { canEditLink } from '@/lib/team-links'
+import { chargerContexteEquipe } from '@/lib/team-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -24,10 +25,7 @@ export async function PATCH(request: NextRequest) {
     // les accepter. Sans cela, glisser un lien d equipe echouait.
     const [links, currentUser] = await Promise.all([
       prisma.link.findMany({ where: { id: { in: linkIds } } }),
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { teamId: true, teamRole: true },
-      }),
+      chargerContexteEquipe(session.user.id),
     ])
 
     if (links.length !== linkIds.length) {
@@ -55,6 +53,8 @@ export async function PATCH(request: NextRequest) {
       linkUserId: link.userId,
       linkTeamId: link.teamId,
       linkOwnerTeamId: equipeParProprietaire.get(link.userId),
+      linkAssignedToUserId: link.assignedToUserId,
+      restrictToAssigned: currentUser?.restrictToAssigned,
     }))
 
     if (interdit) {

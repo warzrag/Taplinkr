@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 import { canEditLink } from '@/lib/team-links'
+import { chargerContexteEquipe } from '@/lib/team-context'
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -31,10 +32,7 @@ export async function PATCH(request: NextRequest) {
     // lien d un membre de l equipe repondait "Link not found".
     const [existingLink, currentUser] = await Promise.all([
       prisma.link.findUnique({ where: { id: linkId } }),
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { teamId: true, teamRole: true },
-      }),
+      chargerContexteEquipe(session.user.id),
     ])
 
     if (!existingLink) {
@@ -53,6 +51,8 @@ export async function PATCH(request: NextRequest) {
       linkUserId: existingLink.userId,
       linkTeamId: existingLink.teamId,
       linkOwnerTeamId: owner?.teamId,
+      linkAssignedToUserId: existingLink.assignedToUserId,
+      restrictToAssigned: currentUser?.restrictToAssigned,
     })) {
       return NextResponse.json({
         error: 'You do not have permission to edit this link',

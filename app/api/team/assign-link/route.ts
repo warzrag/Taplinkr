@@ -113,10 +113,14 @@ export async function GET(request: NextRequest) {
       teamId: user.teamId
     }
 
-    // Si memberId fourni et que ce n'est pas le owner, filtrer uniquement ses liens
-    if (memberId) {
+    // Seuls le proprietaire et les administrateurs peuvent regarder les liens
+    // de quelqu'un d'autre. Sans ce garde, n'importe quel membre lisait les
+    // liens d'un collegue en passant simplement son identifiant en parametre.
+    const peutVoirLesAutres = user.teamRole === 'owner' || user.teamRole === 'admin'
+
+    if (memberId && peutVoirLesAutres) {
       whereClause.assignedToUserId = memberId
-    } else if (user.teamRole !== 'owner' && user.teamRole !== 'admin') {
+    } else if (!peutVoirLesAutres) {
       // Si membre simple, voir uniquement ses liens assignés
       whereClause.assignedToUserId = user.id
     }

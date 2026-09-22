@@ -519,6 +519,10 @@ model Team {
   brandTheme      String?          // JSON theme settings
   brandAssets     String?          // JSON assets (logos, colors)
   isActive        Boolean          @default(true)
+  // Acces exclusif : chaque membre ne voit que les liens qui lui sont
+  // attribues. Eteint par defaut, car l'allumer avant d'avoir attribue les
+  // liens viderait le tableau de bord des membres.
+  restrictToAssignedLinks Boolean  @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 

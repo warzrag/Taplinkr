@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/redis-cache'
+import { filtreLiensAttribues } from '@/lib/team-links'
+import { chargerContexteEquipe } from '@/lib/team-context'
 
 // Route qui utilise Prisma pour récupérer les dossiers
 export async function GET() {
@@ -42,6 +44,16 @@ export async function GET() {
     // On utilise uniquement localStorage côté client pour la performance
     console.log('⚡ [folders-direct] Requête DB (pas de cache Redis)')
 
+    // Accès exclusif : les dossiers restent visibles, mais on n'y montre que
+    // les liens attribués à la personne. Sans ce filtre, cette route rendrait
+    // le réglage inutile : il suffirait de l'appeler pour tout revoir.
+    const contexte = await chargerContexteEquipe(user.id)
+    const filtreExclusif = filtreLiensAttribues({
+      actorUserId: user.id,
+      actorTeamRole: contexte.teamRole,
+      restrictToAssigned: contexte.restrictToAssigned,
+    })
+
     // ⚡ Optimisation: charger seulement les champs nécessaires + dossiers d'équipe
     const folders = await prisma.folder.findMany({
       where: {
@@ -57,6 +69,7 @@ export async function GET() {
       orderBy: { order: 'asc' },
       include: {
         links: {
+          ...(filtreExclusif ? { where: filtreExclusif } : {}),
           orderBy: { order: 'asc' },
           select: {
             id: true,
@@ -91,6 +104,7 @@ export async function GET() {
           orderBy: { order: 'asc' },
           include: {
             links: {
+              ...(filtreExclusif ? { where: filtreExclusif } : {}),
               orderBy: { order: 'asc' },
               select: {
                 id: true,

@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { normalizeHttpURL, validateURL } from '@/lib/url-validator'
 import { checkTeamPermission } from '@/lib/team-permissions'
 import { canDeleteLink, canEditLink, canViewLink } from '@/lib/team-links'
+import { chargerContexteEquipe } from '@/lib/team-context'
 import { RESERVED_USERNAMES } from '@/lib/username'
 import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
 import { serializeLandingSettings } from '@/lib/landing-settings'
@@ -29,10 +30,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
           }
         }
       }),
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { teamId: true, teamRole: true },
-      }),
+      chargerContexteEquipe(session.user.id),
     ])
 
     if (!link) {
@@ -52,6 +50,8 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
       linkUserId: link.userId,
       linkTeamId: link.teamId,
       linkOwnerTeamId: viewOwner?.teamId,
+      linkAssignedToUserId: link.assignedToUserId,
+      restrictToAssigned: currentUser?.restrictToAssigned,
     })) {
       return NextResponse.json({ error: 'Link not found' }, { status: 404 })
     }
@@ -114,10 +114,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       prisma.link.findUnique({
         where: { id: params.id },
       }),
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { teamId: true, teamRole: true },
-      }),
+      chargerContexteEquipe(session.user.id),
     ])
 
     if (!existingLink) {
@@ -137,6 +134,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       linkUserId: existingLink.userId,
       linkTeamId: existingLink.teamId,
       linkOwnerTeamId: putOwner?.teamId,
+      linkAssignedToUserId: existingLink.assignedToUserId,
+      restrictToAssigned: currentUser?.restrictToAssigned,
     })) {
       return NextResponse.json({
         error: 'You do not have permission to edit this link',
@@ -295,10 +294,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
       prisma.link.findUnique({
         where: { id: params.id },
       }),
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { teamId: true, teamRole: true },
-      }),
+      chargerContexteEquipe(session.user.id),
     ])
 
     if (!existingLink) {
@@ -318,6 +314,8 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
       linkUserId: existingLink.userId,
       linkTeamId: existingLink.teamId,
       linkOwnerTeamId: patchOwner?.teamId,
+      linkAssignedToUserId: existingLink.assignedToUserId,
+      restrictToAssigned: currentUser?.restrictToAssigned,
     })) {
       return NextResponse.json({
         error: 'You do not have permission to edit this link',
@@ -365,10 +363,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       prisma.link.findUnique({
         where: { id: params.id },
       }),
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { teamId: true, teamRole: true },
-      }),
+      chargerContexteEquipe(session.user.id),
     ])
 
     if (!existingLink) {
@@ -381,6 +376,8 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
       actorTeamRole: currentUser?.teamRole,
       linkUserId: existingLink.userId,
       linkTeamId: existingLink.teamId,
+      linkAssignedToUserId: existingLink.assignedToUserId,
+      restrictToAssigned: currentUser?.restrictToAssigned,
     })) {
       return NextResponse.json({
         error: 'You do not have permission to delete this link',

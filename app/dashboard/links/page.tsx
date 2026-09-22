@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent } from 'react'
 import { toast } from 'react-hot-toast'
 import {
+  ArrowDownWideNarrow,
   BarChart3,
   Copy,
   ChevronDown,
@@ -65,6 +66,23 @@ function flattenGroups(groups: LinkGroup[]): LinkGroup[] {
   return groups.flatMap(group => [group, ...flattenGroups(group.children || [])])
 }
 
+/**
+ * Ordre d'affichage des groupes.
+ *
+ * « manual » garde l'ordre choisi a la main. Les deux autres classent les
+ * groupes, et les liens qu'ils contiennent, du plus clique au moins clique :
+ * une agence veut voir d'un coup d'oeil ce qui rapporte.
+ */
+type SortMode = 'manual' | 'clicks' | 'today'
+
+const SORT_STORAGE_KEY = 'taplinkr:groups-sort'
+
+const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
+  { value: 'manual', label: 'My order' },
+  { value: 'clicks', label: 'Top clicks' },
+  { value: 'today', label: 'Top today' },
+]
+
 export default function LinksDashboard() {
   const reduceMotion = useReducedMotion()
   const { personalLinks, folders, loading, refreshLinks, refreshFolders, updateLinkOptimistic } = useLinks()
@@ -87,34 +105,92 @@ export default function LinksDashboard() {
   const [movingLinkId, setMovingLinkId] = useState<string | null>(null)
   const [dropTargetId, setDropTargetId] = useState<string | null | undefined>(undefined)
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
+  const [sortMode, setSortMode] = useState<SortMode>('manual')
   const liveClicksRef = useRef<Record<string, number>>({})
   const clickCountsInitializedRef = useRef(false)
   const todayClicksInitializedRef = useRef(false)
 
   const groups = useMemo(() => flattenGroups(folders as LinkGroup[]), [folders])
   const knownGroupIds = useMemo(() => new Set(groups.map(group => group.id)), [groups])
-  const linkSections = useMemo(() => [
-    ...groups.map(group => ({
-      id: group.id,
-      name: group.name,
-      description: group.description,
-      color: group.color,
-      icon: group.icon,
-      links: personalLinks.filter(item => item.folderId === group.id),
-    })),
-    {
-      id: null,
-      name: 'Ungrouped',
-      description: 'Links waiting to be organized',
-      color: '#8b5cf6',
-      icon: '',
-      links: personalLinks.filter(item => !item.folderId || !knownGroupIds.has(item.folderId)),
-    },
-  ], [groups, knownGroupIds, personalLinks])
+  const linkSections = useMemo(() => {
+    const score = (item: LinkType) => sortMode === 'today'
+      ? (todayClicks[item.id] || 0)
+      : (liveClicks[item.id] ?? item.clicks ?? 0)
+
+    const section = (
+      id: string | null,
+      name: string,
+      description: string | undefined,
+      color: string,
+      icon: string,
+      links: LinkType[],
+    ) => ({
+      id,
+      name,
+      description,
+      color,
+      icon,
+      // Le tri s'applique aussi a l'interieur du groupe : un groupe classe par
+      // clics dont les liens restent en ordre manuel se lit de travers.
+      links: sortMode === 'manual' ? links : [...links].sort((a, b) => score(b) - score(a)),
+      totalClicks: links.reduce((sum, item) => sum + (liveClicks[item.id] ?? item.clicks ?? 0), 0),
+      todayClicks: links.reduce((sum, item) => sum + (todayClicks[item.id] || 0), 0),
+    })
+
+    const grouped = groups.map(group => section(
+      group.id,
+      group.name,
+      group.description,
+      group.color,
+      group.icon,
+      personalLinks.filter(item => item.folderId === group.id),
+    ))
+
+    if (sortMode !== 'manual') {
+      grouped.sort((a, b) => sortMode === 'today'
+        ? b.todayClicks - a.todayClicks
+        : b.totalClicks - a.totalClicks)
+    }
+
+    return [
+      ...grouped,
+      // « Ungrouped » n'est pas un groupe mais une file d'attente. Elle reste
+      // en bas quel que soit le tri, sinon elle passerait devant de vrais
+      // groupes juste parce qu'elle contient un lien populaire.
+      section(
+        null,
+        'Ungrouped',
+        'Links waiting to be organized',
+        '#8b5cf6',
+        '',
+        personalLinks.filter(item => !item.folderId || !knownGroupIds.has(item.folderId)),
+      ),
+    ]
+  }, [groups, knownGroupIds, personalLinks, liveClicks, todayClicks, sortMode])
 
   useEffect(() => {
     void refreshFolders()
   }, [])
+
+  // Le choix de tri suit la personne d'une visite a l'autre : celui qui suit
+  // ses meilleurs groupes ne veut pas le reposer chaque matin.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SORT_STORAGE_KEY)
+      if (saved === 'clicks' || saved === 'today') setSortMode(saved)
+    } catch {
+      // Navigation privee ou stockage refuse : l'ordre manuel reste valable.
+    }
+  }, [])
+
+  const changeSortMode = (mode: SortMode) => {
+    setSortMode(mode)
+    try {
+      localStorage.setItem(SORT_STORAGE_KEY, mode)
+    } catch {
+      // Sans consequence : le tri reste actif pour cette visite.
+    }
+  }
 
   useEffect(() => {
     setLiveClicks(current => {
@@ -413,6 +489,24 @@ export default function LinksDashboard() {
             <p className="mt-2 text-base text-dash-text4">Create link pages or direct redirects.</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.035] p-1" role="group" aria-label="Sort groups">
+              <ArrowDownWideNarrow className="ml-2 mr-1 h-4 w-4 shrink-0 text-dash-text6" aria-hidden />
+              {SORT_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => changeSortMode(option.value)}
+                  aria-pressed={sortMode === option.value}
+                  className={`rounded-lg px-3 py-2 text-xs font-bold transition ${
+                    sortMode === option.value
+                      ? 'bg-violet-500/20 text-violet-200'
+                      : 'text-dash-text4 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
             <motion.button
               whileHover={reduceMotion ? undefined : { y: -2 }}
               whileTap={reduceMotion ? undefined : { scale: 0.97 }}
@@ -448,14 +542,8 @@ export default function LinksDashboard() {
               {linkSections.map(section => {
                 const groupKey = section.id || 'ungrouped'
                 const collapsed = collapsedGroups.has(groupKey)
-                const totalClicksInGroup = section.links.reduce(
-                  (sum, item) => sum + (liveClicks[item.id] ?? item.clicks ?? 0),
-                  0,
-                )
-                const todayClicksInGroup = section.links.reduce(
-                  (sum, item) => sum + (todayClicks[item.id] || 0),
-                  0,
-                )
+                const totalClicksInGroup = section.totalClicks
+                const todayClicksInGroup = section.todayClicks
 
                 return (
                   <motion.section

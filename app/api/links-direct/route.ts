@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { filtreLiensAttribues } from '@/lib/team-links'
+import { chargerContexteEquipe } from '@/lib/team-context'
 
 // Route simplifiée qui utilise Prisma
 export async function GET() {
@@ -13,15 +15,19 @@ export async function GET() {
     }
 
     // Récupérer l'équipe de l'utilisateur
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { teamId: true }
+    const user = await chargerContexteEquipe(session.user.id)
+
+    // Accès exclusif : le membre ne voit que les liens qui lui sont attribués.
+    const filtreExclusif = filtreLiensAttribues({
+      actorUserId: session.user.id,
+      actorTeamRole: user.teamRole,
+      restrictToAssigned: user.restrictToAssigned,
     })
 
     // ⚡ Optimisation: charger seulement les champs essentiels
     // Inclure les liens personnels ET les liens d'équipe
     const links = await prisma.link.findMany({
-      where: {
+      where: filtreExclusif ?? {
         OR: [
           { userId: session.user.id },  // Mes liens
           ...(user?.teamId ? [{

@@ -5,7 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { getUpgradeMessage } from '@/lib/permissions'
 import { createShortPublicSlug } from '@/lib/public-slug'
 import { checkTeamLimit } from '@/lib/team-permissions'
-import { getTeamLinkCreationFields, uniqueTeamMemberIds } from '@/lib/team-links'
+import { filtreLiensAttribues, getTeamLinkCreationFields, uniqueTeamMemberIds } from '@/lib/team-links'
+import { chargerContexteEquipe } from '@/lib/team-context'
 import { hasTeamActionPermission, TeamAction } from '@/lib/team-roles'
 import { validateURL } from '@/lib/url-validator'
 import { invalidatePublicLinkCache } from '@/lib/public-link-cache'
@@ -20,14 +21,19 @@ export async function GET() {
     }
 
     // Récupérer d'abord l'utilisateur avec son équipe
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { teamId: true }
+    const user = await chargerContexteEquipe(session.user.id)
+
+    // Accès exclusif : le membre ne voit que les liens qui lui sont attribués,
+    // et plus rien du reste de l'équipe.
+    const filtreExclusif = filtreLiensAttribues({
+      actorUserId: session.user.id,
+      actorTeamRole: user.teamRole,
+      restrictToAssigned: user.restrictToAssigned,
     })
 
     // Récupérer les liens personnels de l'utilisateur
     const personalLinks = await prisma.link.findMany({
-      where: { userId: session.user.id },
+      where: filtreExclusif ?? { userId: session.user.id },
       orderBy: { order: 'asc' },
       include: {
         multiLinks: {
@@ -46,7 +52,7 @@ export async function GET() {
 
     // Récupérer les liens partagés de l'équipe (si l'utilisateur fait partie d'une équipe)
     let teamLinks = []
-    if (user?.teamId) {
+    if (user?.teamId && !filtreExclusif) {
       const members = await prisma.user.findMany({
         where: { teamId: user.teamId },
         select: { id: true },
