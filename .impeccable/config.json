@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-09-22T21:47:36.434Z",
         "reason": "Violet is Taplinkr's existing brand colour across the whole dashboard: line 527 is the pre-existing Create link button, untouched today, and violet appears 26 times in this file in commit 0d42f94, before this session. Changing it would be a redesign nobody asked for."
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "components/TeamLinkManager.tsx"
+        ],
+        "createdAt": "2026-09-23T23:57:11.605Z",
+        "reason": "False positive on the icon buttons (copy, open, edit): text is gray on the neutral card at rest, and on hover it turns indigo together with the indigo-50 background, so gray never sits on a colored fill. Lines predate this session (commit 32ccd15, 2026-08-05)."
       }
     ]
   }

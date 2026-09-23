@@ -384,7 +384,10 @@ export default function TeamLinkManager({ userRole, userId, teamId, restrictToAs
               }`}
             >
               <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-gray-50 shadow transition-transform dark:bg-gray-100 ${
+                // `left-0` ancre le rond a gauche : sans lui, un bouton centre
+                // son contenu, et le rond partait du milieu. Eteint, il
+                // paraissait allume ; allume, il sortait du cadre.
+                className={`absolute left-0 top-0.5 h-5 w-5 rounded-full bg-gray-50 shadow transition-transform dark:bg-gray-100 ${
                   exclusif ? 'translate-x-[22px]' : 'translate-x-0.5'
                 }`}
               />
