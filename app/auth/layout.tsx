@@ -1,14 +1,12 @@
 import { Suspense } from 'react'
 
+import { AuthSpinner } from '@/components/auth/auth-ui'
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense
-      fallback={
-        <main className="flex min-h-screen items-center justify-center bg-[#09090f] text-white">
-          <p className="text-sm text-white/60">Loading...</p>
-        </main>
-      }
-    >
+    // L'attente reprend le fond des pages de compte. Elle etait toujours noire,
+    // meme en mode clair : un eclair sombre avant chaque page claire.
+    <Suspense fallback={<AuthSpinner />}>
       {children}
     </Suspense>
   )

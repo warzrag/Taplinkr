@@ -3,25 +3,23 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
-import {
-  AlertCircle,
-  ArrowLeft,
-  ChevronRight,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  Shield,
-  User,
-  UserPlus,
-} from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
 import Logo from '@/components/Logo'
 import { Button } from '@/components/ui/button'
-import { Container } from '@/components/ui/Container'
+import {
+  AuthShell,
+  FieldError,
+  PasswordInput,
+  fieldBorder,
+  fieldClass,
+  labelClass,
+  pageTitle,
+  primaryButton,
+  textLink,
+} from '@/components/auth/auth-ui'
 
 interface FormData {
   name: string
@@ -29,40 +27,20 @@ interface FormData {
   password: string
 }
 
-const benefits = [
-  {
-    icon: Shield,
-    title: 'Protection and trust',
-    description: 'Control your deep links, enable an 18+ gate, and keep every page on brand.'
-  },
-  {
-    icon: UserPlus,
-    title: 'Pages built to convert',
-    description: 'Build an on-brand page tailored to every offer, network, and campaign.'
-  },
-  {
-    icon: Mail,
-    title: 'Launch in minutes',
-    description: 'Create your account, add your key links, and start tracking performance.'
-  },
-]
-
-const steps = [
-  { label: 'Your profile', description: 'Introduce your business' },
-  { label: 'Security', description: 'Create your password' },
-]
-
+// Inscription en un seul ecran. Elle en comptait deux (nom et e-mail, puis
+// mot de passe) sans rien envoyer entre les deux : la premiere etape n'etait
+// qu'un clic de plus avant de creer son compte. Retires aussi : la colonne
+// d'argumentaire, les halos flous du fond, les cartes d'etapes et l'encadre
+// « Tip ».
 export default function SignUp() {
-  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState(0)
   const [suggestedUsername, setSuggestedUsername] = useState('')
   const [submitError, setSubmitError] = useState('')
   const [accountState, setAccountState] = useState<'verified' | 'unverified' | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const { register, handleSubmit, formState: { errors }, getValues, trigger } = useForm<FormData>()
+  const { register, handleSubmit, formState: { errors }, getValues } = useForm<FormData>()
 
   useEffect(() => {
     const username = searchParams.get('username')
@@ -70,15 +48,6 @@ export default function SignUp() {
       setSuggestedUsername(username)
     }
   }, [searchParams])
-
-  const nextStep = async () => {
-    setSubmitError('')
-    setAccountState(null)
-    const isValid = await trigger(['name', 'email'])
-    if (isValid) {
-      setStep(1)
-    }
-  }
 
   const onSubmit = async (data: FormData) => {
     setSubmitError('')
@@ -134,278 +103,134 @@ export default function SignUp() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute right-1/2 top-0 h-[420px] w-[420px] translate-x-1/3 rounded-full bg-brand-500/15 blur-[180px]" />
-        <div className="absolute left-1/2 bottom-[-80px] h-64 w-64 -translate-x-1/2 rounded-full bg-secondary-400/20 blur-[140px]" />
-      </div>
+    <AuthShell>
+      <Logo size="md" animated={false} />
 
-      <Container className="relative z-10 flex min-h-screen items-center py-16">
-        <div className="grid w-full gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] lg:items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="hidden h-full flex-col justify-between rounded-3xl border border-border bg-[hsl(var(--surface))] p-10 shadow-card lg:flex"
-          >
-            <div className="space-y-4">
-              <span className="badge-pill bg-brand-500/10 text-brand-600">Your hub in minutes</span>
-              <h2 className="text-3xl font-semibold">Build a creator page designed to convert</h2>
-              <p className="text-sm text-foreground/65">
-                Bring your offers, content, direct links, and analytics together in one fast, measurable workspace.
-              </p>
-            </div>
+      <h1 className={pageTitle}>Create your account</h1>
+      {suggestedUsername && (
+        <p className="mt-2 text-sm text-gray-600 dark:text-dash-text4">
+          Your reserved URL:{' '}
+          <span className="font-semibold text-gray-950 dark:text-dash-text">taplinkr.com/{suggestedUsername}</span>
+        </p>
+      )}
 
-            <div className="space-y-6">
-              {benefits.map((benefit) => (
-                <div key={benefit.title} className="flex gap-4 rounded-2xl border border-border/80 bg-[hsl(var(--surface-muted))] p-4 shadow-sm">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600">
-                    <benefit.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{benefit.title}</p>
-                    <p className="text-xs text-foreground/60">{benefit.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mx-auto w-full max-w-md rounded-3xl border border-border bg-[hsl(var(--surface))] p-8 shadow-card backdrop-blur"
-          >
-            <div className="mb-6 flex items-center justify-between text-sm">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Link>
-              <Link
-                href="/auth/signin"
-                className="text-foreground/70 transition-colors hover:text-foreground"
-              >
-                I already have an account
-              </Link>
-            </div>
-
-            <div className="mb-8 space-y-3 text-center">
-              <div className="flex justify-center">
-                <Logo size="md" showText={false} />
-              </div>
-              <h1 className="text-2xl font-semibold">Create your account</h1>
-              <p className="text-sm text-foreground/60">
-                {suggestedUsername
-                  ? `Your reserved URL: taplinkr.com/${suggestedUsername}`
-                  : 'Launch your creator page, deep links, and analytics.'}
-              </p>
-            </div>
-
-            <div className="mb-6 grid gap-3 sm:grid-cols-2">
-              {steps.map((item, index) => {
-                const active = step === index
-                const completed = step > index
-                return (
-                  <div
-                    key={item.label}
-                    className={`rounded-2xl border px-4 py-3 text-left text-sm transition-all ${
-                      active
-                        ? 'border-brand-500 bg-brand-500/10 text-brand-600'
-                        : completed
-                          ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-600'
-                          : 'border-border bg-[hsl(var(--surface))] text-foreground/60'
-                    }`}
-                  >
-                    <p className="font-semibold">{item.label}</p>
-                    <p className="text-xs text-foreground/50">{item.description}</p>
-                  </div>
-                )
-              })}
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <AnimatePresence mode="wait">
-                {step === 0 ? (
-                  <motion.div
-                    key="step-0"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    className="space-y-5"
-                  >
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Full name</label>
-                      <div className="relative">
-                        <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
-                        <input
-                          type="text"
-                          {...register('name', { required: 'Your name is required' })}
-                          className="input pl-12"
-                          placeholder="Your name"
-                        />
-                      </div>
-                      <AnimatePresence>
-                        {errors.name && (
-                          <motion.p
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            className="text-xs text-rose-500"
-                          >
-                            {errors.name.message}
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Email address</label>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
-                        <input
-                          type="email"
-                          {...register('email', {
-                            required: 'Your email is required',
-                            pattern: {
-                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                              message: 'Invalid email address',
-                            },
-                          })}
-                          className="input pl-12"
-                          placeholder="you@example.com"
-                        />
-                      </div>
-                      <AnimatePresence>
-                        {errors.email && (
-                          <motion.p
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            className="text-xs text-rose-500"
-                          >
-                            {errors.email.message}
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
-
-                    <Button type="button" fullWidth onClick={nextStep}>
-                      Continue
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="step-1"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    className="space-y-5"
-                  >
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Password</label>
-                      <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          {...register('password', {
-                            required: 'Your password is required',
-                            minLength: { value: 8, message: 'At least 8 characters' },
-                          })}
-                          className="input pl-12 pr-12"
-                          placeholder="Create a password"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword((state) => !state)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-2 text-foreground/40 transition-colors hover:text-foreground"
-                        >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                      <AnimatePresence>
-                        {errors.password && (
-                          <motion.p
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            className="text-xs text-rose-500"
-                          >
-                            {errors.password.message}
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
-
-                    <Button type="submit" fullWidth loading={loading}>
-                      Create my account
-                      <UserPlus className="h-4 w-4" />
-                    </Button>
-
-                    <div aria-live="polite">
-                      {loading && (
-                        <p className="text-center text-sm text-foreground/60">
-                          Creating your account… Please keep this page open.
-                        </p>
-                      )}
-
-                      {submitError && (
-                        <div
-                          role="alert"
-                          className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-4 text-sm text-rose-700 dark:text-rose-300"
-                        >
-                          <div className="flex items-start gap-2">
-                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                            <p>{submitError}</p>
-                          </div>
-                          {accountState && (
-                            <div className="mt-3 flex flex-wrap gap-3 pl-6 text-sm font-semibold">
-                              {accountState === 'unverified' && (
-                                <Link
-                                  href={`/auth/resend-verification?email=${encodeURIComponent(getValues('email') || '')}`}
-                                  className="text-brand-600 hover:underline"
-                                >
-                                  Resend verification email
-                                </Link>
-                              )}
-                              <Link href="/auth/signin" className="text-brand-600 hover:underline">
-                                Go to login
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSubmitError('')
-                        setAccountState(null)
-                        setStep(0)
-                      }}
-                      className="w-full text-sm text-foreground/50 transition-colors hover:text-foreground/70"
-                    >
-                      Back to the previous step
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </form>
-
-            <div className="mt-8 rounded-2xl border border-border bg-[hsl(var(--surface))] p-5 text-left">
-              <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">Tip</p>
-              <p className="mt-2 text-sm text-foreground/70">
-                Once signed up, add your deep links, enable the 18+ gate if needed, and track clicks from your first campaign.
-              </p>
-            </div>
-          </motion.div>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8 space-y-5">
+        <div>
+          <label htmlFor="name" className={labelClass}>
+            Full name
+          </label>
+          <input
+            id="name"
+            type="text"
+            autoComplete="name"
+            aria-invalid={errors.name ? true : undefined}
+            aria-describedby={errors.name ? 'name-error' : undefined}
+            {...register('name', { required: 'Enter your name.' })}
+            className={`${fieldClass} ${fieldBorder(Boolean(errors.name))}`}
+            placeholder="Your name"
+          />
+          <FieldError id="name-error" message={errors.name?.message} />
         </div>
-      </Container>
-    </div>
+
+        <div>
+          <label htmlFor="email" className={labelClass}>
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            aria-invalid={errors.email ? true : undefined}
+            aria-describedby={errors.email ? 'email-error' : undefined}
+            {...register('email', {
+              required: 'Enter your email address.',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'This email address looks incomplete.',
+              },
+            })}
+            className={`${fieldClass} ${fieldBorder(Boolean(errors.email))}`}
+            placeholder="you@example.com"
+          />
+          <FieldError id="email-error" message={errors.email?.message} />
+        </div>
+
+        <div>
+          <label htmlFor="password" className={labelClass}>
+            Password
+          </label>
+          <PasswordInput
+            id="password"
+            autoComplete="new-password"
+            hasError={Boolean(errors.password)}
+            aria-invalid={errors.password ? true : undefined}
+            aria-describedby={errors.password ? 'password-error' : 'password-hint'}
+            {...register('password', {
+              required: 'Choose a password.',
+              // Memes bornes que le serveur (/api/auth/register) : sinon l'erreur
+              // n'arrive qu'apres l'envoi, sous forme de message generique.
+              minLength: { value: 8, message: 'Use at least 8 characters.' },
+              maxLength: { value: 128, message: 'Use 128 characters or fewer.' },
+            })}
+          />
+          {errors.password ? (
+            <FieldError id="password-error" message={errors.password.message} />
+          ) : (
+            <p id="password-hint" className="mt-2 text-xs text-gray-500 dark:text-dash-text5">
+              At least 8 characters.
+            </p>
+          )}
+        </div>
+
+        <div className="pt-1">
+          <Button type="submit" fullWidth loading={loading} className={primaryButton}>
+            Create my account
+          </Button>
+        </div>
+
+        <div aria-live="polite">
+          {loading && (
+            <p className="text-center text-sm text-gray-600 dark:text-dash-text4">
+              Creating your account… Please keep this page open.
+            </p>
+          )}
+
+          {submitError && (
+            <div
+              role="alert"
+              className="rounded-xl border border-rose-500/30 bg-rose-500/[0.06] p-4 text-sm text-rose-700 dark:border-rose-400/30 dark:bg-rose-400/10 dark:text-rose-300"
+            >
+              <div className="flex items-start gap-2">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                <p>{submitError}</p>
+              </div>
+              {accountState && (
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 pl-6">
+                  {accountState === 'unverified' && (
+                    <Link
+                      href={`/auth/resend-verification?email=${encodeURIComponent(getValues('email') || '')}`}
+                      className={textLink}
+                    >
+                      Resend verification email
+                    </Link>
+                  )}
+                  <Link href="/auth/signin" className={textLink}>
+                    Go to login
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </form>
+
+      <p className="mt-8 text-sm text-gray-600 dark:text-dash-text4">
+        Already have an account?{' '}
+        <Link href="/auth/signin" className={textLink}>
+          Log in
+        </Link>
+      </p>
+    </AuthShell>
   )
 }
