@@ -37,8 +37,15 @@ interface ProfileData {
   createdAt: string
 }
 
+// Prenom = premier mot, nom = tout le reste. Un nom compose (« Le Gall »)
+// reste ainsi entier dans le champ du nom.
+function separerNom(nomComplet: string): [string, string] {
+  const [prenom = '', ...reste] = nomComplet.trim().split(/\s+/)
+  return [prenom, reste.join(' ')]
+}
+
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -52,6 +59,11 @@ export default function ProfilePage() {
     emailVerified: true,
     createdAt: new Date().toISOString()
   })
+  // Prenom et nom edites separement, puis recolles a l'enregistrement. Les deux
+  // champs relisaient auparavant le nom complet a chaque frappe : modifier le
+  // prenom effacait le nom, et on ne pouvait pas taper d'espace.
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [linkCount, setLinkCount] = useState<number | null>(null)
   const currentPlan = (['free', 'standard', 'premium'].includes(profile.plan)
     ? profile.plan
@@ -77,6 +89,9 @@ export default function ProfilePage() {
             emailVerified: Boolean(data.emailVerified),
             createdAt: data.createdAt || new Date().toISOString()
           })
+          const [prenom, nom] = separerNom(data.name || '')
+          setFirstName(prenom)
+          setLastName(nom)
           const linksResponse = await fetch('/api/links/fast', { cache: 'no-store' })
           if (linksResponse.ok) {
             const linksData = await linksResponse.json()
@@ -93,6 +108,9 @@ export default function ProfilePage() {
             emailVerified: true,
             createdAt: new Date().toISOString()
           })
+          const [prenom, nom] = separerNom(session.user.name || '')
+          setFirstName(prenom)
+          setLastName(nom)
         } finally {
           setLoading(false)
         }
@@ -103,16 +121,21 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     setSaving(true)
+    const nomComplet = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
     try {
       const response = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: profile.name
+          name: nomComplet
         })
       })
 
       if (response.ok) {
+        setProfile(prev => ({ ...prev, name: nomComplet }))
+        // Le nom en bas de la barre laterale vient de la session : sans cet
+        // appel, il garde l'ancien nom jusqu'au prochain rafraichissement.
+        await update()
         toast.success('Profile updated successfully!')
       } else {
         toast.error('Unable to save your profile.')
@@ -290,36 +313,40 @@ export default function ProfilePage() {
               transition={{ delay: 0.2 }}
               className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
             >
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Informations personnelles</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Personal information</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="profile-first-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     First name
                   </label>
                   <input
+                    id="profile-first-name"
                     type="text"
-                    value={profile.name.split(' ')[0] || ''}
-                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                    autoComplete="given-name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nom
+                  <label htmlFor="profile-last-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Last name
                   </label>
                   <input
+                    id="profile-last-name"
                     type="text"
-                    value={profile.name.split(' ')[1] || ''}
-                    onChange={(e) => setProfile({ ...profile, name: profile.name.split(' ')[0] + ' ' + e.target.value })}
+                    autoComplete="family-name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nom d'utilisateur
+                    Username
                   </label>
                   <div className="relative">
                     <input

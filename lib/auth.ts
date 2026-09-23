@@ -214,6 +214,10 @@ export const authOptions: NextAuthOptions = {
         const refreshedUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
+            // Le nom etait fixe a la connexion et jamais relu : un nom modifie
+            // dans le profil restait l'ancien en bas de la barre laterale
+            // jusqu'a la deconnexion.
+            name: true,
             username: true,
             role: true,
             plan: true,
@@ -238,6 +242,7 @@ export const authOptions: NextAuthOptions = {
           return token
         }
 
+        token.name = refreshedUser.name
         token.username = refreshedUser.username
         token.role = refreshedUser.role
         token.plan = refreshedUser.plan
