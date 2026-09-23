@@ -202,6 +202,33 @@
     transition: background-color 600000ms ease-in-out, color 600000ms ease-in-out;
   }
 
+  /* Champs de la page de connexion. Chrome peint en bleu clair les champs qu'il
+     remplit tout seul, par-dessus la couleur du site : sur fond sombre, ils
+     ressortaient comme casses. La couleur du champ vit dans une variable, reprise
+     a la fois par le fond normal et par l'ombre interieure qui recouvre ce bleu.
+     L'ombre garde l'anneau de focus, sinon un champ pre-rempli le perdrait. */
+  .auth-field {
+    --field-bg: #ffffff;
+    --field-fg: #030712;
+  }
+
+  .dark .auth-field {
+    --field-bg: #11111a;
+    --field-fg: #f7f7fb;
+  }
+
+  .auth-field:-webkit-autofill,
+  .auth-field:-webkit-autofill:hover,
+  .auth-field:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--field-fg);
+    caret-color: var(--field-fg);
+    box-shadow:
+      0 0 0 1000px var(--field-bg) inset,
+      var(--tw-ring-offset-shadow, 0 0 #0000),
+      var(--tw-ring-shadow, 0 0 #0000);
+    transition: background-color 600000s 0s, color 600000s 0s;
+  }
+
   input,
   textarea {
     color: hsl(var(--foreground));

@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          "app/dashboard/links/page.tsx"
+        ],
+        "createdAt": "2026-09-22T21:47:36.434Z",
+        "reason": "Violet is Taplinkr's existing brand colour across the whole dashboard: line 527 is the pre-existing Create link button, untouched today, and violet appears 26 times in this file in commit 0d42f94, before this session. Changing it would be a redesign nobody asked for."
+      }
+    ]
+  }
+}

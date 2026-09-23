@@ -6,56 +6,39 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
-import {
-  ArrowLeft,
-  CheckCircle,
-  Eye,
-  EyeOff,
-  LogIn,
-  Mail,
-  Lock,
-  Shield,
-  BarChart3,
-  Users,
-  Zap,
-  TrendingUp,
-  Globe,
-} from 'lucide-react'
+import { ArrowLeft, CheckCircle, Eye, EyeOff, Users } from 'lucide-react'
 import Link from 'next/link'
 
 import Logo from '@/components/Logo'
 import { Button } from '@/components/ui/button'
-import { Container } from '@/components/ui/Container'
 
 interface FormData {
   email: string
   password: string
 }
 
-const benefits = [
-  {
-    icon: BarChart3,
-    title: 'Creator analytics',
-    description: 'Clear dashboards for views, clicks, sources, and conversions'
-  },
-  {
-    icon: Shield,
-    title: 'Secure access',
-    description: 'Protected sessions, server-side data, and private dashboard access'
-  },
-  {
-    icon: Users,
-    title: 'Collaboration',
-    description: 'Team management for multiple pages and campaigns'
-  },
-]
+// Page de connexion reduite a son role : se connecter. Elle portait une
+// colonne d'argumentaire (avantages, chiffres, badge de securite) adressee a
+// quelqu'un qui est deja client, et qui debordait de l'ecran.
+// `dark:bg-` est indispensable meme si la variable change deja de valeur en
+// sombre : globals.css repeint en mode sombre tout champ qui n'en declare pas,
+// fond, texte ET bordure compris, et ecrasait la couleur et le focus d'ici.
+// `focus-visible:outline-none` retire le contour indigo que
+// performance-optimizations.css pose sur tout element actif : l'anneau du
+// champ montre deja le focus, les deux ensemble faisaient un double trait bleu.
+const fieldClass =
+  'auth-field block h-11 w-full rounded-xl border bg-[var(--field-bg)] dark:bg-[var(--field-bg)] px-3.5 text-sm text-[var(--field-fg)] caret-violet-500 outline-none focus-visible:outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-gray-500 dark:placeholder:text-dash-text5 focus:ring-[3px]'
 
-const metrics = [
-  { value: 'Pages', label: 'Creator pages', icon: Users },
-  { value: 'Stats', label: 'Clicks and views', icon: TrendingUp },
-  { value: 'Geo', label: 'Sources and devices', icon: Globe },
-  { value: 'Teams', label: 'Agencies', icon: Zap },
-]
+// Un champ en erreur garde son rouge pendant qu'on le corrige, en clair comme
+// en sombre. Les variantes `dark:focus:` sont necessaires : sans elles, la
+// bordure sombre l'emporte sur celle du focus et le champ actif ne se voit plus.
+const fieldBorder = (hasError: boolean) =>
+  hasError
+    ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/25 dark:border-rose-400 dark:focus:border-rose-400'
+    : 'border-gray-300 hover:border-gray-400 focus:border-violet-500 focus:ring-violet-500/25 dark:border-dash-line2 dark:hover:border-dash-line3 dark:focus:border-violet-500'
+
+const textLink =
+  'rounded-sm font-semibold text-violet-700 underline-offset-4 transition-colors hover:text-violet-600 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 dark:text-violet-400 dark:hover:text-violet-300'
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
@@ -146,14 +129,13 @@ export default function SignIn() {
     }
   }
 
-  // Afficher un loader pendant la vérification de session
+  // Afficher un loader pendant la vérification de session. Même fond que la
+  // page : le passage au formulaire se fait sans éclair de couleur.
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
-        <div className="text-center space-y-4">
-          <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-200 border-t-brand-500" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">Checking...</p>
-        </div>
+      <div className="flex min-h-[100dvh] items-center justify-center bg-gray-50 dark:bg-dash-bg" role="status">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-violet-600 dark:border-dash-line2 dark:border-t-violet-400" />
+        <span className="sr-only">Checking your session</span>
       </div>
     )
   }
@@ -164,271 +146,135 @@ export default function SignIn() {
   }
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-gray-950">
-      {/* Background Grid */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-50" />
-      </div>
+    <div className="flex min-h-[100dvh] flex-col bg-gray-50 text-gray-950 selection:bg-violet-500/25 dark:bg-dash-bg dark:text-dash-text">
+      <header className="px-5 pt-5 sm:px-8 sm:pt-7">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-sm text-sm text-gray-600 transition-colors hover:text-gray-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 dark:text-dash-text4 dark:hover:text-dash-text"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Back to home
+        </Link>
+      </header>
 
-      <Container className="relative z-10 min-h-screen py-12 lg:py-16">
-        <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-16 items-center">
-          {/* Left Column - Benefits */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="hidden lg:block space-y-12"
-          >
-            <div className="space-y-6">
-              <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                <ArrowLeft className="h-4 w-4" />
-                Back to home
-              </Link>
+      <main className="flex flex-1 items-center justify-center px-5 py-12">
+        <div className="w-full max-w-[360px]">
+          <Logo size="md" animated={false} />
 
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-1.5 text-sm font-medium">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-gray-700 dark:text-gray-300">Creator platform</span>
-                </div>
+          <h1 className="mt-10 text-[28px] font-bold leading-tight tracking-[-0.03em]">
+            Welcome back
+          </h1>
 
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white lg:text-5xl">
-                  Run your creator page
-                </h1>
-
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Manage your pages, direct links, protection, teams, and analytics from one dashboard.
-                </p>
-              </div>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8 space-y-5">
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900 dark:text-dash-text2">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                aria-invalid={errors.email ? true : undefined}
+                aria-describedby={errors.email ? 'email-error' : undefined}
+                {...register('email', {
+                  required: 'Enter your email address.',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'This email address looks incomplete.',
+                  },
+                })}
+                className={`${fieldClass} ${fieldBorder(Boolean(errors.email))}`}
+                placeholder="you@example.com"
+              />
+              <AnimatePresence>
+                {errors.email && (
+                  <motion.p
+                    id="email-error"
+                    role="alert"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="mt-2 text-xs text-rose-600 dark:text-rose-400"
+                  >
+                    {errors.email.message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Benefits Cards */}
-            <div className="space-y-4">
-              {benefits.map((benefit, index) => (
-                <motion.div
-                  key={benefit.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + index * 0.1 }}
-                  className="flex gap-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-lg"
-                >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
-                    <benefit.icon className="h-6 w-6" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {benefit.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {benefit.description}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Metrics */}
-            <div className="grid grid-cols-2 gap-4">
-              {metrics.map((metric, index) => (
-                <motion.div
-                  key={metric.label}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4 + index * 0.05 }}
-                  className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center"
-                >
-                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400">
-                    <metric.icon className="h-4 w-4" />
-                  </div>
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
-                    {metric.value}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {metric.label}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Right Column - Sign In Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mx-auto w-full max-w-md"
-          >
-            <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 lg:p-10 shadow-xl">
-              {/* Mobile Back Link */}
-              <div className="mb-8 flex items-center justify-between lg:hidden">
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
-                >
-                  Create an account
+            <div>
+              <div className="mb-2 flex items-baseline justify-between gap-4">
+                <label htmlFor="password" className="text-sm font-medium text-gray-900 dark:text-dash-text2">
+                  Password
+                </label>
+                <Link href="/auth/forgot-password" className={`text-xs ${textLink}`}>
+                  Forgot password?
                 </Link>
               </div>
-
-              {/* Logo & Title */}
-              <div className="mb-8 space-y-4 text-center">
-                <div className="flex justify-center">
-                  <Logo size="md" showText={false} />
-                </div>
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">
-                    Welcome back
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Log in to manage your pages, deep links, and analytics
-                  </p>
-                </div>
-              </div>
-
-              {/* Sign In Form */}
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-900 dark:text-white">
-                    Email address
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="email"
-                      {...register('email', {
-                        required: 'Your email is required',
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: 'Invalid email address',
-                        },
-                      })}
-                      className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-12 pr-4 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
-                      placeholder="you@company.com"
-                    />
-                  </div>
-                  <AnimatePresence>
-                    {errors.email && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        className="text-xs text-rose-500"
-                      >
-                        {errors.email.message}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-900 dark:text-white">
-                      Password
-                    </label>
-                    <Link
-                      href="/auth/forgot-password"
-                      className="text-xs font-medium text-brand-600 hover:text-brand-500 transition-colors"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      {...register('password', { required: 'Your password is required' })}
-                      className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-12 pr-12 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
-                      placeholder="••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <AnimatePresence>
-                    {errors.password && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        className="text-xs text-rose-500"
-                      >
-                        {errors.password.message}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  fullWidth
-                  loading={loading}
-                  className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900"
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  aria-invalid={errors.password ? true : undefined}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  {...register('password', { required: 'Enter your password.' })}
+                  className={`${fieldClass} ${fieldBorder(Boolean(errors.password))} pr-11`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                  className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-gray-500 transition-colors hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-dash-text5 dark:hover:text-dash-text"
                 >
-                  Log in
-                  <LogIn className="h-4 w-4" />
-                </Button>
-              </form>
-
-              {/* Divider */}
-              <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200 dark:border-gray-800" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">
-                    Don&apos;t have an account?
-                  </span>
-                </div>
+                  {showPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
+                </button>
               </div>
+              <AnimatePresence>
+                {errors.password && (
+                  <motion.p
+                    id="password-error"
+                    role="alert"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="mt-2 text-xs text-rose-600 dark:text-rose-400"
+                  >
+                    {errors.password.message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
 
-              {/* Sign Up Link */}
-              <Link
-                href="/auth/signup"
-                className="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+            <div className="pt-1">
+              <Button
+                type="submit"
+                fullWidth
+                loading={loading}
+                className="bg-gray-950 font-semibold text-white hover:bg-gray-800 focus-visible:outline-violet-500 active:scale-[0.99] dark:bg-white dark:text-gray-950 dark:hover:bg-gray-200"
               >
-                Create a free account
-              </Link>
-
-              {/* Security Badge */}
-              <div className="mt-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
-                    <Shield className="h-4 w-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-gray-900 dark:text-white">
-                      Secure login
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Your data and pages stay protected
-                    </p>
-                  </div>
-                </div>
-              </div>
+                Log in
+              </Button>
             </div>
+          </form>
 
-            {/* Support Link */}
-            <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
-              Need help?{' '}
-              <Link href="mailto:hello@taplinkr.com" className="font-medium text-brand-600 hover:text-brand-500 transition-colors">
-                Contact support
-              </Link>
-            </p>
-          </motion.div>
+          <p className="mt-8 text-sm text-gray-600 dark:text-dash-text4">
+            New to TapLinkr?{' '}
+            <Link href="/auth/signup" className={textLink}>
+              Create a free account
+            </Link>
+          </p>
         </div>
-      </Container>
+      </main>
+
+      <footer className="px-5 pb-6 text-center text-xs text-gray-500 dark:text-dash-text5">
+        Need help?{' '}
+        <a href="mailto:hello@taplinkr.com" className={textLink}>
+          Contact support
+        </a>
+      </footer>
     </div>
   )
 }
