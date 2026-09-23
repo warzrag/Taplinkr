@@ -1,29 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { motion, useReducedMotion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
-import { 
-  User,
-  Shield,
-  Camera,
-  Check,
-  Crown,
-  Sparkles,
-  Lock,
-  ChevronRight,
-  Upload,
-  BadgeCheck,
-  Zap,
-  BarChart3,
-  Link,
-  Globe,
-  Palette,
-  ShieldCheck
-} from 'lucide-react'
-import Image from 'next/image'
+import { BadgeCheck, Crown, Lock } from 'lucide-react'
+
+import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
 import { PLAN_LIMITS, type UserPlan } from '@/lib/permissions'
 
 interface ProfileData {
@@ -37,6 +23,38 @@ interface ProfileData {
   createdAt: string
 }
 
+// Memes prix que lib/stripe.ts (PRICING_PLANS). Ce module charge le SDK Stripe
+// cote serveur : l'importer ici l'enverrait dans le navigateur.
+const PLANS: Record<UserPlan, { label: string; price: string | null }> = {
+  free: { label: 'Free', price: null },
+  standard: { label: 'Standard', price: '€9.99' },
+  premium: { label: 'Premium', price: '€24.99' },
+}
+
+// Page refaite dans la palette du tableau de bord, toujours sombre. Elle avait
+// la sienne (bleu, degrades, titre en degrade) et plusieurs pieces mortes : un
+// bouton appareil photo sans action, « Last changed: Never » ecrit en dur, un
+// bouton « Comparer tous les plans » sans action, et un encadre d'usage qui
+// repetait celui de la barre laterale.
+
+// `dark:bg-` et `focus-visible:outline-none` echappent aux deux regles globales
+// qui repeignent tout champ (voir components/auth/auth-ui.tsx). `dash-field`
+// (globals.css) empeche Chrome de peindre en bleu clair un champ pre-rempli.
+const fieldClass =
+  'dash-field block h-11 w-full rounded-xl border border-dash-line2 bg-dash-bg dark:bg-dash-bg px-3.5 text-sm text-dash-text outline-none focus-visible:outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-dash-text6 hover:border-dash-line3 focus:border-violet-500 focus:ring-[3px] focus:ring-violet-500/20'
+
+const focusRing =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400'
+
+const primaryButton =
+  `inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`
+
+const secondaryButton =
+  `inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-dash-line2 bg-white/[0.03] px-4 text-sm font-semibold text-dash-text2 transition hover:border-dash-line3 hover:bg-white/[0.06] hover:text-dash-text disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`
+
+const card =
+  'overflow-hidden rounded-2xl border border-white/[0.075] bg-dash-raised/90 shadow-[0_24px_70px_rgba(0,0,0,0.22)]'
+
 // Prenom = premier mot, nom = tout le reste. Un nom compose (« Le Gall »)
 // reste ainsi entier dans le champ du nom.
 function separerNom(nomComplet: string): [string, string] {
@@ -44,9 +62,25 @@ function separerNom(nomComplet: string): [string, string] {
   return [prenom, reste.join(' ')]
 }
 
+const normaliser = (nom: string) => nom.trim().split(/\s+/).filter(Boolean).join(' ')
+
+function Row({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="grid gap-3 px-5 py-5 sm:grid-cols-[150px_minmax(0,1fr)] sm:gap-6 sm:px-6">
+      <p className="pt-0.5 text-sm font-semibold text-dash-text">{label}</p>
+      <div className="min-w-0">
+        {children}
+        {hint && <p className="mt-2 text-xs text-dash-text5">{hint}</p>}
+      </div>
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const { data: session, status, update } = useSession()
   const router = useRouter()
+  const reduceMotion = useReducedMotion()
+  const fileInput = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -64,7 +98,6 @@ export default function ProfilePage() {
   // prenom effacait le nom, et on ne pouvait pas taper d'espace.
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [linkCount, setLinkCount] = useState<number | null>(null)
   const currentPlan = (['free', 'standard', 'premium'].includes(profile.plan)
     ? profile.plan
     : 'free') as UserPlan
@@ -92,11 +125,6 @@ export default function ProfilePage() {
           const [prenom, nom] = separerNom(data.name || '')
           setFirstName(prenom)
           setLastName(nom)
-          const linksResponse = await fetch('/api/links/fast', { cache: 'no-store' })
-          if (linksResponse.ok) {
-            const linksData = await linksResponse.json()
-            setLinkCount(Number(linksData.count ?? linksData.links?.length ?? 0))
-          }
         } catch {
           setProfile({
             name: session.user.name || '',
@@ -119,9 +147,12 @@ export default function ProfilePage() {
     }
   }, [status, session, router])
 
+  const nomSaisi = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
+  const nameChanged = normaliser(nomSaisi) !== normaliser(profile.name)
+
   const handleSave = async () => {
     setSaving(true)
-    const nomComplet = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
+    const nomComplet = nomSaisi
     try {
       const response = await fetch('/api/profile', {
         method: 'PATCH',
@@ -136,16 +167,17 @@ export default function ProfilePage() {
         // Le nom en bas de la barre laterale vient de la session : sans cet
         // appel, il garde l'ancien nom jusqu'au prochain rafraichissement.
         await update()
-        toast.success('Profile updated successfully!')
+        toast.success('Name updated.')
       } else {
-        toast.error('Unable to save your profile.')
+        toast.error('Unable to save your name.')
       }
     } catch (error) {
-      toast.error('Unable to save your profile.')
+      toast.error('Unable to save your name.')
     } finally {
       setSaving(false)
     }
   }
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -177,7 +209,7 @@ export default function ProfilePage() {
       }
 
       setProfile(prev => ({ ...prev, image: uploadData.url }))
-      toast.success('Photo de profil mise a jour')
+      toast.success('Photo updated.')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to upload the image.')
     } finally {
@@ -200,124 +232,107 @@ export default function ProfilePage() {
       }
 
       setProfile(prev => ({ ...prev, image: '' }))
-      toast.success('Photo supprimee')
+      toast.success('Photo removed.')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to delete the image.')
     } finally {
       setUploadingImage(false)
     }
   }
+
   if (loading || status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-3 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full"
-        />
+      <div className="min-h-screen bg-dash-bg px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+        <div className="mx-auto max-w-3xl animate-pulse" role="status">
+          <span className="sr-only">Loading your profile</span>
+          <div className="h-9 w-36 rounded-lg bg-white/[0.05]" />
+          <div className="mt-3 h-4 w-64 rounded bg-white/[0.04]" />
+          <div className="mt-8 h-[440px] rounded-2xl bg-white/[0.035]" />
+          <div className="mt-10 h-28 rounded-2xl bg-white/[0.035]" />
+        </div>
       </div>
     )
   }
 
-  const isPremium = profile.plan === 'premium'
-  const isStandard = profile.plan === 'standard'
-  const isPaid = isPremium || isStandard
+  const isPaid = currentPlan !== 'free'
+  // Memes deux lettres que l'avatar de la barre laterale, pour qu'on s'y retrouve.
+  const initials = (profile.name || profile.email).slice(0, 2).toUpperCase()
+  const plan = PLANS[currentPlan]
+  const planStatus = isPaid
+    ? profile.planExpiresAt
+      ? `Access through ${new Date(profile.planExpiresAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+      : 'Billed monthly'
+    : maxPages === -1
+      ? 'Unlimited pages'
+      : `${maxPages} page${maxPages > 1 ? 's' : ''} included`
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="p-6 max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 dark:from-gray-100 dark:to-blue-400 bg-clip-text text-transparent">
-                My profile
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your personal information and subscription</p>
-            </div>
-          </div>
-        </motion.div>
+    <div className="relative min-h-screen overflow-hidden bg-dash-bg px-5 py-8 text-dash-text sm:px-8 lg:px-10 lg:py-10">
+      <DashboardAtmosphere />
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="relative mx-auto max-w-3xl"
+      >
+        <header>
+          <h1 className="text-3xl font-black tracking-[-0.04em] sm:text-4xl">Profile</h1>
+          <p className="mt-2 text-base text-dash-text4">Your photo, your name and your plan.</p>
+        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Colonne principale */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Photo de profil */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
-            >
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Photo de profil</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                This photo will appear on your profile across the platform.
-              </p>
-              
-              <div className="flex items-center gap-6">
-                <div className="relative">
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                    {profile.image ? (
-                      <img 
-                        src={profile.image} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-12 h-12 text-blue-600 dark:text-blue-400" />
-                    )}
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="absolute -bottom-2 -right-2 p-2 bg-white dark:bg-gray-700 rounded-xl shadow-lg border border-gray-200 dark:border-gray-600"
-                  >
-                    <Camera className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                  </motion.button>
-                </div>
-                
-                <div className="flex gap-3">
-                  <label className={`px-4 py-2 bg-blue-600 text-white rounded-xl flex items-center gap-2 font-medium cursor-pointer ${uploadingImage ? 'opacity-60 pointer-events-none' : ''}`}>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/gif,image/webp"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                      disabled={uploadingImage}
-                    />
-                    <Upload className="w-4 h-4" />
-                    {uploadingImage ? 'Uploading...' : 'Upload'}
-                  </label>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+        <section className={`mt-8 divide-y divide-dash-line ${card}`} aria-label="Your details">
+          <Row label="Photo" hint="JPG, PNG, GIF or WebP, up to 4 MB.">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-violet-500/15 text-lg font-bold text-violet-200 ring-1 ring-white/[0.08]">
+                {profile.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={profile.image} alt="Your profile photo" className="h-full w-full object-cover" />
+                ) : (
+                  <span aria-hidden>{initials}</span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  tabIndex={-1}
+                  aria-hidden
+                  onChange={handleImageUpload}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInput.current?.click()}
+                  disabled={uploadingImage}
+                  className={secondaryButton}
+                >
+                  {uploadingImage ? 'Uploading…' : profile.image ? 'Change photo' : 'Add a photo'}
+                </button>
+                {profile.image && (
+                  <button
                     type="button"
                     onClick={handleImageDelete}
-                    disabled={uploadingImage || !profile.image}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={uploadingImage}
+                    className={`inline-flex h-10 items-center rounded-xl px-3 text-sm font-semibold text-dash-text4 transition hover:bg-white/[0.04] hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`}
                   >
-                    Delete
-                  </motion.button>
-                </div>
+                    Remove
+                  </button>
+                )}
               </div>
-            </motion.div>
+            </div>
+          </Row>
 
-            {/* Informations personnelles */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
+          <Row label="Name">
+            <form
+              onSubmit={event => {
+                event.preventDefault()
+                if (nameChanged && !saving) void handleSave()
+              }}
             >
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Personal information</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="profile-first-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="profile-first-name" className="mb-1.5 block text-xs font-medium text-dash-text4">
                     First name
                   </label>
                   <input
@@ -326,12 +341,11 @@ export default function ProfilePage() {
                     autoComplete="given-name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={fieldClass}
                   />
                 </div>
-                
                 <div>
-                  <label htmlFor="profile-last-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="profile-last-name" className="mb-1.5 block text-xs font-medium text-dash-text4">
                     Last name
                   </label>
                   <input
@@ -340,259 +354,79 @@ export default function ProfilePage() {
                     autoComplete="family-name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={fieldClass}
                   />
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Username
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={profile.username}
-                      disabled
-                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <Lock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email address
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      value={profile.email}
-                      disabled
-                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                    />
-                    {profile.emailVerified && (
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                        <div className="flex items-center gap-1 text-green-600">
-                          <BadgeCheck className="w-4 h-4" />
-                          <span className="text-xs font-medium">Verified</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Contact support to change your email address
-                  </p>
-                </div>
               </div>
-              
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleSave}
-                disabled={saving}
-                className="mt-6 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-blue-600/25 disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save profile'}
-              </motion.button>
-            </motion.div>
+              <button type="submit" disabled={!nameChanged || saving} className={`mt-4 ${primaryButton}`}>
+                {saving ? 'Saving…' : 'Save name'}
+              </button>
+            </form>
+          </Row>
 
-            {/* Sécurité */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl">
-                  <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />
-                </div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Security</h2>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-white">Password</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Last changed: Never</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex gap-1">
-                    {[...Array(12)].map((_, i) => (
-                      <div key={i} className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full" />
-                    ))}
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => router.push(`/auth/forgot-password?email=${encodeURIComponent(profile.email)}`)}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600 flex items-center gap-2"
-                  >
-                    Reset password
-                    <ChevronRight className="w-4 h-4" />
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+          <Row label="Username">
+            <p className="flex min-w-0 items-center gap-2 text-sm text-dash-text2">
+              <span className="truncate">{profile.username}</span>
+              <Lock className="h-3.5 w-3.5 shrink-0 text-dash-text6" aria-hidden />
+              <span className="sr-only">(locked)</span>
+            </p>
+          </Row>
 
-          {/* Colonne latérale - Plan et usage */}
-          <div className="space-y-6">
-            {/* Plan actuel */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className={`relative overflow-hidden rounded-2xl shadow-sm border ${
-                isPremium 
-                  ? 'bg-gradient-to-br from-purple-600 to-indigo-600 border-purple-200' 
-                  : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'
-              }`}
-            >
-              {isPremium && (
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
+          <Row
+            label="Email"
+            hint={<>To change it, <a href="mailto:hello@taplinkr.com" className={`rounded-sm font-semibold text-violet-300 underline-offset-4 hover:text-violet-200 hover:underline ${focusRing}`}>contact support</a>.</>}
+          >
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <span className="truncate text-sm text-dash-text2">{profile.email}</span>
+              {profile.emailVerified && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/10 px-2 py-0.5 text-xs font-semibold text-emerald-300">
+                  <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
+                  Verified
+                </span>
               )}
-              
-              <div className="relative p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      {isPremium ? (
-                        <Crown className="w-5 h-5 text-yellow-400" />
-                      ) : isStandard ? (
-                        <Zap className="w-5 h-5 text-blue-400" />
-                      ) : (
-                        <Sparkles className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                      )}
-                      <h3 className={`font-semibold ${isPaid ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                        Plan {isPremium ? 'Premium' : isStandard ? 'Standard' : 'Free'}
-                      </h3>
-                    </div>
-                    <p className={`text-2xl font-bold ${isPaid ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                      {isPremium ? '€24.99' : isStandard ? '€9.99' : 'Free'}
-                    </p>
-                  </div>
-                  {isPaid && (
-                    <div className="p-3 bg-white/20 rounded-xl">
-                      <Zap className="w-6 h-6 text-yellow-400" />
-                    </div>
-                  )}
-                </div>
-                
-                <div className={`text-sm ${isPaid ? 'text-white/80' : 'text-gray-600 dark:text-gray-400'} mb-4`}>
-                  {isPaid ? (
-                    profile.planExpiresAt
-                      ? <>Access through {new Date(profile.planExpiresAt).toLocaleDateString('en-US')}</>
-                      : <>Billed monthly</>
-                  ) : (
-                    <>No renewal</>
-                  )}
-                </div>
-                
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => window.location.href = isPaid ? '/dashboard/billing' : '/pricing'}
-                  className={`w-full py-2.5 rounded-xl font-medium ${
-                    isPaid 
-                      ? 'bg-white text-purple-600 hover:bg-gray-100' 
-                      : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
-                  }`}
-                >
-                  {isPaid ? 'Manage subscription' : 'View plans'}
-                </motion.button>
-              </div>
-            </motion.div>
+            </div>
+          </Row>
 
-            {/* Usage du plan */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
-            >
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Plan usage</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">Created links</span>
-                    <span className="text-sm font-bold text-gray-900">
-                      {linkCount ?? '—'} / {maxPages === -1 ? 'Unlimited' : maxPages}
-                    </span>
-                  </div>
-                  {maxPages !== -1 && linkCount !== null && <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all ${
-                        linkCount >= maxPages
-                          ? 'bg-red-500' 
-                          : 'bg-gradient-to-r from-blue-500 to-indigo-500'
-                      }`}
-                      style={{ width: `${Math.min(100, (linkCount / maxPages) * 100)}%` }}
-                    />
-                  </div>}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Fonctionnalités du plan */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
-            >
-              <h3 className="font-semibold mb-4">
-                {currentPlan === 'premium' ? 'Premium' : currentPlan === 'standard' ? 'Standard' : 'Free'} features
-              </h3>
-              
-              <div className="space-y-3">
-                {[
-                  { icon: Link, label: maxPages === -1 ? 'Unlimited pages' : `${maxPages} page${maxPages > 1 ? 's' : ''}`, available: true },
-                  { icon: BarChart3, label: isPaid ? 'Advanced analytics' : 'Basic analytics', available: true },
-                  { icon: Globe, label: 'Direct links', available: true },
-                  { icon: Globe, label: 'Campaign organization', available: isPaid },
-                  { icon: Palette, label: 'Advanced customization', available: isPremium },
-                  { icon: ShieldCheck, label: 'Full Shield protection', available: isPremium },
-                ].map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + index * 0.05 }}
-                    className="flex items-center gap-3"
-                  >
-                    <div className={`p-1.5 rounded-lg ${
-                      feature.available 
-                        ? 'bg-green-100 text-green-600' 
-                        : 'bg-gray-100 text-gray-400'
-                    }`}>
-                      <feature.icon className="w-4 h-4" />
-                    </div>
-                    <span className={`text-sm ${
-                      feature.available ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'
-                    }`}>
-                      {feature.label}
-                    </span>
-                    {feature.available && (
-                      <Check className="w-4 h-4 text-green-600 ml-auto" />
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-              
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full mt-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium"
+          <Row label="Password">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-dash-text3">We&apos;ll email you a link to choose a new one.</p>
+              <Link
+                href={`/auth/forgot-password?email=${encodeURIComponent(profile.email)}`}
+                className={secondaryButton}
               >
-                Comparer tous les plans
-              </motion.button>
-            </motion.div>
+                Reset password
+              </Link>
+            </div>
+          </Row>
+        </section>
+
+        <section className="mt-10" aria-labelledby="profile-plan">
+          <h2 id="profile-plan" className="mb-3 text-sm font-semibold text-dash-text3">Plan</h2>
+          <div className={card}>
+            <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-6">
+              <div className="min-w-0">
+                <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                  <span className="inline-flex items-center gap-2 text-lg font-bold text-dash-text">
+                    {currentPlan === 'premium' && <Crown className="h-4 w-4 text-amber-300" aria-hidden />}
+                    {plan.label}
+                  </span>
+                  {plan.price && <span className="text-sm text-dash-text4">{plan.price} / month</span>}
+                </p>
+                <p className="mt-1 text-sm text-dash-text4">{planStatus}</p>
+              </div>
+              {isPaid ? (
+                <Link href="/dashboard/billing" className={secondaryButton}>
+                  Manage subscription
+                </Link>
+              ) : (
+                <Link href="/pricing" className={primaryButton}>
+                  Upgrade
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </motion.div>
     </div>
   )
 }

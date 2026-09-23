@@ -229,6 +229,20 @@
     transition: background-color 600000s 0s, color 600000s 0s;
   }
 
+  /* Meme parade pour les champs du tableau de bord, toujours sombre : les
+     couleurs y sont fixes (fond dash-bg, texte dash-text). */
+  .dash-field:-webkit-autofill,
+  .dash-field:-webkit-autofill:hover,
+  .dash-field:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f7f7fb;
+    caret-color: #f7f7fb;
+    box-shadow:
+      0 0 0 1000px #09090f inset,
+      var(--tw-ring-offset-shadow, 0 0 #0000),
+      var(--tw-ring-shadow, 0 0 #0000);
+    transition: background-color 600000s 0s, color 600000s 0s;
+  }
+
   input,
   textarea {
     color: hsl(var(--foreground));
