@@ -9,7 +9,15 @@
 # Texte en ASCII et entites HTML : PowerShell 5.1 lit ce fichier sans BOM en
 # Windows-1252, et casserait tout accent ecrit en clair.
 
-param([Parameter(Mandatory = $true)][string]$A)
+# -Sujet et -FichierHtml remplacent le texte de test par un vrai modele, par
+# exemple l'e-mail d'invitation rendu par buildTeamInvitationEmail, pour voir
+# exactement ce que recoit un invite.
+param(
+  [Parameter(Mandatory = $true)][string]$A,
+  [string]$Sujet,
+  [string]$FichierSujet,
+  [string]$FichierHtml
+)
 
 $ErrorActionPreference = 'Continue'
 $ProgressPreference = 'SilentlyContinue'
@@ -35,7 +43,19 @@ $corps = @{
             "<p>Si tu lis ce message, les e-mails de ton site repartent.</p>" +
             "<p>Invitations d&#39;&eacute;quipe, confirmations d&#39;inscription et mots de passe oubli&eacute;s peuvent de nouveau &ecirc;tre envoy&eacute;s.</p>" +
             "<p style=""color:#71717a;font-size:13px"">Test envoy&eacute; le $heure depuis le serveur.</p></div>"
-} | ConvertTo-Json -Depth 3
+}
+if ($FichierHtml) {
+  if (-not (Test-Path $FichierHtml)) { Write-Output "Fichier introuvable : $FichierHtml"; exit 1 }
+  # [string] est indispensable : sous PowerShell 5.1, Get-Content colle au texte
+  # des proprietes cachees (PSPath...) que ConvertTo-Json serialise, et Resend
+  # recoit un objet au lieu du HTML (« The html field must be a string »).
+  $corps.html = [string](Get-Content -Raw -Encoding UTF8 $FichierHtml)
+}
+# Le sujet peut venir d'un fichier : une apostrophe (« You're invited »)
+# ne survit pas toujours a la ligne de commande a travers SSH.
+if ($FichierSujet) { $corps.subject = (Get-Content -Raw -Encoding UTF8 $FichierSujet).Trim() }
+if ($Sujet) { $corps.subject = $Sujet }
+$corps = $corps | ConvertTo-Json -Depth 3
 
 try {
   $reponse = Invoke-RestMethod -Method Post -Uri 'https://api.resend.com/emails' `

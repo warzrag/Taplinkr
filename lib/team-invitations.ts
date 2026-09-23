@@ -38,20 +38,26 @@ function roleLabel(role: TeamInviteRole): string {
   }[role]
 }
 
-export async function sendTeamInvitationEmail(input: {
+interface TeamInvitationEmailInput {
   email: string
   inviter: string
   teamName: string
   role: TeamInviteRole
   token: string
-}) {
+}
+
+/**
+ * Le contenu de l'e-mail d'invitation, sans l'envoyer. Separe de l'envoi pour
+ * pouvoir en montrer un apercu fidele : c'est ce meme texte qui part.
+ */
+export function buildTeamInvitationEmail(input: TeamInvitationEmailInput) {
   const inviteUrl = buildTeamInviteUrl(input.token)
   const email = escapeHtml(input.email)
   const inviter = escapeHtml(input.inviter)
   const teamName = escapeHtml(input.teamName)
 
-  const result = await sendEmail({
-    to: input.email,
+  return {
+    inviteUrl,
     subject: `You're invited to join ${input.teamName} on TapLinkr`,
     html: `
       <!doctype html>
@@ -77,7 +83,12 @@ export async function sendTeamInvitationEmail(input: {
         </body>
       </html>
     `,
-  })
+  }
+}
+
+export async function sendTeamInvitationEmail(input: TeamInvitationEmailInput) {
+  const { inviteUrl, subject, html } = buildTeamInvitationEmail(input)
+  const result = await sendEmail({ to: input.email, subject, html })
 
   return { ...result, inviteUrl }
 }
