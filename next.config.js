@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  // Deux copies du site tournent sur le serveur (voir scripts/deployer-vps.ps1)
+  // et Caddy bascule de l'une a l'autre pendant une mise en ligne. Construites
+  // chacune de leur cote, elles auraient deux numeros differents : un visiteur
+  // qui a ouvert une page sur l'une irait chercher ses fichiers sur l'autre.
+  // Le script donne le meme numero aux deux constructions ; sans lui (poste de
+  // developpement), Next en tire un au hasard comme avant.
+  generateBuildId: async () => process.env.TAPLINKR_BUILD_ID || null,
   // Keep the Blob SDK as a native server dependency. Bundling it inside the
   // upload function breaks its runtime path resolution on Vercel.
   serverExternalPackages: ['@vercel/blob'],
