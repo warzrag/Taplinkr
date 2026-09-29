@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-29T17:15:09.087Z",
+  "generatedAt": "2026-09-29T20:36:09.174Z",
   "title": "Design System: TapLinkr",
   "extensions": {
     "colorMeta": {
@@ -517,16 +517,26 @@
         "purpose": "Avatar on the phone page screen."
       },
       {
+        "name": "finger-lift",
+        "value": "0 8px 18px -6px rgba(11,11,18,0.55)",
+        "purpose": "Demonstration finger inside the phone screen."
+      },
+      {
         "name": "focus-ring-field",
         "value": "0 0 0 3px rgba(124,58,237,0.25)",
         "purpose": "Claim field focus, with the border turning #8b5cf6."
+      },
+      {
+        "name": "glare-band",
+        "value": "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.13) 48%, rgba(255,255,255,0.04) 53%, transparent 58%)",
+        "purpose": "Light band over the desktop phone frame, sliding opposite to the tilt (x 24% to -24%). Not a shadow; carried here as the phone's only other depth effect."
       }
     ],
     "motion": [
       {
         "name": "ease-story",
         "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "All phone transitions."
+        "purpose": "Every movement on the home page (entrances, reveals, screens, finger), with no bounce. The float alone uses ease-in-out."
       },
       {
         "name": "screen-push",
@@ -559,9 +569,54 @@
         "purpose": "Desktop only; removed under reduced motion."
       },
       {
+        "name": "hero-word",
+        "value": "home-word 0.9s, from translateY(0.42em) + blur(10px), 60ms + 70ms x --i",
+        "purpose": "Hero headline words, pure CSS so it runs before JavaScript."
+      },
+      {
+        "name": "hero-rise",
+        "value": "home-rise 0.8s, from translateY(18px), delay --d (420-700ms)",
+        "purpose": "Hero subtitle, MiniPreview, claim form, reassurance row."
+      },
+      {
+        "name": "phone-land",
+        "value": "home-phone 1.3s, from translateY(80px) rotateX(18deg) scale(0.92), delay 380ms, origin 50% 90%, perspective 1400px",
+        "purpose": "Desktop phone arrival."
+      },
+      {
+        "name": "phone-float",
+        "value": "home-float 6s ease-in-out infinite, 8px",
+        "purpose": "Every phone; mobile chapter phones phase-shifted by -1.6s per chapter."
+      },
+      {
+        "name": "phone-tilt",
+        "value": "spring stiffness 110, damping 18, mass 0.8; rotateY up to 9deg, rotateX up to 5deg",
+        "purpose": "Desktop phone follows the pointer (hover: hover and pointer: fine, not calm)."
+      },
+      {
+        "name": "finger",
+        "value": "moves 0.45-0.75s, tap 0.3s (scale 1-0.8-1), ripple 0.55s to 1.9x",
+        "purpose": "Demonstration finger on the edit and direct screens."
+      },
+      {
+        "name": "reveal-title",
+        "value": "0.8s per word from 0.4em + blur(8px), 60ms stagger",
+        "purpose": "Chapter and section titles on scroll."
+      },
+      {
+        "name": "reveal-block",
+        "value": "0.7s, rise 12-48px, list items 0.5s from 12px and scale 0.96, 70-120ms stagger",
+        "purpose": "Paragraphs, chips, plan contents, pricing block, mobile phones; hidden only if below 92% of the viewport after mount."
+      },
+      {
+        "name": "loop-gating",
+        "value": "useInView: hero 15%, story 5%, chapter phone 50%",
+        "purpose": "Typing demo and screen loops stop off screen."
+      },
+      {
         "name": "reduced-motion",
         "value": "MotionConfig reducedMotion=\"user\" + useCalm (false until mount)",
-        "purpose": "Every animated screen settles on one complete still state."
+        "purpose": "Demonstrations keep running as fades; transforms are instant, CSS entrances become a 0.6s home-fade, and the finger, tilt, glare and float are removed."
       }
     ],
     "breakpoints": [
@@ -651,14 +706,15 @@
   ],
   "narrative": {
     "northStar": "The Lit Phone in a Dark Room",
-    "overview": "The marketing home page is a night-dark room (#09090f) with one bright object in it: a phone whose white screen builds the visitor's page while they type their name, then turns into the product's other screens as they scroll. Everything around the phone stays quiet, tonal and violet-accented, so the phone does the explaining. The page stays dark whatever the visitor's theme; `app/page.tsx` forces the `dark` class and adds `home-dark` to `<html>` for the visit so the scrollbar and overscroll background match.\n\nDensity is low on the dark side (large display type, short paragraphs, generous section padding) and realistic inside the phone (app-sized 12 to 15px type, 40 to 48px rows, status bar). The phone content is UI only: text profiles, link rows, counters, chat bubbles. No raster imagery ships on the page.\n\nScope: this world is established by the home page (`app/page.tsx`, `components/landing/PhoneStory.tsx`, and the `tone=\"home\"` variant of `SiteFooter`, plus `SiteHeader`). The dashboard, auth pages and other marketing pages still use the older Tailwind theme tokens (indigo/violet `brand-*`, `--font-display` Space Grotesk) and have not been migrated. This file does not set rules for them.",
+    "overview": "The marketing home page is a night-dark room (#09090f) with one bright object in it: a phone whose white screen builds the visitor's page while they type their name, then turns into the product's other screens as they scroll. Everything around the phone stays quiet, tonal and violet-accented, so the phone does the explaining. The page stays dark whatever the visitor's theme; `app/page.tsx` forces the `dark` class and adds `home-dark` to `<html>` for the visit so the scrollbar and overscroll background match.\n\nDensity is low on the dark side (large display type, short paragraphs, generous section padding) and realistic inside the phone (app-sized 12 to 15px type, 40 to 48px rows, status bar). The phone content is UI only: text profiles, link rows, counters, chat bubbles. No raster imagery ships on the page.\n\nScope: this world is established by the home page (`app/page.tsx`, `components/landing/PhoneStory.tsx`, `components/landing/Reveal.tsx`, the home motion block at the end of `app/globals.css`, and the `tone=\"home\"` variant of `SiteFooter`, plus `SiteHeader`). The dashboard, auth pages and other marketing pages still use the older Tailwind theme tokens (indigo/violet `brand-*`, `--font-display` Space Grotesk) and have not been migrated. This file does not set rules for them.",
     "keyCharacteristics": [
       "A single light object (the phone) on a near-black ground; all other surfaces are dark tonal steps.",
       "Violet is the only action color; solid violet fills mark the one primary action in a group.",
       "Bricolage Grotesque, tight and heavy, for display only; the sans stack for everything else.",
       "Depth by hairline seams and tonal steps; the phone alone casts a real shadow, tinted by its accent.",
       "Every color is an explicit hex value, never a named theme class, because of global overrides in `globals.css`.",
-      "Demo data is fictional and labeled \"Example\" until the visitor types."
+      "Demo data is fictional and labeled \"Example\" until the visitor types.",
+      "Motion arrives once and stays readable: the hero rises in CSS before JavaScript, later blocks rise as they enter, and the phone lives (tilt, float, a demonstrating finger) only while it is on screen."
     ],
     "rules": [
       {
@@ -693,12 +749,27 @@
       },
       {
         "name": "The Calm Hydration Rule",
-        "body": "Motion honors reduced-motion through `MotionConfig reducedMotion=\"user\"` plus `useCalm`, which is false on the first render and only reads the preference after mount, so the client's first render always matches the server's. When calm, every screen settles on one complete still state (a written name, a fixed edit step, the open chat, full bars).",
+        "body": "Motion honors reduced-motion through `MotionConfig reducedMotion=\"user\"` plus `useCalm`, which is false on the first render and only reads the preference after mount, so the client's first render always matches the server's. When calm, the demonstrations keep running as fades (the typing name, edit steps, stats stream, chat, team bars): transforms become instant, the CSS entrances fall back to a 0.6s fade, and the finger, tilt, glare and float are removed.",
         "section": "components"
       },
       {
         "name": "The Honest Example Rule",
         "body": "No real figures appear on the home page. Every name, count and chat in the phone is fictional and labeled Example until the visitor types their own name; only what the visitor typed is shown as theirs.",
+        "section": "components"
+      },
+      {
+        "name": "The Visible by Default Rule",
+        "body": "Nothing on the home page is hidden in the server HTML. The hero entrance is pure CSS with a both fill, so it runs before JavaScript and ends visible if scripts fail; scroll reveals hide, instantly and only after mount, the blocks still below 92% of the viewport, and reveal each once as it enters.",
+        "section": "components"
+      },
+      {
+        "name": "The Off-Screen Stillness Rule",
+        "body": "A loop runs only while its surface is in view: the typing demo while the hero is on screen (each letter re-renders the whole page), the desktop phone's screen loops while the story section is, and each mobile chapter phone while half of it is visible.",
+        "section": "components"
+      },
+      {
+        "name": "The Server-Painted Accent Rule",
+        "body": "Every motion element that carries the page's accent (header band, avatar, first link, MiniPreview chips, edit swatch ring, \"Add link\") uses `initial={false}`, so the server HTML paints the color; without it, the avatar and first link stayed white until hydration.",
         "section": "components"
       }
     ],
@@ -708,7 +779,9 @@
       "**Do** reserve solid Action Violet for the single primary action per group; secondary actions are Edge-outlined.",
       "**Do** use a 2px Light Violet outline with 2px offset as the focus state on every interactive element.",
       "**Do** label fictional demo content \"Example\" and keep it fictional (The Honest Example Rule).",
-      "**Do** gate motion with `MotionConfig reducedMotion=\"user\"` and `useCalm`, and give each animated screen a complete still state.",
+      "**Do** gate motion with `MotionConfig reducedMotion=\"user\"` and `useCalm`; when calm, keep the demonstrations running as fades and remove the finger, tilt, glare and float (The Calm Hydration Rule).",
+      "**Do** ease every movement except the float on `cubic-bezier(0.16, 1, 0.3, 1)`, with no bounce.",
+      "**Do** give every accent-colored motion element `initial={false}` (The Server-Painted Accent Rule).",
       "**Do** write site copy in English."
     ],
     "donts": [
@@ -717,7 +790,10 @@
       "**Don't** show real figures, testimonials or customer counts on the home page.",
       "**Don't** read the reduced-motion preference during the first render.",
       "**Don't** add shadows to dark-side cards or buttons (The Only the Phone Glows Rule).",
-      "**Don't** use Bricolage Grotesque for buttons, fields, chips or phone content."
+      "**Don't** use Bricolage Grotesque for buttons, fields, chips or phone content.",
+      "**Don't** hide content in the server HTML or make it depend on JavaScript to appear (The Visible by Default Rule).",
+      "**Don't** leave a demo loop running while its surface is off screen (The Off-Screen Stillness Rule).",
+      "**Don't** stack two transforms on one element; arrival, tilt and float each own a wrapper."
     ]
   }
 }

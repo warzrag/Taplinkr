@@ -584,3 +584,97 @@
     opacity: 0;
   }
 }
+
+/* Page d'accueil : l'arrivee du haut de page (app/page.tsx). En CSS pour partir
+   des le premier affichage, sans attendre le JavaScript : si le script echoue,
+   le texte finit visible quand meme. Le titre monte mot par mot en sortant du
+   flou (--i : rang du mot), le reste suit (--d : retard), le telephone se pose
+   en basculant vers l'avant. Animations reduites : un simple fondu. */
+@keyframes home-word {
+  from {
+    opacity: 0;
+    transform: translateY(0.42em);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes home-phone {
+  from {
+    opacity: 0;
+    transform: translateY(80px) rotateX(18deg) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes home-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes home-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.home-word {
+  display: inline-block;
+  animation: home-word 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(60ms + var(--i, 0) * 70ms);
+}
+
+.home-rise {
+  animation: home-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.home-phone {
+  animation: home-phone 1.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--d, 0ms);
+  transform-origin: 50% 90%;
+}
+
+/* Le flottement ne sert qu'a l'ecran : il ne touche pas au trace de la page. */
+.home-float {
+  animation: home-float 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-word,
+  .home-rise,
+  .home-phone {
+    animation-name: home-fade;
+    animation-duration: 0.6s;
+  }
+
+  .home-float {
+    animation: none;
+  }
+}
