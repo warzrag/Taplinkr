@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
+import { ShellSkeleton } from '@/components/dashboard/DashboardSkeleton'
 
 export default function DashboardLayoutWrapper({
   children,
@@ -35,16 +36,10 @@ export default function DashboardLayoutWrapper({
     }
   }, [shouldRedirect, router])
 
-  // Afficher le loader pendant le chargement ou si pas encore de session
+  // Pendant le chargement : la silhouette de l'espace membre, qui scintille,
+  // plutot qu'un rond qui tourne sur un ecran vide.
   if (status === 'loading' || (status === 'unauthenticated' && !shouldRedirect)) {
-    return (
-      <div className="min-h-screen bg-dash-bg text-white flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <div className="h-10 w-10 mx-auto animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-brand-500" />
-          <div className="text-dash-text4">Loading...</div>
-        </div>
-      </div>
-    )
+    return <ShellSkeleton />
   }
 
   if (!session) {

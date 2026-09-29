@@ -678,3 +678,35 @@
     animation: none;
   }
 }
+
+/* Espace membre : le reflet qui balaie les blocs de chargement
+   (components/dashboard/motion.tsx, Shimmer). Animations reduites : les blocs
+   restent simplement gris. */
+@keyframes dash-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.dash-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.dash-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+  animation: dash-shimmer 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-shimmer::after {
+    animation: none;
+  }
+}

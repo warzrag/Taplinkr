@@ -36,6 +36,7 @@ import type { TooltipProps } from 'recharts'
 import { toast } from 'react-hot-toast'
 
 import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
+import { CountUp } from '@/components/dashboard/motion'
 import { chartColors } from '@/lib/dashboard-colors'
 
 type AnalyticsTab = 'overview' | 'links' | 'audience' | 'sources'
@@ -240,7 +241,7 @@ function Overview({ data, insights, loading, reduceMotion, days }: { data: Analy
     <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       {cards.map((card, index) => <motion.article key={card.label} initial={reduceMotion ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.045 }} whileHover={reduceMotion ? undefined : { y: -4 }} className={`${cardClass} group relative overflow-hidden p-5`}>
         <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.glow} to-transparent opacity-65 transition group-hover:opacity-100`} />
-        <div className="relative flex items-start justify-between"><div><p className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/45">{card.label}</p><AnimatePresence mode="wait"><motion.p key={`${card.value}-${loading}`} initial={reduceMotion ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} className="mt-4 text-3xl font-black tracking-[-0.04em] tabular-nums">{loading ? '—' : `${card.value.toLocaleString('en-US')}${card.suffix}`}</motion.p></AnimatePresence>{card.growth !== undefined && <Growth value={card.growth} />}</div><span className="grid h-10 w-10 place-items-center rounded-2xl border border-white/[0.08] bg-black/20 text-violet-200"><card.icon className="h-5 w-5" /></span></div>
+        <div className="relative flex items-start justify-between"><div><p className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/45">{card.label}</p><p className="mt-4 text-3xl font-black tracking-[-0.04em] tabular-nums">{loading ? '—' : <CountUp value={card.value} decimals={card.suffix ? 1 : 0} suffix={card.suffix} />}</p>{card.growth !== undefined && <Growth value={card.growth} />}</div><span className="grid h-10 w-10 place-items-center rounded-2xl border border-white/[0.08] bg-black/20 text-violet-200"><card.icon className="h-5 w-5" /></span></div>
       </motion.article>)}
     </section>
 

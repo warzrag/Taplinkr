@@ -22,6 +22,8 @@ interface LinksContextType {
   teamLinks: LinkType[]
   folders: Folder[]
   loading: boolean
+  /** Vrai apres la premiere reponse du serveur (la liste part vide avant). */
+  hasLoaded: boolean
   hasTeam: boolean
   refreshLinks: () => Promise<void>
   refreshFolders: () => Promise<void>
@@ -281,6 +283,7 @@ export function LinksProvider({ children }: { children: ReactNode }) {
       teamLinks,
       folders,
       loading,
+      hasLoaded,
       hasTeam,
       refreshLinks,
       refreshFolders,

@@ -2,7 +2,9 @@
 
 import { motion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
+
+import { EASE } from '@/components/dashboard/motion'
 
 /**
  * Graphique de trafic, echelles et indicateur de variation.
@@ -58,6 +60,11 @@ export function TrafficChart({ data, period }: { data: ChartPoint[]; period: Per
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const plotRef = useRef<HTMLDivElement>(null)
+  // Le trace, l'aire et les points rejouent leur entree a chaque nouvelle serie.
+  const signature = `${period}-${values.join('-')}`
+  // Sans les deux-points de useId : ils cassent la reference url(#...).
+  const clipId = `traffic-reveal-${useId().replace(/:/g, '')}`
+  const DRAW = 0.9
 
   // Les lignes de repere et leurs etiquettes sont calculees a partir des memes
   // constantes, pour qu'elles ne puissent pas se desaligner.
@@ -140,13 +147,25 @@ export function TrafficChart({ data, period }: { data: ChartPoint[]; period: Per
               <feGaussianBlur stdDeviation="5" result="blur" />
               <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
+            {/* L'aire se devoile de gauche a droite, au rythme du trace. */}
+            <clipPath id={clipId}>
+              <motion.rect
+                key={`reveal-${signature}`}
+                x="0"
+                y="0"
+                height={height}
+                initial={{ width: 0 }}
+                animate={{ width }}
+                transition={{ duration: DRAW, ease: 'easeOut' }}
+              />
+            </clipPath>
           </defs>
           {gridRows.map(row => (
             <line key={row.y} x1="0" x2={width} y1={row.y} y2={row.y} stroke="white" strokeOpacity="0.055" strokeDasharray="5 8" />
           ))}
-          <motion.path key={`area-${period}-${values.join('-')}`} d={areaPath} fill="url(#trafficArea)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }} />
+          <motion.path key={`area-${signature}`} d={areaPath} fill="url(#trafficArea)" clipPath={`url(#${clipId})`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }} />
           <motion.path
-            key={`line-${period}-${values.join('-')}`}
+            key={`line-${signature}`}
             d={linePath}
             fill="none"
             stroke="url(#trafficLine)"
@@ -156,7 +175,7 @@ export function TrafficChart({ data, period }: { data: ChartPoint[]; period: Per
             filter="url(#trafficGlow)"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 0.9, ease: 'easeOut' }}
+            transition={{ duration: DRAW, ease: 'easeOut' }}
           />
         </svg>
 
@@ -171,15 +190,21 @@ export function TrafficChart({ data, period }: { data: ChartPoint[]; period: Per
         {/* Les points sont poses en HTML et non en SVG : le graphique est etire
             horizontalement (preserveAspectRatio="none"), ce qui transformait les
             cercles SVG en ovales. Le reperage est le meme, donc ils restent alignes. */}
+        {/* Chaque point s'allume quand le trace passe dessus. Centre par x/y de
+            framer-motion : une classe -translate-* serait ecrasee par le zoom. */}
         {points.map((point, index) => (point.value > 0 || index === activeIndex) && (
-          <span
-            key={index}
-            className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full ring-[3px] ring-dash-overlay transition-[height,width] ${
+          <motion.span
+            key={`${signature}-${index}`}
+            className={`pointer-events-none absolute rounded-full ring-[3px] ring-dash-overlay transition-[height,width] ${
               // bg-dash-text et non bg-white : le filet de securite mode sombre de
               // globals.css reecrit bg-white en couleur de carte, le point serait invisible.
               index === activeIndex ? 'h-[13px] w-[13px] bg-dash-text' : 'h-[9px] w-[9px] bg-violet-300'
             }`}
-            style={{ left: `${(point.x / width) * 100}%`, top: `${(point.y / height) * 100}%` }}
+            style={{ left: `${(point.x / width) * 100}%`, top: `${(point.y / height) * 100}%`, x: '-50%', y: '-50%' }}
+            // Un point a zero n'apparait qu'au survol : il se montre aussitot.
+            initial={point.value > 0 ? { scale: 0, opacity: 0 } : false}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: DRAW * (point.x / width), duration: 0.3, ease: EASE }}
           />
         ))}
 

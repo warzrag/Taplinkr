@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+
+import { PopPanel } from '@/components/dashboard/motion'
 import { Inbox, Move, X } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -55,10 +57,8 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
         onClick={onClose}
       >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
+        {/* Sort du bouton qui l'a ouverte (components/dashboard/motion.tsx). */}
+        <PopPanel
           className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-3xl border border-[#2a2a38] bg-[#0e0e17] p-6 text-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
@@ -131,7 +131,7 @@ export default function MoveToFolderMenu({ linkId, currentFolderId, onClose, onM
               )}
             </div>
           )}
-        </motion.div>
+        </PopPanel>
       </motion.div>
     </AnimatePresence>
   )

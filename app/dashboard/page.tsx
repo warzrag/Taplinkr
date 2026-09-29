@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import {
@@ -28,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLinks } from '@/contexts/LinksContext'
 import { useProfile } from '@/contexts/ProfileContext'
 import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
+import { CountUp } from '@/components/dashboard/motion'
 import {
   TrafficChart,
   Trend,
@@ -286,9 +287,11 @@ export default function Dashboard() {
                 <div>
                   <p className="text-sm font-semibold text-dash-text4">{stat.label}</p>
                   <p className="mt-1 text-[11px] font-medium text-white/35">{stat.note}</p>
-                  <AnimatePresence mode="wait"><motion.p key={`${stat.key}-${stat.value}-${metricsLoading}`} initial={reduceMotion ? false : { opacity: 0, y: 8, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -6 }} className="mt-3 text-3xl font-black tracking-[-0.04em] tabular-nums">
-                    {metricsLoading ? '—' : `${stat.value.toLocaleString('en-US', { maximumFractionDigits: 1 })}${stat.suffix}`}
-                  </motion.p></AnimatePresence>
+                  {/* Le chiffre monte jusqu'a sa valeur, puis glisse vers la suivante
+                      a chaque rafraichissement ou changement de periode. */}
+                  <p className="mt-3 text-3xl font-black tracking-[-0.04em] tabular-nums">
+                    {metricsLoading ? '—' : <CountUp value={stat.value} decimals={stat.suffix ? 1 : 0} suffix={stat.suffix} />}
+                  </p>
                 </div>
                 <span className="grid h-11 w-11 place-items-center rounded-2xl border border-white/[0.07] bg-black/20 shadow-inner"><stat.icon className="h-5 w-5 text-dash-text4" /></span>
               </div>
@@ -314,11 +317,11 @@ export default function Dashboard() {
                   une meme valeur. Chacun est maintenant explicitement etiquete. */}
               <div className="flex gap-6 text-right">
                 <div>
-                  <p className="text-2xl font-black tabular-nums">{metrics.realClicks.toLocaleString('en-US')}</p>
+                  <p className="text-2xl font-black tabular-nums"><CountUp value={metrics.realClicks} /></p>
                   <p className="text-xs text-dash-text6">clicks</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-black tabular-nums text-dash-text4">{metrics.pageViews.toLocaleString('en-US')}</p>
+                  <p className="text-2xl font-black tabular-nums text-dash-text4"><CountUp value={metrics.pageViews} /></p>
                   <p className="text-xs text-dash-text6">page views</p>
                 </div>
               </div>
@@ -364,7 +367,7 @@ export default function Dashboard() {
                         <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]"><motion.div initial={{ width: 0 }} animate={{ width: `${(item.clicks / maxTopClicks) * 100}%` }} transition={{ duration: 0.7, delay: index * 0.08 }} className="h-full rounded-full bg-violet-400" /></div>
                         <p className="mt-1.5 truncate text-[11px] text-dash-text6">/{item.slug}</p>
                       </div>
-                      <p className="text-sm font-black tabular-nums">{item.clicks.toLocaleString('en-US')}</p>
+                      <p className="text-sm font-black tabular-nums"><CountUp value={item.clicks} /></p>
                     </Link></motion.div>
                   )
                 })}

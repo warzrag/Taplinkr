@@ -28,6 +28,7 @@ import {
 
 import { useLinks } from '@/contexts/LinksContext'
 import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
+import { DrawnCheck, EASE, PopPanel } from '@/components/dashboard/motion'
 import MoveToFolderMenu from '@/components/MoveToFolderMenu'
 import { reconcileLiveClickCounts } from '@/lib/live-click-counts'
 import { Link as LinkType } from '@/types'
@@ -85,7 +86,7 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
 
 export default function LinksDashboard() {
   const reduceMotion = useReducedMotion()
-  const { personalLinks, folders, loading, refreshLinks, refreshFolders, updateLinkOptimistic } = useLinks()
+  const { personalLinks, folders, loading, hasLoaded, refreshLinks, refreshFolders, updateLinkOptimistic } = useLinks()
   const [createMode, setCreateMode] = useState<'landing' | 'direct' | null>(null)
   const [showCreatePicker, setShowCreatePicker] = useState(false)
   const [editingLink, setEditingLink] = useState<LinkType | null>(null)
@@ -107,6 +108,13 @@ export default function LinksDashboard() {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
   const [sortMode, setSortMode] = useState<SortMode>('manual')
   const liveClicksRef = useRef<Record<string, number>>({})
+  // Le lien dont l'adresse vient d'etre copiee : une coche remplace l'icone.
+  const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
+  const copiedTimerRef = useRef<number | undefined>(undefined)
+  // Les liens deja vus : un lien absent de cette liste vient d'arriver (cree
+  // ici ou ailleurs) et entre avec un eclat violet.
+  const knownLinkIdsRef = useRef<Set<string> | null>(null)
+  const [freshLinkIds, setFreshLinkIds] = useState<Set<string>>(new Set())
   const clickCountsInitializedRef = useRef(false)
   const todayClicksInitializedRef = useRef(false)
 
@@ -342,8 +350,36 @@ export default function LinksDashboard() {
 
   const copyUrl = async (slug: string) => {
     await navigator.clipboard.writeText(`${window.location.origin}/${slug}`)
-    toast.success('URL copied')
+    // La confirmation se lit la ou l'on a clique, plus dans un coin de l'ecran.
+    setCopiedSlug(slug)
+    window.clearTimeout(copiedTimerRef.current)
+    copiedTimerRef.current = window.setTimeout(() => setCopiedSlug(null), 1800)
   }
+
+  useEffect(() => () => window.clearTimeout(copiedTimerRef.current), [])
+
+  useEffect(() => {
+    // La liste demarre vide, avant la reponse du serveur : la reference ne se
+    // prend qu'apres le premier vrai chargement, sinon tout brillait.
+    if (!hasLoaded || loading) return
+    const ids = personalLinks.map(item => item.id)
+    const known = knownLinkIdsRef.current
+    if (!known) {
+      knownLinkIdsRef.current = new Set(ids)
+      return
+    }
+    const fresh = ids.filter(id => !known.has(id))
+    ids.forEach(id => known.add(id))
+    if (!fresh.length) return
+    setFreshLinkIds(current => new Set([...current, ...fresh]))
+    window.setTimeout(() => {
+      setFreshLinkIds(current => {
+        const next = new Set(current)
+        fresh.forEach(id => next.delete(id))
+        return next
+      })
+    }, 2800)
+  }, [hasLoaded, loading, personalLinks])
 
   const moveLinkToGroup = async (linkId: string, groupId: string | null) => {
     if (movingLinkId === linkId) return
@@ -547,7 +583,9 @@ export default function LinksDashboard() {
 
                 return (
                   <motion.section
-                    layout
+                    // "position" et non layout : un groupe qui change de taille se
+                    // deplacait en s'etirant, texte deforme, a l'arrivee des groupes.
+                    layout="position"
                     key={groupKey}
                     onDragOver={event => {
                       event.preventDefault()
@@ -635,16 +673,23 @@ export default function LinksDashboard() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="space-y-2 overflow-visible"
+                          className="relative space-y-2 overflow-visible"
                         >
                           {section.links.length === 0 ? (
                             <div className="mx-1 mb-1 rounded-xl border border-dashed border-white/10 px-5 py-7 text-center text-sm text-dash-text6">
                               Drag a link here to add it to this group.
                             </div>
-                          ) : section.links.map((item, index) => {
+                          ) : (
+                          // popLayout : un lien supprime sort de la liste aussitot
+                          // et s'efface sur place, les suivants remontent en glissant.
+                          <AnimatePresence mode="popLayout">
+                          {section.links.map((item, index) => {
                 const displayedClicks = clickCountsReady
                   ? (liveClicks[item.id] ?? item.clicks ?? 0)
                   : null
+                // Lu pendant le rendu, avant que l'effet ne l'ajoute aux liens connus :
+                // c'est ce qui donne a un nouveau lien son entree par le haut.
+                const arriving = Boolean(knownLinkIdsRef.current && !knownLinkIdsRef.current.has(item.id))
 
                 return (
                 <motion.article
@@ -655,14 +700,30 @@ export default function LinksDashboard() {
                     event.dataTransfer.setData('text/taplinkr-link', item.id)
                   }}
                   onDragEndCapture={() => setDropTargetId(undefined)}
-                  layout
-                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(index * 0.045, 0.32), duration: 0.36 }}
+                  layout="position"
+                  initial={reduceMotion ? false : arriving ? { opacity: 0, y: -18, scale: 0.97 } : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  // Seul un lien supprime s'efface en douceur. Un lien qui change de
+                  // groupe (ou que les groupes rangent au chargement) quitte sa liste
+                  // sans effet, sinon il clignotait par-dessus ses voisins.
+                  exit={deletingLinkId === item.id
+                    ? { opacity: 0, scale: 0.96, transition: { duration: 0.22, ease: EASE } }
+                    : { opacity: 0, transition: { duration: 0 } }}
+                  transition={{ delay: arriving ? 0 : Math.min(index * 0.045, 0.32), duration: arriving ? 0.55 : 0.36, ease: EASE }}
                   whileHover={reduceMotion ? undefined : { x: 4, scale: 1.002 }}
-                  className={`group relative grid min-h-[88px] items-center gap-4 overflow-visible rounded-2xl border border-white/[0.075] bg-dash-bg/90 px-4 py-3 transition-colors hover:z-10 hover:border-violet-400/25 hover:bg-dash-surface sm:grid-cols-[minmax(240px,1fr)_130px_minmax(130px,0.55fr)_190px_132px] ${clickDeltas[item.id] ? 'z-20' : 'z-0'}`}
+                  className={`group relative grid min-h-[88px] items-center gap-4 overflow-visible rounded-2xl border border-white/[0.075] bg-dash-bg/90 px-4 py-3 transition-colors hover:z-10 hover:border-violet-400/25 hover:bg-dash-surface sm:grid-cols-[minmax(220px,1fr)_110px_minmax(110px,0.55fr)_180px_176px] ${clickDeltas[item.id] ? 'z-20' : 'z-0'}`}
                 >
                   <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/0 to-transparent transition-all duration-300 group-hover:via-violet-400/80" />
+                  {freshLinkIds.has(item.id) && (
+                    // L'eclat d'un lien qui vient d'arriver, qui s'eteint doucement.
+                    <motion.span
+                      aria-hidden
+                      className="pointer-events-none absolute -inset-px rounded-2xl border border-violet-400/80 shadow-[0_0_44px_rgba(139,92,246,0.5)]"
+                      initial={{ opacity: 1 }}
+                      animate={{ opacity: 0 }}
+                      transition={{ delay: 0.9, duration: 1.8, ease: 'easeOut' }}
+                    />
+                  )}
                   <div className="flex min-w-0 items-center gap-3">
                     <GripVertical className="hidden h-5 w-5 shrink-0 text-dash-text6 sm:block" />
                     <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.35)]' : 'bg-dash-off'}`} />
@@ -673,7 +734,27 @@ export default function LinksDashboard() {
                         className="mt-1 flex max-w-full items-center gap-1.5 text-left text-sm text-dash-text5 transition hover:text-violet-300"
                       >
                         <span className="truncate">taplinkr.com/{item.slug}</span>
-                        <Copy className="h-3.5 w-3.5 shrink-0" />
+                        <span aria-live="polite" className="inline-flex shrink-0 items-center">
+                          <AnimatePresence mode="wait" initial={false}>
+                            {copiedSlug === item.slug ? (
+                              <motion.span
+                                key="copied"
+                                className="inline-flex items-center gap-1 text-emerald-300"
+                                initial={{ opacity: 0, scale: 0.6 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                                transition={{ type: 'spring', stiffness: 520, damping: 26 }}
+                              >
+                                <DrawnCheck className="h-3.5 w-3.5" />
+                                <span className="text-xs font-bold">Copied</span>
+                              </motion.span>
+                            ) : (
+                              <motion.span key="copy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.1 } }}>
+                                <Copy className="h-3.5 w-3.5" />
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -735,19 +816,21 @@ export default function LinksDashboard() {
                     </AnimatePresence>
                   </button>
 
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="flex items-center justify-end gap-1">
+                    {/* shrink-0 : sans contenu, l'interrupteur se reduisait a 0 px dans une
+                        colonne trop etroite et disparaissait sur ordinateur. */}
                     <button
                       onClick={() => toggleLink(item)}
-                      className={`relative h-7 w-12 rounded-full transition-all duration-300 ${item.isActive ? 'bg-violet-500 shadow-[0_0_18px_rgba(139,92,246,.28)]' : 'bg-dash-line3'}`}
+                      className={`relative h-7 w-11 shrink-0 rounded-full transition-all duration-300 ${item.isActive ? 'bg-violet-500 shadow-[0_0_18px_rgba(139,92,246,.28)]' : 'bg-dash-line3'}`}
                       aria-label={item.isActive ? 'Disable link' : 'Enable link'}
                     >
-                      <span className={`absolute top-1 h-5 w-5 rounded-full bg-dash-bg transition-transform ${item.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                      <span className={`absolute top-1 h-5 w-5 rounded-full bg-dash-bg transition-transform ${item.isActive ? 'translate-x-5' : 'translate-x-1'}`} />
                     </button>
                     {/* Cadre le dashboard entier sur ce lien : courbe, cartes et
                        activite recente ne montrent plus que lui. */}
                     <Link
                       href={`/dashboard?link=${item.id}`}
-                      className="rounded-lg p-2 text-dash-text5 transition hover:bg-violet-500/10 hover:text-violet-300"
+                      className="rounded-lg p-1.5 text-dash-text5 transition hover:bg-violet-500/10 hover:text-violet-300"
                       aria-label={`Dashboard for ${item.internalName || item.title}`}
                       title="See this link on the dashboard"
                     >
@@ -756,7 +839,7 @@ export default function LinksDashboard() {
                     <button
                       onClick={() => setMovingLink(item)}
                       disabled={movingLinkId === item.id}
-                      className="rounded-lg p-2 text-dash-text5 transition hover:bg-violet-500/10 hover:text-violet-300 disabled:opacity-40"
+                      className="rounded-lg p-1.5 text-dash-text5 transition hover:bg-violet-500/10 hover:text-violet-300 disabled:opacity-40"
                       aria-label="Move to group"
                       title="Move to group"
                     >
@@ -764,7 +847,7 @@ export default function LinksDashboard() {
                     </button>
                     <button
                       onClick={() => setEditingLink(item)}
-                      className="rounded-lg p-2 text-dash-text5 transition hover:bg-white/5 hover:text-white"
+                      className="rounded-lg p-1.5 text-dash-text5 transition hover:bg-white/5 hover:text-white"
                       aria-label="Edit"
                     >
                       <Edit3 className="h-4 w-4" />
@@ -773,7 +856,7 @@ export default function LinksDashboard() {
                       <button
                         onClick={() => deleteLink(item)}
                         disabled={deletingLinkId === item.id}
-                        className="rounded-lg p-2 text-dash-text5 transition hover:bg-red-500/10 hover:text-red-400 disabled:cursor-wait disabled:opacity-50"
+                        className="rounded-lg p-1.5 text-dash-text5 transition hover:bg-red-500/10 hover:text-red-400 disabled:cursor-wait disabled:opacity-50"
                         aria-label={`Delete ${item.internalName || item.title}`}
                         title="Delete link"
                       >
@@ -786,6 +869,8 @@ export default function LinksDashboard() {
                 </motion.article>
                 )
                           })}
+                          </AnimatePresence>
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -832,12 +917,7 @@ export default function LinksDashboard() {
               if (event.currentTarget === event.target) setShowCreatePicker(false)
             }}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.98 }}
-              className="w-full max-w-xl rounded-3xl border border-dash-line2 bg-dash-surface p-5 shadow-2xl sm:p-7"
-            >
+            <PopPanel className="w-full max-w-xl rounded-3xl border border-dash-line2 bg-dash-surface p-5 shadow-2xl sm:p-7">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-400">Create a new link</p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight">What do you want to create?</h2>
@@ -883,7 +963,7 @@ export default function LinksDashboard() {
               >
                 Cancel
               </button>
-            </motion.div>
+            </PopPanel>
           </motion.div>
         )}
       </AnimatePresence>
@@ -902,15 +982,13 @@ export default function LinksDashboard() {
               }
             }}
           >
-            <motion.form
-              initial={{ opacity: 0, y: 12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            <PopPanel className="w-full max-w-md">
+            <form
               onSubmit={event => {
                 event.preventDefault()
                 void saveGroup()
               }}
-              className="w-full max-w-md rounded-3xl border border-dash-line2 bg-dash-surface p-6 shadow-2xl"
+              className="rounded-3xl border border-dash-line2 bg-dash-surface p-6 shadow-2xl"
             >
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-500/15 text-violet-300">
                 <Layers3 className="h-5 w-5" />
@@ -934,7 +1012,8 @@ export default function LinksDashboard() {
                   {editingGroup ? 'Save changes' : 'Create group'}
                 </button>
               </div>
-            </motion.form>
+            </form>
+            </PopPanel>
           </motion.div>
         )}
       </AnimatePresence>
