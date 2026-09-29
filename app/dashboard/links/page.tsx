@@ -28,7 +28,7 @@ import {
 
 import { useLinks } from '@/contexts/LinksContext'
 import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
-import { DrawnCheck, EASE, PopPanel } from '@/components/dashboard/motion'
+import { DrawnCheck, EASE, PopPanel, Shimmer } from '@/components/dashboard/motion'
 import MoveToFolderMenu from '@/components/MoveToFolderMenu'
 import { reconcileLiveClickCounts } from '@/lib/live-click-counts'
 import { Link as LinkType } from '@/types'
@@ -176,9 +176,17 @@ export default function LinksDashboard() {
     ]
   }, [groups, knownGroupIds, personalLinks, liveClicks, todayClicks, sortMode])
 
+  // La liste n'apparait qu'une fois les groupes connus : avant, les liens
+  // arrivaient tous dans "Ungrouped" puis se rangeaient, et les groupes
+  // glissaient les uns sur les autres. Un echec compte comme "connus" : les
+  // liens s'affichent alors sans groupes, comme avant.
+  const [foldersReady, setFoldersReady] = useState(false)
   useEffect(() => {
-    void refreshFolders()
+    void refreshFolders().finally(() => setFoldersReady(true))
   }, [])
+  // La liste part vide avant la reponse du serveur : sans ce test, "Create
+  // your first link" s'affichait un instant chez tout le monde.
+  const listReady = foldersReady && !loading && (hasLoaded || personalLinks.length > 0)
 
   // Le choix de tri suit la personne d'une visite a l'autre : celui qui suit
   // ses meilleurs groupes ne veut pas le reposer chaque matin.
@@ -569,9 +577,9 @@ export default function LinksDashboard() {
         </motion.header>
 
         <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.48 }} className="mt-8 overflow-visible rounded-[24px] border border-white/[0.075] bg-dash-raised/90 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-          {loading ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map(item => <div key={item} className="h-[88px] animate-pulse rounded-xl bg-white/[0.035]" />)}
+          {!listReady ? (
+            <div className="space-y-2" role="status" aria-label="Loading links">
+              {[1, 2, 3].map(item => <Shimmer key={item} className="h-[88px] w-full" />)}
             </div>
           ) : personalLinks.length ? (
             <div className="space-y-4">
