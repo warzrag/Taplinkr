@@ -82,8 +82,11 @@ export async function POST(request: NextRequest) {
         title: body.title || 'My link',
         internalName: body.internalName || null,
         slug,
+        // Le texte saisi comme « bio » est garde ici. Un champ `bio` distinct
+        // n'existe pas sur les liens : Firestore l'acceptait sans rien dire,
+        // PostgreSQL refuse toute la creation (« Unknown argument bio »), et
+        // plus aucun lien ne pouvait etre cree depuis le 2 septembre 2026.
         description: body.description || body.bio || '',
-        bio: body.bio || body.description || '',
         directUrl,
         isDirect: !!body.isDirect,
         isActive: true,
@@ -144,9 +147,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ...newLink, multiLinks })
   } catch (error: any) {
     console.error('Erreur creation lien FINAL:', error)
-    return NextResponse.json({
-      error: 'Unable to create the link',
-      message: error.message,
-    }, { status: 500 })
+    // Deux personnes peuvent viser la meme adresse publique au meme instant :
+    // la verification prealable passe pour les deux, la base refuse la seconde.
+    if (error?.code === 'P2002') {
+      return NextResponse.json({ error: 'This public URL is already in use.' }, { status: 409 })
+    }
+    // Jamais le message brut de la base : il affichait au client l'identifiant
+    // interne de son compte et tout le contenu envoye.
+    return NextResponse.json({ error: 'Unable to create the link. Please try again.' }, { status: 500 })
   }
 }
