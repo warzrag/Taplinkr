@@ -1,0 +1,723 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T17:15:09.087Z",
+  "title": "Design System: TapLinkr",
+  "extensions": {
+    "colorMeta": {
+      "violet-action": {
+        "role": "primary",
+        "displayName": "Action Violet",
+        "canonical": "#7c3aed",
+        "oklch": "oklch(54.1% 0.247 293.0)",
+        "tonalRamp": [
+          "#10002c",
+          "#2c0062",
+          "#4b009f",
+          "#6c1ed7",
+          "#8c52ff",
+          "#aa8fff",
+          "#ccc0ff",
+          "#efecfe"
+        ]
+      },
+      "violet-hover": {
+        "role": "primary",
+        "displayName": "Hover Violet",
+        "canonical": "#8b5cf6",
+        "oklch": "oklch(60.6% 0.219 292.7)",
+        "tonalRamp": [
+          "#0f002c",
+          "#2b0062",
+          "#4b00a0",
+          "#6830ca",
+          "#895af4",
+          "#a98ffe",
+          "#ccc1ff",
+          "#efecfe"
+        ]
+      },
+      "violet-light": {
+        "role": "primary",
+        "displayName": "Light Violet",
+        "canonical": "#a78bfa",
+        "oklch": "oklch(70.9% 0.159 293.5)",
+        "tonalRamp": [
+          "#10002c",
+          "#2c0061",
+          "#482289",
+          "#6545ad",
+          "#8669d5",
+          "#aa8efe",
+          "#cdc0ff",
+          "#efecfe"
+        ]
+      },
+      "violet-pale": {
+        "role": "primary",
+        "displayName": "Pale Violet",
+        "canonical": "#c4b5fd",
+        "oklch": "oklch(81.1% 0.101 293.6)",
+        "tonalRamp": [
+          "#10002c",
+          "#28154f",
+          "#43336f",
+          "#615191",
+          "#8374b7",
+          "#a798de",
+          "#cdc0ff",
+          "#efecfe"
+        ]
+      },
+      "logo-blue": {
+        "role": "secondary",
+        "displayName": "Logo Blue",
+        "canonical": "#60a5fa",
+        "oklch": "oklch(71.4% 0.143 254.6)",
+        "tonalRamp": [
+          "#000a22",
+          "#00234d",
+          "#003e7d",
+          "#145dac",
+          "#3d81d3",
+          "#62a7fc",
+          "#a8cefe",
+          "#e4f0fe"
+        ]
+      },
+      "night": {
+        "role": "neutral",
+        "displayName": "Night",
+        "canonical": "#09090f",
+        "oklch": "oklch(14.3% 0.013 284.6)",
+        "tonalRamp": [
+          "#0a0a11",
+          "#23232a",
+          "#3f3f47",
+          "#5c5d65",
+          "#7f7f88",
+          "#a3a4ad",
+          "#c9c9d3",
+          "#ededf7"
+        ]
+      },
+      "night-panel": {
+        "role": "neutral",
+        "displayName": "Night Panel",
+        "canonical": "#0d0d14",
+        "oklch": "oklch(16.3% 0.015 284.7)",
+        "tonalRamp": [
+          "#0a0a11",
+          "#23232b",
+          "#3f3f47",
+          "#5c5d66",
+          "#7f7f89",
+          "#a3a3ae",
+          "#c9c9d4",
+          "#ededf8"
+        ]
+      },
+      "night-field": {
+        "role": "neutral",
+        "displayName": "Night Field",
+        "canonical": "#11111a",
+        "oklch": "oklch(18.2% 0.018 284.4)",
+        "tonalRamp": [
+          "#0a0a13",
+          "#23232d",
+          "#3e3f49",
+          "#5c5c68",
+          "#7f7f8b",
+          "#a3a3b0",
+          "#c9c9d6",
+          "#ededfb"
+        ]
+      },
+      "seam": {
+        "role": "neutral",
+        "displayName": "Seam",
+        "canonical": "#1b1b24",
+        "oklch": "oklch(22.6% 0.017 284.9)",
+        "tonalRamp": [
+          "#0a0a12",
+          "#23232c",
+          "#3e3f49",
+          "#5c5c67",
+          "#7f7f8b",
+          "#a3a3af",
+          "#c9c9d6",
+          "#ededfa"
+        ]
+      },
+      "edge": {
+        "role": "neutral",
+        "displayName": "Edge",
+        "canonical": "#2a2a38",
+        "oklch": "oklch(29.1% 0.025 284.7)",
+        "tonalRamp": [
+          "#0a0a15",
+          "#222230",
+          "#3e3e4d",
+          "#5c5c6c",
+          "#7e7e8f",
+          "#a2a3b4",
+          "#c8c9db",
+          "#ecedfe"
+        ]
+      },
+      "edge-hover": {
+        "role": "neutral",
+        "displayName": "Edge Hover",
+        "canonical": "#343444",
+        "oklch": "oklch(33.2% 0.028 284.8)",
+        "tonalRamp": [
+          "#0a0916",
+          "#222231",
+          "#3e3e4e",
+          "#5b5c6d",
+          "#7e7e91",
+          "#a2a3b6",
+          "#c8c8dd",
+          "#ecedff"
+        ]
+      },
+      "text-bright": {
+        "role": "neutral",
+        "displayName": "Bright Text",
+        "canonical": "#f7f7fb",
+        "oklch": "oklch(97.7% 0.005 286.3)",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#242427",
+          "#3f3f42",
+          "#5d5d60",
+          "#808083",
+          "#a4a4a8",
+          "#cacace",
+          "#eeeef2"
+        ]
+      },
+      "text-soft": {
+        "role": "neutral",
+        "displayName": "Soft Text",
+        "canonical": "#d6d6e0",
+        "oklch": "oklch(87.9% 0.014 286.1)",
+        "tonalRamp": [
+          "#0b0a11",
+          "#23232a",
+          "#3f3f47",
+          "#5d5d65",
+          "#7f7f88",
+          "#a3a3ad",
+          "#c9c9d3",
+          "#ededf8"
+        ]
+      },
+      "text-body": {
+        "role": "neutral",
+        "displayName": "Body Text",
+        "canonical": "#b6b6c6",
+        "oklch": "oklch(78.1% 0.023 285.9)",
+        "tonalRamp": [
+          "#0a0a14",
+          "#23232f",
+          "#3e3e4b",
+          "#5c5c6a",
+          "#7f7f8d",
+          "#a3a3b3",
+          "#c9c9d9",
+          "#ededfd"
+        ]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "#9292a5",
+        "oklch": "oklch(66.6% 0.028 285.6)",
+        "tonalRamp": [
+          "#0a0916",
+          "#232231",
+          "#3e3e4e",
+          "#5c5c6d",
+          "#7e7e91",
+          "#a2a2b6",
+          "#c8c8dc",
+          "#ecedfe"
+        ]
+      },
+      "text-placeholder": {
+        "role": "neutral",
+        "displayName": "Placeholder",
+        "canonical": "#5a5a6c",
+        "oklch": "oklch(47.4% 0.029 285.2)",
+        "tonalRamp": [
+          "#0a0917",
+          "#222232",
+          "#3e3e4f",
+          "#5c5c6e",
+          "#7e7e91",
+          "#a2a2b6",
+          "#c8c8dd",
+          "#ecedfe"
+        ]
+      },
+      "signal-green": {
+        "role": "status",
+        "displayName": "Signal Green",
+        "canonical": "#34d399",
+        "oklch": "oklch(77.3% 0.153 163.2)",
+        "tonalRamp": [
+          "#001007",
+          "#002c1c",
+          "#004c34",
+          "#006f4d",
+          "#00986a",
+          "#0cc289",
+          "#53e9ae",
+          "#c2ffe1"
+        ]
+      },
+      "signal-rose": {
+        "role": "status",
+        "displayName": "Signal Rose",
+        "canonical": "#fb7185",
+        "oklch": "oklch(71.9% 0.169 13.4)",
+        "tonalRamp": [
+          "#200004",
+          "#4a0014",
+          "#7b0028",
+          "#a72041",
+          "#d14b62",
+          "#fb7185",
+          "#ffb3ba",
+          "#ffe8e9"
+        ]
+      },
+      "screen-white": {
+        "role": "neutral",
+        "displayName": "Screen White",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a4a4a4",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "screen-ink": {
+        "role": "neutral",
+        "displayName": "Screen Ink",
+        "canonical": "#0b0b12",
+        "oklch": "oklch(15.3% 0.015 284.5)",
+        "tonalRamp": [
+          "#0a0a11",
+          "#23232b",
+          "#3f3f48",
+          "#5c5d66",
+          "#7f7f89",
+          "#a3a3ae",
+          "#c9c9d4",
+          "#ededf8"
+        ]
+      },
+      "screen-ink-body": {
+        "role": "neutral",
+        "displayName": "Ink Body",
+        "canonical": "#3f3f4b",
+        "oklch": "oklch(37.2% 0.020 285.4)",
+        "tonalRamp": [
+          "#0a0a13",
+          "#23232e",
+          "#3e3e4a",
+          "#5c5c69",
+          "#7f7f8c",
+          "#a3a3b1",
+          "#c9c9d8",
+          "#ededfc"
+        ]
+      },
+      "screen-ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "canonical": "#5f5f6e",
+        "oklch": "oklch(49.1% 0.024 285.5)",
+        "tonalRamp": [
+          "#0a0a15",
+          "#23222f",
+          "#3e3e4c",
+          "#5c5c6b",
+          "#7e7e8e",
+          "#a3a3b3",
+          "#c9c9da",
+          "#ecedfe"
+        ]
+      },
+      "screen-faint": {
+        "role": "neutral",
+        "displayName": "Screen Faint",
+        "canonical": "#9a9aa8",
+        "oklch": "oklch(69.1% 0.020 285.9)",
+        "tonalRamp": [
+          "#0a0a13",
+          "#23232e",
+          "#3e3e4a",
+          "#5c5c69",
+          "#7f7f8c",
+          "#a3a3b1",
+          "#c9c9d8",
+          "#ededfc"
+        ]
+      },
+      "screen-fill": {
+        "role": "neutral",
+        "displayName": "Screen Fill",
+        "canonical": "#f5f5f8",
+        "oklch": "oklch(97.1% 0.004 286.3)",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#242426",
+          "#3f3f42",
+          "#5d5d60",
+          "#808082",
+          "#a4a4a7",
+          "#cacacd",
+          "#eeeef1"
+        ]
+      },
+      "screen-chip": {
+        "role": "neutral",
+        "displayName": "Screen Chip",
+        "canonical": "#f1f1f5",
+        "oklch": "oklch(95.9% 0.005 286.3)",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#242427",
+          "#3f3f42",
+          "#5d5d60",
+          "#808083",
+          "#a4a4a8",
+          "#cacace",
+          "#eeeef2"
+        ]
+      },
+      "screen-hairline": {
+        "role": "neutral",
+        "displayName": "Screen Hairline",
+        "canonical": "#ececf1",
+        "oklch": "oklch(94.5% 0.007 286.3)",
+        "tonalRamp": [
+          "#0b0b0e",
+          "#242427",
+          "#3f3f43",
+          "#5d5d61",
+          "#808084",
+          "#a4a4a9",
+          "#cacacf",
+          "#eeeef3"
+        ]
+      },
+      "screen-violet-wash": {
+        "role": "primary",
+        "displayName": "Violet Wash",
+        "canonical": "#f1ecff",
+        "oklch": "oklch(95.3% 0.026 297.9)",
+        "tonalRamp": [
+          "#0c0915",
+          "#25212f",
+          "#413d4c",
+          "#5f5b6b",
+          "#827d8e",
+          "#a6a1b3",
+          "#ccc7da",
+          "#f0ebfe"
+        ]
+      },
+      "screen-violet-bar": {
+        "role": "primary",
+        "displayName": "Violet Bar",
+        "canonical": "#e7e3fb",
+        "oklch": "oklch(92.6% 0.033 293.4)",
+        "tonalRamp": [
+          "#0c0817",
+          "#252132",
+          "#403d50",
+          "#5e5a6f",
+          "#817d92",
+          "#a5a1b8",
+          "#cbc7de",
+          "#efecfe"
+        ]
+      },
+      "screen-violet-deep": {
+        "role": "primary",
+        "displayName": "Violet Deep",
+        "canonical": "#6d28d9",
+        "oklch": "oklch(49.1% 0.241 292.6)",
+        "tonalRamp": [
+          "#0f002c",
+          "#2b0062",
+          "#4b00a0",
+          "#6a23d5",
+          "#8b53ff",
+          "#a98fff",
+          "#ccc1fe",
+          "#eeecff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline and closing call; 46px mobile, 64px sm, 50px lg, 60px xl."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Chapter titles and section headings; 36px mobile, 44px sm, 48px for the pricing heading."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Plan prices only."
+      },
+      "body-lead": {
+        "displayName": "Body Lead",
+        "purpose": "Paragraph under each heading, 440-520px wide; 17px on mobile chapters."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Field text, buttons, plan lists."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Point chips and the availability line."
+      }
+    },
+    "shadows": [
+      {
+        "name": "phone-halo",
+        "value": "0 60px 90px -40px <accent>8c, 0 30px 50px -25px rgba(0,0,0,0.85)",
+        "purpose": "Phone frame only; the upper layer takes the accent of the page on screen (700ms transition)."
+      },
+      {
+        "name": "preview-halo",
+        "value": "0 22px 44px -26px <accent>b3",
+        "purpose": "Mobile MiniPreview."
+      },
+      {
+        "name": "header-lift",
+        "value": "0 10px 30px -12px rgba(0,0,0,0.6)",
+        "purpose": "Header after 16px of scroll."
+      },
+      {
+        "name": "avatar-lift",
+        "value": "0 10px 24px -10px rgba(0,0,0,0.45)",
+        "purpose": "Avatar on the phone page screen."
+      },
+      {
+        "name": "focus-ring-field",
+        "value": "0 0 0 3px rgba(124,58,237,0.25)",
+        "purpose": "Claim field focus, with the border turning #8b5cf6."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-story",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All phone transitions."
+      },
+      {
+        "name": "screen-push",
+        "value": "500ms, x 48px with fade, direction follows scroll",
+        "purpose": "Phone screen changes between chapters."
+      },
+      {
+        "name": "tint",
+        "value": "500ms",
+        "purpose": "Accent color changes on phone elements."
+      },
+      {
+        "name": "counter-roll",
+        "value": "350ms, y 26px",
+        "purpose": "Real-clicks counter ticking up."
+      },
+      {
+        "name": "caret-blink",
+        "value": "phone-caret 1s step-end infinite",
+        "purpose": "Typing caret in the phone and MiniPreview (CSS keyframe in globals.css)."
+      },
+      {
+        "name": "demo-typing",
+        "value": "95ms per character typed, 42ms deleted, 1900ms hold",
+        "purpose": "Demo names that write themselves while nobody types."
+      },
+      {
+        "name": "chapter-fade",
+        "value": "opacity 35% for inactive chapters, 500ms",
+        "purpose": "Desktop only; removed under reduced motion."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "MotionConfig reducedMotion=\"user\" + useCalm (false until mount)",
+        "purpose": "Every animated screen settles on one complete still state."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      },
+      {
+        "name": "short-760",
+        "value": "max-height 760px (phone scale 0.84)"
+      },
+      {
+        "name": "short-680",
+        "value": "max-height 680px (phone scale 0.74)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one solid violet action in a group, 56px beside the claim field.",
+      "html": "<button class=\"ds-btn-primary\">Claim my page <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; height: 56px; padding: 0 24px; border: none; border-radius: 16px; background: #7c3aed; color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color 150ms, transform 150ms; } .ds-btn-primary:hover { background: #8b5cf6; } .ds-btn-primary:active { transform: scale(0.99); } .ds-btn-primary:focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary plan action on the dark ground.",
+      "html": "<button class=\"ds-btn-outline\">Start free</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 20px; border: 1px solid #2a2a38; border-radius: 12px; background: transparent; color: #f7f7fb; font-size: 15px; font-weight: 600; cursor: pointer; transition: border-color 150ms, background-color 150ms; } .ds-btn-outline:hover { border-color: #343444; background: rgba(255,255,255,0.04); } .ds-btn-outline:focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; }"
+    },
+    {
+      "name": "Claim Field",
+      "kind": "input",
+      "refersTo": "field-claim",
+      "description": "The taplinkr.com/[name] field with live availability.",
+      "html": "<div class=\"ds-claim-wrap\"><div class=\"ds-claim\"><span class=\"ds-claim-prefix\">taplinkr.com/</span><input class=\"ds-claim-input\" placeholder=\"yourname\" value=\"mia\" /><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#34d399\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg></div><div class=\"ds-claim-status\">taplinkr.com/mia is yours to claim.</div></div>",
+      "css": ".ds-claim-wrap { background: #09090f; padding: 16px; } .ds-claim { display: flex; align-items: center; height: 56px; padding: 0 12px 0 16px; border: 1px solid #2a2a38; border-radius: 16px; background: #11111a; transition: border-color 200ms, box-shadow 200ms; } .ds-claim:hover { border-color: #343444; } .ds-claim:focus-within { border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(124,58,237,0.25); } .ds-claim-prefix { color: #9292a5; font-size: 15px; } .ds-claim-input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; color: #f7f7fb; caret-color: #a78bfa; font-size: 15px; font-weight: 600; } .ds-claim-input::placeholder { color: #5a5a6c; } .ds-claim-status { margin-top: 10px; font-size: 13px; color: #34d399; }"
+    },
+    {
+      "name": "Point Chip",
+      "kind": "chip",
+      "refersTo": "chip-point",
+      "description": "Short proof points under each chapter.",
+      "html": "<div class=\"ds-chip-row\"><span class=\"ds-chip\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#a78bfa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>Bots ignored</span></div>",
+      "css": ".ds-chip-row { background: #09090f; padding: 16px; } .ds-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #2a2a38; border-radius: 9999px; color: #d6d6e0; font-size: 13px; font-weight: 500; }"
+    },
+    {
+      "name": "Plan Cell",
+      "kind": "card",
+      "refersTo": "plan-cell",
+      "description": "One cell of the seam-divided pricing block.",
+      "html": "<div class=\"ds-plans\"><div class=\"ds-plan\"><div class=\"ds-plan-name\">Standard</div><div class=\"ds-plan-price\">€9.99<span>/month</span></div><div class=\"ds-plan-line\">For creators who grow.</div></div></div>",
+      "css": ".ds-plans { display: grid; gap: 1px; overflow: hidden; border: 1px solid #1b1b24; border-radius: 24px; background: #1b1b24; } .ds-plan { padding: 32px; background: #0d0d14; } .ds-plan-name { color: #d6d6e0; font-size: 15px; font-weight: 600; } .ds-plan-price { margin-top: 12px; color: #f7f7fb; font-family: \"Bricolage Grotesque\", sans-serif; font-size: 40px; font-weight: 700; letter-spacing: -0.03em; } .ds-plan-price span { margin-left: 4px; color: #9292a5; font-family: inherit; font-size: 15px; font-weight: 400; letter-spacing: 0; } .ds-plan-line { margin-top: 4px; color: #9292a5; font-size: 15px; }"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "button-compact",
+      "description": "Sticky blurred header with two links and one compact violet action.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-logo\">TapLinkr</span><span class=\"ds-nav-links\"><a href=\"#\">How it works</a><a href=\"#\">Pricing</a></span><a class=\"ds-nav-cta\" href=\"#\">Start for free</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 24px; border-bottom: 1px solid #1b1b24; background: rgba(9,9,15,0.9); backdrop-filter: blur(16px); box-shadow: 0 10px 30px -12px rgba(0,0,0,0.6); } .ds-nav-logo { color: #ffffff; font-weight: 700; } .ds-nav-links { display: flex; gap: 28px; font-size: 14px; font-weight: 500; } .ds-nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; transition: color 150ms; } .ds-nav-links a:hover { color: #ffffff; } .ds-nav-cta { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 12px; background: #7c3aed; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; transition: background-color 150ms; } .ds-nav-cta:hover { background: #8b5cf6; } .ds-nav-cta:focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; }"
+    },
+    {
+      "name": "Story Phone",
+      "kind": "custom",
+      "refersTo": "phone-frame",
+      "description": "The lit phone: bezel, white screen, accent-tinted halo, Example label.",
+      "html": "<div class=\"ds-phone-stage\"><div class=\"ds-phone\"><div class=\"ds-phone-screen\"><div class=\"ds-phone-notch\"></div><div class=\"ds-phone-head\"></div><div class=\"ds-phone-avatar\">MI</div><div class=\"ds-phone-name\">Mia</div><div class=\"ds-phone-handle\">@mia</div><div class=\"ds-phone-row ds-phone-row-accent\">Watch my latest video</div><div class=\"ds-phone-row\">Shop my favorites</div><div class=\"ds-phone-tag\">Example</div></div></div></div>",
+      "css": ".ds-phone-stage { display: flex; justify-content: center; padding: 24px 0 48px; background: #09090f; } .ds-phone { width: 200px; height: 410px; padding: 7px; border-radius: 36px; background: #1b1b24; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 40px 60px -28px rgba(124,58,237,0.55), 0 20px 34px -18px rgba(0,0,0,0.85); } .ds-phone-screen { position: relative; height: 100%; overflow: hidden; border-radius: 29px; background: #ffffff; display: flex; flex-direction: column; align-items: center; } .ds-phone-notch { position: absolute; top: 7px; left: 50%; width: 58px; height: 17px; transform: translateX(-50%); border-radius: 9999px; background: #0b0b12; z-index: 2; } .ds-phone-head { position: absolute; inset: 0 0 auto 0; height: 108px; background: #7c3aed; } .ds-phone-avatar { position: relative; margin-top: 56px; display: grid; place-items: center; width: 60px; height: 60px; border: 3px solid #ffffff; border-radius: 9999px; background: #7c3aed; color: #ffffff; font-weight: 700; font-size: 19px; } .ds-phone-name { margin-top: 8px; color: #0b0b12; font-weight: 700; font-size: 15px; letter-spacing: -0.02em; } .ds-phone-handle { color: #5f5f6e; font-size: 11px; } .ds-phone-row { box-sizing: border-box; width: calc(100% - 26px); margin-top: 7px; padding: 0 11px; height: 32px; display: flex; align-items: center; border-radius: 12px; background: #f3f3f7; color: #0b0b12; font-size: 11px; font-weight: 600; } .ds-phone-row-accent { margin-top: 14px; background: #7c3aed; color: #ffffff; } .ds-phone-tag { margin-top: auto; padding-bottom: 12px; color: #a1a1ae; font-size: 8px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Lit Phone in a Dark Room",
+    "overview": "The marketing home page is a night-dark room (#09090f) with one bright object in it: a phone whose white screen builds the visitor's page while they type their name, then turns into the product's other screens as they scroll. Everything around the phone stays quiet, tonal and violet-accented, so the phone does the explaining. The page stays dark whatever the visitor's theme; `app/page.tsx` forces the `dark` class and adds `home-dark` to `<html>` for the visit so the scrollbar and overscroll background match.\n\nDensity is low on the dark side (large display type, short paragraphs, generous section padding) and realistic inside the phone (app-sized 12 to 15px type, 40 to 48px rows, status bar). The phone content is UI only: text profiles, link rows, counters, chat bubbles. No raster imagery ships on the page.\n\nScope: this world is established by the home page (`app/page.tsx`, `components/landing/PhoneStory.tsx`, and the `tone=\"home\"` variant of `SiteFooter`, plus `SiteHeader`). The dashboard, auth pages and other marketing pages still use the older Tailwind theme tokens (indigo/violet `brand-*`, `--font-display` Space Grotesk) and have not been migrated. This file does not set rules for them.",
+    "keyCharacteristics": [
+      "A single light object (the phone) on a near-black ground; all other surfaces are dark tonal steps.",
+      "Violet is the only action color; solid violet fills mark the one primary action in a group.",
+      "Bricolage Grotesque, tight and heavy, for display only; the sans stack for everything else.",
+      "Depth by hairline seams and tonal steps; the phone alone casts a real shadow, tinted by its accent.",
+      "Every color is an explicit hex value, never a named theme class, because of global overrides in `globals.css`.",
+      "Demo data is fictional and labeled \"Example\" until the visitor types."
+    ],
+    "rules": [
+      {
+        "name": "The Explicit Hex Rule",
+        "body": "Every color on the home world is a literal hex on the element. `globals.css` gives h1-h6 and p the theme colors, and a dark-mode safety net repaints `bg-white`, `text-gray-900` and inputs; named classes silently change color here. Inputs carry `bg-transparent dark:bg-transparent` for the same reason.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Light Object Rule",
+        "body": "The phone screen (and its mobile MiniPreview) is the only white surface in the world. The dark side never uses light cards.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Violet Voice Rule",
+        "body": "Solid violet is reserved for the primary action and the phone's accent. Secondary actions are outlined with Edge; there is no second filled button color.",
+        "section": "colors"
+      },
+      {
+        "name": "The Display-Only Grotesque Rule",
+        "body": "Bricolage Grotesque sets headings and prices, nothing else. Buttons, fields, chips and all phone content stay in the sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Counter Rule",
+        "body": "Any number that counts up (click totals, team clicks) uses tabular figures so it does not jitter.",
+        "section": "typography"
+      },
+      {
+        "name": "The Only the Phone Glows Rule",
+        "body": "Colored shadow belongs to the phone and its preview. Dark-side cards and buttons stay shadowless.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Calm Hydration Rule",
+        "body": "Motion honors reduced-motion through `MotionConfig reducedMotion=\"user\"` plus `useCalm`, which is false on the first render and only reads the preference after mount, so the client's first render always matches the server's. When calm, every screen settles on one complete still state (a written name, a fixed edit step, the open chat, full bars).",
+        "section": "components"
+      },
+      {
+        "name": "The Honest Example Rule",
+        "body": "No real figures appear on the home page. Every name, count and chat in the phone is fictional and labeled Example until the visitor types their own name; only what the visitor typed is shown as theirs.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** write every color as an explicit hex on the element (The Explicit Hex Rule), and give inputs `bg-transparent dark:bg-transparent`.",
+      "**Do** keep the phone the only white surface on the dark ground (The One Light Object Rule).",
+      "**Do** reserve solid Action Violet for the single primary action per group; secondary actions are Edge-outlined.",
+      "**Do** use a 2px Light Violet outline with 2px offset as the focus state on every interactive element.",
+      "**Do** label fictional demo content \"Example\" and keep it fictional (The Honest Example Rule).",
+      "**Do** gate motion with `MotionConfig reducedMotion=\"user\"` and `useCalm`, and give each animated screen a complete still state.",
+      "**Do** write site copy in English."
+    ],
+    "donts": [
+      "**Don't** use named theme classes (`bg-white`, `text-gray-900`, `text-foreground`) on this world; the dark-mode safety net repaints them.",
+      "**Don't** put h1-h6 or p tags inside the phone; globals.css paints them with theme colors and made white-on-white text before.",
+      "**Don't** show real figures, testimonials or customer counts on the home page.",
+      "**Don't** read the reduced-motion preference during the first render.",
+      "**Don't** add shadows to dark-side cards or buttons (The Only the Phone Glows Rule).",
+      "**Don't** use Bricolage Grotesque for buttons, fields, chips or phone content."
+    ]
+  }
+}

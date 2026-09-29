@@ -548,3 +548,39 @@
     height: 1.875rem;
   }
 }
+
+/* Page d'accueil : toujours sombre, meme chez un visiteur en theme clair
+   (app/page.tsx pose la classe home-dark sur <html> le temps de la visite).
+   C'est le body qui defile (html et body a 100 % de haut) : on teinte sa
+   barre de defilement, et le fond que devoile l'elastique du defilement.
+   :root.home-dark body bat le dark:bg-gray-900 pose sur <body> par le layout. */
+:root.home-dark,
+:root.home-dark body {
+  color-scheme: dark;
+  background-color: #09090f;
+  scrollbar-color: #2a2a38 #09090f;
+}
+
+:root.home-dark ::-webkit-scrollbar-track {
+  background: #09090f;
+}
+
+:root.home-dark ::-webkit-scrollbar-thumb {
+  background: #2a2a38;
+}
+
+:root.home-dark ::-webkit-scrollbar-thumb:hover {
+  background: #3a3a4c;
+}
+
+/* Curseur du telephone de la page d'accueil (components/landing/PhoneStory.tsx) :
+   allume la premiere moitie de la seconde, eteint la seconde moitie. */
+@keyframes phone-caret {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}

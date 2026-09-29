@@ -59,5 +59,7 @@ public/uploads/*
 firebase-key.json
 *-firebase-adminsdk-*.json
 
-# Cache local du controle de design Impeccable
+# Fichiers locaux du controle de design Impeccable : cache, captures de relecture, questions
 .impeccable/hook.cache.json
+.impeccable/review/
+.impeccable/questions/
