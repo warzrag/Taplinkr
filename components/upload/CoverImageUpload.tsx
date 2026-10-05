@@ -195,6 +195,9 @@ export default function CoverImageUpload({
                 <div className="overflow-hidden rounded-[1.1rem] bg-white">
                   <div className="relative h-28 w-full overflow-hidden sm:h-32">
                     <Image
+                      // Sans optimiseur : les photos /media sont servies par Caddy, que
+                      // l'optimiseur de Next ne voit pas (image cassee dans l'editeur).
+                      unoptimized
                       src={preview}
                       alt=""
                       fill
@@ -202,6 +205,9 @@ export default function CoverImageUpload({
                       priority
                     />
                     <Image
+                      // Sans optimiseur : les photos /media sont servies par Caddy, que
+                      // l'optimiseur de Next ne voit pas (image cassee dans l'editeur).
+                      unoptimized
                       src={preview}
                       alt="Cover"
                       fill

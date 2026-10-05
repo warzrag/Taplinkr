@@ -98,6 +98,9 @@ export default function IconImageUpload({
           <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-700">
             {preview ? (
               <Image
+                // Sans optimiseur : les photos /media sont servies par Caddy, que
+                // l'optimiseur de Next ne voit pas (image cassee dans l'editeur).
+                unoptimized
                 src={preview}
                 alt="Icon"
                 width={64}
