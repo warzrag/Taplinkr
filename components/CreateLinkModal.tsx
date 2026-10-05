@@ -1336,6 +1336,26 @@ export default function CreateLinkModal({ isOpen, onClose, onSuccess, editingLin
                           {!checkingSlug && slugAvailable === false && <span className="inline-flex items-center gap-1 text-red-600"><AlertCircle className="h-3 w-3" /> URL already taken</span>}
                         </div>
                       </div>
+                      {/* Pour un lien direct, coverImage et description ne servent qu'a
+                          l'apercu partage (app/[slug]/page.tsx, generateMetadata). */}
+                      <div className="rounded-2xl border border-gray-200 p-4 dark:border-gray-800">
+                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Preview on X and other apps</p>
+                        <p className="mt-1 text-xs leading-5 text-gray-500">
+                          Optional. When this link is shared, the card shows this photo and title. Leave it empty to keep the neutral TapLinkr card.
+                          Pick a safe photo: X can limit posts that show explicit images. Posts already published keep their old card.
+                        </p>
+                        <div className="mt-3">
+                          <CoverImageUpload value={coverImage} onChange={setCoverImage} onUploadingChange={setImageUploading} />
+                        </div>
+                        <label className="mb-2 mt-4 block text-sm font-semibold text-gray-800 dark:text-gray-200">Preview title</label>
+                        <input
+                          value={description}
+                          onChange={(event) => setDescription(event.target.value)}
+                          placeholder="Example: Maddison"
+                          maxLength={70}
+                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-950 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                        />
+                      </div>
                     </div>
                     <div className="mt-5 flex justify-between gap-3">
                       <button type="button" onClick={() => setActivePanel('start')} className="rounded-xl px-4 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">Changer de type</button>

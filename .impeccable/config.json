@@ -29,6 +29,12 @@
         ],
         "createdAt": "2026-09-29T17:22:16.628Z",
         "reason": "Agent: server-side Node test script that inserts then rolls back a link row; fontFamily 'system' is the database field value the link-creation route stores, not a font rendered on any page"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "system",
+        "createdAt": "2026-10-05T21:10:02.248Z",
+        "reason": "Agent: 'system' is the fontFamily value stored in the database for links (default font of a creator page), not a font used by the app UI"
       }
     ]
   }

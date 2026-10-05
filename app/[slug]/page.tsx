@@ -224,6 +224,31 @@ export async function generateMetadata(props: PageProps) {
   }
 
   if (link.isDirect) {
+    // Aperçu choisi par le créateur (fiche du lien direct, "Preview on X") :
+    // une grande carte avec sa photo et son titre. Pour un lien direct,
+    // coverImage et description ne servent qu'à cet aperçu ; vides, la carte
+    // reste neutre et ne dit rien de la destination.
+    const previewImage = isMetadataImage(link.coverImage) ? link.coverImage : null
+    if (previewImage) {
+      const previewTitle = link.description?.trim() || 'TapLinkr'
+      return {
+        title: previewTitle,
+        robots: { index: false, follow: false, noarchive: true, nosnippet: true },
+        openGraph: {
+          title: previewTitle,
+          url: `/${encodeURIComponent(params.slug)}`,
+          siteName: 'TapLinkr',
+          type: 'website',
+          images: [previewImage],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: previewTitle,
+          images: [previewImage],
+        },
+      }
+    }
+
     return {
       title: 'TapLinkr — Opening link',
       description: 'A secure link powered by TapLinkr.',
