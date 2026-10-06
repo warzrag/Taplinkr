@@ -719,7 +719,7 @@ export default function LinksDashboard() {
                     : { opacity: 0, transition: { duration: 0 } }}
                   transition={{ delay: arriving ? 0 : Math.min(index * 0.045, 0.32), duration: arriving ? 0.55 : 0.36, ease: EASE }}
                   whileHover={reduceMotion ? undefined : { x: 4, scale: 1.002 }}
-                  className={`group relative grid min-h-[88px] items-center gap-4 overflow-visible rounded-2xl border border-white/[0.075] bg-dash-bg/90 px-4 py-3 transition-colors hover:z-10 hover:border-violet-400/25 hover:bg-dash-surface sm:grid-cols-[minmax(220px,1fr)_110px_minmax(110px,0.55fr)_180px_176px] ${clickDeltas[item.id] ? 'z-20' : 'z-0'}`}
+                  className={`group relative grid min-h-[88px] items-center gap-4 overflow-visible rounded-2xl border border-white/[0.075] bg-dash-bg/90 px-4 py-3 transition-colors hover:z-10 hover:border-violet-400/25 hover:bg-dash-surface sm:grid-cols-[minmax(0,1fr)_auto] sm:[grid-template-areas:'name_stats'_'meta_actions'] xl:grid-cols-[minmax(220px,1fr)_110px_minmax(110px,0.55fr)_180px_176px] xl:[grid-template-areas:none] ${clickDeltas[item.id] ? 'z-20' : 'z-0'}`}
                 >
                   <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/0 to-transparent transition-all duration-300 group-hover:via-violet-400/80" />
                   {freshLinkIds.has(item.id) && (
@@ -732,7 +732,9 @@ export default function LinksDashboard() {
                       transition={{ delay: 0.9, duration: 1.8, ease: 'easeOut' }}
                     />
                   )}
-                  <div className="flex min-w-0 items-center gap-3">
+                  {/* Entre 640 et 1279 px : deux rangees (nom / chiffres, type et cible /
+                      boutons) ; les 5 colonnes debordaient du cadre. */}
+                  <div className="flex min-w-0 items-center gap-3 sm:[grid-area:name] xl:[grid-area:auto]">
                     <GripVertical className="hidden h-5 w-5 shrink-0 text-dash-text6 sm:block" />
                     <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.35)]' : 'bg-dash-off'}`} />
                     <div className="min-w-0">
@@ -767,7 +769,8 @@ export default function LinksDashboard() {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="flex min-w-0 items-center gap-3 sm:[grid-area:meta] xl:contents">
+                  <div className="shrink-0">
                     <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
                       item.isDirect ? 'border-violet-400/10 bg-violet-500/10 text-violet-300' : 'border-sky-400/10 bg-sky-500/10 text-sky-300'
                     }`}>
@@ -776,14 +779,15 @@ export default function LinksDashboard() {
                     </span>
                   </div>
 
-                  <p className="truncate text-sm text-dash-text4">
+                  <p className="min-w-0 truncate text-sm text-dash-text4">
                     {item.isDirect ? destinationLabel(item.directUrl) : `${item.multiLinks?.length || 0} bouton${(item.multiLinks?.length || 0) > 1 ? 's' : ''}`}
                   </p>
+                  </div>
 
                   <button
                     type="button"
                     onClick={() => setStatsLink(item)}
-                    className={`relative z-10 inline-flex items-center gap-2.5 overflow-visible rounded-xl border px-3 py-2 text-dash-text2 transition duration-500 hover:text-violet-200 ${
+                    className={`relative z-10 inline-flex items-center gap-2.5 justify-self-start overflow-visible rounded-xl border px-3 py-2 sm:[grid-area:stats] sm:justify-self-end xl:[grid-area:auto] xl:justify-self-start text-dash-text2 transition duration-500 hover:text-violet-200 ${
                       clickDeltas[item.id]
                         ? 'scale-[1.04] border-emerald-400/50 bg-emerald-400/10 shadow-[0_0_28px_rgba(52,211,153,0.22)]'
                         : 'border-violet-500/15 bg-violet-500/[0.07] hover:border-violet-500/35 hover:bg-violet-500/10'
@@ -824,7 +828,7 @@ export default function LinksDashboard() {
                     </AnimatePresence>
                   </button>
 
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-1 sm:[grid-area:actions] xl:[grid-area:auto]">
                     {/* shrink-0 : sans contenu, l'interrupteur se reduisait a 0 px dans une
                         colonne trop etroite et disparaissait sur ordinateur. */}
                     <button

@@ -125,6 +125,19 @@ async function ouvrir(browser, chemin, options = {}) {
     if (chemin === '/api/folders' && methode === 'GET') return repondre(donnees.folders)
     if (chemin === '/api/dashboard/metrics') return repondre(metrics(url.searchParams.get('period') || 'today', donnees.links))
     if (chemin === '/api/links/click-counts') return repondre({ counts: donnees.links.map(l => ({ id: l.id, clicks: l.clicks })) })
+    if (chemin === '/api/analytics/visitors-simple') {
+      const exemples = [
+        ['Paris', 'France', 'Safari', 'iOS', 'iPhone', 'mobile', 'Instagram'],
+        ['N/A', 'Unknown', 'Google Chrome', 'Android', 'Samsung', 'mobile', 'www.taplinkr.com'],
+        ['Brussels', 'Belgium', 'Chrome', 'Windows', 'Desktop', 'desktop', 'x.com'],
+        ['Montreal', 'Canada', 'Safari', 'macOS', 'Mac', 'desktop', 'Direct'],
+      ]
+      const visitors = Array.from({ length: 12 }, (_, i) => {
+        const [city, country, browser, os, device, deviceType, source] = exemples[i % exemples.length]
+        return { id: `v${i}`, timestamp: new Date(Date.now() - i * 37 * 60000).toISOString(), location: { city, region: 'N/A', country, countryCode: 'FR' }, linkSlug: i % 2 ? 'lunaaprivate' : 'mia-chat', linkTitle: i % 2 ? 'VENUS BOT POST' : 'Chat link', browser, os, referrer: '', referrerDomain: '', trafficSource: source, device, deviceType, status: i % 5 === 4 ? 'bot' : 'success', ip: '0.0.0.0', userAgent: 'test' }
+      })
+      return repondre({ visitors, total: 64 })
+    }
     if (chemin === '/api/analytics/charts') return repondre(analytics(Number(url.searchParams.get('days') || 7), donnees.links))
     if (chemin === '/api/links/toggle' && methode === 'PATCH') {
       const corps = JSON.parse(req.postData() || '{}')

@@ -232,7 +232,7 @@ export default function VisitorsPage() {
           </div>
 
           {/* Controls */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-4">
               {/* Device Filter */}
               <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
@@ -314,37 +314,49 @@ export default function VisitorsPage() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* Telephone : une carte par visite, tout se lit sans glisser. */}
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700 lg:hidden">
+              {visitors.map(visitor => (
+                <li key={visitor.id}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedVisitor(visitor)}
+                    className="flex w-full items-start gap-3 px-4 py-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                  >
+                    <span className="mt-0.5 shrink-0">{getDeviceIcon(visitor.deviceType)}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center justify-between gap-3">
+                        <span className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{visitor.linkTitle}</span>
+                        <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">{formatTimeAgo(visitor.timestamp)}</span>
+                      </span>
+                      <span className="mt-1 block truncate text-xs text-gray-500 dark:text-gray-400">
+                        {[visitor.location.city, visitor.location.country].filter(part => part && part !== 'N/A' && part !== 'Unknown').join(', ') || 'Unknown location'}
+                        {' · '}
+                        {[visitor.device, visitor.browser, visitor.os].filter(Boolean).join(' · ')}
+                      </span>
+                      <span className="mt-2 flex items-center justify-between gap-3">
+                        <span className="truncate text-xs text-gray-500 dark:text-gray-400">{visitor.trafficSource || 'Direct'}</span>
+                        <span className="shrink-0">{getStatusBadge(visitor.status)}</span>
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto lg:block">
+              {/* 5 colonnes qui tiennent dans l'ecran : avec 9 colonnes, il fallait
+                  descendre sous la derniere ligne pour trouver la barre de defilement
+                  horizontale et voir la fin de chaque ligne. */}
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Time
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Location
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Link
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Browser
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      OS
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Referrer
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Device
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Details
-                    </th>
+                    <th className="px-3 py-4 xl:px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time</th>
+                    <th className="px-3 py-4 xl:px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Link</th>
+                    <th className="px-3 py-4 xl:px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Visitor</th>
+                    <th className="hidden px-3 py-4 xl:px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider xl:table-cell">Source</th>
+                    <th className="px-3 py-4 xl:px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-3 py-4 xl:px-4"><span className="sr-only">Details</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -357,80 +369,62 @@ export default function VisitorsPage() {
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer"
                     onClick={() => setSelectedVisitor(visitor)}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 xl:px-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
+                        <Clock className="w-4 h-4 shrink-0 text-gray-400" />
                         <span className="text-sm text-gray-900 dark:text-gray-100">
                           {formatTimeAgo(visitor.timestamp)}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-gray-400" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {visitor.location.city || 'N/A'}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {visitor.location.region}, {visitor.location.country}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Link2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <td className="px-3 py-4 xl:px-4">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Link2 className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                        <div className="min-w-0">
+                          <p className="max-w-[150px] truncate xl:max-w-[220px] text-sm font-medium text-gray-900 dark:text-gray-100">
                             {visitor.linkTitle}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="max-w-[150px] truncate xl:max-w-[220px] text-xs text-gray-500 dark:text-gray-400">
                             /{visitor.linkSlug}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 dark:text-gray-100">
-                        {visitor.browser}
-                      </span>
+                    <td className="px-3 py-4 xl:px-4">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {getDeviceIcon(visitor.deviceType)}
+                        <div className="min-w-0">
+                          <p className="max-w-[170px] truncate xl:max-w-[240px] text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {[visitor.location.city, visitor.location.country].filter(part => part && part !== 'N/A' && part !== 'Unknown').join(', ') || 'Unknown location'}
+                          </p>
+                          <p className="max-w-[170px] truncate xl:max-w-[240px] text-xs text-gray-500 dark:text-gray-400">
+                            {[visitor.device, visitor.browser, visitor.os].filter(Boolean).join(' · ')}
+                          </p>
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 dark:text-gray-100">
-                        {visitor.os}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-900 dark:text-gray-100">
+                    <td className="hidden px-3 py-4 xl:px-4 xl:table-cell">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Globe className="w-4 h-4 shrink-0 text-gray-400" />
+                        <span className="max-w-[180px] truncate text-sm text-gray-900 dark:text-gray-100">
                           {visitor.trafficSource || 'Direct'}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        {getDeviceIcon(visitor.deviceType)}
-                        <span className="text-sm text-gray-900 dark:text-gray-100">
-                          {visitor.device}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 xl:px-4 whitespace-nowrap">
                       {getStatusBadge(visitor.status)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                    <td className="px-3 py-4 xl:px-4 text-right">
+                      <span className="inline-flex text-blue-600 dark:text-blue-400" title="View details" aria-label="View details">
                         <Eye className="w-4 h-4" />
-                        <span className="text-sm">View details</span>
-                      </button>
+                      </span>
                     </td>
                   </motion.tr>
                   ))}
                 </tbody>
               </table>
             </div>
+            </>
           )}
 
           {/* Pagination */}
