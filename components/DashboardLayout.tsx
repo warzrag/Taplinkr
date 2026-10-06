@@ -104,7 +104,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     // reducedMotion "user" : chez un visiteur qui a demande moins d'animations,
     // framer-motion renonce aux deplacements et aux zooms, garde les fondus.
     <MotionConfig reducedMotion="user">
-      <div className="dark min-h-screen bg-dash-bg text-dash-text lg:grid lg:h-screen lg:grid-cols-[236px_minmax(0,1fr)] lg:overflow-hidden xl:grid-cols-[248px_minmax(0,1fr)] 2xl:grid-cols-[264px_minmax(0,1fr)]">
+      <div className="dark h-[100dvh] overflow-hidden bg-dash-bg text-dash-text lg:grid lg:h-screen lg:grid-cols-[236px_minmax(0,1fr)] lg:overflow-hidden xl:grid-cols-[248px_minmax(0,1fr)] 2xl:grid-cols-[264px_minmax(0,1fr)]">
         {sidebarOpen && (
           <button
             aria-label="Close menu"
@@ -113,7 +113,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           />
         )}
 
-        <aside className={`dashboard-sidebar fixed inset-y-0 left-0 z-50 flex h-screen w-[min(264px,calc(100vw-24px))] flex-col overflow-hidden border-r border-dash-line bg-dash-surface transition-transform duration-300 lg:static lg:inset-auto lg:h-full lg:min-h-0 lg:w-full lg:translate-x-0 ${
+        <aside className={`dashboard-sidebar fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[min(264px,calc(100vw-24px))] flex-col overflow-hidden border-r border-dash-line bg-dash-surface transition-transform duration-300 lg:static lg:inset-auto lg:h-full lg:min-h-0 lg:w-full lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
           <div className="dashboard-sidebar-header flex h-16 shrink-0 items-center justify-between border-b border-dash-line px-5">
@@ -217,7 +217,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </aside>
 
-        <div className="min-h-screen min-w-0 lg:h-full lg:min-h-0 lg:overflow-y-auto">
+        {/* La zone de contenu defile seule, sur telephone aussi : quand c'etait le
+            body qui defilait, Safari (iPhone) faisait suivre ce defilement au menu
+            fixe, qui sortait de l'ecran par le haut une fois la page descendue. */}
+        <div className="h-full min-w-0 overflow-y-auto overscroll-contain lg:min-h-0">
           <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-dash-line bg-dash-bg/90 px-4 backdrop-blur-xl lg:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
