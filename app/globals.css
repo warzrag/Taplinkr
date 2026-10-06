@@ -710,3 +710,13 @@
     animation: none;
   }
 }
+
+/* Espace membre : la page elle-meme ne defile jamais (components/DashboardLayout.tsx
+   pose dashboard-lock sur <html>). Sur iPhone, un glissement de la hauteur de
+   la barre de Safari suffisait a entrainer le menu fixe hors de l'ecran. */
+:root.dashboard-lock,
+:root.dashboard-lock body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}

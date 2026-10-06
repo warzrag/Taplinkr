@@ -59,6 +59,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => setPendingHref(null), [pathname])
   // Les fenetres s'ouvrent depuis le dernier clic (components/dashboard/motion.tsx).
   useTrackPointer()
+  // Sur iPhone, la page pouvait encore glisser de la hauteur de la barre de
+  // Safari, et Safari entrainait alors le menu "fixe" vers le haut. Tant que
+  // l'espace membre est ouvert, html et body ne defilent plus du tout
+  // (globals.css, dashboard-lock) : seule la zone de contenu defile.
+  useEffect(() => {
+    document.documentElement.classList.add('dashboard-lock')
+    return () => document.documentElement.classList.remove('dashboard-lock')
+  }, [])
 
   useEffect(() => {
     if (!session?.user) {
