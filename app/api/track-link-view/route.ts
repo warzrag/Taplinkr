@@ -80,6 +80,13 @@ export async function POST(request: NextRequest) {
         userAgent: assessment.userAgent,
         url: request.url,
       },
+      location: {
+        country: clickMetadata.country,
+        region: clickMetadata.region ?? undefined,
+        city: clickMetadata.city ?? undefined,
+        latitude: clickMetadata.latitude ?? undefined,
+        longitude: clickMetadata.longitude ?? undefined,
+      },
     })
 
     return NextResponse.json({

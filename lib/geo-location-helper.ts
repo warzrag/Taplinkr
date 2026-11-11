@@ -1,5 +1,6 @@
+import { readFile } from 'node:fs/promises'
 import { isIP } from 'node:net'
-import { geoCache } from './geo-cache'
+import { Reader, type CityResponse } from 'mmdb-lib'
 
 interface LocationData {
   country: string
@@ -14,11 +15,35 @@ interface LocationData {
 const unknownLocation: LocationData = {
   country: 'Unknown',
   countryCode: 'XX',
-  region: 'N/A',
-  city: 'N/A',
-  timezone: 'UTC',
+  region: '',
+  city: '',
+  timezone: '',
   lat: 0,
   lon: 0,
+}
+
+// The database lives on the server, outside the app folders, so both running
+// copies share it and a deploy never overwrites it. Lookups stay local: the
+// visitor's IP is never sent to a third-party service.
+// IP geolocation by DB-IP (https://db-ip.com), CC BY 4.0.
+const databasePath = process.env.GEOIP_DB_PATH || 'C:/web/data/geoip/dbip-city-lite.mmdb'
+const retryAfterFailureMs = 10 * 60 * 1000
+
+let readerPromise: Promise<Reader<CityResponse> | null> | null = null
+let failedAt = 0
+
+function loadReader() {
+  if (readerPromise) return readerPromise
+  if (failedAt && Date.now() - failedAt < retryAfterFailureMs) return Promise.resolve(null)
+  readerPromise = readFile(databasePath)
+    .then(buffer => new Reader<CityResponse>(buffer))
+    .catch(error => {
+      console.error(`Geolocation database unavailable (${databasePath}):`, error instanceof Error ? error.message : error)
+      failedAt = Date.now()
+      readerPromise = null
+      return null
+    })
+  return readerPromise
 }
 
 function isPrivateIp(ip: string) {
@@ -27,35 +52,35 @@ function isPrivateIp(ip: string) {
     ip.startsWith('fc') || ip.startsWith('fd') || ip.startsWith('fe80:')
 }
 
+function countryName(code: string | undefined, fallback: string | undefined) {
+  if (!code) return fallback || 'Unknown'
+  try {
+    return new Intl.DisplayNames(['en-US'], { type: 'region' }).of(code.toUpperCase()) || fallback || code
+  } catch {
+    return fallback || code
+  }
+}
+
 export async function getLocationFromIP(rawIp: string): Promise<LocationData> {
   const ip = rawIp.trim()
   if (!isIP(ip) || isPrivateIp(ip)) return unknownLocation
 
-  const cached = geoCache.get(ip)
-  if (cached) return cached
+  const reader = await loadReader()
+  if (!reader) return unknownLocation
 
   try {
-    const response = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`, {
-      signal: AbortSignal.timeout(3000),
-      headers: { Accept: 'application/json' },
-    })
-    if (!response.ok) return unknownLocation
+    const record = reader.get(ip)
+    if (!record?.country) return unknownLocation
 
-    const data = await response.json()
-    if (data.error) return unknownLocation
-
-    const location: LocationData = {
-      country: data.country_name || 'Unknown',
-      countryCode: data.country_code || 'XX',
-      region: data.region || 'N/A',
-      city: data.city || 'N/A',
-      timezone: data.timezone || 'UTC',
-      lat: Number(data.latitude) || 0,
-      lon: Number(data.longitude) || 0,
+    return {
+      country: countryName(record.country.iso_code, record.country.names?.en),
+      countryCode: record.country.iso_code || 'XX',
+      region: record.subdivisions?.[0]?.names?.en || '',
+      city: record.city?.names?.en || '',
+      timezone: record.location?.time_zone || '',
+      lat: Number(record.location?.latitude) || 0,
+      lon: Number(record.location?.longitude) || 0,
     }
-
-    geoCache.set(ip, location)
-    return location
   } catch {
     return unknownLocation
   }

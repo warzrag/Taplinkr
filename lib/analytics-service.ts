@@ -13,6 +13,8 @@ interface AnalyticsData {
     referer?: string
     url?: string
   }
+  // Location already resolved by the caller (request.ip may be an anonymous hash)
+  location?: LocationInfo
 }
 
 interface DeviceInfo {
@@ -42,7 +44,15 @@ export class AnalyticsService {
       const refererInfo = parseReferer(data.request.referer || null)
 
       // Obtenir les données géographiques (utilise le cache partagé)
-      const geoData = await getLocationFromIP(data.request.ip || 'unknown')
+      const geoData = data.location
+        ? {
+            country: data.location.country || 'Unknown',
+            region: data.location.region || '',
+            city: data.location.city || '',
+            lat: data.location.latitude || 0,
+            lon: data.location.longitude || 0,
+          }
+        : await getLocationFromIP(data.request.ip || 'unknown')
 
       // Create analytics event avec toutes les données réelles
       await prisma.analyticsEvent.create({
