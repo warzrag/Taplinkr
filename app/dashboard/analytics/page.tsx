@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   BarChart3,
   Bot,
+  CalendarDays,
   Clock3,
   Download,
   Eye,
@@ -40,6 +41,16 @@ import { CountUp } from '@/components/dashboard/motion'
 import { chartColors } from '@/lib/dashboard-colors'
 
 type AnalyticsTab = 'overview' | 'links' | 'audience' | 'countries' | 'sources'
+type PeriodName = 'today' | 'yesterday' | '7d' | '30d' | '90d' | 'custom'
+
+const periodOptions: Array<{ id: PeriodName; label: string }> = [
+  { id: 'today', label: 'Today' },
+  { id: 'yesterday', label: 'Yesterday' },
+  { id: '7d', label: '7d' },
+  { id: '30d', label: '30d' },
+  { id: '90d', label: '90d' },
+  { id: 'custom', label: 'Custom' },
+]
 
 interface ChartPoint {
   date: string
@@ -63,6 +74,7 @@ interface LinkPerformance {
 }
 
 interface AnalyticsData {
+  period?: { name: PeriodName; from: string; to: string; timeZone: string; chosenTimeZone: string | null }
   summary: ChartPoint[]
   linkPerformance: LinkPerformance[]
   stats: {
@@ -116,7 +128,12 @@ const cardClass = 'rounded-[22px] border border-white/[0.075] bg-dash-raised/90 
 
 export default function AnalyticsPage() {
   const reduceMotion = useReducedMotion()
-  const [days, setDays] = useState(7)
+  const [period, setPeriod] = useState<PeriodName>('7d')
+  const [customRange, setCustomRange] = useState<{ from: string; to: string } | null>(null)
+  const [customOpen, setCustomOpen] = useState(false)
+  const deviceTimeZone = useMemo(() => {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { return 'UTC' }
+  }, [])
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('overview')
   const [data, setData] = useState<AnalyticsData>(emptyData)
   const [loading, setLoading] = useState(true)
@@ -124,10 +141,16 @@ export default function AnalyticsPage() {
   const loadAnalytics = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/analytics/charts?days=${days}`)
+      const query = new URLSearchParams({ period, timeZone: deviceTimeZone })
+      if (period === 'custom' && customRange) {
+        query.set('from', customRange.from)
+        query.set('to', customRange.to)
+      }
+      const response = await fetch(`/api/analytics/charts?${query}`)
       const payload = await response.json()
       if (!response.ok) throw new Error(payload.error || 'Unable to load analytics')
       setData({
+        period: payload.period,
         summary: payload.summary || [],
         linkPerformance: payload.linkPerformance || [],
         stats: { ...emptyData.stats, ...(payload.stats || {}) },
@@ -138,7 +161,37 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false)
     }
-  }, [days])
+  }, [period, customRange, deviceTimeZone])
+
+  const choosePeriod = (next: PeriodName) => {
+    if (next === 'custom') {
+      setCustomOpen(open => !open)
+      return
+    }
+    setCustomOpen(false)
+    setPeriod(next)
+  }
+
+  const applyCustomRange = (range: { from: string; to: string }) => {
+    setCustomRange(range)
+    setPeriod('custom')
+    setCustomOpen(false)
+  }
+
+  const saveTimeZone = async (timeZone: string | null) => {
+    try {
+      const response = await fetch('/api/user/timezone', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timeZone }),
+      })
+      if (!response.ok) throw new Error('Unable to save the time zone.')
+      toast.success(timeZone ? `Days now start at midnight in ${timeZone.replace(/_/g, ' ')}.` : 'Time zone follows this device again.')
+      await loadAnalytics()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to save the time zone.')
+    }
+  }
 
   useEffect(() => { loadAnalytics() }, [loadAnalytics])
 
@@ -174,7 +227,7 @@ export default function AnalyticsPage() {
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = `taplinkr-analytics-${days}d.csv`
+    anchor.download = `taplinkr-analytics-${data.period ? `${data.period.from}_${data.period.to}` : period}.csv`
     anchor.click()
     URL.revokeObjectURL(url)
   }
@@ -190,11 +243,19 @@ export default function AnalyticsPage() {
             <p className="mt-3 max-w-2xl text-sm leading-6 text-dash-text4 sm:text-base">Verified traffic, conversion signals and actionable insights — without bot or preview noise.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <PeriodSelector days={days} setDays={setDays} />
-            <IconButton label="Refresh analytics" onClick={loadAnalytics} reduceMotion={Boolean(reduceMotion)}><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /></IconButton>
-            <motion.button whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.97 }} onClick={exportCsv} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold transition hover:border-violet-400/40 hover:bg-white/[0.05]"><Download className="h-4 w-4" />Export CSV</motion.button>
+            <PeriodSelector period={period} customOpen={customOpen} onChoose={choosePeriod} />
           </div>
         </motion.header>
+
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
+          <TimeZoneSelect chosen={data.period?.chosenTimeZone ?? null} deviceTimeZone={deviceTimeZone} onChange={saveTimeZone} />
+          <IconButton label="Refresh analytics" onClick={loadAnalytics} reduceMotion={Boolean(reduceMotion)}><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /></IconButton>
+          <motion.button whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.97 }} onClick={exportCsv} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-semibold transition hover:border-violet-400/40 hover:bg-white/[0.05]"><Download className="h-4 w-4" />Export CSV</motion.button>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {customOpen && <CustomRangePanel key="custom-range" initial={customRange} today={data.period?.to && period !== 'yesterday' && period !== 'custom' ? data.period.to : localDateKey(new Date())} onApply={applyCustomRange} onClose={() => setCustomOpen(false)} reduceMotion={Boolean(reduceMotion)} />}
+        </AnimatePresence>
 
         <nav className="mt-8 grid gap-2 rounded-[22px] border border-white/[0.075] bg-dash-raised/80 p-2 shadow-xl backdrop-blur-xl sm:grid-cols-3 xl:grid-cols-5" aria-label="Analytics sections">
           {tabs.map(tab => (
@@ -208,7 +269,7 @@ export default function AnalyticsPage() {
 
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -8 }} transition={{ duration: 0.28 }}>
-            {activeTab === 'overview' && <Overview data={data} insights={insights} loading={loading} reduceMotion={Boolean(reduceMotion)} days={days} />}
+            {activeTab === 'overview' && <Overview data={data} insights={insights} loading={loading} reduceMotion={Boolean(reduceMotion)} period={period} />}
             {activeTab === 'links' && <LinksAnalysis items={data.linkPerformance} loading={loading} />}
             {activeTab === 'audience' && <AudienceAnalysis stats={data.stats} reduceMotion={Boolean(reduceMotion)} />}
             {activeTab === 'countries' && <CountriesAnalysis stats={data.stats} links={data.linkPerformance} reduceMotion={Boolean(reduceMotion)} />}
@@ -220,20 +281,91 @@ export default function AnalyticsPage() {
   )
 }
 
-function PeriodSelector({ days, setDays }: { days: number; setDays: (days: number) => void }) {
-  return <div className="flex rounded-2xl border border-white/[0.08] bg-dash-raised/80 p-1.5 shadow-xl backdrop-blur-xl">
-    {[1, 7, 30, 90].map(value => <button key={value} onClick={() => setDays(value)} className={`relative rounded-xl px-3 py-2 text-xs font-semibold transition sm:px-4 sm:text-sm ${days === value ? 'text-white' : 'text-dash-text5 hover:text-white'}`}>
-      {days === value && <motion.span layoutId="analytics-period" className="absolute inset-0 rounded-xl border border-white/10 bg-gradient-to-b from-violet-500 to-violet-600 shadow-lg shadow-violet-950/40" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
-      <span className="relative z-10">{value === 1 ? 'Today' : `${value}d`}</span>
-    </button>)}
+function PeriodSelector({ period, customOpen, onChoose }: { period: PeriodName; customOpen: boolean; onChoose: (period: PeriodName) => void }) {
+  return <div className="flex max-w-full overflow-x-auto rounded-2xl border border-white/[0.08] bg-dash-raised/80 p-1.5 shadow-xl backdrop-blur-xl [scrollbar-width:none]">
+    {periodOptions.map(option => {
+      const active = period === option.id
+      return <button key={option.id} onClick={() => onChoose(option.id)} aria-pressed={active} className={`relative shrink-0 whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold transition sm:px-4 sm:text-sm ${active ? 'text-white' : customOpen && option.id === 'custom' ? 'text-violet-200' : 'text-dash-text5 hover:text-white'}`}>
+        {active && <motion.span layoutId="analytics-period" className="absolute inset-0 rounded-xl border border-white/10 bg-gradient-to-b from-violet-500 to-violet-600 shadow-lg shadow-violet-950/40" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
+        <span className="relative z-10 flex items-center gap-1.5">{option.id === 'custom' && <CalendarDays className="h-3.5 w-3.5" />}{option.label}</span>
+      </button>
+    })}
   </div>
 }
 
-function IconButton({ label, onClick, reduceMotion, children }: { label: string; onClick: () => void; reduceMotion: boolean; children: React.ReactNode }) {
-  return <motion.button whileHover={reduceMotion ? undefined : { rotate: 7, scale: 1.05 }} whileTap={reduceMotion ? undefined : { scale: 0.94 }} onClick={onClick} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-dash-text3 transition hover:border-violet-400/40 hover:text-white" aria-label={label}>{children}</motion.button>
+function localDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-function Overview({ data, insights, loading, reduceMotion, days }: { data: AnalyticsData; insights: Array<{ title: string; text: string; tone: string }>; loading: boolean; reduceMotion: boolean; days: number }) {
+function shiftKey(key: string, days: number) {
+  const date = new Date(`${key}T12:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + days)
+  return date.toISOString().slice(0, 10)
+}
+
+function CustomRangePanel({ initial, today, onApply, onClose, reduceMotion }: { initial: { from: string; to: string } | null; today: string; onApply: (range: { from: string; to: string }) => void; onClose: () => void; reduceMotion: boolean }) {
+  const [from, setFrom] = useState(initial?.from || shiftKey(today, -6))
+  const [to, setTo] = useState(initial?.to || today)
+  const dayCount = from && to && from <= to ? Math.round((new Date(`${to}T12:00:00Z`).getTime() - new Date(`${from}T12:00:00Z`).getTime()) / 86_400_000) + 1 : 0
+  const error = !from || !to ? 'Choose both dates.' : from > to ? 'The start date must come before the end date.' : dayCount > 90 ? 'Choose 90 days or less.' : ''
+  const inputClass = 'w-full rounded-xl border border-white/10 bg-dash-bg px-3 py-2.5 text-sm font-semibold text-white outline-none transition [color-scheme:dark] focus:border-violet-400/50'
+  return <motion.form
+    initial={reduceMotion ? false : { opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
+    onSubmit={event => { event.preventDefault(); if (!error) onApply({ from, to }) }}
+    className={`${cardClass} mt-4 flex flex-col gap-4 p-5 sm:flex-row sm:items-end`}
+  >
+    <label className="flex flex-1 flex-col gap-1.5 text-xs font-semibold text-white/45">From<input type="date" value={from} max={today} onChange={event => setFrom(event.target.value)} className={inputClass} /></label>
+    <label className="flex flex-1 flex-col gap-1.5 text-xs font-semibold text-white/45">To<input type="date" value={to} max={today} onChange={event => setTo(event.target.value)} className={inputClass} /></label>
+    <div className="flex flex-col gap-2 sm:items-end">
+      <p className={`text-xs ${error ? 'text-amber-300' : 'text-white/45'}`}>{error || `${dayCount} ${dayCount === 1 ? 'day' : 'days'}`}</p>
+      <div className="flex gap-2">
+        <button type="button" onClick={onClose} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-white/60 transition hover:text-white">Cancel</button>
+        <button type="submit" disabled={Boolean(error)} className="rounded-xl bg-gradient-to-b from-violet-500 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-950/40 transition disabled:opacity-40">Apply</button>
+      </div>
+    </div>
+  </motion.form>
+}
+
+let timeZoneList: string[] | null = null
+function allTimeZones() {
+  if (!timeZoneList) {
+    try {
+      const supported = (Intl as unknown as { supportedValuesOf?: (key: string) => string[] }).supportedValuesOf?.('timeZone') || []
+      timeZoneList = ['UTC', ...supported.filter(zone => zone !== 'UTC')]
+    } catch {
+      timeZoneList = ['UTC']
+    }
+  }
+  return timeZoneList
+}
+
+function TimeZoneSelect({ chosen, deviceTimeZone, onChange }: { chosen: string | null; deviceTimeZone: string; onChange: (timeZone: string | null) => void }) {
+  const zones = allTimeZones()
+  const label = (zone: string) => zone.replace(/_/g, ' ')
+  return <label className="flex min-w-0 max-w-full items-center gap-2 rounded-xl border border-white/[0.08] bg-dash-raised/80 py-1.5 pl-3 pr-1.5 text-xs font-semibold text-white/45 backdrop-blur-xl">
+    <Globe2 className="h-3.5 w-3.5 shrink-0 text-violet-300" />
+    <span className="shrink-0">Time zone</span>
+    <select value={chosen || ''} onChange={event => onChange(event.target.value || null)} className="min-w-0 max-w-[15rem] truncate rounded-lg border border-white/10 bg-dash-bg px-2 py-1.5 text-xs font-semibold text-white outline-none transition focus:border-violet-400/50">
+      <option value="">Automatic · {label(deviceTimeZone)}</option>
+      {(chosen && !zones.includes(chosen) ? [chosen, ...zones] : zones).map(zone => <option key={zone} value={zone}>{label(zone)}</option>)}
+    </select>
+  </label>
+}
+
+function IconButton({ label, onClick, reduceMotion, children }: { label: string; onClick: () => void; reduceMotion: boolean; children: React.ReactNode }) {
+  return <motion.button whileHover={reduceMotion ? undefined : { rotate: 7, scale: 1.05 }} whileTap={reduceMotion ? undefined : { scale: 0.94 }} onClick={onClick} className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5 text-dash-text3 transition hover:border-violet-400/40 hover:text-white" aria-label={label}>{children}</motion.button>
+}
+
+const periodPhrases: Record<PeriodName, string> = {
+  today: 'for today',
+  yesterday: 'for yesterday',
+  '7d': 'over the last 7 days',
+  '30d': 'over the last 30 days',
+  '90d': 'over the last 90 days',
+  custom: 'over the selected period',
+}
+
+function Overview({ data, insights, loading, reduceMotion, period }: { data: AnalyticsData; insights: Array<{ title: string; text: string; tone: string }>; loading: boolean; reduceMotion: boolean; period: PeriodName }) {
   const dateRange = formatDateRange(data.summary)
   const cards = [
     { label: 'Verified clicks', value: data.totals.clicks, suffix: '', growth: data.totals.clicksGrowth, icon: MousePointer2, glow: 'from-violet-500/22' },
@@ -256,8 +388,8 @@ function Overview({ data, insights, loading, reduceMotion, days }: { data: Analy
 
     <section className={`${cardClass} relative mt-6 overflow-hidden p-5 sm:p-7`}>
       <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-violet-500/[0.08] blur-3xl" />
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><h2 className="flex items-center gap-2 text-xl font-bold"><BarChart3 className="h-5 w-5 text-violet-300" />Traffic trend</h2><p className="mt-1 text-sm text-dash-text5">Clicks, visitors and landing-page views during the {days === 1 ? 'current day' : `last ${days} days`}.</p></div><div className="flex flex-col gap-3 sm:items-end"><span className="w-fit rounded-lg border border-white/[0.07] bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-white/65">{dateRange || 'Waiting for traffic data'}</span><div className="flex gap-4 text-xs text-white/55"><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-violet-400" />Clicks</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-cyan-300" />Visitors</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-sky-500" />Views</span></div></div></div>
-      <div className="relative mt-7 h-[360px] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data.summary} margin={{ top: 4, right: 8, bottom: 8, left: 0 }}><defs><linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.38} /><stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} /></linearGradient><linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity={0.2} /><stop offset="100%" stopColor="#38bdf8" stopOpacity={0} /></linearGradient></defs><CartesianGrid stroke={chartColors.grid} strokeDasharray="4 8" vertical={false} /><XAxis dataKey="date" stroke={chartColors.axisLabel} tickLine={false} axisLine={false} tickFormatter={formatAxisDate} interval={days <= 7 ? 0 : 'preserveStartEnd'} minTickGap={days <= 30 ? 26 : 42} tickMargin={12} height={38} tick={{ fontSize: 12, fontWeight: 600 }} /><YAxis stroke={chartColors.axis} tickLine={false} axisLine={false} allowDecimals={false} /><Tooltip content={<TrafficTooltip />} cursor={{ stroke: 'rgba(167, 139, 250, 0.42)', strokeWidth: 1.5, strokeDasharray: '4 5' }} wrapperStyle={{ outline: 'none', zIndex: 20 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="clicks" name="Verified clicks" stroke="#a78bfa" strokeWidth={3.5} fill="url(#clicksGradient)" activeDot={{ r: 6, fill: '#a78bfa', stroke: '#ffffff', strokeWidth: 2 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="visitors" name="Unique visitors" stroke="#67e8f9" strokeWidth={2.5} fill="transparent" activeDot={{ r: 5, fill: '#67e8f9', stroke: '#ffffff', strokeWidth: 2 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="views" name="Landing views" stroke="#38bdf8" strokeWidth={2} fill="url(#viewsGradient)" activeDot={{ r: 5, fill: '#38bdf8', stroke: '#ffffff', strokeWidth: 2 }} /></AreaChart></ResponsiveContainer></div>
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><h2 className="flex items-center gap-2 text-xl font-bold"><BarChart3 className="h-5 w-5 text-violet-300" />Traffic trend</h2><p className="mt-1 text-sm text-dash-text5">Clicks, visitors and landing-page views {periodPhrases[period]}{data.period ? ` · days start at midnight, ${data.period.timeZone.replace(/_/g, ' ')} time` : ''}.</p></div><div className="flex flex-col gap-3 sm:items-end"><span className="w-fit rounded-lg border border-white/[0.07] bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-white/65">{dateRange || 'Waiting for traffic data'}</span><div className="flex gap-4 text-xs text-white/55"><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-violet-400" />Clicks</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-cyan-300" />Visitors</span><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-sky-500" />Views</span></div></div></div>
+      <div className="relative mt-7 h-[360px] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data.summary} margin={{ top: 4, right: 8, bottom: 8, left: 0 }}><defs><linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.38} /><stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} /></linearGradient><linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity={0.2} /><stop offset="100%" stopColor="#38bdf8" stopOpacity={0} /></linearGradient></defs><CartesianGrid stroke={chartColors.grid} strokeDasharray="4 8" vertical={false} /><XAxis dataKey="date" stroke={chartColors.axisLabel} tickLine={false} axisLine={false} tickFormatter={formatAxisDate} interval={data.summary.length <= 7 ? 0 : 'preserveStartEnd'} minTickGap={data.summary.length <= 30 ? 26 : 42} tickMargin={12} height={38} tick={{ fontSize: 12, fontWeight: 600 }} /><YAxis stroke={chartColors.axis} tickLine={false} axisLine={false} allowDecimals={false} /><Tooltip content={<TrafficTooltip />} cursor={{ stroke: 'rgba(167, 139, 250, 0.42)', strokeWidth: 1.5, strokeDasharray: '4 5' }} wrapperStyle={{ outline: 'none', zIndex: 20 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="clicks" name="Verified clicks" stroke="#a78bfa" strokeWidth={3.5} fill="url(#clicksGradient)" activeDot={{ r: 6, fill: '#a78bfa', stroke: '#ffffff', strokeWidth: 2 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="visitors" name="Unique visitors" stroke="#67e8f9" strokeWidth={2.5} fill="transparent" activeDot={{ r: 5, fill: '#67e8f9', stroke: '#ffffff', strokeWidth: 2 }} /><Area isAnimationActive={!reduceMotion} type="monotone" dataKey="views" name="Landing views" stroke="#38bdf8" strokeWidth={2} fill="url(#viewsGradient)" activeDot={{ r: 5, fill: '#38bdf8', stroke: '#ffffff', strokeWidth: 2 }} /></AreaChart></ResponsiveContainer></div>
     </section>
   </>
 }

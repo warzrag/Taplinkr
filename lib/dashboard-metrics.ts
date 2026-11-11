@@ -110,6 +110,41 @@ export function nextDateKey(dateKey: string): string {
   return date.toISOString().slice(0, 10)
 }
 
+/** Cle du jour situe `days` jours avant (ou apres, si negatif), au format AAAA-MM-JJ. */
+export function shiftDateKey(dateKey: string, days: number): string {
+  const date = new Date(`${dateKey}T00:00:00.000Z`)
+  date.setUTCDate(date.getUTCDate() - days)
+  return date.toISOString().slice(0, 10)
+}
+
+/** Toutes les cles de `from` a `to` inclus. */
+export function dateKeysBetween(from: string, to: string): string[] {
+  const keys: string[] = []
+  for (let key = from; key <= to && keys.length < 400; key = nextDateKey(key)) keys.push(key)
+  return keys
+}
+
+const hourWeekdayFormatters = new Map<string, Intl.DateTimeFormat>()
+
+/** Heure (0 a 23) et jour de la semaine ("Mon"...) d'un instant, dans un fuseau. */
+export function hourAndWeekdayInTimeZone(date: Date, timeZone: string) {
+  let formatter = hourWeekdayFormatters.get(timeZone)
+  if (!formatter) {
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit', hourCycle: 'h23', weekday: 'short' }
+    try {
+      formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone })
+    } catch {
+      formatter = new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' })
+    }
+    hourWeekdayFormatters.set(timeZone, formatter)
+  }
+  const parts = formatter.formatToParts(date)
+  return {
+    hour: Number(parts.find(part => part.type === 'hour')?.value) % 24,
+    weekday: parts.find(part => part.type === 'weekday')?.value || '',
+  }
+}
+
 export function dashboardPeriodStart(period: DashboardPeriod, now = new Date()) {
   const start = new Date(now)
   if (period === 'today') {

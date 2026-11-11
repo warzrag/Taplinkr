@@ -14,11 +14,7 @@ import {
   type DashboardPeriod,
 } from '@/lib/dashboard-metrics'
 import { prisma } from '@/lib/prisma'
-import {
-  isValidTimeZone,
-  readReportingTimeZone,
-  writeReportingTimeZone,
-} from '@/lib/reporting-timezone'
+import { resolveReportingTimeZone } from '@/lib/reporting-timezone'
 
 const periods = new Set<DashboardPeriod>(['today', '7d', '30d'])
 
@@ -58,7 +54,10 @@ export async function GET(request: NextRequest) {
     const now = new Date()
 
     // La cle contient l'identifiant du compte : jamais de fuite entre comptes.
-    const cacheKey = `dashboard:metrics:${session.user.id}:${period}:${requestedLinkId || 'all'}`
+    // Le fuseau de l'appareil y figure aussi : le meme compte ouvert a Paris et
+    // a Karachi ne decoupe pas les journees au meme moment.
+    const deviceTimeZone = request.nextUrl.searchParams.get('timeZone')
+    const cacheKey = `dashboard:metrics:${session.user.id}:${period}:${requestedLinkId || 'all'}:${deviceTimeZone || ''}`
     const wantsTimings = request.nextUrl.searchParams.get('timings') === '1'
     const cached = wantsTimings ? null : memoryCache.get(cacheKey)
     if (cached) {
@@ -73,18 +72,15 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: {
-        teamId: true,
-        team: { select: { ownerId: true } },
-      },
+      select: { teamId: true },
     })
-    const reportingUserId = user?.team?.ownerId || session.user.id
     step('user')
     // Le profil et la liste des coequipiers ne dependent que de `user` : rien
     // ne justifiait de les enchainer l'un apres l'autre.
-    const [reportingProfile, teamMembers] = await Promise.all([
+    const [profile, teamMembers] = await Promise.all([
+      // Le fuseau est celui de la personne connectee, pas celui de l'equipe.
       prisma.userProfile.findUnique({
-        where: { userId: reportingUserId },
+        where: { userId: session.user.id },
         select: { analytics: true },
       }),
       user?.teamId
@@ -94,29 +90,8 @@ export async function GET(request: NextRequest) {
           })
         : Promise.resolve([] as Array<{ id: string }>),
     ])
-    const storedTimeZone = readReportingTimeZone(reportingProfile?.analytics)
+    const { timeZone } = resolveReportingTimeZone(profile?.analytics, deviceTimeZone)
     step('profil+equipe')
-    const geoTimeZone = request.headers.get('x-vercel-ip-timezone')
-    const browserTimeZone = request.nextUrl.searchParams.get('timeZone')
-    const inferredTimeZone = isValidTimeZone(geoTimeZone)
-      ? geoTimeZone
-      : isValidTimeZone(browserTimeZone)
-        ? browserTimeZone
-        : 'UTC'
-    const timeZone = storedTimeZone || inferredTimeZone
-
-    if (!storedTimeZone) {
-      await prisma.userProfile.upsert({
-        where: { userId: reportingUserId },
-        create: {
-          userId: reportingUserId,
-          analytics: writeReportingTimeZone(null, timeZone),
-        },
-        update: {
-          analytics: writeReportingTimeZone(reportingProfile?.analytics, timeZone),
-        },
-      })
-    }
     const visibleUserIds = [...new Set([session.user.id, ...teamMembers.map(member => member.id)])]
     const allLinks = await prisma.link.findMany({
       where: user?.teamId

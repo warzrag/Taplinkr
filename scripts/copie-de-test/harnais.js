@@ -141,7 +141,25 @@ async function ouvrir(browser, chemin, options = {}) {
       })
       return repondre({ visitors, total: 64 })
     }
-    if (chemin === '/api/analytics/charts') return repondre(analytics(Number(url.searchParams.get('days') || 7), donnees.links))
+    if (chemin === '/api/analytics/charts') {
+      const periode = url.searchParams.get('period') || '7d'
+      let jours = { today: 1, yesterday: 1, '7d': 7, '30d': 30, '90d': 90 }[periode] || 7
+      let de = isoDay(1 - jours)
+      let a = isoDay(0)
+      if (periode === 'yesterday') de = a = isoDay(-1)
+      if (periode === 'custom') {
+        de = url.searchParams.get('from')
+        a = url.searchParams.get('to')
+        jours = Math.round((new Date(a) - new Date(de)) / 86400000) + 1
+      }
+      const reponse = analytics(jours, donnees.links)
+      reponse.period = { name: periode, from: de, to: a, timeZone: donnees.fuseau || url.searchParams.get('timeZone') || 'UTC', chosenTimeZone: donnees.fuseau || null }
+      return repondre(reponse)
+    }
+    if (chemin === '/api/user/timezone' && methode === 'PUT') {
+      donnees.fuseau = JSON.parse(req.postData() || '{}').timeZone || null
+      return repondre({ timeZone: donnees.fuseau })
+    }
     if (chemin === '/api/links/toggle' && methode === 'PATCH') {
       const corps = JSON.parse(req.postData() || '{}')
       const lien = donnees.links.find(l => l.id === corps.linkId)

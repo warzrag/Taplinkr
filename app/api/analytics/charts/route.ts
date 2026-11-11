@@ -2,7 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 
 import { authOptions } from '@/lib/auth'
+import {
+  dateKeyInTimeZone,
+  dateKeysBetween,
+  hourAndWeekdayInTimeZone,
+  nextDateKey,
+  shiftDateKey,
+  zonedDayStart,
+} from '@/lib/dashboard-metrics'
 import { prisma } from '@/lib/prisma'
+import { resolveReportingTimeZone } from '@/lib/reporting-timezone'
+
+const MAX_DAYS = 90
+const presetDays: Record<string, number> = { today: 1, '7d': 7, '30d': 30, '90d': 90 }
+const dateKeyPattern = /^\d{4}-\d{2}-\d{2}$/
 
 type CountMap = Record<string, number>
 
@@ -56,17 +69,50 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const user = await prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } })
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, userProfile: { select: { analytics: true } } },
+    })
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
     const { searchParams } = new URL(request.url)
     const linkId = searchParams.get('linkId')
-    const days = Math.min(Math.max(Number.parseInt(searchParams.get('days') || '7', 10) || 7, 1), 90)
-    const endDate = new Date()
-    const startDate = new Date(endDate)
-    startDate.setDate(startDate.getDate() - days)
-    const previousStartDate = new Date(startDate)
-    previousStartDate.setDate(previousStartDate.getDate() - days)
+
+    // Journees decoupees a minuit dans le fuseau de la personne (son choix,
+    // sinon celui de son appareil), et non plus a minuit UTC.
+    const { timeZone, chosen: chosenTimeZone } = resolveReportingTimeZone(user.userProfile?.analytics, searchParams.get('timeZone'))
+    const now = new Date()
+    const todayKey = dateKeyInTimeZone(now, timeZone)
+    const period = searchParams.get('period') || '7d'
+    let firstKey: string
+    let lastKey: string
+    if (period === 'yesterday') {
+      firstKey = lastKey = shiftDateKey(todayKey, 1)
+    } else if (period === 'custom') {
+      const from = searchParams.get('from') || ''
+      const to = searchParams.get('to') || ''
+      if (!dateKeyPattern.test(from) || !dateKeyPattern.test(to) || from > to) {
+        return NextResponse.json({ error: 'Choose a valid start and end date.' }, { status: 400 })
+      }
+      firstKey = from
+      lastKey = to > todayKey ? todayKey : to
+      if (firstKey > lastKey) return NextResponse.json({ error: 'The period starts in the future.' }, { status: 400 })
+      if (dateKeysBetween(firstKey, lastKey).length > MAX_DAYS) {
+        return NextResponse.json({ error: `Choose a period of ${MAX_DAYS} days or less.` }, { status: 400 })
+      }
+    } else {
+      const days = presetDays[period] || 7
+      lastKey = todayKey
+      firstKey = shiftDateKey(todayKey, days - 1)
+    }
+    const dayKeys = dateKeysBetween(firstKey, lastKey)
+    const startDate = zonedDayStart(firstKey, timeZone)
+    const dayAfterEnd = zonedDayStart(nextDateKey(lastKey), timeZone)
+    const endDate = dayAfterEnd < now ? dayAfterEnd : now
+    // Periode precedente de meme longueur. Pour une periode en cours, on la
+    // coupe a la meme heure : aujourd'hui jusqu'a 15 h contre hier jusqu'a 15 h.
+    const previousStartDate = zonedDayStart(shiftDateKey(firstKey, dayKeys.length), timeZone)
+    const previousEndDate = new Date(previousStartDate.getTime() + (endDate.getTime() - startDate.getTime()))
 
     const links = await prisma.link.findMany({
       where: { userId: user.id, ...(linkId ? { id: linkId } : {}) },
@@ -78,39 +124,32 @@ export async function GET(request: NextRequest) {
 
     const [events, directClicks, allFilteredClicks, previousEvents, previousDirectClicks] = await Promise.all([
       prisma.analyticsEvent.findMany({
-        where: { userId: user.id, ...(linkId ? { linkId } : {}), createdAt: { gte: startDate, lte: endDate } },
+        where: { userId: user.id, ...(linkId ? { linkId } : {}), createdAt: { gte: startDate, lt: endDate } },
         orderBy: { createdAt: 'asc' },
       }),
       directLinkIds.length ? prisma.click.findMany({
-        where: { userId: user.id, linkId: { in: directLinkIds }, createdAt: { gte: startDate, lte: endDate } },
+        where: { userId: user.id, linkId: { in: directLinkIds }, createdAt: { gte: startDate, lt: endDate } },
         orderBy: { createdAt: 'asc' },
       }) : [],
       prisma.filteredClick.findMany({
-        // Firestore would require a new three-field composite index for
-        // userId + linkId + createdAt. Keep this query on the existing
-        // userId index and narrow the small result set in memory instead.
-        where: { userId: user.id },
+        where: { userId: user.id, createdAt: { gte: startDate, lt: endDate } },
         select: { linkId: true, reason: true, createdAt: true },
       }),
       prisma.analyticsEvent.findMany({
-        where: { userId: user.id, ...(linkId ? { linkId } : {}), createdAt: { gte: previousStartDate, lt: startDate } },
+        where: { userId: user.id, ...(linkId ? { linkId } : {}), createdAt: { gte: previousStartDate, lt: previousEndDate } },
         select: { eventType: true },
       }),
       directLinkIds.length ? prisma.click.count({
-        where: { userId: user.id, linkId: { in: directLinkIds }, createdAt: { gte: previousStartDate, lt: startDate } },
+        where: { userId: user.id, linkId: { in: directLinkIds }, createdAt: { gte: previousStartDate, lt: previousEndDate } },
       }) : 0,
     ])
     const selectedLinkIds = new Set(linkIds)
     const filteredClicks = allFilteredClicks.filter(click =>
-      selectedLinkIds.has(click.linkId) && click.createdAt >= startDate && click.createdAt <= endDate
+      selectedLinkIds.has(click.linkId)
     )
 
     const dateMap = new Map<string, { clicks: number; views: number; visitors: Set<string> }>()
-    const cursor = new Date(startDate)
-    while (cursor <= endDate) {
-      dateMap.set(cursor.toISOString().split('T')[0], { clicks: 0, views: 0, visitors: new Set() })
-      cursor.setDate(cursor.getDate() + 1)
-    }
+    for (const key of dayKeys) dateMap.set(key, { clicks: 0, views: 0, visitors: new Set() })
 
     const countries: CountMap = {}
     const countryVisitors = new Map<string, Set<string>>()
@@ -123,7 +162,7 @@ export async function GET(request: NextRequest) {
     const hourlyDistribution: CountMap = {}
     const weekdayDistribution: CountMap = {}
     const uniqueVisitors = new Set<string>()
-    const today = endDate.toISOString().split('T')[0]
+    const today = todayKey
     const linkMap = new Map<string, LinkStats>(links.map(link => [link.id, {
       id: link.id,
       name: link.internalName || link.title || link.slug,
@@ -148,7 +187,7 @@ export async function GET(request: NextRequest) {
       os?: string | null
       source: string
     }) => {
-      const date = event.createdAt.toISOString().split('T')[0]
+      const date = dateKeyInTimeZone(event.createdAt, timeZone)
       const day = dateMap.get(date)
       if (day) {
         day.clicks += 1
@@ -177,12 +216,13 @@ export async function GET(request: NextRequest) {
       increment(browsers, event.browser)
       increment(operatingSystems, event.os)
       increment(sources, event.source)
-      increment(hourlyDistribution, String(event.createdAt.getHours()))
-      increment(weekdayDistribution, event.createdAt.toLocaleDateString('en-US', { weekday: 'short' }))
+      const { hour, weekday } = hourAndWeekdayInTimeZone(event.createdAt, timeZone)
+      increment(hourlyDistribution, String(hour))
+      increment(weekdayDistribution, weekday)
     }
 
     for (const event of events) {
-      const date = event.createdAt.toISOString().split('T')[0]
+      const date = dateKeyInTimeZone(event.createdAt, timeZone)
       if (event.eventType === 'view') {
         const day = dateMap.get(date)
         if (day) {
@@ -236,6 +276,7 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.clicks - a.clicks)
 
     return NextResponse.json({
+      period: { name: period, from: firstKey, to: lastKey, timeZone, chosenTimeZone },
       summary,
       linkPerformance,
       stats: {
