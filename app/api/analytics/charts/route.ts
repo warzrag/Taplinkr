@@ -16,6 +16,7 @@ interface LinkStats {
   views: number
   visitors: Set<string>
   sources: CountMap
+  countries: CountMap
 }
 
 function increment(map: CountMap, key?: string | null) {
@@ -112,6 +113,8 @@ export async function GET(request: NextRequest) {
     }
 
     const countries: CountMap = {}
+    const countryVisitors = new Map<string, Set<string>>()
+    let unlocatedClicks = 0
     const cities: CountMap = {}
     const devices: CountMap = {}
     const browsers: CountMap = {}
@@ -131,6 +134,7 @@ export async function GET(request: NextRequest) {
       views: 0,
       visitors: new Set<string>(),
       sources: {} as CountMap,
+      countries: {} as CountMap,
     }] as const))
 
     const registerClick = (event: {
@@ -156,9 +160,18 @@ export async function GET(request: NextRequest) {
         if (date === today) link.todayClicks += 1
         if (event.ip) link.visitors.add(event.ip)
         increment(link.sources, event.source)
+        increment(link.countries, event.country)
       }
       if (event.ip) uniqueVisitors.add(event.ip)
       increment(countries, event.country)
+      const country = event.country?.trim()
+      if (!country || country.toLowerCase() === 'unknown') {
+        unlocatedClicks += 1
+      } else if (event.ip) {
+        const visitors = countryVisitors.get(country) || new Set<string>()
+        visitors.add(event.ip)
+        countryVisitors.set(country, visitors)
+      }
       increment(cities, event.city)
       increment(devices, event.device)
       increment(browsers, event.browser)
@@ -227,6 +240,11 @@ export async function GET(request: NextRequest) {
       linkPerformance,
       stats: {
         topCountries: topEntries(countries),
+        countries: Object.entries(countries)
+          .sort(([, a], [, b]) => b - a)
+          .map(([country, clicks]) => ({ country, clicks, visitors: countryVisitors.get(country)?.size || 0 })),
+        countriesByLink: Object.fromEntries(Array.from(linkMap.values()).map(link => [link.id, topEntries(link.countries, Infinity)])),
+        unlocatedClicks,
         topCities: topEntries(cities),
         topDevices: topEntries(devices),
         topBrowsers: topEntries(browsers),

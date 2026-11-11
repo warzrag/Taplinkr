@@ -80,6 +80,9 @@ function analytics(days, links) {
     linkPerformance: links.map((l, i) => ({ id: l.id, name: l.internalName || l.title, slug: l.slug, type: l.isDirect ? 'Direct' : 'Landing page', clicks: [620, 330, 180, 90, 40][i] || 10, todayClicks: [40, 20, 9, 6, 2][i] || 1, views: 900, uniqueVisitors: 500, ctr: l.isDirect ? null : 44.5, topSource: 'Instagram' })),
     stats: {
       topCountries: [['France', 640], ['Belgium', 210], ['Canada', 160], ['Switzerland', 90]],
+      countries: [['France', 640, 480], ['United States', 260, 230], ['Belgium', 210, 170], ['Canada', 160, 140], ['Switzerland', 90, 75], ['United Kingdom', 64, 60], ['Bosnia & Herzegovina', 12, 11], ['Kosovo', 3, 3]].map(([country, clicks, visitors]) => ({ country, clicks, visitors })),
+      countriesByLink: Object.fromEntries(links.map((l, i) => [l.id, i === 0 ? [['France', 400], ['Belgium', 120], ['Canada', 100]] : [['United States', 50], ['France', 30]]])),
+      unlocatedClicks: 1240,
       topCities: [['Paris', 320], ['Lyon', 110], ['Brussels', 95]],
       topDevices: [['Mobile', 880], ['Desktop', 210]],
       topBrowsers: [['Safari', 520], ['Chrome', 460]],

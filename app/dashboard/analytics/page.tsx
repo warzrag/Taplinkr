@@ -39,7 +39,7 @@ import DashboardAtmosphere from '@/components/dashboard/DashboardAtmosphere'
 import { CountUp } from '@/components/dashboard/motion'
 import { chartColors } from '@/lib/dashboard-colors'
 
-type AnalyticsTab = 'overview' | 'links' | 'audience' | 'sources'
+type AnalyticsTab = 'overview' | 'links' | 'audience' | 'countries' | 'sources'
 
 interface ChartPoint {
   date: string
@@ -67,6 +67,9 @@ interface AnalyticsData {
   linkPerformance: LinkPerformance[]
   stats: {
     topCountries: Array<[string, number]>
+    countries: Array<{ country: string; clicks: number; visitors: number }>
+    countriesByLink: Record<string, Array<[string, number]>>
+    unlocatedClicks: number
     topCities: Array<[string, number]>
     topDevices: Array<[string, number]>
     topBrowsers: Array<[string, number]>
@@ -92,7 +95,7 @@ const emptyData: AnalyticsData = {
   summary: [],
   linkPerformance: [],
   stats: {
-    topCountries: [], topCities: [], topDevices: [], topBrowsers: [], topOperatingSystems: [], topSources: [],
+    topCountries: [], countries: [], countriesByLink: {}, unlocatedClicks: 0, topCities: [], topDevices: [], topBrowsers: [], topOperatingSystems: [], topSources: [],
     hourlyDistribution: [], weekdayDistribution: [],
   },
   totals: {
@@ -105,6 +108,7 @@ const tabs: Array<{ id: AnalyticsTab; label: string; description: string }> = [
   { id: 'overview', label: 'Overview', description: 'What changed' },
   { id: 'links', label: 'Links', description: 'What performs' },
   { id: 'audience', label: 'Audience', description: 'Who clicks' },
+  { id: 'countries', label: 'Countries', description: 'Where they click from' },
   { id: 'sources', label: 'Sources', description: 'Where they come from' },
 ]
 
@@ -192,7 +196,7 @@ export default function AnalyticsPage() {
           </div>
         </motion.header>
 
-        <nav className="mt-8 grid gap-2 rounded-[22px] border border-white/[0.075] bg-dash-raised/80 p-2 shadow-xl backdrop-blur-xl sm:grid-cols-2 xl:grid-cols-4" aria-label="Analytics sections">
+        <nav className="mt-8 grid gap-2 rounded-[22px] border border-white/[0.075] bg-dash-raised/80 p-2 shadow-xl backdrop-blur-xl sm:grid-cols-3 xl:grid-cols-5" aria-label="Analytics sections">
           {tabs.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`relative rounded-2xl px-4 py-3 text-left transition ${activeTab === tab.id ? 'text-white' : 'text-dash-text5 hover:bg-white/[0.025] hover:text-white'}`}>
               {activeTab === tab.id && <motion.span layoutId="analytics-tab" className="absolute inset-0 rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/20 to-cyan-500/[0.06] shadow-lg shadow-violet-950/20" />}
@@ -207,6 +211,7 @@ export default function AnalyticsPage() {
             {activeTab === 'overview' && <Overview data={data} insights={insights} loading={loading} reduceMotion={Boolean(reduceMotion)} days={days} />}
             {activeTab === 'links' && <LinksAnalysis items={data.linkPerformance} loading={loading} />}
             {activeTab === 'audience' && <AudienceAnalysis stats={data.stats} reduceMotion={Boolean(reduceMotion)} />}
+            {activeTab === 'countries' && <CountriesAnalysis stats={data.stats} links={data.linkPerformance} reduceMotion={Boolean(reduceMotion)} />}
             {activeTab === 'sources' && <SourcesAnalysis stats={data.stats} reduceMotion={Boolean(reduceMotion)} />}
           </motion.div>
         </AnimatePresence>
@@ -275,6 +280,84 @@ function AudienceAnalysis({ stats, reduceMotion }: { stats: AnalyticsData['stats
     <section className="mt-6 grid gap-6 xl:grid-cols-3"><Ranking title="Devices" icon={Laptop} items={stats.topDevices} reduceMotion={reduceMotion} /><Ranking title="Browsers" icon={Globe2} items={stats.topBrowsers} reduceMotion={reduceMotion} /><Ranking title="Operating systems" icon={Users} items={stats.topOperatingSystems} reduceMotion={reduceMotion} /></section>
     <section className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_.65fr]"><ChartCard title="Best hours" subtitle="When verified clicks happen" icon={Clock3}><ResponsiveContainer width="100%" height="100%"><BarChart data={stats.hourlyDistribution}><CartesianGrid stroke={chartColors.grid} strokeDasharray="4 8" vertical={false} /><XAxis dataKey="hour" tickFormatter={value => `${value}h`} stroke={chartColors.axis} tickLine={false} axisLine={false} /><YAxis stroke={chartColors.axis} tickLine={false} axisLine={false} allowDecimals={false} /><Tooltip content={<HourlyTooltip />} cursor={{ fill: 'rgba(139, 92, 246, 0.08)', radius: 8 }} wrapperStyle={{ outline: 'none', zIndex: 20 }} /><Bar dataKey="clicks" name="Verified clicks" fill="#8b5cf6" radius={[6, 6, 0, 0]} isAnimationActive={!reduceMotion} /></BarChart></ResponsiveContainer></ChartCard><Ranking title="Best days" icon={BarChart3} items={stats.weekdayDistribution.map(item => [item.day, item.clicks])} reduceMotion={reduceMotion} /></section>
   </>
+}
+
+// Country names are stored in English ("France"); flags need the ISO code.
+let countryCodesByName: Map<string, string> | null = null
+function countryCode(name: string) {
+  if (!countryCodesByName) {
+    countryCodesByName = new Map()
+    try {
+      const names = new Intl.DisplayNames(['en-US'], { type: 'region' })
+      for (let a = 65; a <= 90; a += 1) {
+        for (let b = 65; b <= 90; b += 1) {
+          const code = String.fromCharCode(a, b)
+          const label = names.of(code)
+          if (label && label !== code && !countryCodesByName.has(label)) countryCodesByName.set(label, code)
+        }
+      }
+    } catch {}
+  }
+  return countryCodesByName.get(name) || null
+}
+
+function CountryFlag({ name }: { name: string }) {
+  const code = countryCode(name)
+  const [failed, setFailed] = useState(false)
+  if (!code || failed) return <span className="grid h-[18px] w-6 shrink-0 place-items-center rounded-[4px] bg-white/[0.06] text-[9px] font-black text-white/45">{code || '?'}</span>
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`} alt="" width={24} height={18} loading="lazy" onError={() => setFailed(true)} className="h-[18px] w-6 shrink-0 rounded-[4px] object-cover ring-1 ring-white/10" />
+}
+
+function CountriesAnalysis({ stats, links, reduceMotion }: { stats: AnalyticsData['stats']; links: LinkPerformance[]; reduceMotion: boolean }) {
+  const [linkId, setLinkId] = useState('all')
+  const linksWithClicks = links.filter(link => link.clicks > 0)
+  const rows = linkId === 'all'
+    ? stats.countries
+    : (stats.countriesByLink[linkId] || []).map(([country, clicks]) => ({ country, clicks, visitors: null as number | null }))
+  const total = rows.reduce((sum, row) => sum + row.clicks, 0)
+  const max = Math.max(...rows.map(row => row.clicks), 1)
+  const showVisitors = linkId === 'all'
+
+  return <section className={`${cardClass} mt-6 overflow-hidden`}>
+    <div className="flex flex-col gap-4 border-b border-white/[0.06] p-6 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h2 className="flex items-center gap-2 text-lg font-bold"><Globe2 className="h-5 w-5 text-violet-300" />Clicks by country</h2>
+        <p className="mt-1 text-sm text-dash-text5">{rows.length ? `${rows.length} ${rows.length === 1 ? 'country' : 'countries'} · ${total.toLocaleString('en-US')} located clicks` : 'Every verified click, grouped by the visitor’s country.'}</p>
+      </div>
+      <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-white/45 sm:w-64">
+        Link
+        <select value={linkId} onChange={event => setLinkId(event.target.value)} className="w-full rounded-xl border border-white/10 bg-dash-bg px-3 py-2.5 text-sm font-semibold text-white outline-none transition focus:border-violet-400/50">
+          <option value="all">All links</option>
+          {linksWithClicks.map(link => <option key={link.id} value={link.id}>{link.name}</option>)}
+        </select>
+      </label>
+    </div>
+    {rows.length ? <>
+      <div className="hidden grid-cols-[2.5rem_minmax(0,1fr)_5rem_5rem_minmax(0,9rem)] gap-3 px-6 pt-4 text-[11px] font-semibold uppercase tracking-[0.13em] text-white/35 sm:grid">
+        <span>#</span><span>Country</span><span className="text-right">Clicks</span><span className="text-right">{showVisitors ? 'Visitors' : ''}</span><span className="text-right">Share</span>
+      </div>
+      <ol className="divide-y divide-white/[0.05] px-3 pb-3 sm:px-0">
+        {rows.map((row, index) => {
+          const share = total ? Math.round((row.clicks / total) * 1000) / 10 : 0
+          return <li key={row.country} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-3 py-3.5 sm:grid-cols-[2.5rem_minmax(0,1fr)_5rem_5rem_minmax(0,9rem)] sm:px-6">
+            <span className="hidden text-xs font-black tabular-nums text-white/30 sm:block">{index + 1}</span>
+            <span className="flex min-w-0 items-center gap-3"><CountryFlag name={row.country} /><span className="truncate font-semibold text-dash-text2">{row.country}</span></span>
+            <span className="text-right font-black tabular-nums text-violet-200">{row.clicks.toLocaleString('en-US')}</span>
+            <span className="hidden text-right text-sm tabular-nums text-white/55 sm:block">{showVisitors && row.visitors !== null ? row.visitors.toLocaleString('en-US') : ''}</span>
+            <span className="col-span-2 flex items-center gap-3 sm:col-span-1">
+              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]"><motion.span initial={reduceMotion ? false : { width: 0 }} animate={{ width: `${(row.clicks / max) * 100}%` }} transition={{ duration: 0.6, delay: Math.min(index, 12) * 0.03 }} className="block h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-300" /></span>
+              <span className="w-12 text-right text-xs font-bold tabular-nums text-white/60">{share}%</span>
+            </span>
+          </li>
+        })}
+      </ol>
+    </> : <EmptyState title="No located clicks yet" text="Countries are recorded for every new verified click." />}
+    <div className="flex flex-col gap-2 border-t border-white/[0.06] px-6 py-4 text-xs text-white/35 sm:flex-row sm:items-center sm:justify-between">
+      <span>{linkId === 'all' && stats.unlocatedClicks > 0 ? `${stats.unlocatedClicks.toLocaleString('en-US')} clicks in this period have no known location (recorded before Nov 11, 2026, or sent from a private network).` : 'Locations are estimated from the visitor’s network and never shared.'}</span>
+      <a href="https://db-ip.com" target="_blank" rel="noopener noreferrer" className="shrink-0 underline decoration-white/20 underline-offset-2 hover:text-white/60">IP Geolocation by DB-IP</a>
+    </div>
+  </section>
 }
 
 function SourcesAnalysis({ stats, reduceMotion }: { stats: AnalyticsData['stats']; reduceMotion: boolean }) {
